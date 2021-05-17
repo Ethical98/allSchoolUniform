@@ -1,0 +1,45 @@
+main {
+  min-height: 80vh;
+}
+.rating {
+  margin-top: 0.2rem;
+}
+.rating span {
+  margin: 0.1rem;
+}
+
+.accordionCard {
+  width: 21vw;
+}
+
+h1 {
+  font-size: 1.8rem;
+  padding: 1rem 0;
+}
+
+h2 {
+  font-size: 1.4rem;
+  padding: 0.5rem, 0;
+}
+
+.card-header {
+  background-color: aqua;
+  color: black;
+}
+.card-header[aria-expanded='true'] .fa-arrow-circle-right {
+  margin-left: 4vh;
+  display: none;
+}
+.card-header[aria-expanded='false'] .fa-arrow-circle-down {
+  display: none;
+}
+.logo {
+  height: 10vh;
+}
+
+@media (max-width: 576px) {
+  span {
+    font-size: 0px;
+    margin: -1vw;
+  }
+}
