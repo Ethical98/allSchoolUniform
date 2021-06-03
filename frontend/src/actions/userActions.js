@@ -8,12 +8,18 @@ import {
   USER_OTP_SENT,
   USER_OTP_VERIFICATION_FAIL,
   USER_OTP_VERIFICATION_SUCCESS,
-  USER_REQUEST_ID,
-  USER_VERIFIED,
+  // USER_REQUEST_ID,
+  // USER_VERIFIED,
   USER_REGISTER_REQUEST,
   USER_REGISTER_SUCCESS,
   USER_REGISTER_FAIL,
   USER_OTP_VERIFICATION_ERROR,
+  USER_DETAILS_REQUEST,
+  USER_DETAILS_SUCCESS,
+  USER_DETAILS_FAIL,
+  USER_UPDATE_PROFILE_REQUEST,
+  USER_UPDATE_PROFILE_SUCCESS,
+  USER_UPDATE_PROFILE_FAIL,
 } from '../constants/userConstants';
 
 export const login = (email, password) => async (dispatch) => {
@@ -88,7 +94,17 @@ export const loginByPhone = (phone, password) => async (dispatch) => {
 
 export const logout = () => (dispatch, getState) => {
   localStorage.removeItem('userInfo');
+  localStorage.removeItem('cartItems');
+  localStorage.removeItem('shippingAddress');
+  getState().cart.shippingAddress = {};
+  getState().cart.cartItems = [];
   getState().userOtpVerification.verified = false;
+  getState().cart.cartSuccess = false;
+  getState().userRegister.userInfo = [];
+  localStorage.setItem(
+    'cartSuccess',
+    JSON.stringify(getState().cart.cartSuccess)
+  );
 
   dispatch({ type: USER_LOGOUT });
 };
@@ -132,11 +148,78 @@ export const register = (name, email, phone, password) => async (dispatch) => {
     });
   }
 };
+export const userInfoFromToken = () => async (dispatch, getState) => {};
+export const getUserDetails = (id) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: USER_DETAILS_REQUEST,
+    });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.get(`/api/users/${id}`, config);
+    dispatch({
+      type: USER_DETAILS_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_DETAILS_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const updateUserProfile = (user) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: USER_UPDATE_PROFILE_REQUEST,
+    });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.put(`/api/users/profile`, user, config);
+    dispatch({
+      type: USER_UPDATE_PROFILE_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_UPDATE_PROFILE_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
 
 export const getOtp = (phone) => async (dispatch) => {
   try {
     dispatch({
       type: USER_OTP_REQUEST,
+      payload: phone,
     });
 
     const config = {

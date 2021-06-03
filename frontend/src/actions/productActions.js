@@ -50,3 +50,4 @@ export const ListProductDetails = (id) => async (dispatch) => {
     });
   }
 };
+
