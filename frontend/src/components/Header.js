@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import jsonwebtoken from 'jsonwebtoken';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import {
@@ -13,7 +14,8 @@ import url from './asu-top-logo.png';
 import './css/Header.css';
 import { logout } from '../actions/userActions';
 
-const Header = () => {
+const Header = ({ history }) => {
+  const [user, setUser] = useState({});
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
@@ -21,10 +23,27 @@ const Header = () => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
+  useEffect(() => {
+    if (userInfo && userInfo.token) {
+      jsonwebtoken.verify(
+        userInfo.token,
+        process.env.REACT_APP_JWT_SECRET,
+        (err, decoded) => {
+          if (err) {
+            dispatch(logout());
+          } else {
+            setUser(decoded);
+          }
+        }
+      );
+    }
+  }, [dispatch, userInfo, history]);
+
   const qty = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
   const logoutHandler = () => {
     dispatch(logout());
+    
   };
   return (
     <header>
@@ -58,7 +77,7 @@ const Header = () => {
               </Nav.Link>
             </LinkContainer>
             {userInfo ? (
-              <NavDropdown title={userInfo.name} id='username'>
+              <NavDropdown title={user.name} id='username'>
                 <LinkContainer to='/profile'>
                   <NavDropdown.Item>Profile</NavDropdown.Item>
                 </LinkContainer>

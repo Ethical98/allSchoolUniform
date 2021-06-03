@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Card, Form, Button } from 'react-bootstrap';
 import Rating from './Rating';
 import { addToCart } from '../actions/cartActions';
 
 const Product = ({ product }) => {
+ 
+
   const dispatch = useDispatch();
   const id = product._id;
 
@@ -60,11 +62,11 @@ const Product = ({ product }) => {
                 size='sm'
                 className='mx-1'
                 style={{ border: '1px solid lightGrey', width: '5vw' }}
-                onChange={(e) => setQty(Number(e.target.value) + Number(qty))}
+                onChange={(e) => setQty(Number(e.target.value))}
               >
                 <option>QTY</option>
                 {[...Array(product.countInStock).keys()].map((x) => (
-                  <option key={x + 1} value={x}>
+                  <option key={x + 1} value={x + 1}>
                     {x + 1}
                   </option>
                 ))}
