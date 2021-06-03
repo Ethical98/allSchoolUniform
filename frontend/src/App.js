@@ -11,18 +11,27 @@ import CartScreen from './Screens/CartScreen';
 import LoginScreen from './Screens/LoginScreen';
 import RegisterScreen from './Screens/RegisterScreen';
 import LoginScreenOTP from './Screens/LoginScreenOtp';
-
+import ProfileScreen from './Screens/ProfileScreen';
+import ShippingScreen from './Screens/ShippingScreen';
+import PaymentScreen from './Screens/PaymentScreen';
+import PlaceOrderScreen from './Screens/PlaceOrderScreen';
+import dotenv from 'dotenv';
 const App = () => {
+  dotenv.config();
+
   return (
     <Router>
       <Header />
+
       <main style={{ marginTop: '18vh' }}>
         <Container>
+          <Route path='/shipping' component={ShippingScreen} />
+          <Route path='/payment' component={PaymentScreen} />
+          <Route path='/placeorder' component={PlaceOrderScreen} />
           <Route path='/otp' component={LoginScreenOTP} />
           <Route path='/login' component={LoginScreen} />
-
           <Route path='/register' component={RegisterScreen} />
-
+          <Route path='/profile' component={ProfileScreen} exact />
           <Route path='/products' component={BreadCrumb} />
           <Row>
             <Route path='/products' component={Accordion} exact />
@@ -34,6 +43,7 @@ const App = () => {
           <Route path='/cart/:id?' component={CartScreen} />
         </Container>
       </main>
+
       <Footer />
     </Router>
   );
