@@ -17,7 +17,7 @@ const protect = expressAsyncHandler(async (req, res, next) => {
     } catch (error) {
       console.error(error);
       res.status(401);
-      throw new Error('Not Authorized,token failed');
+      throw new Error('Not Authorized,Please Login Again!!');
     }
   }
 

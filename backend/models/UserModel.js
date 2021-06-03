@@ -1,6 +1,17 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+const addressSchema = mongoose.Schema(
+  {
+    address: { type: String, required: true },
+    address: { type: String, required: true },
+    postalCode: { type: Number, required: true },
+    country: { type: String, required: true },
+  },
+  {
+    timestamps: true,
+  }
+);
 const userSchema = mongoose.Schema(
   {
     name: {
@@ -20,6 +31,7 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    savedAddress: [addressSchema],
     isAdmin: {
       type: Boolean,
       required: true,
