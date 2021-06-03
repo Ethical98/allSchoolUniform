@@ -12,8 +12,8 @@ const LoginScreenOtp = ({ history }) => {
   const dispatch = useDispatch();
 
   const phoneInfo = useSelector((state) => state.userOtpVerification);
-  const { phone, verified, error, loading, id, message } = phoneInfo;
-
+  const { phone, verified, error, id, message } = phoneInfo;
+  const phoneNumber = phone;
   const requestId = id;
 
   const userLogin = useSelector((state) => state.userLogin);
@@ -22,13 +22,17 @@ const LoginScreenOtp = ({ history }) => {
   const userLoading = userLogin.loading;
 
   useEffect(() => {
-    if (verified) {
-      dispatch(loginByOTP(phone));
-      if (userInfo) {
-        history.push('/products');
+    if (!phoneNumber) {
+      history.push('/login');
+    } else {
+      if (verified) {
+        dispatch(loginByOTP(phone));
+        if (userInfo) {
+          history.push('/products');
+        }
       }
     }
-  }, [userInfo, history, verified, dispatch, phone]);
+  }, [userInfo, history, verified, dispatch, phone,phoneNumber]);
 
   const resendOtpHandler = () => {
     dispatch(getOtp(phone));

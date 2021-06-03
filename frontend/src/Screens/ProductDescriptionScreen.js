@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { ListProductDetails } from '../actions/productActions';
+import { correctCartItemDetails } from '../actions/cartActions';
+import jsonwebtoken from 'jsonwebtoken';
 import {
   Row,
   Col,
@@ -10,11 +12,11 @@ import {
   Card,
   Button,
   Form,
-  ListGroupItem,
 } from 'react-bootstrap';
 import Rating from '../components/Rating';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
+import { logout } from '../actions/userActions';
 
 const ProductDescriptionScreen = ({ history, match }) => {
   const [qty, setQty] = useState(1);
@@ -24,13 +26,34 @@ const ProductDescriptionScreen = ({ history, match }) => {
   const productDetails = useSelector((state) => state.productDetails);
   const { loading, error, product } = productDetails;
 
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
+  useEffect(() => {
+    dispatch(correctCartItemDetails());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (userInfo && userInfo.token) {
+      jsonwebtoken.verify(
+        userInfo.token,
+        process.env.REACT_APP_JWT_SECRET,
+        (err, decoded) => {
+          if (err) {
+            dispatch(logout());
+            history.push('/login');
+          }
+        }
+      );
+    }
+  }, [dispatch, userInfo, history]);
+
   useEffect(() => {
     dispatch(ListProductDetails(match.params.id));
   }, [dispatch, match]);
 
   const addToCartHandler = () => {
     history.push(`/cart/${match.params.id}?qty=${qty}`);
-    
   };
 
   return (

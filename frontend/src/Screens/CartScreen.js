@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
-
+import jsonwebtoken from 'jsonwebtoken';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { getCartFromDatabase } from '../actions/cartActions';
+import { correctCartItemDetails } from '../actions/cartActions';
 import {
   Row,
   Col,
@@ -13,6 +15,7 @@ import {
 } from 'react-bootstrap';
 import Message from '../components/Message';
 import { addToCart, removeFromCart } from '../actions/cartActions';
+import { logout } from '../actions/userActions';
 
 const CartScreen = ({ match, location, history }) => {
   const productId = match.params.id;
@@ -20,8 +23,37 @@ const CartScreen = ({ match, location, history }) => {
   const qty = location.search ? Number(location.search.split('=')[1]) : 1;
   const dispatch = useDispatch();
 
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
+  useEffect(() => {
+    if (userInfo && userInfo.token) {
+      jsonwebtoken.verify(
+        userInfo.token,
+        process.env.REACT_APP_JWT_SECRET,
+        (err, decoded) => {
+          if (err) {
+            dispatch(logout());
+            history.push('/login');
+          }
+        }
+      );
+    }
+  }, [dispatch, userInfo, history]);
+
+  useEffect(() => {
+    dispatch(correctCartItemDetails());
+  }, [dispatch]);
+
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
+
+  useEffect(() => {
+    if (userInfo && userInfo.token) {
+      dispatch(getCartFromDatabase());
+    }
+    // eslint-disable-next-line
+  }, []);
 
   useEffect(() => {
     if (productId) {
@@ -30,16 +62,21 @@ const CartScreen = ({ match, location, history }) => {
   }, [dispatch, productId, qty]);
 
   const checkOutHandler = () => {
-    history.push('/login?redirect=shipping');
+    if (userInfo && userInfo.token) {
+      history.push('/shipping');
+    } else {
+      history.push('/login?redirect=shipping');
+    }
   };
 
   const removeFromCartHandler = (id) => {
     dispatch(removeFromCart(id));
   };
+
   return (
     <Row>
       <Col md={8}>
-        <h1>Shopping Cart</h1>
+        <h1>SHOPPING CART</h1>
         {cartItems.length === 0 ? (
           <Message>
             Your Cart is Empty <Link to='/products'> Go Back</Link>

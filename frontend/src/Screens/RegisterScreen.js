@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import { register } from '../actions/userActions';
 import Loader from '../components/Loader';
+import { mergeCartWithDatabase } from '../actions/cartActions';
 
 const RegisterScreen = ({ history, location }) => {
   const dispatch = useDispatch();
@@ -19,13 +20,20 @@ const RegisterScreen = ({ history, location }) => {
   const userRegister = useSelector((state) => state.userRegister);
   const { loading, error, userInfo } = userRegister;
 
+  const cart = useSelector((state) => state.cart);
+  const { cartSuccess } = cart;
+
   const redirect = location.search ? location.search.split('=')[1] : '/';
 
   useEffect(() => {
-    if (userInfo) {
+    if (userInfo && userInfo.token) {
+      console.log(userInfo);
       history.push(redirect);
+      if (!cartSuccess) {
+        dispatch(mergeCartWithDatabase());
+      }
     }
-  }, [history, userInfo, redirect]);
+  }, [history, userInfo, redirect, cartSuccess, dispatch]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -97,7 +105,7 @@ const RegisterScreen = ({ history, location }) => {
           ></Form.Control>
         </Form.Group>
 
-        <Button type='submit' className='btn-block' onSubmit={submitHandler}>
+        <Button type='submit' className='btn-block'>
           REGISTER
         </Button>
       </Form>

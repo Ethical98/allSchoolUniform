@@ -5,20 +5,16 @@ import { Button, Form, Row, Col } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import validator from 'validator';
 import { getOtp, loginByPhone, login } from '../actions/userActions';
+import { mergeCartWithDatabase } from '../actions/cartActions';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 
 const LoginScreenByPhone = ({ history, location }) => {
-
-
-
   const phoneInfo = useSelector((state) => state.userOtpVerification);
   const { phone } = phoneInfo;
 
-
   const dispatch = useDispatch();
 
-  
   const [validated, setValidated] = useState(false);
   const [inputValue, setInputValue] = useState(phone ? phone : '');
   const [message, setMessage] = useState('');
@@ -32,7 +28,19 @@ const LoginScreenByPhone = ({ history, location }) => {
   const userLogin = useSelector((state) => state.userLogin);
   const { loading, userInfo, error } = userLogin;
 
+  const cart = useSelector((state) => state.cart);
+  const { cartSuccess } = cart;
+
   const redirect = location.search ? location.search.split('=')[1] : '/';
+
+  useEffect(() => {
+    if (userInfo && userInfo.token) {
+      history.push(redirect);
+      if (!cartSuccess) {
+        dispatch(mergeCartWithDatabase());
+      }
+    }
+  }, [userInfo, dispatch, redirect, history, cartSuccess]);
 
   const onSubmitHandlerFormOne = (e) => {
     const form = e.currentTarget;
@@ -45,11 +53,13 @@ const LoginScreenByPhone = ({ history, location }) => {
     } else {
       if (validator.isMobilePhone(inputValue)) {
         e.preventDefault();
+        setEmail('');
         setPasswordMessage('');
         setPhoneNumber(inputValue);
         setContinueClicked(true);
       } else if (validator.isEmail(inputValue)) {
         e.preventDefault();
+        setPhoneNumber('');
         setPasswordMessage('');
         setEmail(inputValue);
         setContinueClicked(true);
@@ -81,12 +91,6 @@ const LoginScreenByPhone = ({ history, location }) => {
     setValidated(true);
   };
 
-  useEffect(() => {
-    if (userInfo) {
-      history.push(redirect);
-    }
-  }, [userInfo, dispatch, redirect, history]);
-
   const getOtpHandler = () => {
     if (phoneNumber) {
       console.log(email);
@@ -95,7 +99,7 @@ const LoginScreenByPhone = ({ history, location }) => {
       console.log(email);
     }
   };
-
+ 
   return (
     <FormContainer>
       <h1>Sign In</h1>
@@ -114,10 +118,11 @@ const LoginScreenByPhone = ({ history, location }) => {
             <Form.Label>Email or Phone Number</Form.Label>
             <Form.Control
               value={inputValue}
-              
               required
               placeholder='Enter Email or Mobile'
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+              }}
             ></Form.Control>
 
             <Form.Control.Feedback type='invalid'>
@@ -144,7 +149,6 @@ const LoginScreenByPhone = ({ history, location }) => {
           <Form.Group controlId='emailOrPhone'>
             <Form.Label>Email or Phone Number</Form.Label>
             <Form.Control
-             
               value={inputValue}
               required
               readOnly
