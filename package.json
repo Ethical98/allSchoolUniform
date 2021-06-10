@@ -24,18 +24,15 @@
   },
   "homepage": "https://github.com/Ethical98/ASU_MERN#readme",
   "dependencies": {
-    "@vonage/server-sdk": "^2.10.8",
     "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
-    "firebase": "^8.6.1",
-    "formik": "^2.2.6",
     "jsonwebtoken": "^8.5.1",
+    "jssha": "^3.2.0",
     "mongoose": "^5.12.7",
-    "twilio": "^3.62.0",
-    "yup": "^0.32.9"
+    "secure-web-storage": "^1.0.2"
   },
   "devDependencies": {
     "concurrently": "^6.0.2",

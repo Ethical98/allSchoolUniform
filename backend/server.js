@@ -7,6 +7,7 @@ import productRoutes from './routes/productsRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
+import payRoutes from './routes/payRoutes.js';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/pay', payRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

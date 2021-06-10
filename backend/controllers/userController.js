@@ -1,19 +1,8 @@
 import asyncHandler from 'express-async-handler';
 import User from '../models/UserModel.js';
 import generateToken from '../utils/generateToken.js';
-import twilio from 'twilio';
-import Vonage from '@vonage/server-sdk';
 import dotenv from 'dotenv';
 dotenv.config();
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-const vonage = new Vonage({
-  apiKey: '5ceb9acf',
-  apiSecret: 'MGAlyfFA2j5BMFu7',
-});
 
 // @desc Auth user & get token
 // @route POST /api/users/login
@@ -23,23 +12,14 @@ const authUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ email });
   if (user && (await user.matchPassword(password))) {
-    if (user.isAdmin) {
-      res.json({
-        _id: user._id,
-        //name: user.name,
-        //email: user.email,
-        isAdmin: user.isAdmin,
-        token: generateToken(user._id, user.name),
-      });
-    } else {
-      res.json({
-        _id: user._id,
-        //name: user.name,
-        //email: user.email,
-        //isAdmin: user.isAdmin,
-        token: generateToken(user._id, user.name),
-      });
-    }
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      isAdmin: user.isAdmin,
+      token: generateToken(user._id, user.name),
+    });
   } else {
     res.status(401);
     throw new Error('Invalid email or Password');
@@ -58,6 +38,7 @@ const authUserByOTP = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       isAdmin: user.isAdmin,
       token: generateToken(user._id, user.name),
     });
@@ -94,10 +75,10 @@ const registerUser = asyncHandler(async (req, res) => {
   if (user) {
     res.status(201).json({
       _id: user._id,
-      //name: user.name,
-      //email: user.email,
-      //phone: user.phone,
-      //isAdmin: user.isAdmin,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      isAdmin: user.isAdmin,
       token: generateToken(user._id, user.name),
     });
   } else {
@@ -141,10 +122,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     const updatedUser = await user.save();
     res.json({
       _id: updatedUser._id,
-      //name: updatedUser.name,
-      //email: updatedUser.email,
-      //phone: updatedUser.phone,
-      //isAdmin: updatedUser.isAdmin,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      isAdmin: updatedUser.isAdmin,
       token: generateToken(updatedUser._id, updatedUser.name),
     });
   } else {
@@ -161,25 +142,14 @@ const authUserByPhone = asyncHandler(async (req, res) => {
   const user = await User.findOne({ phone });
 
   if (user && (await user.matchPassword(password))) {
-    if (user.isAdmin) {
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        isAdmin: user.isAdmin,
-        token: generateToken(user._id, user.name),
-      });
-    } else {
-      res.json({
-        _id: user._id,
-        //name: user.name,
-        //email: user.email,
-        //phone: user.phone,
-        //isAdmin: user.isAdmin,
-        token: generateToken(user._id, user.name),
-      });
-    }
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      isAdmin: user.isAdmin,
+      token: generateToken(user._id, user.name),
+    });
   } else {
     res.status(401);
     throw new Error('Invalid Email/Mobile or Password');
@@ -206,114 +176,122 @@ const getUserPhone = asyncHandler(async (req, res) => {
 // @desc Get OTP
 // @route POST /api/users/getOtp
 // @access public
-const getOtp = asyncHandler(async (req, res) => {
-  // try {
-  //   const data = await client.verify
-  //     .services(process.env.TWILIO_SERVICE_ID)
-  //     .verifications.create({
-  //       to: `+91${req.body.phone}`,
-  //       channel: 'sms',
-  //     });
-  //   res.json(data);
-  // } catch (error) {
-  //   res.status(500);
-  //   throw new Error('Too many Attempts! Please Try Again After some time');
-  // }
-  vonage.verify.request(
-    {
-      number: `91${req.body.phone}`,
-      brand: 'Vonage',
-    },
-    (err, result) => {
-      if (err) {
-        res.status(400);
-        throw new Error('hellooo');
-      } else {
-        res.status(400);
-        // const verifyRequestId = result.request_id;
-        throw new Error('Hello World');
-        // res.json(verifyRequestId);
-      }
-    }
-  );
-});
+// const getOtp = asyncHandler(async (req, res) => {
+// try {
+//   const data = await client.verify
+//     .services(process.env.TWILIO_SERVICE_ID)
+//     .verifications.create({
+//       to: `+91${req.body.phone}`,
+//       channel: 'sms',
+//     });
+//   res.json(data);
+// } catch (error) {
+//   res.status(500);
+//   throw new Error('Too many Attempts! Please Try Again After some time');
+// }
+//   vonage.verify.request(
+//     {
+//       number: `91${req.body.phone}`,
+//       brand: 'Vonage',
+//     },
+//     (err, result) => {
+//       if (err) {
+//         res.status(400);
+//         throw new Error('hellooo');
+//       } else {
+//         res.status(400);
+//         // const verifyRequestId = result.request_id;
+//         throw new Error('Hello World');
+//         // res.json(verifyRequestId);
+//       }
+//     }
+//   );
+// });
 
 // @desc get OTP
 // @route POST /api/users/verifyOtp
 // @access private
-const verifyOtp = asyncHandler(async (req, res) => {
-  // try {
-  //   const data = await client.verify
-  //     .services(process.env.TWILIO_SERVICE_ID)
-  //     .verificationChecks.create({
-  //       to: `+91${req.body.phone}`,
-  //       code: req.body.code,
-  //     });
+// const verifyOtp = asyncHandler(async (req, res) => {
+//   // try {
+//   //   const data = await client.verify
+//   //     .services(process.env.TWILIO_SERVICE_ID)
+//   //     .verificationChecks.create({
+//   //       to: `+91${req.body.phone}`,
+//   //       code: req.body.code,
+//   //     });
 
-  //   res.json(data);
-  // } catch (error) {
-  //   res.status(500);
-  //   throw new Error('Please Enter Correct OTP ');
-  // }
-  vonage.verify.check(
-    {
-      request_id: req.body.id,
-      code: req.body.code,
-    },
-    (err, result) => {
-      if (err) {
-        res.json(400);
-        throw new Error('Please Enter Correct OTP ');
-        // res.json({
-        //   message: result.error_text,
-        // });
-        // res.json('pleaaeee');
-        // console.error(err);
-      } else if (result.status != 0) {
-        res.json('Please!! Resend OTP');
-      } else {
-        res.status(200);
-        res.json(result.request_id);
-        // console.log(result);
-      }
-    }
-  );
+//   //   res.json(data);
+//   // } catch (error) {
+//   //   res.status(500);
+//   //   throw new Error('Please Enter Correct OTP ');
+//   // }
+//   vonage.verify.check(
+//     {
+//       request_id: req.body.id,
+//       code: req.body.code,
+//     },
+//     (err, result) => {
+//       if (err) {
+//         res.json(400);
+//         throw new Error('Please Enter Correct OTP ');
+//         // res.json({
+//         //   message: result.error_text,
+//         // });
+//         // res.json('pleaaeee');
+//         // console.error(err);
+//       } else if (result.status != 0) {
+//         res.json('Please!! Resend OTP');
+//       } else {
+//         res.status(200);
+//         res.json(result.request_id);
+//         // console.log(result);
+//       }
+//     }
+//   );
 
-  // try {
-  //   const data = vonage.verify.check({
-  //     request_id: req.body.id,
-  //     code: req.body.code,
-  //   });
+// try {
+//   const data = vonage.verify.check({
+//     request_id: req.body.id,
+//     code: req.body.code,
+//   });
 
-  //   res.json(data);
-  // } catch (error) {
-  //   res.json(error);
-  // }
-});
-
-// const saveUserShippingAddress = asyncHandler(async (req, res) => {
-//   const user = await User.findById(req.user._id);
-//   const shippingAddress
-//   if (user) {
-//     res.json({
-//       _id: user._id,
-//       name: user.name,
-//       email: user.email,
-//       phone: user.phone,
-//       isAdmin: user.isAdmin,
-//     });
-//   } else {
-//     res.status(404);
-//     throw new Error('User Not Found');
-//   }
+//   res.json(data);
+// } catch (error) {
+//   res.json(error);
+// }
 // });
 
+const saveUserShippingAddress = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const { data } = req.body;
+  if (user) {
+    user.savedAddress = [...user.savedAddress, data];
+    await user.save();
+    res.json('Address Saved');
+  } else {
+    res.status(404);
+    throw new Error('User Not Found');
+  }
+});
+
+const getShipppingAddress = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (user) {
+    res.json(user.savedAddress);
+  } else {
+    res.status(404);
+    throw new Error('User Not Found');
+  }
+});
+
 export {
+  getShipppingAddress,
   registerUser,
   authUser,
   getUserProfile,
-  getOtp,
-  verifyOtp,
+  saveUserShippingAddress,
+  // getOtp,
+  // verifyOtp,
   authUserByPhone,
   updateUserProfile,
   getUserPhone,

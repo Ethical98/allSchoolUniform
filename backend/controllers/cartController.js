@@ -2,7 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Cart from '../models/CartModel.js';
 
 // @desc Add T0 Cart
-// @route GET /api/cart/add
+// @route POST /api/cart/add
 // @access Private
 const addToCart = asyncHandler(async (req, res) => {
   const { addItem } = req.body;
@@ -39,10 +39,8 @@ const addToCart = asyncHandler(async (req, res) => {
   }
 });
 
-
-
 // @desc Remove From Cart
-// @route GET /api/cart/remove
+// @route POST /api/cart/remove
 // @access Private
 const cartItemRemove = asyncHandler(async (req, res) => {
   const { id } = req.body;
@@ -70,15 +68,12 @@ const cartItemRemove = asyncHandler(async (req, res) => {
 const getCart = asyncHandler(async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
   if (cart) {
-    
-    res.json(cart.cartItems);
-  } else {
-    res.json([]);
+    res.json(cart);
   }
 });
 
 // @desc Sync databse cart
-// @route GET /api/cart/
+// @route POST /api/cart/
 // @access Private
 const mergeCart = asyncHandler(async (req, res) => {
   const { cartItems } = req.body;
@@ -110,4 +105,17 @@ const mergeCart = asyncHandler(async (req, res) => {
   }
 });
 
-export { addToCart, cartItemRemove, mergeCart, getCart };
+// @desc Cart Reset
+// @route POST /api/cart/reset
+// @access Private
+const resetCart = asyncHandler(async (req, res) => {
+  if (!req.user._id) {
+    res.status(403);
+    throw new Error('No Cart Data');
+  } else {
+    await Cart.deleteOne({ user: req.user._id });
+    res.json('Cart Reset');
+  }
+});
+
+export { addToCart, cartItemRemove, mergeCart, getCart, resetCart };
