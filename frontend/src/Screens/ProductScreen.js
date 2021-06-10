@@ -7,7 +7,6 @@ import Product from '../components/Product';
 import { ListProducts } from '../actions/productActions';
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
-import { correctCartItemDetails } from '../actions/cartActions';
 
 const ProductScreen = ({ history }) => {
   const userLogin = useSelector((state) => state.userLogin);
@@ -17,12 +16,6 @@ const ProductScreen = ({ history }) => {
 
   const productList = useSelector((state) => state.productList);
   const { loading, error, products } = productList;
-
-  const cart = useSelector((state) => state.cart);
-
-  useEffect(() => {
-    dispatch(correctCartItemDetails());
-  }, [dispatch]);
 
   useEffect(() => {
     dispatch(ListProducts());
@@ -49,8 +42,6 @@ const ProductScreen = ({ history }) => {
         <Loader />
       ) : error ? (
         <Message variant='danger'>{error}</Message>
-      ) : cart.error ? (
-        <Message variant='danger'>Please Login Again!!</Message>
       ) : (
         <Row>
           {products.map((product) => (

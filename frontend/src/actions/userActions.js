@@ -21,6 +21,11 @@ import {
   USER_UPDATE_PROFILE_SUCCESS,
   USER_UPDATE_PROFILE_FAIL,
 } from '../constants/userConstants';
+import { encryptData } from './Crypto';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const salt = process.env.REACT_APP_CRYPTO_SALT;
 
 export const login = (email, password) => async (dispatch) => {
   try {
@@ -45,7 +50,7 @@ export const login = (email, password) => async (dispatch) => {
       payload: data,
     });
 
-    localStorage.setItem('userInfo', JSON.stringify(data));
+    localStorage.setItem('userInfo', encryptData(JSON.stringify(data), salt));
   } catch (error) {
     dispatch({
       type: USER_LOGIN_FAIL,
@@ -80,7 +85,7 @@ export const loginByPhone = (phone, password) => async (dispatch) => {
       payload: data,
     });
 
-    localStorage.setItem('userInfo', JSON.stringify(data));
+    localStorage.setItem('userInfo', encryptData(JSON.stringify(data), salt));
   } catch (error) {
     dispatch({
       type: USER_LOGIN_FAIL,
@@ -137,7 +142,7 @@ export const register = (name, email, phone, password) => async (dispatch) => {
       payload: data,
     });
 
-    localStorage.setItem('userInfo', JSON.stringify(data));
+    localStorage.setItem('userInfo', encryptData(JSON.stringify(data), salt));
   } catch (error) {
     dispatch({
       type: USER_REGISTER_FAIL,
@@ -148,7 +153,7 @@ export const register = (name, email, phone, password) => async (dispatch) => {
     });
   }
 };
-export const userInfoFromToken = () => async (dispatch, getState) => {};
+
 export const getUserDetails = (id) => async (dispatch, getState) => {
   try {
     dispatch({
@@ -310,7 +315,7 @@ export const loginByOTP = (phone) => async (dispatch) => {
       payload: data,
     });
 
-    localStorage.setItem('userInfo', JSON.stringify(data));
+    localStorage.setItem('userInfo', encryptData(JSON.stringify(data), salt));
   } catch (error) {
     dispatch({
       type: USER_LOGIN_FAIL,

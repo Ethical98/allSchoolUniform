@@ -39,11 +39,10 @@ const Header = ({ history }) => {
     }
   }, [dispatch, userInfo, history]);
 
-  const qty = cartItems.reduce((acc, item) => acc + item.qty, 0);
+  const qty = cartItems && cartItems.reduce((acc, item) => acc + item.qty, 0);
 
   const logoutHandler = () => {
     dispatch(logout());
-    
   };
   return (
     <header>

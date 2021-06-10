@@ -10,7 +10,7 @@ import {
 } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
 
-const ProfileScreen = ({ history, location }) => {
+const ProfileScreen = ({ history }) => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -28,6 +28,12 @@ const ProfileScreen = ({ history, location }) => {
 
   const userUpdateProfile = useSelector((state) => state.userUpdateProfile);
   const { success } = userUpdateProfile;
+
+  useEffect(() => {
+    if (!userInfo) {
+      history.push('/login');
+    }
+  }, [userInfo, history]);
 
   useEffect(() => {
     if (userInfo && userInfo.token) {

@@ -5,7 +5,7 @@ import { Button, Form, Row, Col } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import validator from 'validator';
 import { getOtp, loginByPhone, login } from '../actions/userActions';
-import { mergeCartWithDatabase } from '../actions/cartActions';
+import { mergeCartWithDatabase, getSavedAddress } from '../actions/cartActions';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 
@@ -36,6 +36,7 @@ const LoginScreenByPhone = ({ history, location }) => {
   useEffect(() => {
     if (userInfo && userInfo.token) {
       history.push(redirect);
+
       if (!cartSuccess) {
         dispatch(mergeCartWithDatabase());
       }
@@ -99,7 +100,7 @@ const LoginScreenByPhone = ({ history, location }) => {
       console.log(email);
     }
   };
- 
+
   return (
     <FormContainer>
       <h1>Sign In</h1>

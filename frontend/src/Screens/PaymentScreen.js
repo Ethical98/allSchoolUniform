@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import jsonwebtoken from 'jsonwebtoken';
 import { useDispatch, useSelector } from 'react-redux';
 import FormContainer from '../components/FormContainer';
-import { Button, Form, Col } from 'react-bootstrap';
+import { Button, Form, ListGroup } from 'react-bootstrap';
 import { savePaymentMethod } from '../actions/cartActions';
 import { logout } from '../actions/userActions';
-import { correctCartItemDetails } from '../actions/cartActions';
 import CheckoutSteps from '../components/CheckoutSteps';
 
 const PaymentScreen = ({ history }) => {
@@ -13,15 +12,21 @@ const PaymentScreen = ({ history }) => {
   const { userInfo } = userLogin;
 
   const cart = useSelector((state) => state.cart);
-  const { shippingAddress } = cart;
+  const { shippingAddress, cartItems } = cart;
 
-  const [paymentMethod, setPaymentMethod] = useState('PayU');
+  const [paymentMethod, setPaymentMethod] = useState('COD');
 
   const dispatch = useDispatch();
 
+  if (!shippingAddress) {
+    history.push('/shipping');
+  }
+
   useEffect(() => {
-    dispatch(correctCartItemDetails());
-  }, [dispatch]);
+    if (!userInfo) {
+      history.push('/login');
+    }
+  }, [history, userInfo]);
 
   useEffect(() => {
     if (userInfo && userInfo.token) {
@@ -39,13 +44,10 @@ const PaymentScreen = ({ history }) => {
   }, [dispatch, userInfo, history]);
 
   useEffect(() => {
-    if (!userInfo) {
-      history.push('/login');
+    if (cartItems.length === 0) {
+      history.push('/products');
     }
-  }, [history, userInfo]);
-  if (!shippingAddress) {
-    history.push('/shipping');
-  }
+  }, [history, cartItems]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -61,25 +63,29 @@ const PaymentScreen = ({ history }) => {
         <Form.Group>
           <Form.Label as='legend'>Select Method</Form.Label>
 
-          <Col>
-            <Form.Check
-              type='radio'
-              label='PayU or Debit/Credit Card'
-              id='PayU'
-              name='paymentMethod'
-              value='PayU'
-              checked
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            ></Form.Check>
-            <Form.Check
-              type='radio'
-              label='RazorPay'
-              id='RazorPay'
-              name='paymentMethod'
-              value='RazorPay'
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            ></Form.Check>
-          </Col>
+          <ListGroup>
+            <ListGroup.Item>
+              <Form.Check
+                type='radio'
+                label='Cash On Delivery'
+                id='COD'
+                name='paymentMethod'
+                value='COD'
+                checked
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              ></Form.Check>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Form.Check
+                type='radio'
+                label='PayUMoney/Debit/Credit Card'
+                id='PayU'
+                name='paymentMethod'
+                value='PayU'
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              ></Form.Check>
+            </ListGroup.Item>
+          </ListGroup>
         </Form.Group>
 
         <Button type='submit' variant='primary'>
