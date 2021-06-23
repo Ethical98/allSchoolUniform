@@ -19,7 +19,9 @@ import { logout } from '../actions/userActions';
 
 const ProductDescriptionScreen = ({ history, match }) => {
   const [qty, setQty] = useState(1);
-
+  const [index, setIndex] = useState(0);
+  const [productPrice, setProductPrice] = useState(0);
+  const [countInStock, setCountInStock] = useState(0);
   const dispatch = useDispatch();
 
   const productDetails = useSelector((state) => state.productDetails);
@@ -27,8 +29,12 @@ const ProductDescriptionScreen = ({ history, match }) => {
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-
-
+  useEffect(() => {
+    if (product && product.size) {
+      setProductPrice(product.size[index].price);
+      setCountInStock(product.size[index].countInStock);
+    }
+  }, [product, index]);
 
   useEffect(() => {
     if (userInfo && userInfo.token) {
@@ -50,7 +56,11 @@ const ProductDescriptionScreen = ({ history, match }) => {
   }, [dispatch, match]);
 
   const addToCartHandler = () => {
-    history.push(`/cart/${match.params.id}?qty=${qty}`);
+    history.push(`/cart/${match.params.id}?q=${qty}?i=${index}`);
+  };
+
+  const handleSizeChange = (val) => {
+    setIndex(product.size.findIndex((x) => x.size === val));
   };
 
   return (
@@ -78,7 +88,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
                   text={`${product.numReviews} reviews`}
                 />
               </ListGroup.Item>
-              <ListGroup.Item>Price: ₹{product.price}</ListGroup.Item>
+              <ListGroup.Item>Price: ₹{productPrice}</ListGroup.Item>
               <ListGroup.Item>
                 Description: {product.description}
               </ListGroup.Item>
@@ -97,19 +107,34 @@ const ProductDescriptionScreen = ({ history, match }) => {
                   <Row>
                     <Col>Price:</Col>
                     <Col>
-                      <strong>₹{product.price}</strong>
+                      <strong>₹{productPrice}</strong>
                     </Col>
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <Row>
                     <Col>Status:</Col>
+                    <Col>{countInStock > 0 ? 'In Stock' : 'Out of Stock'}</Col>
+                  </Row>
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <Row>
+                    <Col>SIZE</Col>
                     <Col>
-                      {product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}
+                      <Form.Control
+                        as='select'
+                        onChange={(e) => handleSizeChange(e.target.value)}
+                      >
+                        <option>Size</option>
+                        {product.size &&
+                          product.size.map((x) => {
+                            return <option>{x.size}</option>;
+                          })}
+                      </Form.Control>
                     </Col>
                   </Row>
                 </ListGroup.Item>
-                {product.countInStock > 0 && (
+                {countInStock > 0 && (
                   <ListGroup.Item>
                     <Row>
                       <Col>QTY</Col>
@@ -119,7 +144,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
                           value={qty}
                           onChange={(e) => setQty(e.target.value)}
                         >
-                          {[...Array(product.countInStock).keys()].map((x) => (
+                          {[...Array(countInStock).keys()].map((x) => (
                             <option key={x + 1} value={x + 1}>
                               {x + 1}
                             </option>
@@ -129,22 +154,18 @@ const ProductDescriptionScreen = ({ history, match }) => {
                     </Row>
                   </ListGroup.Item>
                 )}
+
                 <ListGroup.Item>
-                  <Form inline className='ml-3'>
-                    <Form.Control className='ml-2' as='select'>
-                      <option>Size</option>
-                    </Form.Control>
-
-                    <Button className='ml-2'>Size Guide</Button>
-                  </Form>
+                  <Button className='btn-block' variant='warning'>
+                    Size Guide
+                  </Button>
                 </ListGroup.Item>
-
                 <ListGroup.Item>
                   <Button
                     onClick={addToCartHandler}
                     className='btn-block'
                     type='button'
-                    disabled={product.countInStock === 0}
+                    disabled={countInStock === 0}
                   >
                     Add To Cart
                   </Button>

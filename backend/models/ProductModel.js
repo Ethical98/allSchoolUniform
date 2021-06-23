@@ -11,6 +11,16 @@ const reviewSchema = mongoose.Schema(
   }
 );
 
+const sizeSchema = mongoose.Schema({
+  size: { type: String, required: true },
+  price: { type: Number, required: true },
+  countInStock: { type: Number, required: true },
+  openingQty: { type: Number },
+  disount: { type: Number },
+  alertOnQty: { type: Number },
+  tax: { type: Number },
+});
+
 const productSchema = mongoose.Schema(
   {
     user: {
@@ -18,10 +28,16 @@ const productSchema = mongoose.Schema(
       required: true,
       ref: 'User',
     },
+
+    // season: [{type:String,required:true}],
     name: {
       type: String,
       required: true,
     },
+    // gender: {
+    //   type: String,
+    //   required: true,
+    // },
     image: {
       type: String,
       required: true,
@@ -30,6 +46,18 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    // supplier: {
+    //   type: String,
+    //   required: true,
+    // },
+    // brandLogo: {
+    //   type: String,
+    //   required: true,
+    // },
+    // displayOrder: {
+    //   type: Number,
+    //   required: true,
+    // },
     category: {
       type: String,
       required: true,
@@ -38,8 +66,18 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    // class: {
+    //   type: String,
+    //   required: true,
+    // },
+    class: [{ type: String, required: true }],
+    // productCode: {
+    //   type: String,
+    //   required: true,
+    // },
     reviews: [reviewSchema],
-    // schoolName: [School],
+    schoolName: [{ type: String, required: true }],
+    size: [sizeSchema],
     rating: {
       type: Number,
       required: true,
@@ -50,16 +88,16 @@ const productSchema = mongoose.Schema(
       required: true,
       default: 0,
     },
-    price: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    countInStock: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
+    // seoDescription: {
+    //   type: String,
+    // },
+    // seoKeywords: {
+    //   type: String,
+    // },
+    // mafatLalProduct: {
+    //   type: Boolean,
+    //   default: false,
+    // },
   },
   { timestamps: true }
 );

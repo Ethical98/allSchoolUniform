@@ -13,13 +13,13 @@ import {
   CART_REQUEST_SHIPPING_ADDRESS,
   CART_FAIL_SHIPPING_ADDRESS,
 } from '../constants/cartConstants';
-import { encryptData } from './Crypto';
+import { encryptData } from '../utils/Crypto';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;
 
-export const addToCart = (id, qty) => async (dispatch, getState) => {
+export const addToCart = (id, index, qty) => async (dispatch, getState) => {
   try {
     const { data } = await axios.get(`/api/products/${id}`);
     const {
@@ -33,13 +33,17 @@ export const addToCart = (id, qty) => async (dispatch, getState) => {
           Authorization: `Bearer ${userInfo.token}`,
         },
       };
+
       const addItem = {
+        _id: data.size[index]._id,
         product: data._id,
         name: data.name,
         image: data.image,
-        price: data.price,
-        countInStock: data.countInStock,
+        size: data.size[index].size,
+        price: data.size[index].price,
+        countInStock: data.size[index].countInStock,
         qty,
+        index,
       };
 
       dispatch({
@@ -51,12 +55,15 @@ export const addToCart = (id, qty) => async (dispatch, getState) => {
       dispatch({
         type: CART_ADD_ITEM,
         payload: {
+          _id: data.size[index]._id,
           product: data._id,
           name: data.name,
+          price: data.size[index].price,
           image: data.image,
-          price: data.price,
-          countInStock: data.countInStock,
+          countInStock: data.size[index].countInStock,
+          size: data.size[index].size,
           qty,
+          index,
         },
       });
     }
@@ -102,7 +109,6 @@ export const removeFromCart = (id) => async (dispatch, getState) => {
       });
     }
   } catch (error) {
-    console.log(error);
     dispatch({
       type: CART_ITEM_FAIL,
       payload:
@@ -194,31 +200,6 @@ export const getCartFromDatabase = () => async (dispatch, getState) => {
   }
 };
 
-export const correctCartItemDetails = () => async (dispatch, getState) => {
-  const {
-    cart: { cartItems },
-  } = getState();
-
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  };
-
-  cartItems.forEach(async (x) => {
-    const { data } = await axios.get(`/api/products/${x.product}`, config);
-    x.price = data.price;
-    x.image = data.image;
-    x.countInStock = data.countInStock;
-
-    dispatch({
-      type: CART_ADD_ITEM,
-      payload: x,
-    });
-  });
-
-  localStorage.setItem('cartItems', JSON.stringify(getState().cart.cartItems));
-};
 export const getSavedAddress = () => async (dispatch, getState) => {
   dispatch({
     type: CART_REQUEST_SHIPPING_ADDRESS,
@@ -236,7 +217,6 @@ export const getSavedAddress = () => async (dispatch, getState) => {
 
     const { data } = await axios.get('/api/users/shippingAddress', config);
 
-    
     dispatch({
       type: CART_GET_SHIPPING_ADDRESS,
       payload: data,

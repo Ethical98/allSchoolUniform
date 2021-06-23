@@ -33,9 +33,6 @@ h2 {
 .card-header[aria-expanded='false'] .fa-arrow-circle-down {
   display: none;
 }
-.logo {
-  height: 10vh;
-}
 
 @media (max-width: 576px) {
   span {

@@ -9,7 +9,6 @@ import {
   ORDER_CREATE_RESET,
   ORDER_PAY_RESET,
 } from '../constants/orderConstants';
-
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
 import { clearCartFromDatabase } from '../actions/cartActions';
@@ -56,37 +55,12 @@ const OrderScreen = ({ match, history }) => {
     }
   }, [dispatch, orderId, order, successPay]);
 
-  // useEffect(() => {
-  //   if (userInfo) {
-  //   }
-  // }, [userInfo, dispatch]);
-
-  // useEffect(() => {
-  //   const addPayUMoneyScript = () => {
-  //     const script = document.createElement('script');
-  //     script.type = 'text/javascript';
-  //     script.src = 'https://checkout-static.citruspay.com/bolt/run/bolt.min.js';
-  //     //script.src="https://sboxcheckout-static.citruspay.com/bolt/run/bolt.min.js"
-  //     script.id = 'bolt';
-  //     script.async = true;
-  //     script.onLoad = () => {
-  //       setScriptReady(true);
-  //     };
-  //     document.body.appendChild(script);
-  //   };
-  //   if (!order || order._id !== orderId || successPay) {
-
-  //     dispatch(getOrderDetails(orderId));
-  //   } else {
-  //     if (!order.isPaid) {
-  //       if (!window.bolt) {
-  //         addPayUMoneyScript();
-  //       } else {
-  //         setScriptReady(true);
-  //       }
-  //     }
-  //   }
-  // }, [dispatch, orderId, successPay, order]);
+  useEffect(() => {
+    if (!userInfo) {
+      dispatch(logout());
+      history.push('/login');
+    }
+  }, [userInfo, dispatch, history]);
 
   if (!loading && order.orderItems) {
     // Calculate Prices
@@ -94,38 +68,6 @@ const OrderScreen = ({ match, history }) => {
       .reduce((acc, item) => acc + item.price * item.qty, 0)
       .toFixed(2);
   }
-  // const pay = () => {
-  //   if (pd) {
-  //     window.bolt.launch(
-  //       pd,
-
-  //       {
-  //         responseHandler: (response) => {
-  //           console.log(response);
-  //           dispatch(paymentStatus(response.response));
-  //         },
-  //       }
-  //     );
-  //   }
-  // };
-  // useEffect(() => {
-  //   if (order) {
-  //     dispatch(
-  //       payOrderPayU(
-  //         order.totalPrice,
-  //         order.user.name,
-  //         order.user.email,
-  //         order.user.phone,
-  //         orderId
-  //       )
-  //     );
-  //   }
-  // }, [dispatch, order, orderId]);
-  // console.log(paymentResponse);
-
-  // if (!successPay) {
-  //   pay();
-  // }
 
   return loading ? (
     <Loader />
@@ -213,6 +155,7 @@ const OrderScreen = ({ match, history }) => {
                             {item.name}
                           </Link>
                         </Col>
+                        <Col md={2}>Size: {item.size}</Col>
                         <Col md={4}>
                           {item.qty} x ₹{item.price} = ₹
                           {(item.qty * item.price).toFixed(2)}

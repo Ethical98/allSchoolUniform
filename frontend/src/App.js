@@ -16,6 +16,8 @@ import ShippingScreen from './Screens/ShippingScreen';
 import PaymentScreen from './Screens/PaymentScreen';
 import PlaceOrderScreen from './Screens/PlaceOrderScreen';
 import OrderScreen from './Screens/OrderScreen';
+import ResetPasswordScreen from './Screens/ResetPasswordScreen';
+import ForgotPasswordScreen from './Screens/ForgotPasswordScreen';
 const App = () => {
   return (
     <Router>
@@ -23,6 +25,8 @@ const App = () => {
 
       <main style={{ marginTop: '18vh' }}>
         <Container>
+          <Route path='/forgotpassword' component={ForgotPasswordScreen} />
+          <Route path='/resetpassword' component={ResetPasswordScreen} />
           <Route path='/order/:id' component={OrderScreen} />
           <Route path='/shipping' component={ShippingScreen} />
           <Route path='/payment' component={PaymentScreen} />

@@ -13,15 +13,15 @@ const addToCart = asyncHandler(async (req, res) => {
   } else {
     const cart = await Cart.findOne({ user: req.user._id });
     if (cart) {
-      const existItem = cart.cartItems.find(
-        (x) => x.product == addItem.product
-      );
+      const existItem = cart.cartItems.find((x) => x._id == addItem._id);
 
       if (existItem) {
         cart.cartItems = cart.cartItems.map((x) =>
-          x.product == existItem.product ? addItem : x
+          x._id == existItem._id ? addItem : x
         );
+
         const items = await cart.save();
+
         res.json(items.cartItems);
       } else {
         cart.cartItems = [...cart.cartItems, addItem];
@@ -44,13 +44,15 @@ const addToCart = asyncHandler(async (req, res) => {
 // @access Private
 const cartItemRemove = asyncHandler(async (req, res) => {
   const { id } = req.body;
+
   if (!id) {
     res.status(400);
     throw new Error('No Item to Delete From Cart');
   } else {
     const cart = await Cart.findOne({ user: req.user._id });
 
-    cart.cartItems = cart.cartItems.filter((x) => x.product != id);
+    cart.cartItems = cart.cartItems.filter((x) => x.id != id);
+
     if (cart.cartItems.length == 0) {
       await Cart.deleteOne({ user: req.user._id });
 
@@ -82,15 +84,17 @@ const mergeCart = asyncHandler(async (req, res) => {
   if (cart) {
     cart.cartItems.map((x) =>
       cartItems.map(
-        (item) => (x.qty = x.product == item.product ? x.qty + item.qty : x.qty)
+        (item) =>
+          (x.qty =
+            x.product == item.product && x.size == item.size
+              ? x.qty + item.qty
+              : x.qty)
       )
     );
     await cart.save();
     const products = cartItems.filter(
       (itemToAdd) =>
-        !cart.cartItems.some(
-          (addedItem) => itemToAdd.product == addedItem.product
-        )
+        !cart.cartItems.some((addedItem) => itemToAdd.size == addedItem.size)
     );
     cart.cartItems = [...cart.cartItems, ...products];
     const finalCart = await cart.save();

@@ -10,6 +10,7 @@ import {
   userDetailsReducer,
   userLoginReducer,
   userOtpVerificationReducer,
+  userPasswordResetReducer,
   userRegisterReducer,
   userUpdateProfileReducer,
 } from './reducers/userReducers';
@@ -18,7 +19,7 @@ import {
   orderDetailsReducer,
   orderPayReducer,
 } from './reducers/orderReducers';
-import { decryptData } from './actions/Crypto';
+import { decryptData } from './utils/Crypto';
 
 const reducer = combineReducers({
   productList: productListReducer,
@@ -30,6 +31,7 @@ const reducer = combineReducers({
   userOtpVerification: userOtpVerificationReducer,
   userDetails: userDetailsReducer,
   userUpdateProfile: userUpdateProfileReducer,
+  userPasswordReset: userPasswordResetReducer,
   orderCreate: orderCreateReducer,
   orderDetails: orderDetailsReducer,
   orderPay: orderPayReducer,
@@ -40,6 +42,10 @@ const salt = process.env.REACT_APP_CRYPTO_SALT;
 const cartItemsFromStorage = localStorage.getItem('cartItems')
   ? JSON.parse(decryptData(localStorage.getItem('cartItems'), salt))
   : [];
+
+// const cartItemsFromStorage = localStorage.getItem('cartItems')
+//   ? JSON.parse(localStorage.getItem('cartItems'))
+//   : [];
 
 const userInfoFromStorage = localStorage.getItem('userInfo')
   ? JSON.parse(decryptData(localStorage.getItem('userInfo'), salt))
@@ -53,6 +59,10 @@ const cartSuccessFromStorage = localStorage.getItem('cartSuccess')
   ? JSON.parse(localStorage.getItem('cartSuccess'))
   : false;
 
+const resetEmailFromStorage = localStorage.getItem('RE')
+  ? JSON.parse(decryptData(localStorage.getItem('RE'), salt))
+  : '';
+
 const initialState = {
   cart: {
     cartItems: cartItemsFromStorage,
@@ -60,6 +70,7 @@ const initialState = {
     cartSuccess: cartSuccessFromStorage,
   },
   userLogin: { userInfo: userInfoFromStorage },
+  userPasswordReset: { email: resetEmailFromStorage },
 };
 
 const middleware = [thunk];

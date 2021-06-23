@@ -128,6 +128,22 @@ export const payOrderPayU =
         type: ORDER_PAY_REQUEST,
         payload: pd,
       });
+      window.bolt.launch(
+        pd,
+
+        {
+          responseHandler: async (response) => {
+            
+            dispatch(paymentStatus(response.response));
+          },
+          catchException: function (response) {
+            dispatch({
+              type: ORDER_PAY_FAIL,
+              payload: response,
+            });
+          },
+        }
+      );
     } catch (error) {
       dispatch({
         type: ORDER_PAY_FAIL,
@@ -139,7 +155,7 @@ export const payOrderPayU =
     }
   };
 
-export const paymentStatus = (response) => async (dispatch, getState) => {
+const paymentStatus = (response) => async (dispatch, getState) => {
   try {
     const {
       userLogin: { userInfo },
@@ -199,8 +215,6 @@ export const updateOrder =
         type: ORDER_DETAILS_SUCCESS,
         payload: data,
       });
-
-      
     } catch (error) {
       dispatch({
         type: ORDER_DETAILS_FAIL,

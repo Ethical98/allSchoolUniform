@@ -1,4 +1,5 @@
 import axios from 'axios';
+import firebase from '../utils/firebase';
 import {
   USER_LOGIN_FAIL,
   USER_LOGIN_REQUEST,
@@ -6,23 +7,30 @@ import {
   USER_LOGOUT,
   USER_OTP_REQUEST,
   USER_OTP_SENT,
-  USER_OTP_VERIFICATION_FAIL,
-  USER_OTP_VERIFICATION_SUCCESS,
-  // USER_REQUEST_ID,
-  // USER_VERIFIED,
+  USER_OTP_FAIL,
+  USER_OTP_SUCCESS,
   USER_REGISTER_REQUEST,
   USER_REGISTER_SUCCESS,
   USER_REGISTER_FAIL,
-  USER_OTP_VERIFICATION_ERROR,
   USER_DETAILS_REQUEST,
   USER_DETAILS_SUCCESS,
   USER_DETAILS_FAIL,
   USER_UPDATE_PROFILE_REQUEST,
   USER_UPDATE_PROFILE_SUCCESS,
   USER_UPDATE_PROFILE_FAIL,
+  USER_OTP_RESET,
+  USER_OTP_CANCEL,
+  USER_PASSWORD_RESET_REQUEST,
+  USER_PASSWORD_RESET_SUCCESS,
+  USER_PASSWORD_RESET_FAIL,
+  USER_PASSWORD_RESET_CLEAR,
 } from '../constants/userConstants';
-import { encryptData } from './Crypto';
+import { encryptData } from '../utils/Crypto';
 import dotenv from 'dotenv';
+// import 'firebase/auth';
+// import firebase1 from 'firebase/app';
+// import firebase from 'firebase';
+
 dotenv.config();
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;
@@ -103,6 +111,7 @@ export const logout = () => (dispatch, getState) => {
   localStorage.removeItem('shippingAddress');
   getState().cart.shippingAddress = {};
   getState().cart.cartItems = [];
+  getState().userOtpVerification.phone = '';
   getState().userOtpVerification.verified = false;
   getState().cart.cartSuccess = false;
   getState().userRegister.userInfo = [];
@@ -131,6 +140,7 @@ export const register = (name, email, phone, password) => async (dispatch) => {
       { name, email, phone, password },
       config
     );
+    await firebase.auth().createUserWithEmailAndPassword(email, password);
 
     dispatch({
       type: USER_REGISTER_SUCCESS,
@@ -146,6 +156,48 @@ export const register = (name, email, phone, password) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: USER_REGISTER_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const getOtpWithEmail = (email) => async (dispatch) => {
+  try {
+    dispatch({
+      type: USER_OTP_REQUEST,
+    });
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const { data } = await axios.post(
+      '/api/users/getUserPhone',
+      { email },
+      config
+    );
+
+    if (data) {
+      const phoneNumber = '+91' + data.phone;
+      const appVerifier = window.recaptchaVerifier;
+
+      const confirmationResult = await firebase
+        .auth()
+        .signInWithPhoneNumber(phoneNumber, appVerifier);
+      window.confirmationResult = confirmationResult;
+      dispatch({
+        type: USER_OTP_SENT,
+        payload: data.phone,
+      });
+    }
+  } catch (error) {
+    dispatch({
+      type: USER_OTP_FAIL,
       payload:
         error.response && error.response.data.message
           ? error.response.data.message
@@ -220,78 +272,6 @@ export const updateUserProfile = (user) => async (dispatch, getState) => {
   }
 };
 
-export const getOtp = (phone) => async (dispatch) => {
-  try {
-    dispatch({
-      type: USER_OTP_REQUEST,
-      payload: phone,
-    });
-
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-
-    const { data } = await axios.post('/api/users/getOtp', { phone }, config);
-    dispatch({
-      type: USER_OTP_SENT,
-      payload: data,
-      phone: phone,
-    });
-    // dispatch({
-    //   type: USER_REQUEST_ID,
-    //   payload: data.request_id,
-    // });
-  } catch (error) {
-    dispatch({
-      type: USER_OTP_VERIFICATION_FAIL,
-      data: phone,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
-    });
-  }
-};
-
-export const verifyOtp = (id, code, phone) => async (dispatch) => {
-  try {
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-    const { data } = await axios.post(
-      '/api/users/verifyOtp',
-      { id, code },
-      config
-    );
-    if (data === id) {
-      dispatch({
-        type: USER_OTP_VERIFICATION_SUCCESS,
-        payload: phone,
-      });
-    } else {
-      dispatch({
-        type: USER_OTP_VERIFICATION_ERROR,
-        payload: data.message,
-        phone: phone,
-        id: id,
-      });
-    }
-  } catch (error) {
-    dispatch({
-      type: USER_OTP_VERIFICATION_FAIL,
-      data: phone,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
-    });
-  }
-};
-
 export const loginByOTP = (phone) => async (dispatch) => {
   try {
     dispatch({
@@ -327,59 +307,161 @@ export const loginByOTP = (phone) => async (dispatch) => {
   }
 };
 
-// export const recaptchaVerifier = (id,phone) => async (dispatch) => {
-//   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(id, {
-//     size: 'invisible',
-//     callback: (response) => {
-//       // reCAPTCHA solved, allow signInWithPhoneNumber.
-//       dispatch({
-//         type: USER_OTP_SENT,
-//       });
-//       onSignInSubmit();
-//     },
-//   });
-// };
+export const configureCaptcha = (id) => {
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(id, {
+    size: 'invisible',
+    callback: (response) => {},
+    defaultCountry: 'IN',
+  });
+};
 
-// export const onSignInSubmit = (phone, id) => async (dispatch) => {
-//   try {
-//     recaptchaVerifier(id,phone);
-//     const phoneNumber = phone;
-//     console.log(phoneNumber);
-//     const appVerifier = window.recaptchaVerifier;
-//     const confirmationResult = await firebase
-//       .auth()
-//       .signInWithPhoneNumber(phoneNumber, appVerifier);
+export const getOTP = (phone) => async (dispatch) => {
+  try {
+    var phoneNumber;
+    dispatch({
+      type: USER_OTP_REQUEST,
+      payload: phone,
+    });
+    if (phone.toString().length > 10) {
+      if (phone.toString().startsWith('+91')) {
+        phoneNumber = phone;
+      } else {
+        phoneNumber = '+91' + phone.toString().substring(1);
+      }
+    } else {
+      phoneNumber = '+91' + phone;
+    }
 
-//     // SMS sent. Prompt user to type the code from the message, then sign the
-//     // user in with confirmationResult.confirm(code).
-//     window.confirmationResult = confirmationResult;
-//     const code = window.prompt('Enter Otp');
-//     try {
-//       const result = await confirmationResult.confirm(code);
+    const appVerifier = window.recaptchaVerifier;
 
-//       // User signed in successfully.
-//       const user = result.user;
-//       console.log('User is signed in');
-//       // ...
-//     } catch (error) {
-//       dispatch({
-//         type: USER_OTP_VERIFICATION_FAIL,
-//         payload:
-//           error.response && error.response.data.message
-//             ? error.response.data.message
-//             : error.message,
-//       });
-//       // console.log(error);
-//       // // User couldn't sign in (bad verification code?)
-//       // // ...
-//     }
-//   } catch (error) {
-//     dispatch({
-//       type: USER_OTP_VERIFICATION_FAIL,
-//       payload:
-//         error.response && error.response.data.message
-//           ? error.response.data.message
-//           : error.message,
-//     });
-//   }
-// };
+    const confirmationResult = await firebase
+      .auth()
+      .signInWithPhoneNumber(phoneNumber, appVerifier);
+    window.confirmationResult = confirmationResult;
+    dispatch({
+      type: USER_OTP_SENT,
+      payload: phone,
+    });
+  } catch (error) {
+    window.recaptchaVerifier.render().then((widgetId) => {
+      window.recaptchaVerifier.reset(widgetId);
+    });
+
+    dispatch({
+      type: USER_OTP_FAIL,
+      payload: error,
+    });
+  }
+};
+
+export const submitOTP = (otp) => async (dispatch) => {
+  const code = otp;
+
+  try {
+    const result = await window.confirmationResult.confirm(code);
+    const user = result.user;
+    if (user) {
+      dispatch({
+        type: USER_OTP_SUCCESS,
+      });
+      window.recaptchaVerifier.render().then((widgetId) => {
+        window.recaptchaVerifier.reset(widgetId);
+      });
+    }
+  } catch (error) {
+    window.recaptchaVerifier.render().then((widgetId) => {
+      window.recaptchaVerifier.reset(widgetId);
+    });
+    console.log(error);
+    dispatch({
+      type: USER_OTP_FAIL,
+      payload: error,
+    });
+  }
+};
+
+export const resetOtp = () => (dispatch) => {
+  dispatch({
+    type: USER_OTP_RESET,
+  });
+  window.recaptchaVerifier.render().then((widgetId) => {
+    window.recaptchaVerifier.reset(widgetId);
+  });
+};
+
+export const cancelOtpRequest = (phone) => (dispatch) => {
+  dispatch({
+    type: USER_OTP_CANCEL,
+    payload: phone,
+  });
+};
+
+export const forgotPassword = (email) => async (dispatch) => {
+  try {
+    dispatch({ type: USER_PASSWORD_RESET_REQUEST });
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    await axios.post('/api/users/forgotPassword', { email }, config);
+
+    await firebase.auth().sendPasswordResetEmail(email);
+    localStorage.setItem('RE', encryptData(JSON.stringify(email), salt));
+    dispatch({ type: USER_PASSWORD_RESET_SUCCESS });
+  } catch (error) {
+    dispatch({
+      type: USER_PASSWORD_RESET_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const resetPassword = (password, email) => async (dispatch) => {
+  try {
+    dispatch({
+      type: USER_UPDATE_PROFILE_REQUEST,
+    });
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const { data } = await axios.post(
+      `/api/users/resetPassword`,
+      { password, email },
+      config
+    );
+    dispatch({
+      type: USER_UPDATE_PROFILE_SUCCESS,
+      payload: data,
+    });
+
+    dispatch({
+      type: USER_LOGIN_SUCCESS,
+      payload: data,
+    });
+
+    localStorage.setItem('userInfo', encryptData(JSON.stringify(data), salt));
+  } catch (error) {
+    dispatch({
+      type: USER_UPDATE_PROFILE_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const clearResetPasswordRequest = () => async (dispatch) => {
+  dispatch({ type: USER_PASSWORD_RESET_CLEAR });
+  localStorage.removeItem('RE');
+};

@@ -7,16 +7,17 @@ import Message from '../components/Message';
 import {
   createOrder,
   payOrderPayU,
-  paymentStatus,
+  //paymentStatus,
   updateOrder,
 } from '../actions/orderActions';
 import { getCartFromDatabase } from '../actions/cartActions';
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
-import Loader from '../components/Loader';
 
 const PlaceOrderScreen = ({ history }) => {
   const dispatch = useDispatch();
+
+  const [message, setMessage] = useState('');
 
   const [scriptReady, setScriptReady] = useState(false);
 
@@ -27,7 +28,6 @@ const PlaceOrderScreen = ({ history }) => {
   const {
     success: successPay,
     error: errorPay,
-    pd,
     response: paymentResponse,
   } = orderPay;
 
@@ -36,6 +36,13 @@ const PlaceOrderScreen = ({ history }) => {
 
   const orderCreate = useSelector((state) => state.orderCreate);
   const { order, success, error } = orderCreate;
+
+  useEffect(() => {
+    if (cartItems.length !== 0) {
+      dispatch(getCartFromDatabase());
+    }
+    // eslint-disable-next-line
+  }, [dispatch, cartItems.length]);
 
   if (userInfo && userInfo.token) {
     jsonwebtoken.verify(
@@ -55,46 +62,34 @@ const PlaceOrderScreen = ({ history }) => {
   }
 
   useEffect(() => {
-    const addPayUMoneyScript = () => {
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.src = 'https://checkout-static.citruspay.com/bolt/run/bolt.min.js';
-      //script.src="https://sboxcheckout-static.citruspay.com/bolt/run/bolt.min.js"
-      script.id = 'bolt';
-      script.async = true;
-      script.onLoad = () => {
-        setScriptReady(true);
+    if (cart.paymentMethod !== 'COD') {
+      const addPayUMoneyScript = () => {
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src =
+          'https://checkout-static.citruspay.com/bolt/run/bolt.min.js';
+        //script.src="https://sboxcheckout-static.citruspay.com/bolt/run/bolt.min.js"
+        script.id = 'bolt';
+        script.async = true;
+        script.onLoad = () => {
+          setScriptReady(true);
+        };
+        document.body.appendChild(script);
       };
-      document.body.appendChild(script);
-    };
 
-    if (!window.bolt) {
-      addPayUMoneyScript();
-    } else {
-      setScriptReady(true);
+      if (!window.bolt) {
+        addPayUMoneyScript();
+      } else {
+        setScriptReady(true);
+      }
     }
-  }, [dispatch, successPay]);
+  }, [dispatch, cart.paymentMethod]);
 
-  useEffect(() => {
-    if (cartItems.length !== 0) {
-      dispatch(getCartFromDatabase());
-    }
-    // eslint-disable-next-line
-  }, [dispatch, cartItems.length]);
   useEffect(() => {
     if (cart.paymentMethod !== 'COD') {
       if (cartId) {
-        dispatch(
-          payOrderPayU(
-            cart.totalPrice,
-            userInfo.name,
-            userInfo.email,
-            userInfo.phone,
-            cartId
-          )
-        );
-        if (errorPay) {
-          history.push('/paymentFailed');
+        if (errorPay === 'Overlay closed by consumer') {
+          setMessage('Payment Canceled Please try again!!');
         }
         if (success) {
           dispatch(updateOrder(order._id, paymentResponse));
@@ -125,10 +120,6 @@ const PlaceOrderScreen = ({ history }) => {
     Number(cart.taxPrice)
   ).toFixed(2);
 
-  // useEffect(() => {
-  //   // eslint-disable-next-line
-  // }, [history, success]);
-
   useEffect(() => {
     if (successPay) {
       dispatch(
@@ -146,22 +137,8 @@ const PlaceOrderScreen = ({ history }) => {
     // eslint-disable-next-line
   }, [successPay, dispatch]);
 
-  const pay = () => {
-    if (pd) {
-      window.bolt.launch(
-        pd,
-
-        {
-          responseHandler: (response) => {
-            console.log(response);
-            dispatch(paymentStatus(response.response));
-          },
-        }
-      );
-    }
-  };
-
   const placeOrderHandler = () => {
+    setMessage('');
     if (cart.paymentMethod === 'COD') {
       dispatch(
         createOrder({
@@ -175,13 +152,24 @@ const PlaceOrderScreen = ({ history }) => {
         })
       );
     } else {
-      pay();
+      if (cartId) {
+        dispatch(
+          payOrderPayU(
+            cart.totalPrice,
+            userInfo.name,
+            userInfo.email,
+            userInfo.phone,
+            cartId
+          )
+        );
+      }
     }
   };
 
   return (
     <>
       <CheckoutSteps step1 step2 step3 step4 />
+      {message && <Message variant='warning'>{message}</Message>}
       <Row>
         <Col md={8}>
           <ListGroup variant='flush'>
@@ -220,6 +208,7 @@ const PlaceOrderScreen = ({ history }) => {
                             {item.name}
                           </Link>
                         </Col>
+                        <Col md={2}>Size: {item.size}</Col>
                         <Col md={4}>
                           {item.qty} x ₹{item.price} = ₹
                           {(item.qty * item.price).toFixed(2)}

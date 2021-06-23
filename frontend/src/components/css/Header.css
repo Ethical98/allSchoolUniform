@@ -1,8 +1,28 @@
 .lblCartCount {
   font-size: 0.7rem;
-  left: 15%;
-  color: #fff;
-  ;
-  padding: 0 2px;
+  bottom: 18px;
+  color: black;
+  background-color: white;
+  padding: 0 4px;
   vertical-align: top;
+  border-radius: 100%;
+}
+.cart-qty {
+  border-radius: 100%;
+  vertical-align: super;
+}
+
+.logo {
+  height: 10vh;
+}
+
+@media (max-width: 576px) {
+  .cart-qty {
+    position: relative;
+    border-radius: 100%;
+    bottom: 20%;
+  }
+  .logo {
+    height: 6vh;
+  }
 }

@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import jsonwebtoken from 'jsonwebtoken';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCartFromDatabase } from '../actions/cartActions';
 import {
   Row,
   Col,
@@ -13,17 +12,31 @@ import {
   Card,
 } from 'react-bootstrap';
 import Message from '../components/Message';
-import { addToCart, removeFromCart } from '../actions/cartActions';
+import {
+  addToCart,
+  removeFromCart,
+  getCartFromDatabase,
+} from '../actions/cartActions';
 import { logout } from '../actions/userActions';
 
 const CartScreen = ({ match, location, history }) => {
   const productId = match.params.id;
 
-  const qty = location.search ? Number(location.search.split('=')[1]) : 1;
+  const qty = location.search
+    ? Number(location.search.split('q=')[1].split('?')[0])
+    : 1;
+  const index = location.search ? Number(location.search.split('i=')[1]) : 1;
+
   const dispatch = useDispatch();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
+  useEffect(() => {
+    if (userInfo && userInfo.token) {
+      dispatch(getCartFromDatabase());
+    }
+  }, [dispatch, userInfo]);
 
   useEffect(() => {
     if (userInfo && userInfo.token) {
@@ -44,17 +57,11 @@ const CartScreen = ({ match, location, history }) => {
   const { cartItems } = cart;
 
   useEffect(() => {
-    if (userInfo && userInfo.token) {
-      dispatch(getCartFromDatabase());
-    }
-    // eslint-disable-next-line
-  }, []);
-
-  useEffect(() => {
     if (productId) {
-      dispatch(addToCart(productId, qty));
+      console.log(productId, index, qty);
+      dispatch(addToCart(productId, index, qty));
     }
-  }, [dispatch, productId, qty]);
+  }, [dispatch, productId, qty, index]);
 
   const checkOutHandler = () => {
     if (userInfo && userInfo.token) {
@@ -80,14 +87,15 @@ const CartScreen = ({ match, location, history }) => {
           <ListGroup variant='flush'>
             {cartItems &&
               cartItems.map((item) => (
-                <ListGroup.Item key={item.product}>
+                <ListGroup.Item key={item._id}>
                   <Row>
                     <Col md={2}>
                       <Image src={item.image} alt={item.name} fluid rounded />
                     </Col>
-                    <Col md={3}>
+                    <Col md={2}>
                       <Link to={`/products/${item.product}`}>{item.name}</Link>
                     </Col>
+                    <Col md={2}>Size: {item.size}</Col>
                     <Col md={2}>₹{item.price}</Col>
                     <Col md={2}>
                       <Form.Control
@@ -95,7 +103,11 @@ const CartScreen = ({ match, location, history }) => {
                         value={item.qty}
                         onChange={(e) =>
                           dispatch(
-                            addToCart(item.product, Number(e.target.value))
+                            addToCart(
+                              item.product,
+                              item.index,
+                              Number(e.target.value)
+                            )
                           )
                         }
                       >
@@ -110,7 +122,7 @@ const CartScreen = ({ match, location, history }) => {
                       <Button
                         type='button'
                         variant='light'
-                        onClick={() => removeFromCartHandler(item.product)}
+                        onClick={() => removeFromCartHandler(item._id)}
                       >
                         <i className='fas fa-trash'></i>
                       </Button>

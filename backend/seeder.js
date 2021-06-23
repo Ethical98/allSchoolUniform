@@ -7,6 +7,8 @@ import User from './models/UserModel.js';
 import Product from './models/ProductModel.js';
 import Order from './models/OrderModel.js';
 import connectDB from './config/db.js';
+// import { ShirtSize } from './models/SizeModel.js';
+// import Size from './data/Sizes.js';
 
 dotenv.config();
 
@@ -26,7 +28,11 @@ const importData = async () => {
     });
 
     await Product.insertMany(sampleProducts);
-
+    // const firstProduct = insertedProducts[0]._id;
+    // const sampleSizes = Size.map((size) => {
+    //   return { ...size, user: adminUser, product: firstProduct };
+    // });
+    // await ShirtSize.insertMany(sampleSizes);
     console.log('Data Imported!'.green.inverse);
     process.exit();
   } catch (error) {

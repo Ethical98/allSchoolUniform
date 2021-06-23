@@ -1,5 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Product from '../models/ProductModel.js';
+import mongoose from 'mongoose';
+import connectDB from '../config/db.js';
 
 // @desc Fetch all Products
 // @route GET /api/products
@@ -28,6 +30,7 @@ const getProductById = asyncHandler(async (req, res) => {
 // @access Public
 const getItemPrice = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
+
   if (product) {
     res.json(product.price);
   } else {

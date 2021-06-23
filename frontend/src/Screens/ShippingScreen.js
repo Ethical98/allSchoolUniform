@@ -17,7 +17,7 @@ const ShippingScreen = ({ history }) => {
   const dispatch = useDispatch();
 
   const cart = useSelector((state) => state.cart);
-  const { shippingAddress, cartItems, savedAddress, loading, error } = cart;
+  const { cartItems, savedAddress, loading, error } = cart;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -74,7 +74,6 @@ const ShippingScreen = ({ history }) => {
 
   const handleNewAddress = () => {
     setNewAddress(true);
-    console.log(newAddress);
   };
 
   return (

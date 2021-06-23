@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Form, Row, Col } from 'react-bootstrap';
+import { Button, Form, Row, Col, ListGroup } from 'react-bootstrap';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import {
@@ -13,6 +13,7 @@ import jsonwebtoken from 'jsonwebtoken';
 const ProfileScreen = ({ history }) => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [savedAddress, setSavedAddress] = useState([]);
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -51,6 +52,7 @@ const ProfileScreen = ({ history }) => {
               setName(user.name);
               setPhone(user.phone);
               setEmail(user.email);
+              setSavedAddress([...user.savedAddress]);
             }
           }
         }
@@ -139,7 +141,32 @@ const ProfileScreen = ({ history }) => {
           </Button>
         </Form>
       </Col>
-      <Col md={9}>
+      {savedAddress.length !== 0 && (
+        <Col md={3}>
+          {message && <Message variant='danger'>{message}</Message>}
+          {error && <Message variant='danger'>{error}</Message>}
+          {success && <Message variant='success'>Profile Updated</Message>}
+          {loading && <Loader />}
+          <h2>Saved Addreses</h2>
+          <ListGroup className='mt-2'>
+            {savedAddress.map((x) => {
+              return (
+                <ListGroup.Item>
+                  {x.address}
+                  <br />
+                  {x.city}
+                  <br />
+                  {x.postalCode}
+                  <br />
+                  {x.country}
+                  <br />
+                </ListGroup.Item>
+              );
+            })}
+          </ListGroup>
+        </Col>
+      )}
+      <Col md={6}>
         <h2>My Orders</h2>
       </Col>
     </Row>

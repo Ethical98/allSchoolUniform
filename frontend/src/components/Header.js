@@ -9,6 +9,7 @@ import {
   Button,
   Image,
   NavDropdown,
+  Badge,
 } from 'react-bootstrap';
 import url from './asu-top-logo.png';
 import './css/Header.css';
@@ -72,7 +73,11 @@ const Header = ({ history }) => {
             <LinkContainer to='/cart'>
               <Nav.Link>
                 <i className='fas fa-shopping-cart'></i> <span>CART</span>
-                {qty > 0 && <span className='lblCartCount'>{qty}</span>}
+                {qty > 0 && (
+                  <Badge className='cart-qty primary' variant='primary'>
+                    {qty}
+                  </Badge>
+                )}
               </Nav.Link>
             </LinkContainer>
             {userInfo ? (

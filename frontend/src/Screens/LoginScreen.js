@@ -4,8 +4,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button, Form, Row, Col } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import validator from 'validator';
-import { getOtp, loginByPhone, login } from '../actions/userActions';
-import { mergeCartWithDatabase, getSavedAddress } from '../actions/cartActions';
+import {
+  loginByPhone,
+  login,
+  getOTP,
+  configureCaptcha,
+  getOtpWithEmail,
+} from '../actions/userActions';
+import { mergeCartWithDatabase } from '../actions/cartActions';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 
@@ -30,6 +36,9 @@ const LoginScreenByPhone = ({ history, location }) => {
 
   const cart = useSelector((state) => state.cart);
   const { cartSuccess } = cart;
+
+  const userOtpVerification = useSelector((state) => state.userOtpVerification);
+  const { loading: otpLoading, error: otpError, sent } = userOtpVerification;
 
   const redirect = location.search ? location.search.split('=')[1] : '/';
 
@@ -92,22 +101,39 @@ const LoginScreenByPhone = ({ history, location }) => {
     setValidated(true);
   };
 
+  useEffect(() => {
+    if (sent) {
+      history.push('/otp');
+    }
+  }, [history, sent]);
   const getOtpHandler = () => {
     if (phoneNumber) {
-      console.log(email);
-      dispatch(getOtp(phoneNumber));
+      dispatch(getOTP(phoneNumber));
     } else {
-      console.log(email);
+      dispatch(getOtpWithEmail(email));
     }
   };
+  useEffect(() => {
+    if (continueClicked) {
+      configureCaptcha('login-otp');
+    }
+  }, [continueClicked]);
 
   return (
     <FormContainer>
       <h1>Sign In</h1>
-      {loading && <Loader />}
-      {error && <Message variant='danger'>{error}</Message>}
-      {invalidInputError && (
-        <Message variant='danger'>{invalidInputError}</Message>
+      {loading || otpLoading ? (
+        <Loader />
+      ) : sent ? (
+        <Message variant='success'>OTP SENT</Message>
+      ) : otpError ? (
+        <Message variant='danger'>OTP NOT SENT</Message>
+      ) : error ? (
+        <Message variant='danger'>{error}</Message>
+      ) : (
+        invalidInputError && (
+          <Message variant='danger'>{invalidInputError}</Message>
+        )
       )}
       {!continueClicked ? (
         <Form
@@ -149,12 +175,12 @@ const LoginScreenByPhone = ({ history, location }) => {
         <Form noValidate validated={validated} onSubmit={submitHandler}>
           <Form.Group controlId='emailOrPhone'>
             <Form.Label>Email or Phone Number</Form.Label>
+
             <Form.Control
               value={inputValue}
               required
               readOnly
               placeholder='Enter Email or Mobile'
-              onChange={(e) => setInputValue(e.target.value)}
             ></Form.Control>
 
             <Form.Control.Feedback type='invalid'>
@@ -180,18 +206,29 @@ const LoginScreenByPhone = ({ history, location }) => {
             <Form.Control.Feedback type='invalid'>
               {passwordMessage}
             </Form.Control.Feedback>
+            <Form.Text
+              as={Link}
+              to='/forgotpassword'
+              style={{ color: 'white' }}
+            >
+              Forgot Password?
+            </Form.Text>
           </Form.Group>
+
           <Button type='submit' className='btn-block'>
             Sign-In
           </Button>
           <Row className='py-3'>
             <Col className='text-center'>
-              Or{' '}
-              <Link style={{ textDecoration: 'none' }} to='/otp'>
-                <Button className='btn-block' onClick={getOtpHandler}>
-                  Get an OTP on your phone
-                </Button>
-              </Link>
+              Or {/* <Link style={{ textDecoration: 'none' }} to='/otp'> */}
+              <Button
+                className='btn-block'
+                id='login-otp'
+                onClick={getOtpHandler}
+              >
+                Get an OTP on your phone
+              </Button>
+              {/* </Link> */}
             </Col>
           </Row>
         </Form>

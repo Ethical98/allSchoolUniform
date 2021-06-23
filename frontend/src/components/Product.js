@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Card, Form, Button } from 'react-bootstrap';
@@ -6,15 +6,30 @@ import Rating from './Rating';
 import { addToCart } from '../actions/cartActions';
 
 const Product = ({ product }) => {
- 
+  const [index, setIndex] = useState(0);
+  const [productPrice, setProductPrice] = useState(product.size[0].price);
+  const [countInStock, setCountInStock] = useState(
+    product.size[0].countInStock
+  );
 
   const dispatch = useDispatch();
   const id = product._id;
 
   const [qty, setQty] = useState(1);
 
+  const handleChange = (val) => {
+    setIndex(product.size.findIndex((x) => x.size === val));
+  };
+
+  useEffect(() => {
+    console.log(index);
+    setProductPrice(product.size[index].price);
+    setCountInStock(product.size[index].countInStock);
+    // eslint-disable-next-line
+  }, [index]);
+
   const addToCartHandler = (id, qty) => {
-    dispatch(addToCart(id, qty));
+    dispatch(addToCart(id, index, qty));
   };
 
   return (
@@ -39,22 +54,34 @@ const Product = ({ product }) => {
           </Link>
 
           <Card.Text className='text-center' as='h6'>
-            ₹{product.price}
+            ₹{productPrice}
           </Card.Text>
+
           <Card
             className='sizeCard px-1'
             bg='white'
             style={{ minHeight: '16vh' }}
           >
             <Card.Text className='text-center'>Choose Your Size</Card.Text>
+
             <Form inline>
               <Form.Control
                 as='select'
                 size='sm'
                 className='mx-1'
                 style={{ border: '1px solid lightGrey', width: '5vw' }}
+                onChange={(e) => {
+                  handleChange(e.target.value);
+                }}
               >
                 <option>Size</option>
+                {product.size.map((x) => {
+                  return (
+                    <option key={x._id} value={x.size}>
+                      {x.size}
+                    </option>
+                  );
+                })}
               </Form.Control>
 
               <Form.Control
@@ -65,7 +92,7 @@ const Product = ({ product }) => {
                 onChange={(e) => setQty(Number(e.target.value))}
               >
                 <option>QTY</option>
-                {[...Array(product.countInStock).keys()].map((x) => (
+                {[...Array(countInStock).keys()].map((x) => (
                   <option key={x + 1} value={x + 1}>
                     {x + 1}
                   </option>
@@ -75,12 +102,6 @@ const Product = ({ product }) => {
               <Button size='sm' className='mx-1'>
                 Size Guide
               </Button>
-
-              {/* <div div className='float-left '>
-                <Badge variant='primary'>Hello</Badge>{' '}
-                <Badge variant='primary'>Hello</Badge>{' '}
-                <Badge variant='primary'>Hello</Badge>{' '}
-              </div> */}
             </Form>
           </Card>
 

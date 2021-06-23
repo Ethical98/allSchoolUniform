@@ -1,25 +1,42 @@
 import mongoose from 'mongoose';
 
-const sizeSchema = mongoose.Schema({
+const shirtSizeSchema = mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',
   },
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'Product',
+  },
   size: {
-    type: Integer,
+    type: Number,
     required: true,
   },
   price: {
-    type: Integer,
+    type: Number,
     rquired: true,
   },
   quantity: {
-    type: Integer,
+    type: Number,
+    required: true,
+  },
+  openingQty: {
+    type: Number,
+    required: true,
+  },
+  chest: {
+    type: Number,
+    required: true,
+  },
+  shoulder: {
+    type: Number,
     required: true,
   },
 });
 
-const Size = mongoose.model('Size', sizeSchema);
+const ShirtSize = mongoose.model('ShirtSize', shirtSizeSchema);
 
-export default Size;
+export { shirtSizeSchema, ShirtSize };

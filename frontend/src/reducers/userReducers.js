@@ -5,9 +5,6 @@ import {
   USER_LOGOUT,
   USER_OTP_REQUEST,
   USER_OTP_SENT,
-  USER_OTP_VERIFICATION_SUCCESS,
-  USER_OTP_VERIFICATION_FAIL,
-  USER_OTP_VERIFICATION_ERROR,
   USER_REGISTER_FAIL,
   USER_REGISTER_REQUEST,
   USER_REGISTER_SUCCESS,
@@ -17,6 +14,14 @@ import {
   USER_UPDATE_PROFILE_SUCCESS,
   USER_UPDATE_PROFILE_FAIL,
   USER_UPDATE_PROFILE_REQUEST,
+  USER_OTP_SUCCESS,
+  USER_OTP_FAIL,
+  USER_OTP_RESET,
+  USER_OTP_CANCEL,
+  USER_PASSWORD_RESET_REQUEST,
+  USER_PASSWORD_RESET_SUCCESS,
+  USER_PASSWORD_RESET_FAIL,
+  USER_PASSWORD_RESET_CLEAR,
 } from '../constants/userConstants';
 
 export const userLoginReducer = (state = {}, action) => {
@@ -48,36 +53,36 @@ export const userRegisterReducer = (state = {}, action) => {
   }
 };
 
-export const userOtpVerificationReducer = (state = {}, action) => {
+export const userOtpVerificationReducer = (state = { phone: '' }, action) => {
   switch (action.type) {
     case USER_OTP_REQUEST:
-      return { loading: true, verfied: false, phone: action.payload };
-
+      return { ...state, loading: true, verfied: false, phone: action.payload };
     case USER_OTP_SENT:
       return {
+        ...state,
         loading: false,
         verified: false,
-        id: action.payload,
-        phone: action.phone,
+        sent: true,
+        phone: action.payload,
       };
-
-    case USER_OTP_VERIFICATION_SUCCESS:
-      return { loading: false, verified: true, phone: action.payload };
-    case USER_OTP_VERIFICATION_ERROR:
+    case USER_OTP_SUCCESS:
+      return { ...state, loading: false, verified: true };
+    case USER_OTP_FAIL:
       return {
+        ...state,
         loading: false,
         verified: false,
-        message: action.payload,
-        phone: action.phone,
-        id: action.id,
-      };
-    case USER_OTP_VERIFICATION_FAIL:
-      return {
-        loading: false,
-        verified: false,
-        phone: action.data,
         error: action.payload,
       };
+    case USER_OTP_CANCEL:
+      return {
+        sent: false,
+        loading: false,
+        verified: false,
+        phone: action.payload,
+      };
+    case USER_OTP_RESET:
+      return {};
     default:
       return state;
   }
@@ -103,6 +108,21 @@ export const userUpdateProfileReducer = (state = { user: {} }, action) => {
     case USER_UPDATE_PROFILE_SUCCESS:
       return { loading: false, success: true, user: action.payload };
     case USER_UPDATE_PROFILE_FAIL:
+      return { loading: false, error: action.payload };
+    case USER_PASSWORD_RESET_CLEAR:
+      return {};
+    default:
+      return state;
+  }
+};
+
+export const userPasswordResetReducer = (state = {}, action) => {
+  switch (action.type) {
+    case USER_PASSWORD_RESET_REQUEST:
+      return { loading: true };
+    case USER_PASSWORD_RESET_SUCCESS:
+      return { loading: false, success: true };
+    case USER_PASSWORD_RESET_FAIL:
       return { loading: false, error: action.payload };
     default:
       return state;
