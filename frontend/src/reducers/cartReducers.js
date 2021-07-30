@@ -11,6 +11,7 @@ import {
   CART_GET_SHIPPING_ADDRESS,
   CART_FAIL_SHIPPING_ADDRESS,
   CART_REQUEST_SHIPPING_ADDRESS,
+  CART_ITEMS_RESET,
 } from '../constants/cartConstants';
 
 export const cartReducer = (
@@ -79,6 +80,13 @@ export const cartReducer = (
       };
     case CART_RESET_FAIL:
       return { loading: false, error: action.payload };
+    case CART_ITEMS_RESET:
+      return {
+        cartItems: [],
+        shippingAddress: {},
+        cartSuccess: false,
+        cartId: '',
+      };
     default:
       return state;
   }

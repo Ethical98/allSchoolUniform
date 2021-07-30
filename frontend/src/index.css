@@ -8,10 +8,6 @@ main {
   margin: 0.1rem;
 }
 
-.accordionCard {
-  width: 21vw;
-}
-
 h1 {
   font-size: 1.8rem;
   padding: 1rem 0;
@@ -23,20 +19,13 @@ h2 {
 }
 
 .card-header {
-  background-color: aqua;
-  color: black;
+  background-color: darkslategrey;
+  color: white;
 }
+
 .card-header[aria-expanded='true'] .fa-arrow-circle-right {
-  margin-left: 4vh;
   display: none;
 }
 .card-header[aria-expanded='false'] .fa-arrow-circle-down {
   display: none;
-}
-
-@media (max-width: 576px) {
-  span {
-    font-size: 0px;
-    margin: -1vw;
-  }
 }

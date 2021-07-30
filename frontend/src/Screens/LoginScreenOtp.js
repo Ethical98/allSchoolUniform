@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Form } from 'react-bootstrap';
+import { Button, FloatingLabel, Form, Row } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -48,6 +48,7 @@ const LoginScreenOtp = ({ history }) => {
   }, [configureCaptcha, phone]);
 
   const resendOtpHandler = () => {
+    // configureCaptcha('resend-otp');
     dispatch(getOTP(phone));
   };
   const submitHandler = (e) => {
@@ -72,44 +73,63 @@ const LoginScreenOtp = ({ history }) => {
       ) : (
         <>
           <Form onSubmit={submitHandler}>
-            <Form.Group>
-              <Form.Label>Phone</Form.Label>
-
-              <Form.Control value={phone} readOnly plaintext></Form.Control>
-              <Link to='/login'>
-                <Form.Text style={{ color: 'white', textDecoration: 'none' }}>
+            <Form.Group className='mb-3'>
+              <FloatingLabel controlId='phone' label='Phone' className='mb-3'>
+                <Form.Control
+                  value={phone}
+                  placeholder='Phone'
+                  readOnly
+                ></Form.Control>
+                <Form.Text
+                  style={{ textDecoration: 'none' }}
+                  as={Link}
+                  to='/login'
+                  onClick={() => dispatch(cancelOtpRequest(phone))}
+                >
                   Change?
                 </Form.Text>
-              </Link>
-              <Form.Text className='pt-3'>
+              </FloatingLabel>
+
+              <Form.Text>
                 We’ve sent a One Time Password (OTP) to the mobile number above.
                 Please enter it to complete verification
               </Form.Text>
             </Form.Group>
-            <Form.Group>
-              <Form.Label>Enter OTP</Form.Label>
 
-              <Form.Control
-                value={OTP}
-                placeholder='OTP'
-                onChange={(e) => setOTP(e.target.value)}
-              ></Form.Control>
+            <Form.Group className='mb-3'>
+              <FloatingLabel label='Enter OTP' controlId='otp' className='mb-3'>
+                <Form.Control
+                  value={OTP}
+                  placeholder='Enter OTP'
+                  onChange={(e) => setOTP(e.target.value)}
+                ></Form.Control>
+              </FloatingLabel>
             </Form.Group>
-            <Button type='submit' className='btn-block'>
+            <Button variant='info' type='submit' className='col-12 mb-3'>
               Sign In
             </Button>
           </Form>
-          <Form.Text
-            className='text-center pt-3'
-            id='resend-otp'
-            onClick={resendOtpHandler}
-          >
-            Resend OTP
-          </Form.Text>
-          <Form.Text className='text-center pt-3'>Or</Form.Text>
+          <div id='resend-otp'></div>
+          <Row>
+            <Form.Text
+              as={Link}
+              to='/otp'
+              style={{ textDecoration: 'none' }}
+              className='text-center'
+              onClick={resendOtpHandler}
+            >
+              Resend OTP
+            </Form.Text>
+          </Row>
+          <Row>
+            <span as={Link} className='text-center'>
+              or
+            </span>
+          </Row>
           <Link to='/login'>
             <Button
-              className='btn-block'
+              variant='info'
+              className='col-12 mb-3'
               onClick={() => dispatch(cancelOtpRequest(phone))}
             >
               Sign-In with your password

@@ -1,28 +1,57 @@
-.lblCartCount {
-  font-size: 0.7rem;
-  bottom: 18px;
-  color: black;
-  background-color: white;
-  padding: 0 4px;
-  vertical-align: top;
-  border-radius: 100%;
-}
 .cart-qty {
   border-radius: 100%;
-  vertical-align: super;
+  position: relative;
+  bottom: 30%;
+  right: 10%;
 }
 
 .logo {
+  height: 8vh;
+  -webkit-filter: drop-shadow(5px 5px 5px black);
+  filter: drop-shadow(5px 5px 5px black);
+}
+
+.navbar {
+  font-size: small;
   height: 10vh;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
   .cart-qty {
     position: relative;
     border-radius: 100%;
-    bottom: 20%;
+    bottom: 25%;
   }
   .logo {
     height: 6vh;
+    -webkit-filter: drop-shadow(5px 5px 5px black);
+    filter: drop-shadow(5px 5px 5px black);
+  }
+
+  .header-text {
+    font-size: 0px;
+    margin: -1vw;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .cart-qty {
+    position: relative;
+    border-radius: 100%;
+    bottom: 25%;
+  }
+
+  .header-text {
+    font-size: 0px;
+    margin: -1vw;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .cart-qty {
+    position: relative;
+    border-radius: 100%;
+    bottom: 80%;
+    left: 60%;
   }
 }

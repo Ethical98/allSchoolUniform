@@ -30,7 +30,6 @@ const RegisterScreen = ({ history, location }) => {
   const [message, setMessage] = useState(null);
   const [mobileVerified, setMobileVerified] = useState(false);
   const [otpMessage, setOtpMessage] = useState(null);
-  const [verifiedNumber, setVerifiedNumber] = useState('');
 
   const userRegister = useSelector((state) => state.userRegister);
   const { loading, error, userInfo } = userRegister;
@@ -71,18 +70,12 @@ const RegisterScreen = ({ history, location }) => {
       setMessage('Passwords do not match');
     } else if (!mobileVerified) {
       setMessage('Mobile Number Not Verified');
-    } else if (phone !== verifiedNumber) {
-      setMessage('Mobile Number Not Verified');
     } else {
       if (phone.toString().length > 10) {
-        console.log(verifiedNumber);
         const number = Number(phone.toString().split('91')[1]);
-        console.log(phone);
+
         dispatch(register(name, email, number, password));
       } else {
-        console.log(mobileVerified);
-        console.log(verifiedNumber);
-        console.log(phone);
         dispatch(register(name, email, phone, password));
         //dispatch(resetOtp());
       }
@@ -107,7 +100,6 @@ const RegisterScreen = ({ history, location }) => {
   }, [dispatch, sent, otpError]);
 
   const requestOTP = async () => {
-    dispatch(resetOtp());
     if (!phone) {
       setMessage('Please Enter Mobile');
     } else if (!validator.isMobilePhone(phone)) {
@@ -124,7 +116,6 @@ const RegisterScreen = ({ history, location }) => {
     if (verified) {
       setMessage('Mobile Number Verified');
       setMobileVerified(true);
-      setVerifiedNumber(phone);
       dispatch(resetOtp());
     }
   }, [verified, phone, otpError, dispatch]);
@@ -155,93 +146,115 @@ const RegisterScreen = ({ history, location }) => {
       )}
       {error && <Message variant='danger'>{error}</Message>}
       <Form onSubmit={submitHandler}>
-        <Form.Group controlId='email'>
-          <Form.Label>Email</Form.Label>
+        <InputGroup className='mb-3'>
+          <InputGroup.Text id='email' style={{ width: '2.5rem' }}>
+            <i className='fas fa-envelope' />
+          </InputGroup.Text>
           <Form.Control
             required
             type='email'
-            placeholder='Enter Email'
+            placeholder='Email'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           ></Form.Control>
-        </Form.Group>
+        </InputGroup>
 
-        <Form.Group controlId='name'>
-          <Form.Label>Name</Form.Label>
-
+        <InputGroup controlId='name' className='mb-3'>
+          <InputGroup.Text id='name'>
+            <i className='fas fa-user' />
+          </InputGroup.Text>
           <Form.Control
             required
             type='name'
-            placeholder='Enter Name'
+            placeholder='Name'
             value={name}
             onChange={(e) => setName(e.target.value)}
           ></Form.Control>
-        </Form.Group>
-        <Form.Group controlId='phone'>
-          <Form.Label>Mobile</Form.Label>
-          <InputGroup>
-            <Form.Control
-              required
-              type='phone'
-              placeholder='Enter Mobile'
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            ></Form.Control>
+        </InputGroup>
 
-            <Button className='ml-1' id='sign-in-button' onClick={requestOTP}>
+        <InputGroup controlId='phone' className='mb-3'>
+          <InputGroup.Text id='phone' style={{ width: '2.5rem' }}>
+            <i class='fas fa-phone-alt' />
+          </InputGroup.Text>
+          <Form.Control
+            required
+            readOnly={mobileVerified}
+            type='phone'
+            placeholder='Phone'
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          ></Form.Control>
+
+          {!mobileVerified ? (
+            <Button
+              variant='outline-dark'
+              id='sign-in-button'
+              onClick={requestOTP}
+            >
               GET OTP
             </Button>
-          </InputGroup>
-          <Modal
-            show={show}
-            onHide={() => setShow(false)}
-            backdrop='static'
-            keyboard={false}
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>Submit OTP</Modal.Title>
-            </Modal.Header>
-            {otpMessage && (
-              <Message
-                variant={otpMessage === 'OTP SENT' ? 'success' : 'danger'}
-              >
-                {otpMessage}
-              </Message>
-            )}
-            {otpLoading ? (
-              <Loader />
-            ) : (
-              <Modal.Body className='text-center'>
-                <OtpInput
-                  value={otp}
-                  onChange={handleOtpChange}
-                  numInputs={6}
-                  inputStyle='inputStyle'
-                />
-              </Modal.Body>
-            )}
-            <Modal.Footer>
-              <Button variant='warning' onClick={requestOTP}>
-                Resend OTP
-              </Button>
-              <Button variant='success' onClick={onSubmitOTP}>
-                Submit OTP
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        </Form.Group>
-        <Form.Group controlId='password'>
-          <Form.Label>Password</Form.Label>
+          ) : (
+            <Button
+              variant='outline-dark'
+              onClick={() => setMobileVerified(false)}
+            >
+              Change?
+            </Button>
+          )}
+        </InputGroup>
+
+        <Modal
+          show={show}
+          onHide={() => setShow(false)}
+          backdrop='static'
+          keyboard={false}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Submit OTP</Modal.Title>
+          </Modal.Header>
+          {otpMessage && (
+            <Message variant={otpMessage === 'OTP SENT' ? 'success' : 'danger'}>
+              {otpMessage}
+            </Message>
+          )}
+          {otpLoading ? (
+            <Loader />
+          ) : (
+            <Modal.Body className='text-center'>
+              <OtpInput
+                value={otp}
+                onChange={handleOtpChange}
+                numInputs={6}
+                inputStyle='inputStyle'
+              />
+            </Modal.Body>
+          )}
+          <Modal.Footer>
+            <Button variant='warning' onClick={requestOTP}>
+              Resend OTP
+            </Button>
+            <Button variant='success' onClick={onSubmitOTP}>
+              Submit OTP
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <InputGroup controlId='password' className='mb-3'>
+          <InputGroup.Text id='password'>
+            <i class='fas fa-lock' />
+          </InputGroup.Text>
           <Form.Control
             required
             type='password'
-            placeholder='Enter Password'
+            placeholder='Password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           ></Form.Control>
-        </Form.Group>
-        <Form.Group controlId='confirmPassword'>
-          <Form.Label>Confirm Password</Form.Label>
+        </InputGroup>
+        <InputGroup controlId='confirmPassword' className='mb-3'>
+          <InputGroup.Text id='confirmPassword'>
+            <i class='fas fa-lock' />
+          </InputGroup.Text>
           <Form.Control
             required
             type='password'
@@ -249,16 +262,19 @@ const RegisterScreen = ({ history, location }) => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           ></Form.Control>
-        </Form.Group>
+        </InputGroup>
 
-        <Button type='submit' className='btn-block'>
+        <Button type='submit' variant='info' className='col-12'>
           REGISTER
         </Button>
       </Form>
       <Row className='py-3'>
         <Col>
-          Have an Account?{' '}
-          <Link to={redirect ? `/login?redirect=${redirect}` : '/login'}>
+          Have an Account?
+          <Link
+            className=' mx-1 col-2 btn btn-outline-info btn-sm'
+            to={redirect ? `/login?redirect=${redirect}` : '/login'}
+          >
             Login
           </Link>
         </Col>

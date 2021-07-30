@@ -1,17 +1,30 @@
 import React from 'react';
 import { Breadcrumb } from 'react-bootstrap';
+import './css/BreadCrumb.css';
 
-const BreadCrumb = () => {
+const BreadCrumb = ({ history, location }) => {
+  const pathArray = location.pathname.split('/');
+  pathArray.shift();
+  const Items = pathArray.map((x) => {
+    return x && x.charAt(0).toUpperCase() + x.slice(1);
+  });
+
+  const url = location.pathname;
+
   return (
-    <div>
-      <Breadcrumb>
-        <Breadcrumb.Item href='#'>Home</Breadcrumb.Item>
-        {/* <Breadcrumb.Item href='https://getbootstrap.com/docs/4.0/components/breadcrumb/'>
-          Library
-        </Breadcrumb.Item> */}
-        <Breadcrumb.Item active>School Name</Breadcrumb.Item>
-      </Breadcrumb>
-    </div>
+    <Breadcrumb className='my-2 navigationCrumb btn-outline-light'>
+      <Breadcrumb.Item href='/'>Home</Breadcrumb.Item>
+      {Items.map((x) => {
+        return (
+          <Breadcrumb.Item
+            key={x}
+            href={Items[Items.length - 1] === x ? url : `/${x}`}
+          >
+            {x}
+          </Breadcrumb.Item>
+        );
+      })}
+    </Breadcrumb>
   );
 };
 

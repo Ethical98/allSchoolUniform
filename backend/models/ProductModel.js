@@ -16,7 +16,7 @@ const sizeSchema = mongoose.Schema({
   price: { type: Number, required: true },
   countInStock: { type: Number, required: true },
   openingQty: { type: Number },
-  disount: { type: Number },
+  discount: { type: Number },
   alertOnQty: { type: Number },
   tax: { type: Number },
 });
@@ -29,8 +29,12 @@ const productSchema = mongoose.Schema(
       ref: 'User',
     },
 
-    // season: [{type:String,required:true}],
+    season: { type: String, required: true },
     name: {
+      type: String,
+      required: true,
+    },
+    type: {
       type: String,
       required: true,
     },
@@ -66,10 +70,7 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    // class: {
-    //   type: String,
-    //   required: true,
-    // },
+
     class: [{ type: String, required: true }],
     // productCode: {
     //   type: String,

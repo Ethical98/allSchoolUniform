@@ -4,9 +4,10 @@ import { Row, Col } from 'react-bootstrap';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import Product from '../components/Product';
-import { ListProducts } from '../actions/productActions';
+import { listProducts } from '../actions/productActions';
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
+
 
 const ProductScreen = ({ history }) => {
   const userLogin = useSelector((state) => state.userLogin);
@@ -18,7 +19,7 @@ const ProductScreen = ({ history }) => {
   const { loading, error, products } = productList;
 
   useEffect(() => {
-    dispatch(ListProducts());
+    dispatch(listProducts());
   }, [dispatch]);
 
   useEffect(() => {
@@ -44,8 +45,8 @@ const ProductScreen = ({ history }) => {
         <Message variant='danger'>{error}</Message>
       ) : (
         <Row>
-          {products.map((product) => (
-            <Col sm={12} md={6} lg={4} xl={4} key={product._id}>
+          {products.map((product, index) => (
+            <Col sm={12} md={6} lg={4} xl={4} key={index}>
               <Product product={product} />
             </Col>
           ))}

@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import colors from 'colors';
 import users from './data/users.js';
@@ -6,7 +5,15 @@ import products from './data/products.js';
 import User from './models/UserModel.js';
 import Product from './models/ProductModel.js';
 import Order from './models/OrderModel.js';
+import Class from './models/ClassModel.js';
+import School from './models/SchoolModel.js';
+import Cart from './models/CartModel.js';
+import classes from './data/classes.js';
+import ProductType from './models/ProductTypesModel.js';
+import productType from './Data/productType.js';
+import schools from './Data/schools.js';
 import connectDB from './config/db.js';
+
 // import { ShirtSize } from './models/SizeModel.js';
 // import Size from './data/Sizes.js';
 
@@ -19,6 +26,10 @@ const importData = async () => {
     await Order.deleteMany();
     await Product.deleteMany();
     await User.deleteMany();
+    await Class.deleteMany();
+    await Cart.deleteMany();
+    await ProductType.deleteMany();
+    await School.deleteMany();
 
     const createdUsers = await User.insertMany(users);
     const adminUser = createdUsers[0]._id;
@@ -26,8 +37,15 @@ const importData = async () => {
     const sampleProducts = products.map((product) => {
       return { ...product, user: adminUser };
     });
-
+    const schoolsList = schools.map((school) => {
+      return { ...school, user: adminUser };
+    });
+    await School.insertMany(schoolsList);
     await Product.insertMany(sampleProducts);
+    await Class.insertMany(classes);
+    await ProductType.insertMany(productType);
+    // console.log(productType);
+    // console.log(products);
     // const firstProduct = insertedProducts[0]._id;
     // const sampleSizes = Size.map((size) => {
     //   return { ...size, user: adminUser, product: firstProduct };
@@ -46,6 +64,10 @@ const destroyData = async () => {
     await Order.deleteMany();
     await Product.deleteMany();
     await User.deleteMany();
+    await Class.deleteMany();
+    await Cart.deleteMany();
+    await ProductType.deleteMany();
+    await School.deleteMany();
 
     console.log('Data Destroyed!'.red.inverse);
     process.exit();

@@ -12,10 +12,14 @@ import {
   getShipppingAddress,
   forgotPassword,
   resetPassword,
+  getUsers,
+  deleteUser,
+  getUserById,
+  updateUser,
 } from '../controllers/userController.js';
-import { protect } from '../Middleware/authMiddleware.js';
+import { protect, isAdmin } from '../Middleware/authMiddleware.js';
 
-router.route('/').post(registerUser);
+router.route('/').post(registerUser).get(protect, isAdmin, getUsers);
 router.post('/loginByPhone', authUserByPhone);
 router.post('/getUserPhone', getUserPhone);
 router.post('/login', authUser);
@@ -32,5 +36,11 @@ router
   .route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
+
+router
+  .route('/:id')
+  .delete(protect, isAdmin, deleteUser)
+  .get(protect, isAdmin, getUserById)
+  .put(protect, isAdmin, updateUser);
 
 export default router;

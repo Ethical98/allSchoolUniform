@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Form, Row, Col, ListGroup } from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
+import {
+  Button,
+  Form,
+  Row,
+  Col,
+  ListGroup,
+  Table,
+  InputGroup,
+} from 'react-bootstrap';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import {
@@ -9,6 +18,8 @@ import {
   logout,
 } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
+import { listMyOrders } from '../actions/orderActions';
+import './css/ProfileScreen.css';
 
 const ProfileScreen = ({ history }) => {
   const [phone, setPhone] = useState('');
@@ -30,6 +41,9 @@ const ProfileScreen = ({ history }) => {
   const userUpdateProfile = useSelector((state) => state.userUpdateProfile);
   const { success } = userUpdateProfile;
 
+  const orderListMy = useSelector((state) => state.orderListMy);
+  const { loading: loadingOrders, error: errorOrders, orders } = orderListMy;
+
   useEffect(() => {
     if (!userInfo) {
       history.push('/login');
@@ -48,6 +62,7 @@ const ProfileScreen = ({ history }) => {
           } else {
             if (!user.name) {
               dispatch(getUserDetails('profile'));
+              dispatch(listMyOrders());
             } else {
               setName(user.name);
               setPhone(user.phone);
@@ -81,95 +96,177 @@ const ProfileScreen = ({ history }) => {
   };
 
   return (
-    <Row>
-      <Col md={3}>
-        <h2>User Profile</h2>
-        {message && <Message variant='danger'>{message}</Message>}
-        {error && <Message variant='danger'>{error}</Message>}
-        {success && <Message variant='success'>Profile Updated</Message>}
-        {loading && <Loader />}
-        <Form onSubmit={submitHandler}>
-          <Form.Group controlId='email'>
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type='email'
-              placeholder='Enter Email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group controlId='name'>
-            <Form.Label>Name</Form.Label>
-
-            <Form.Control
-              type='name'
-              placeholder='Enter Name'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group controlId='phone'>
-            <Form.Label>Mobile</Form.Label>
-            <Form.Control
-              type='phone'
-              placeholder='Enter Mobile'
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group controlId='password'>
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type='password'
-              placeholder='Enter Password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group controlId='confirmPassword'>
-            <Form.Label>Confirm Password</Form.Label>
-            <Form.Control
-              type='password'
-              placeholder='Confirm Password'
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-
-          <Button type='submit' className='btn-block'>
-            Update
-          </Button>
-        </Form>
-      </Col>
-      {savedAddress.length !== 0 && (
-        <Col md={3}>
+    <>
+      <Row className='mb-3'>
+        <Col md={4}>
+          <h2>PROFILE</h2>
           {message && <Message variant='danger'>{message}</Message>}
           {error && <Message variant='danger'>{error}</Message>}
           {success && <Message variant='success'>Profile Updated</Message>}
           {loading && <Loader />}
-          <h2>Saved Addreses</h2>
-          <ListGroup className='mt-2'>
-            {savedAddress.map((x) => {
-              return (
-                <ListGroup.Item>
-                  {x.address}
-                  <br />
-                  {x.city}
-                  <br />
-                  {x.postalCode}
-                  <br />
-                  {x.country}
-                  <br />
-                </ListGroup.Item>
-              );
-            })}
-          </ListGroup>
+          <Form onSubmit={submitHandler}>
+            <InputGroup className='mb-3'>
+              <InputGroup.Text id='email' style={{ width: '2.5rem' }}>
+                <i className='fas fa-envelope' />
+              </InputGroup.Text>
+              <Form.Control
+                required
+                type='email'
+                placeholder='Email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              ></Form.Control>
+            </InputGroup>
+
+            <InputGroup controlId='name' className='mb-3'>
+              <InputGroup.Text id='name'>
+                <i className='fas fa-user' />
+              </InputGroup.Text>
+              <Form.Control
+                required
+                type='name'
+                placeholder='Name'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              ></Form.Control>
+            </InputGroup>
+
+            <InputGroup controlId='phone' className='mb-3'>
+              <InputGroup.Text style={{ width: '2.5rem' }}>
+                <i class='fas fa-phone-alt' />
+              </InputGroup.Text>
+              <Form.Control
+                required
+                type='phone'
+                placeholder='Phone'
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              ></Form.Control>
+            </InputGroup>
+
+            <InputGroup controlId='password' className='mb-3'>
+              <InputGroup.Text>
+                <i class='fas fa-lock' />
+              </InputGroup.Text>
+              <Form.Control
+                required
+                type='password'
+                placeholder='Password'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              ></Form.Control>
+            </InputGroup>
+            <InputGroup controlId='confirmPassword' className='mb-3'>
+              <InputGroup.Text>
+                <i class='fas fa-lock' />
+              </InputGroup.Text>
+              <Form.Control
+                required
+                type='password'
+                placeholder='Confirm Password'
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              ></Form.Control>
+            </InputGroup>
+
+            <Button className='btn btn-dark col-12' type='submit'>
+              Update
+            </Button>
+          </Form>
         </Col>
-      )}
-      <Col md={6}>
-        <h2>My Orders</h2>
-      </Col>
-    </Row>
+
+        <Col md={8}>
+          <h2>ORDERS</h2>
+          {loadingOrders ? (
+            <Loader />
+          ) : errorOrders ? (
+            <Message variant='danger'>{errorOrders}</Message>
+          ) : (
+            <Table striped bordered hover responsive className='table-sm'>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>DATE</th>
+                  <th>TOTAL</th>
+                  <th>PAID</th>
+                  <th>DELIVERED</th>
+                  <th>PAYMENT METHOD</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr key={order._id}>
+                    <td>{order.orderId}</td>
+                    <td>{order.createdAt.substring(0, 10)}</td>
+                    <td>₹ {order.totalPrice}</td>
+                    <td>
+                      {order.isPaid ? (
+                        order.paidAt.substring(0, 10)
+                      ) : (
+                        <i className='fas fa-times' style={{ color: ' red' }} />
+                      )}
+                    </td>
+                    <td>
+                      {order.isDelivered ? (
+                        order.deliveredAt.substring(0, 10)
+                      ) : (
+                        <i className='fas fa-times' style={{ color: 'red' }} />
+                      )}
+                    </td>
+                    <td>{order.paymentMethod}</td>
+                    <td>
+                      <LinkContainer to={`/orderdetails/${order._id}`}>
+                        <Button size='sm' variant='light'>
+                          Details
+                        </Button>
+                      </LinkContainer>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Col>
+      </Row>
+      <Row className='mb-3 g-0'>
+        <Col>
+          {savedAddress.length !== 0 && (
+            <>
+              {message && <Message variant='danger'>{message}</Message>}
+              {error && <Message variant='danger'>{error}</Message>}
+              {success && <Message variant='success'>Profile Updated</Message>}
+              {loading && <Loader />}
+              <h2>ADDRESSES</h2>
+              <ListGroup className='mt-2'>
+                <Row>
+                  {savedAddress.map((x) => (
+                    <Col md={3}>
+                      <ListGroup.Item key={x._id}>
+                        {x.address}
+                        <br />
+                        {x.city}
+                        <br />
+                        {x.postalCode}
+                        <br />
+                        {x.country}
+                        <br />
+                        <i className='fas fa-edit' />
+                        Edit
+                        <div className='float-end' style={{ color: 'red' }}>
+                          <i className='fas fa-trash' />
+                          Delete
+                        </div>
+                      </ListGroup.Item>
+                    </Col>
+                  ))}
+                </Row>
+              </ListGroup>
+            </>
+          )}
+        </Col>
+      </Row>
+    </>
   );
 };
 

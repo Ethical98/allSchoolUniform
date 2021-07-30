@@ -40,10 +40,10 @@ const addToCart = asyncHandler(async (req, res) => {
 });
 
 // @desc Remove From Cart
-// @route POST /api/cart/remove
+// @route DELETE /api/cart/remove/:id
 // @access Private
 const cartItemRemove = asyncHandler(async (req, res) => {
-  const { id } = req.body;
+  const id = req.params.id;
 
   if (!id) {
     res.status(400);
@@ -71,6 +71,8 @@ const getCart = asyncHandler(async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
   if (cart) {
     res.json(cart);
+  } else {
+    res.json({ cartItems: [], cartId: '' });
   }
 });
 
@@ -115,7 +117,7 @@ const mergeCart = asyncHandler(async (req, res) => {
 const resetCart = asyncHandler(async (req, res) => {
   if (!req.user._id) {
     res.status(403);
-    throw new Error('No Cart Data');
+    throw new Error('Cart Is Empty');
   } else {
     await Cart.deleteOne({ user: req.user._id });
     res.json('Cart Reset');

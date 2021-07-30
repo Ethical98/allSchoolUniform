@@ -12,7 +12,6 @@ const cartSchema = new mongoose.Schema(
         name: {
           type: String,
           required: true,
-          
         },
         image: {
           type: String,
@@ -33,6 +32,9 @@ const cartSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           required: true,
           ref: 'Product',
+        },
+        tax: {
+          type: Number,
         },
         size: {
           type: Number,

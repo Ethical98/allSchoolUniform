@@ -27,9 +27,11 @@ const OrderScreen = ({ match, history }) => {
   const orderDetails = useSelector((state) => state.orderDetails);
   const { order, loading, error } = orderDetails;
 
-  if (!userInfo) {
-    history.push('/login');
-  }
+  useEffect(() => {
+    if (!userInfo) {
+      history.push('/login');
+    }
+  }, [history, userInfo]);
 
   useEffect(() => {
     if (userInfo && userInfo.token) {
@@ -79,94 +81,101 @@ const OrderScreen = ({ match, history }) => {
 
       <Row>
         <Col md={8}>
-          <ListGroup variant='flush'>
-            <h1>
-              Hi, <strong>{order.user.name}</strong>
-            </h1>
+          <Card>
+            <ListGroup variant='flush'>
+              <h1>
+                Hi, <strong>{order.user.name}</strong>
+              </h1>
 
-            <h5>Your Order Has been Placed! Thank You for Shopping with Us.</h5>
-            <h6> An Email Confirmation has been sent to You.</h6>
+              <h5>
+                Your Order Has been Placed! Thank You for Shopping with Us.
+              </h5>
+              <h6> An Email Confirmation has been sent to You.</h6>
 
-            <h2 className='mt-2'>Details</h2>
+              <h2 className='mt-2'>Details</h2>
 
-            <ListGroup.Item>
-              <p>
-                <strong>Order</strong> #{order.orderId}
-              </p>
-              <p>
-                <strong>Payment Method: </strong>
-                {order.paymentMethod}
-              </p>
-              <p>
-                <strong>Ship to </strong>
-                {order.shippingAddress.address},{order.shippingAddress.city},
-                {order.shippingAddress.postalCode},{''}
-                {order.shippingAddress.country}
-              </p>
-              <p>Order will be Delivered in 24-48 Hours</p>
-              {/* {order.isPaid ? (
+              <ListGroup.Item>
+                <p>
+                  <strong>Order</strong> #{order.orderId}
+                </p>
+                <p>
+                  <strong>Payment Method: </strong>
+                  {order.paymentMethod}
+                </p>
+                <p>
+                  <strong>Ship to </strong>
+                  {order.shippingAddress.address},{order.shippingAddress.city},
+                  {order.shippingAddress.postalCode},{''}
+                  {order.shippingAddress.country}
+                </p>
+                <p>Order will be Delivered in 24-48 Hours</p>
+                {/* {order.isPaid ? (
                     <Message variant='success'>Paid on {order.paidAt}</Message>
                   ) : (
                     <Message variant='danger'>Not Paid</Message>
                   )} */}
 
-              {/* <p>
+                {/* <p>
                     <strong>Name: </strong>
                     {order.user.name}
                   </p> */}
-              {/* <p>
+                {/* <p>
                     <strong>Email: </strong>
                     <a href={`mailto:${order.user.email}`}>
                       {order.user.email}
                     </a>
                   </p> */}
-              {/* <p>
+                {/* <p>
                     <strong>Mobile: </strong>
                     {order.user.phone}
                   </p> */}
 
-              {/* {order.isDelivered ? (
+                {/* {order.isDelivered ? (
                     <Message variant='success'>
                       Delivered on {order.DeliveredAt}
                     </Message>
                   ) : (
                     <Message variant='danger'>Not Delivered</Message>
                   )} */}
-            </ListGroup.Item>
-            <h2 className='mt-2'>Order Items</h2>
-            <ListGroup.Item>
-              {order.orderItems.length === 0 ? (
-                <Message>Order Is Empty</Message>
-              ) : (
-                <ListGroup variant='flush'>
-                  {order.orderItems.map((item, index) => (
-                    <ListGroup.Item key={index}>
-                      <Row>
-                        <Col md={2} lg={1}>
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fluid
-                            rounded
-                          />
-                        </Col>
-                        <Col>
-                          <Link to={`/products/${item.product}`}>
-                            {item.name}
-                          </Link>
-                        </Col>
-                        <Col md={2}>Size: {item.size}</Col>
-                        <Col md={4}>
-                          {item.qty} x ₹{item.price} = ₹
-                          {(item.qty * item.price).toFixed(2)}
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              )}
-            </ListGroup.Item>
-          </ListGroup>
+              </ListGroup.Item>
+              <h2 className='mt-2'>Order Items</h2>
+              <ListGroup.Item>
+                {order.orderItems.length === 0 ? (
+                  <Message>Order Is Empty</Message>
+                ) : (
+                  <ListGroup variant='flush'>
+                    {order.orderItems.map((item, index) => (
+                      <ListGroup.Item key={index}>
+                        <Row>
+                          <Col md={2} lg={1}>
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              fluid
+                              rounded
+                            />
+                          </Col>
+                          <Col>
+                            <Link
+                              to={`/products/${item.product}`}
+                              style={{ textDecoration: 'none', color: 'black' }}
+                            >
+                              {item.name}
+                            </Link>
+                          </Col>
+                          <Col md={2}>Size: {item.size}</Col>
+                          <Col md={4}>
+                            {item.qty} x ₹{item.price} = ₹
+                            {(item.qty * item.price).toFixed(2)}
+                          </Col>
+                        </Row>
+                      </ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                )}
+              </ListGroup.Item>
+            </ListGroup>
+          </Card>
         </Col>
         <Col md={4}>
           <Card>

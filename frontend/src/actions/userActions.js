@@ -24,9 +24,23 @@ import {
   USER_PASSWORD_RESET_SUCCESS,
   USER_PASSWORD_RESET_FAIL,
   USER_PASSWORD_RESET_CLEAR,
+  USER_DETAILS_RESET,
+  USER_REGISTER_RESET,
+  USER_LIST_REQUEST,
+  USER_LIST_FAIL,
+  USER_LIST_SUCCESS,
+  USER_LIST_RESET,
+  USER_DELETE_SUCCESS,
+  USER_DELETE_FAIL,
+  USER_DELETE_REQUEST,
+  USER_UPDATE_FAIL,
+  USER_UPDATE_SUCCESS,
+  USER_UPDATE_REQUEST,
 } from '../constants/userConstants';
 import { encryptData } from '../utils/Crypto';
 import dotenv from 'dotenv';
+import { ORDER_LIST_MY_RESET } from '../constants/orderConstants';
+import { CART_ITEMS_RESET } from '../constants/cartConstants';
 // import 'firebase/auth';
 // import firebase1 from 'firebase/app';
 // import firebase from 'firebase';
@@ -109,18 +123,15 @@ export const logout = () => (dispatch, getState) => {
   localStorage.removeItem('userInfo');
   localStorage.removeItem('cartItems');
   localStorage.removeItem('shippingAddress');
-  getState().cart.shippingAddress = {};
-  getState().cart.cartItems = [];
-  getState().userOtpVerification.phone = '';
-  getState().userOtpVerification.verified = false;
-  getState().cart.cartSuccess = false;
-  getState().userRegister.userInfo = [];
-  localStorage.setItem(
-    'cartSuccess',
-    JSON.stringify(getState().cart.cartSuccess)
-  );
+  localStorage.removeItem('cartSuccess');
 
   dispatch({ type: USER_LOGOUT });
+  dispatch({ type: USER_DETAILS_RESET });
+  dispatch({ type: ORDER_LIST_MY_RESET });
+  dispatch({ type: USER_OTP_RESET });
+  dispatch({ type: USER_REGISTER_RESET });
+  dispatch({ type: CART_ITEMS_RESET });
+  dispatch({ type: USER_LIST_RESET });
 };
 
 export const register = (name, email, phone, password) => async (dispatch) => {
@@ -310,7 +321,9 @@ export const loginByOTP = (phone) => async (dispatch) => {
 export const configureCaptcha = (id) => {
   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(id, {
     size: 'invisible',
-    callback: (response) => {},
+    callback: (response) => {
+      console.log(response);
+    },
     defaultCountry: 'IN',
   });
 };
@@ -342,10 +355,14 @@ export const getOTP = (phone) => async (dispatch) => {
       type: USER_OTP_SENT,
       payload: phone,
     });
+    // window.recaptchaVerifier.render().then((widgetId) => {
+    //   window.recaptchaVerifier.reset(widgetId);
+    // });
   } catch (error) {
-    window.recaptchaVerifier.render().then((widgetId) => {
-      window.recaptchaVerifier.reset(widgetId);
-    });
+    console.log(error);
+    // window.recaptchaVerifier.render().then((widgetId) => {
+    //   window.recaptchaVerifier.reset(widgetId);
+    // });
 
     dispatch({
       type: USER_OTP_FAIL,
@@ -364,15 +381,12 @@ export const submitOTP = (otp) => async (dispatch) => {
       dispatch({
         type: USER_OTP_SUCCESS,
       });
-      window.recaptchaVerifier.render().then((widgetId) => {
-        window.recaptchaVerifier.reset(widgetId);
-      });
     }
   } catch (error) {
-    window.recaptchaVerifier.render().then((widgetId) => {
-      window.recaptchaVerifier.reset(widgetId);
-    });
-    console.log(error);
+    // window.recaptchaVerifier.render().then((widgetId) => {
+    //   window.recaptchaVerifier.reset(widgetId);
+    // });
+
     dispatch({
       type: USER_OTP_FAIL,
       payload: error,
@@ -384,9 +398,9 @@ export const resetOtp = () => (dispatch) => {
   dispatch({
     type: USER_OTP_RESET,
   });
-  window.recaptchaVerifier.render().then((widgetId) => {
-    window.recaptchaVerifier.reset(widgetId);
-  });
+  // window.recaptchaVerifier.render().then((widgetId) => {
+  //   window.recaptchaVerifier.reset(widgetId);
+  // });
 };
 
 export const cancelOtpRequest = (phone) => (dispatch) => {
@@ -464,4 +478,106 @@ export const resetPassword = (password, email) => async (dispatch) => {
 export const clearResetPasswordRequest = () => async (dispatch) => {
   dispatch({ type: USER_PASSWORD_RESET_CLEAR });
   localStorage.removeItem('RE');
+};
+
+export const listUsers = () => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: USER_LIST_REQUEST,
+    });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.get('/api/users', config);
+
+    dispatch({
+      type: USER_LIST_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_LIST_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const deleteUser = (id) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: USER_DELETE_REQUEST,
+    });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    await axios.delete(`/api/users/${id}`, config);
+
+    dispatch({
+      type: USER_DELETE_SUCCESS,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_DELETE_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const updateUser = (user) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: USER_UPDATE_REQUEST,
+    });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const { data } = await axios.put(`/api/users/${user._id}`, user, config);
+
+    dispatch({
+      type: USER_UPDATE_SUCCESS,
+    });
+    dispatch({
+      type: USER_DETAILS_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_UPDATE_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
 };

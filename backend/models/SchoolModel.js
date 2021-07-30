@@ -8,29 +8,29 @@ const schoolSchema = mongoose.Schema({
   },
   orderId: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
+
     ref: 'Order',
   },
-  schoolName: {
+  name: {
     type: String,
     required: true,
   },
-  schoolAddress: {
+  address: {
     type: String,
     required: true,
   },
-  schoolLogo: {
+  logo: {
     type: String,
     required: true,
   },
-  schoolContact: {
+  contact: {
     type: Number,
     required: true,
   },
-  schoolImage: {
-    type: String,
-    required: true,
-  },
+  // schoolImage: {
+  //   type: String,
+  //   required: true,
+  // },
   disabled: {
     type: Boolean,
     default: false,

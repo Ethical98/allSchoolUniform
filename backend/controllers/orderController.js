@@ -1,5 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Order from '../models/OrderModel.js';
+import nodemailer from 'nodemailer';
+import { google } from 'googleapis';
 
 // @desc Create new order
 // @route GET /api/orders
@@ -13,13 +15,11 @@ const addOrderItems = asyncHandler(async (req, res) => {
     taxPrice,
     shippingPrice,
     totalPrice,
-    size,
   } = req.body;
 
   if (orderItems && orderItems.length === 0) {
     res.status(400);
     throw new Error('No order items');
-    return;
   } else {
     const order = new Order({
       orderItems,
@@ -31,10 +31,99 @@ const addOrderItems = asyncHandler(async (req, res) => {
       shippingPrice,
       totalPrice,
     });
-
+    // console.log(orderItems);
+    // const imageArray = [];
+    // for (var i = 0; i < orderItems.length; i++) {
+    //   imageArray.push({
+    //     filename: orderItems[i].name,
+    //     path: 'frontend/public' + orderItems[i].image,
+    //     cid: orderItems[i].name,
+    //   });
+    //   // result[i].filename = orderItems[i].name;
+    //   // result[i].path = orderItems[i].image;
+    //   // result[i].cid = orderItems[i].image;
+    // }
+    // console.log(imageArray);
     const createdOrder = await order.save();
-
     res.status(201).json(createdOrder);
+
+    // const CLIENT_ID =
+    //   '335123042167-qm7u26oc6pbkd8mskkbr1vqdr6io0b24.apps.googleusercontent.com';
+    // const CLIENT_SECRET = 'uTH3_a7ShhIjPymVaB8QONaR';
+    // const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+    // const REFRESH_TOKEN =
+    //   '1//04nAsjtwZdCYMCgYIARAAGAQSNwF-L9IrDJnYxaXzYR4zxZhEKKUKSypRLetfPIMcIWTToQJCH_8dfIqhqCW_5EveSp-gnSYFOL0';
+
+    // const oAuth2Client = new google.auth.OAuth2(
+    //   CLIENT_ID,
+    //   CLIENT_SECRET,
+    //   REDIRECT_URI
+    // );
+    // oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+    // try {
+    //   const accessToken = await oAuth2Client.getAccessToken();
+    //   const transport = nodemailer.createTransport({
+    //     service: 'gmail',
+    //     auth: {
+    //       type: 'Oauth2',
+    //       user: 'noreply@gouniform.com',
+    //       clientId: CLIENT_ID,
+    //       clientSecret: CLIENT_SECRET,
+    //       refreshToken: REFRESH_TOKEN,
+    //       accessToken: accessToken,
+    //     },
+    //   });
+
+    //   const mailOptions = {
+    //     from: 'ALLSCHOOLUNIFORM',
+    //     replyTo: 'akash@gounifrom.com',
+    //     to: 'devanshgupta54@gmail.com',
+    //     subject: 'ORDER',
+    //     text: 'HELOOOOOOO',
+    //     html:
+    //       '<h1>' +
+    //       createdOrder.orderId +
+    //       '</h1><table style="border:2px solid green;border-collapse:collapse"><tr><th style="border:2px solid green;border-collapse:collapse">S.NO</th><th>IMAGE</th><th>NAME</th><th>SIZE</th><th>PRICE</th></tr>' +
+    //       orderItems
+    //         .map(
+    //           (x, index) =>
+    //             '<tr style="border:2px solid green;border-collapse:collapse"><td style="border:2px solid green">' +
+    //             (index + 1) +
+    //             '</td><td style="border:2px solid green;border-collapse:collapse;width:20vw">' +
+    //             `<img style="width:10vw" src="cid:${x.name}"/>` +
+    //             '</td><td style="border:2px solid green;border-collapse:collapse">' +
+    //             x.name +
+    //             '</td><td style="border:2px solid green;border-collapse:collapse">' +
+    //             x.size +
+    //             '</td><td style="border:2px solid green;border-collapse:collapse" >' +
+    //             x.qty +
+    //             '*' +
+    //             x.price +
+    //             '=' +
+    //             x.qty * x.price +
+    //             '</td></tr>'
+    //         )
+    //         .join('') +
+    //       '</table>',
+    //     attachments: imageArray,
+    //   };
+
+    //   // const mailOptions2 = {
+    //   //   from: 'ALLSCHOOLUNIFORM noreply@allschooluniform.com',
+    //   //   replyTo: 'akash@gounifrom.com',
+    //   //   to: 'devanshgupta54@gmail.com',
+    //   //   subject: 'ORDER',
+    //   //   text: 'HELOOOOOOO',
+    //   //   html: '<table><thead><tr><th>HELLO</th><th>NAME</th><th>PRICE</th><th>CHANGES</th></tr></thead></table>',
+    //   // };
+    //   const result = await transport.sendMail(mailOptions);
+    //   // const result2 = await transport.sendMail(mailOptions2);
+    //   console.log(result);
+    //   // console.log(result2);
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 });
 
@@ -105,4 +194,134 @@ const updateOrderTopaid = asyncHandler(async (req, res) => {
     throw new Error('Order Not Found');
   }
 });
-export { addOrderItems, getOrderById, updateOrderTopaid };
+
+// @desc Get logged in user orders
+// @route GET /api/orders/myorders
+// @access Private
+const getMyOrders = asyncHandler(async (req, res) => {
+  const orders = await Order.find({ user: req.user._id });
+
+  if (orders.length > 0) {
+    res.json(orders);
+  } else {
+    res.status(404);
+    throw new Error('No orders Found');
+  }
+});
+
+const sendMail = asyncHandler(async (req, res) => {
+  const CLIENT_ID =
+    '335123042167-qm7u26oc6pbkd8mskkbr1vqdr6io0b24.apps.googleusercontent.com';
+  const CLIENT_SECRET = 'uTH3_a7ShhIjPymVaB8QONaR';
+  const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+  const REFRESH_TOKEN =
+    '1//04nAsjtwZdCYMCgYIARAAGAQSNwF-L9IrDJnYxaXzYR4zxZhEKKUKSypRLetfPIMcIWTToQJCH_8dfIqhqCW_5EveSp-gnSYFOL0';
+
+  const oAuth2Client = new google.auth.OAuth2(
+    CLIENT_ID,
+    CLIENT_SECRET,
+    REDIRECT_URI
+  );
+  oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+  try {
+    const accessToken = await oAuth2Client.getAccessToken();
+    const transport = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'Oauth2',
+        user: 'noreply@gouniform.com',
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        refreshToken: REFRESH_TOKEN,
+        accessToken: accessToken,
+      },
+    });
+
+    const mailOptions = {
+      from: 'ALLSCHOOLUNIFORM noreply@allschooluniform.com',
+      replyTo: 'akash@gounifrom.com',
+      to: 'devanshgupta54@gmail.com',
+      subject: 'ORDER',
+      text: 'HELOOOOOOO',
+      html: '<table style="border:2px solid green"><thead><tr><th>HELLO</th><th>NAME</th><th>PRICE</th><th>CHANGES</th></tr></thead></table>',
+    };
+
+    const mailOptions2 = {
+      from: 'ALLSCHOOLUNIFORM noreply@allschooluniform.com',
+      replyTo: 'akash@gounifrom.com',
+      to: 'devanshgupta54@gmail.com',
+      subject: 'ORDER',
+      text: 'HELOOOOOOO',
+      html: '<table><thead><tr><th>HELLO</th><th>NAME</th><th>PRICE</th><th>CHANGES</th></tr></thead></table>',
+    };
+    const result = await transport.sendMail(mailOptions);
+    const result2 = await transport.sendMail(mailOptions2);
+    console.log(result);
+    console.log(result2);
+
+    // const res = await gmail.users.messages.send({
+    //   userId: 'devansh.gupta73@yahoo.in',
+    //   requestBody: {
+    //     raw: 'hello',
+    //     access_token: accessToken,
+    //     refresh_token: REFRESH_TOKEN,
+
+    //     clientId: CLIENT_ID,
+    //     clientSecret: CLIENT_SECRET,
+    //   },
+    // });
+    // console.log(res.data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// @desc Get all orders
+// @route GET /api/orders
+// @access Private?Admin
+const getOrders = asyncHandler(async (req, res) => {
+  const orders = await Order.find({}).populate('user', 'id name');
+
+  if (orders.length > 0) {
+    res.json(orders);
+  } else {
+    res.status(404);
+    throw new Error('No orders Found');
+  }
+});
+
+// @desc Edit order
+// @route POST /api/orders/:id
+// @access Private/Admin
+const editOrderById = asyncHandler(async (req, res) => {
+  const { modifiedOrderItems, shippingAddress, itemsPrice, totalPrice } = req.body;
+
+  const order = await Order.findById(req.params.id);
+  if (order) {
+    order.shippingAddress = shippingAddress || order.shippingAddress;
+    // order.itemsPrice = itemsPrice || order.itemsPrice;
+    // order.taxPrice = taxPrice || order.taxPrice;
+    // //order.shippingPrice = shippingPrice || order.shippingPrice;
+    order.totalPrice = totalPrice || order.totalPrice;
+    if (modifiedOrderItems && modifiedOrderItems.length === 0) {
+      order.modified = false;
+    } else {
+      order.modified = true;
+      order.modifiedItems = [...modifiedOrderItems];
+    }
+    const updatedOrder = await order.save();
+    res.status(200);
+    res.json(updatedOrder);
+  }
+});
+
+export {
+  getOrders,
+  addOrderItems,
+  getOrderById,
+  updateOrderTopaid,
+  getMyOrders,
+  sendMail,
+  editOrderById,
+};

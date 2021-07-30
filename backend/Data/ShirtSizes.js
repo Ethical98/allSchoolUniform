@@ -61,4 +61,4 @@ const ShirtSizes = [
   },
 ];
 
-export default Sizes;
+export default ShirtSizes;

@@ -7,7 +7,6 @@ import Message from '../components/Message';
 import {
   createOrder,
   payOrderPayU,
-  //paymentStatus,
   updateOrder,
 } from '../actions/orderActions';
 import { getCartFromDatabase } from '../actions/cartActions';
@@ -172,54 +171,61 @@ const PlaceOrderScreen = ({ history }) => {
       {message && <Message variant='warning'>{message}</Message>}
       <Row>
         <Col md={8}>
-          <ListGroup variant='flush'>
-            <ListGroup.Item>
-              <h2>SHIPPING</h2>
-              <p>
-                <strong>Address: </strong>
-                {cart.shippingAddress.address},{cart.shippingAddress.city},
-                {cart.shippingAddress.postalCode},{''}
-                {cart.shippingAddress.country}
-              </p>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <h2>PAYMENT METHOD </h2>
-              <strong>Method: {cart.paymentMethod}</strong>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <h2>ORDER ITEMS</h2>
-              {cart.cartItems.length === 0 ? (
-                <Message>Your Cart Is Empty</Message>
-              ) : (
-                <ListGroup variant='flush'>
-                  {cartItems.map((item, index) => (
-                    <ListGroup.Item key={index}>
-                      <Row>
-                        <Col md={2} lg={1}>
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fluid
-                            rounded
-                          />
-                        </Col>
-                        <Col>
-                          <Link to={`/products/${item.product}`}>
-                            {item.name}
-                          </Link>
-                        </Col>
-                        <Col md={2}>Size: {item.size}</Col>
-                        <Col md={4}>
-                          {item.qty} x ₹{item.price} = ₹
-                          {(item.qty * item.price).toFixed(2)}
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              )}
-            </ListGroup.Item>
-          </ListGroup>
+          <Card rounded>
+            <ListGroup variant='flush'>
+              <ListGroup.Item>
+                <h2>SHIPPING</h2>
+                <p>
+                  <strong>Address: </strong>
+                  {cart.shippingAddress.address},{cart.shippingAddress.city},
+                  {cart.shippingAddress.postalCode},{''}
+                  {cart.shippingAddress.country}
+                </p>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <h2>PAYMENT METHOD </h2>
+                <strong>Method: {cart.paymentMethod}</strong>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <h2>ORDER ITEMS</h2>
+                {cart.cartItems.length === 0 ? (
+                  <Message>Your Cart Is Empty</Message>
+                ) : (
+                  <Card rounded>
+                    <ListGroup variant='flush'>
+                      {cartItems.map((item, index) => (
+                        <ListGroup.Item key={index}>
+                          <Row>
+                            <Col md={2} lg={1}>
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                fluid
+                                rounded
+                              />
+                            </Col>
+                            <Col>
+                              <Link
+                                to={`/products/${item.name}`}
+                                style={{ textDecoration: 'none' }}
+                              >
+                                {item.name}
+                              </Link>
+                            </Col>
+                            <Col md={2}>Size: {item.size}</Col>
+                            <Col md={4}>
+                              {item.qty} x ₹{item.price} = ₹
+                              {(item.qty * item.price).toFixed(2)}
+                            </Col>
+                          </Row>
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  </Card>
+                )}
+              </ListGroup.Item>
+            </ListGroup>
+          </Card>
         </Col>
         <Col md={4}>
           <Card>
@@ -261,8 +267,9 @@ const PlaceOrderScreen = ({ history }) => {
                   <Loader />
                 ) : ( */}
                 <Button
+                  variant='success'
                   type='button'
-                  className='btn-block'
+                  className='col-12'
                   disabled={cart.cartItems === 0}
                   onClick={placeOrderHandler}
                 >

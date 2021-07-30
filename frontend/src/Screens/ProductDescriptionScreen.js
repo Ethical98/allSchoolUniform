@@ -56,7 +56,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
   }, [dispatch, match]);
 
   const addToCartHandler = () => {
-    history.push(`/cart/${match.params.id}?q=${qty}?i=${index}`);
+    history.push(`/cart/${product._id}?q=${qty}?i=${index}`);
   };
 
   const handleSizeChange = (val) => {
@@ -65,7 +65,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
 
   return (
     <>
-      <Link className='btn btn-light my-3' to='/products'>
+      <Link className='btn btn-outline-dark my-3' to='/products'>
         Go Back
       </Link>
       {loading ? (
@@ -78,27 +78,29 @@ const ProductDescriptionScreen = ({ history, match }) => {
             <Image src={product.image} alt={product.name} fluid />
           </Col>
           <Col md={4}>
-            <ListGroup variant='flush'>
-              <ListGroup.Item>
-                <h6>{product.name}</h6>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <Rating
-                  value={product.rating}
-                  text={`${product.numReviews} reviews`}
-                />
-              </ListGroup.Item>
-              <ListGroup.Item>Price: ₹{productPrice}</ListGroup.Item>
-              <ListGroup.Item>
-                Description: {product.description}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                Delivery & Returns:
-                <br />
-                Delivery within 24 Hrs. in Delhi/NCR <br />
-                3-4 Days for delivery in other states
-              </ListGroup.Item>
-            </ListGroup>
+            <Card>
+              <ListGroup variant='flush'>
+                <ListGroup.Item>
+                  <h6>{product.name}</h6>
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <Rating
+                    value={product.rating}
+                    text={`${product.numReviews} reviews`}
+                  />
+                </ListGroup.Item>
+                <ListGroup.Item>Price: ₹{productPrice}</ListGroup.Item>
+                <ListGroup.Item>
+                  Description: {product.description}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  Delivery & Returns:
+                  <br />
+                  Delivery within 24 Hrs. in Delhi/NCR <br />
+                  3-4 Days for delivery in other states
+                </ListGroup.Item>
+              </ListGroup>
+            </Card>
           </Col>
           <Col md={4}>
             <Card>
@@ -121,16 +123,19 @@ const ProductDescriptionScreen = ({ history, match }) => {
                   <Row>
                     <Col>SIZE</Col>
                     <Col>
-                      <Form.Control
-                        as='select'
+                      <Form.Select
                         onChange={(e) => handleSizeChange(e.target.value)}
                       >
                         <option>Size</option>
                         {product.size &&
                           product.size.map((x) => {
-                            return <option>{x.size}</option>;
+                            return (
+                              <option key={x._id} value={x.size}>
+                                {x.size}
+                              </option>
+                            );
                           })}
-                      </Form.Control>
+                      </Form.Select>
                     </Col>
                   </Row>
                 </ListGroup.Item>
@@ -139,8 +144,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
                     <Row>
                       <Col>QTY</Col>
                       <Col>
-                        <Form.Control
-                          as='select'
+                        <Form.Select
                           value={qty}
                           onChange={(e) => setQty(e.target.value)}
                         >
@@ -149,21 +153,22 @@ const ProductDescriptionScreen = ({ history, match }) => {
                               {x + 1}
                             </option>
                           ))}
-                        </Form.Control>
+                        </Form.Select>
                       </Col>
                     </Row>
                   </ListGroup.Item>
                 )}
 
                 <ListGroup.Item>
-                  <Button className='btn-block' variant='warning'>
+                  <Button variant='outline-info' className='col-12'>
                     Size Guide
                   </Button>
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <Button
+                    variant='dark'
                     onClick={addToCartHandler}
-                    className='btn-block'
+                    className='col-12'
                     type='button'
                     disabled={countInStock === 0}
                   >

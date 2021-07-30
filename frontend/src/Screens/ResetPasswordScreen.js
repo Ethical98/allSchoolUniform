@@ -5,7 +5,7 @@ import {
   resetPassword,
 } from '../actions/userActions';
 import { Link } from 'react-router-dom';
-import { Card, Button, Form } from 'react-bootstrap';
+import { Card, Button, Form, FloatingLabel, InputGroup } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -52,7 +52,7 @@ const ResetPasswordScreen = ({ history }) => {
       ) : error ? (
         <Message variant='danger'>{error}</Message>
       ) : (
-        message && <Message variant='success'>{message}</Message>
+        message && <Message variant='danger'>{message}</Message>
       )}
 
       <Card>
@@ -62,32 +62,44 @@ const ResetPasswordScreen = ({ history }) => {
 
         <Card.Body>
           <Form onSubmit={submitHandler}>
-            <Form.Group>
-              <Form.Label>Enter new Password</Form.Label>
-              <Form.Control
-                required
-                type='password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              ></Form.Control>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Confirm Password</Form.Label>
-              <Form.Control
-                type='password'
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              ></Form.Control>
-            </Form.Group>
-            <Button type='submit' className='btn-block'>
+            <InputGroup className='mb-3'>
+              <InputGroup.Text>
+                <i className='fas fa-lock'></i>
+              </InputGroup.Text>
+
+              <FloatingLabel label='New Password' style={{ width: '90%' }}>
+                <Form.Control
+                  required
+                  placeholder='New Password'
+                  type='password'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                ></Form.Control>
+              </FloatingLabel>
+            </InputGroup>
+            <InputGroup className='mb-3'>
+              <InputGroup.Text>
+                <i className='fas fa-lock'></i>
+              </InputGroup.Text>
+
+              <FloatingLabel label='Confirm Password' style={{ width: '90%' }}>
+                <Form.Control
+                  required
+                  placeholder='Confirm Password'
+                  type='password'
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                ></Form.Control>
+              </FloatingLabel>
+            </InputGroup>
+            <Button type='submit' variant='success' className='col-12'>
               Reset Password
             </Button>
           </Form>
         </Card.Body>
         <Card.Footer className='text-center'>
           <Link to='/login'>
-            <span>Back To Login</span>
+            <span className='btn btn-outline-dark'>Back To Login</span>
           </Link>
         </Card.Footer>
       </Card>

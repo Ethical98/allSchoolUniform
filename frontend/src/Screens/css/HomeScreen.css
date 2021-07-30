@@ -1,0 +1,15 @@
+/* .header-section {
+  background-image: url('../../homeScreenBanner/Banner.jpg');
+  background-size: cover;
+  height: 100vh;
+  width: auto;
+} */
+.d-block {
+  height: 60vh;
+  width: 100vw;
+  background-size: cover;
+}
+.schoolLogo {
+  margin-top: 3vh;
+  height: 15vh;
+}

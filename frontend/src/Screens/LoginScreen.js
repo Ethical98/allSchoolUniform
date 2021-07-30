@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Form, Row, Col } from 'react-bootstrap';
+import { Button, Form, Row, Col, FloatingLabel } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import validator from 'validator';
 import {
@@ -30,6 +30,7 @@ const LoginScreenByPhone = ({ history, location }) => {
   const [password, setPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [otpErrorMessage, setOtpErrorMessage] = useState('');
 
   const userLogin = useSelector((state) => state.userLogin);
   const { loading, userInfo, error } = userLogin;
@@ -44,6 +45,7 @@ const LoginScreenByPhone = ({ history, location }) => {
 
   useEffect(() => {
     if (userInfo && userInfo.token) {
+      setMessage('');
       history.push(redirect);
 
       if (!cartSuccess) {
@@ -107,27 +109,35 @@ const LoginScreenByPhone = ({ history, location }) => {
     }
   }, [history, sent]);
   const getOtpHandler = () => {
+    configureCaptcha('login-otp');
     if (phoneNumber) {
       dispatch(getOTP(phoneNumber));
     } else {
       dispatch(getOtpWithEmail(email));
     }
   };
+  // useEffect(() => {
+  //   if (continueClicked) {
+  //     setInvalidInputError('');
+  //     configureCaptcha('login-otp');
+  //   }
+  // }, [continueClicked]);
+
   useEffect(() => {
-    if (continueClicked) {
-      configureCaptcha('login-otp');
+    if (otpError === 'auth/invalid-phone-number') {
+      setOtpErrorMessage('Enter Valid Email/Number');
     }
-  }, [continueClicked]);
+  }, [otpError]);
 
   return (
     <FormContainer>
-      <h1>Sign In</h1>
+      <h1>SIGN IN</h1>
       {loading || otpLoading ? (
         <Loader />
       ) : sent ? (
         <Message variant='success'>OTP SENT</Message>
       ) : otpError ? (
-        <Message variant='danger'>OTP NOT SENT</Message>
+        <Message variant='danger'>{otpError}</Message>
       ) : error ? (
         <Message variant='danger'>{error}</Message>
       ) : (
@@ -141,22 +151,26 @@ const LoginScreenByPhone = ({ history, location }) => {
           validated={validated}
           onSubmit={onSubmitHandlerFormOne}
         >
-          <Form.Group controlId='emailOrPhone'>
-            <Form.Label>Email or Phone Number</Form.Label>
-            <Form.Control
-              value={inputValue}
-              required
-              placeholder='Enter Email or Mobile'
-              onChange={(e) => {
-                setInputValue(e.target.value);
-              }}
-            ></Form.Control>
-
-            <Form.Control.Feedback type='invalid'>
-              {message}
-            </Form.Control.Feedback>
+          <Form.Group controlId='emailOrPhone' className='mb-3'>
+            <FloatingLabel
+              controlId='emailOrPhone'
+              label='Email or Phone'
+              className='mb-3'
+            >
+              <Form.Control
+                value={inputValue}
+                required
+                placeholder='Enter Email or Mobile'
+                onChange={(e) => {
+                  setInputValue(e.target.value);
+                }}
+              ></Form.Control>
+              <Form.Control.Feedback type='invalid'>
+                {message}
+              </Form.Control.Feedback>
+            </FloatingLabel>
           </Form.Group>
-          <Button type='submit' className='btn-block'>
+          <Button variant='outline-dark' type='submit' className='col-12 mb-3'>
             Continue
           </Button>
           <Row className='py-3'>
@@ -166,64 +180,64 @@ const LoginScreenByPhone = ({ history, location }) => {
                 style={{ textDecoration: 'none' }}
                 to={redirect ? `/register?redirect=${redirect}` : '/register'}
               >
-                <Button className='btn-block'>Register</Button>
+                <Button variant='info' className='col-12 mb-3'>
+                  Register
+                </Button>
               </Link>
             </Col>
           </Row>
         </Form>
       ) : (
         <Form noValidate validated={validated} onSubmit={submitHandler}>
-          <Form.Group controlId='emailOrPhone'>
-            <Form.Label>Email or Phone Number</Form.Label>
+          <Form.Group controlId='emailOrPhone' className='mb-3'>
+            <span className='mb-3'>{inputValue}</span>
 
-            <Form.Control
-              value={inputValue}
-              required
-              readOnly
-              placeholder='Enter Email or Mobile'
-            ></Form.Control>
-
-            <Form.Control.Feedback type='invalid'>
-              {message}
-            </Form.Control.Feedback>
             <Form.Text
+              className='float-end mb-3'
+              style={{ textDecoration: 'none' }}
               as={Link}
               to='/login'
-              style={{ color: 'white' }}
               onClick={() => setContinueClicked(false)}
             >
               Change?
             </Form.Text>
           </Form.Group>
           <Form.Group controlId='password'>
-            <Form.Control
-              value={password}
-              required
-              type='password'
-              placeholder='Enter Password'
-              onChange={(e) => setPassword(e.target.value)}
-            ></Form.Control>
-            <Form.Control.Feedback type='invalid'>
-              {passwordMessage}
-            </Form.Control.Feedback>
-            <Form.Text
-              as={Link}
-              to='/forgotpassword'
-              style={{ color: 'white' }}
+            <FloatingLabel
+              label='Password'
+              controlId='password'
+              className='mb-3'
             >
-              Forgot Password?
-            </Form.Text>
+              <Form.Control
+                value={password}
+                required
+                type='password'
+                placeholder='Password'
+                onChange={(e) => setPassword(e.target.value)}
+              ></Form.Control>
+              <Form.Control.Feedback type='invalid'>
+                {passwordMessage}
+              </Form.Control.Feedback>
+              <Form.Text
+                as={Link}
+                to='/forgotpassword'
+                style={{ textDecoration: 'none' }}
+              >
+                Forgot Password?
+              </Form.Text>
+            </FloatingLabel>
           </Form.Group>
 
-          <Button type='submit' className='btn-block'>
+          <Button variant='secondary' type='submit' className='col-12 mb-3'>
             Sign-In
           </Button>
           <Row className='py-3'>
             <Col className='text-center'>
               Or {/* <Link style={{ textDecoration: 'none' }} to='/otp'> */}
+              <div id='login-otp'></div>
               <Button
-                className='btn-block'
-                id='login-otp'
+                variant='dark'
+                className='col-12 mb-3'
                 onClick={getOtpHandler}
               >
                 Get an OTP on your phone

@@ -16,7 +16,7 @@ const authUser = asyncHandler(async (req, res) => {
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
-      token: generateToken(user._id, user.name),
+      token: generateToken(user._id, user.name, user.isAdmin),
     });
   } else {
     res.status(401);
@@ -38,7 +38,7 @@ const authUserByOTP = asyncHandler(async (req, res) => {
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
-      token: generateToken(user._id, user.name),
+      token: generateToken(user._id, user.name, user.isAdmin),
     });
   } else {
     res.status(401);
@@ -77,7 +77,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
-      token: generateToken(user._id, user.name),
+      token: generateToken(user._id, user.name, user.isAdmin),
     });
   } else {
     res.status(400);
@@ -125,7 +125,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       email: updatedUser.email,
       phone: updatedUser.phone,
       isAdmin: updatedUser.isAdmin,
-      token: generateToken(updatedUser._id, updatedUser.name),
+      token: generateToken(user._id, user.name, user.isAdmin),
     });
   } else {
     res.status(404);
@@ -147,7 +147,7 @@ const authUserByPhone = asyncHandler(async (req, res) => {
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
-      token: generateToken(user._id, user.name),
+      token: generateToken(user._id, user.name, user.isAdmin),
     });
   } else {
     res.status(401);
@@ -233,11 +233,77 @@ const resetPassword = asyncHandler(async (req, res) => {
       email: updatedUser.email,
       phone: updatedUser.phone,
       isAdmin: updatedUser.isAdmin,
-      token: generateToken(updatedUser._id, updatedUser.name),
+      token: generateToken(
+        updatedUser._id,
+        updatedUser.name,
+        updatedUser.isAdmin
+      ),
     });
   } else {
     res.status(400);
     throw new Error('User not Registered!!');
+  }
+});
+
+// @desc Get all users
+// @route GET /api/users
+// @access Private/Admin
+const getUsers = asyncHandler(async (req, res) => {
+  const users = await User.find();
+  res.json(users);
+});
+
+// @desc Delete User
+// @route DELETE /api/users/:id
+// @access Private/Admin
+const deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (user) {
+    await user.remove();
+    res.json({ message: 'User removed' });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
+
+// @desc Get user by ID
+// @route GET /api/users/:id
+// @access Private/Admin
+const getUserById = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).select('-password');
+  if (user) {
+    res.json(user);
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
+
+// @desc Update user
+// @route PUT /api/users/:id
+// @access Private/Admin
+const updateUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.phone = req.body.phone || user.phone;
+    user.isAdmin = req.body.isAdmin;
+    user.savedAddress = [...req.body.savedAddress] || [...user.savedAddress];
+
+    const updatedUser = await user.save();
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      isAdmin: updatedUser.isAdmin,
+      savedAddress: [...updatedUser.savedAddress],
+    });
+  } else {
+    res.status(404);
+    throw new Error('User Not Found');
   }
 });
 
@@ -253,4 +319,8 @@ export {
   authUserByOTP,
   forgotPassword,
   resetPassword,
+  getUsers,
+  deleteUser,
+  getUserById,
+  updateUser,
 };

@@ -42,6 +42,8 @@ export const addToCart = (id, index, qty) => async (dispatch, getState) => {
         size: data.size[index].size,
         price: data.size[index].price,
         countInStock: data.size[index].countInStock,
+        tax: data.size[index].tax,
+        schoolName: data.schoolName,
         qty,
         index,
       };
@@ -61,7 +63,9 @@ export const addToCart = (id, index, qty) => async (dispatch, getState) => {
           price: data.size[index].price,
           image: data.image,
           countInStock: data.size[index].countInStock,
+          tax: data.size[index].tax,
           size: data.size[index].size,
+          schoolName: data.schoolName,
           qty,
           index,
         },
@@ -97,7 +101,7 @@ export const removeFromCart = (id) => async (dispatch, getState) => {
         },
       };
 
-      await axios.post(`/api/cart/remove`, { id }, config);
+      await axios.delete(`/api/cart/remove/${id}`, config);
       dispatch({
         type: CART_REMOVE_ITEM,
         payload: id,
@@ -296,8 +300,8 @@ export const clearCartFromDatabase = () => async (dispatch, getState) => {
     } = getState();
 
     localStorage.removeItem('shippingAddress');
-    localStorage.removeItem('cartItems');
-    getState().cart.cartItems = [];
+    // localStorage.removeItem('cartItems');
+    // getState().cart.cartItems = [];
 
     const config = {
       headers: {

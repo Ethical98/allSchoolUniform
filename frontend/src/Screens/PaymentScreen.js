@@ -14,13 +14,15 @@ const PaymentScreen = ({ history }) => {
   const cart = useSelector((state) => state.cart);
   const { shippingAddress, cartItems } = cart;
 
-  const [paymentMethod, setPaymentMethod] = useState('COD');
+  const [paymentMethod, setPaymentMethod] = useState('');
 
   const dispatch = useDispatch();
 
-  if (!shippingAddress) {
-    history.push('/shipping');
-  }
+  useEffect(() => {
+    if (!shippingAddress) {
+      history.push('/shipping');
+    }
+  }, [history, shippingAddress]);
 
   useEffect(() => {
     if (!userInfo) {
@@ -60,23 +62,24 @@ const PaymentScreen = ({ history }) => {
       <CheckoutSteps step1 step2 step3 />
       <h1>PAYMENT METHOD</h1>
       <Form onSubmit={submitHandler}>
-        <Form.Group>
+        <Form.Group className='mb-3'>
           <Form.Label as='legend'>Select Method</Form.Label>
 
           <ListGroup>
             <ListGroup.Item>
               <Form.Check
+                required
                 type='radio'
                 label='Cash On Delivery'
                 id='COD'
                 name='paymentMethod'
                 value='COD'
-                checked
                 onChange={(e) => setPaymentMethod(e.target.value)}
               ></Form.Check>
             </ListGroup.Item>
             <ListGroup.Item>
               <Form.Check
+                required
                 type='radio'
                 label='PayUMoney/Debit/Credit Card'
                 id='PayU'
@@ -88,7 +91,7 @@ const PaymentScreen = ({ history }) => {
           </ListGroup>
         </Form.Group>
 
-        <Button type='submit' variant='primary'>
+        <Button type='submit' className='col-12' variant='outline-dark'>
           Continue
         </Button>
       </Form>

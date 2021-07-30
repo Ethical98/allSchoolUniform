@@ -23,6 +23,23 @@ const orderSchema = mongoose.Schema(
         qty: { type: Number, required: true },
         image: { type: String, required: true },
         price: { type: Number, required: true },
+        size: { type: String, required: true },
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: 'Product',
+        },
+        tax: { type: Number },
+        schoolName: { type: String },
+        productCode: { type: String },
+      },
+    ],
+    modifiedItems: [
+      {
+        name: { type: String, required: true },
+        qty: { type: Number, required: true },
+        image: { type: String, required: true },
+        price: { type: Number, required: true },
         size: { type: Number, required: true },
         product: {
           type: mongoose.Schema.Types.ObjectId,
@@ -39,6 +56,10 @@ const orderSchema = mongoose.Schema(
       city: { type: String, required: true },
       postalCode: { type: String, required: true },
       country: { type: String, required: true },
+    },
+    modified: {
+      type: Boolean,
+      default: false,
     },
 
     paymentMethod: {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import jsonwebtoken from 'jsonwebtoken';
 import { useDispatch, useSelector } from 'react-redux';
 import FormContainer from '../components/FormContainer';
-import { Button, Form, ListGroup } from 'react-bootstrap';
+import { Button, FloatingLabel, Form, ListGroup } from 'react-bootstrap';
 import {
   saveShippingAddress,
   saveShippingAddressDatabase,
@@ -21,6 +21,7 @@ const ShippingScreen = ({ history }) => {
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
   const [newAddress, setNewAddress] = useState(false);
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
@@ -86,8 +87,7 @@ const ShippingScreen = ({ history }) => {
         <Message variant='danger'>{error}</Message>
       ) : newAddress ? (
         <Form onSubmit={shippingAddressSave}>
-          <Form.Group>
-            <Form.Label>Address</Form.Label>
+          <FloatingLabel className='mb-3' label='Address' controlId='address'>
             <Form.Control
               required
               type='text'
@@ -95,38 +95,39 @@ const ShippingScreen = ({ history }) => {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>City</Form.Label>
+          </FloatingLabel>
+          <FloatingLabel className='mb-3' label='City' controlId='city'>
             <Form.Control
               required
               type='text'
-              placeholder='Enter City'
+              placeholder='City'
               value={city}
               onChange={(e) => setCity(e.target.value)}
             ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Postal Code</Form.Label>
+          </FloatingLabel>
+          <FloatingLabel
+            className='mb-3'
+            label='Postal Code'
+            controlId='postalCode'
+          >
             <Form.Control
               required
               type='text'
-              placeholder='Enter Postal Code'
+              placeholder='Postal Code'
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
             ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Country</Form.Label>
+          </FloatingLabel>
+          <FloatingLabel className='mb-3' label='Country' controlId='country'>
             <Form.Control
               required
               type='text'
-              placeholder='Enter Country'
+              placeholder='Country'
               value={country}
               onChange={(e) => setCountry(e.target.value)}
             ></Form.Control>
-          </Form.Group>
-          <Button type='submit' variant='primary'>
+          </FloatingLabel>
+          <Button className='col-12' type='submit' variant='outline-dark'>
             Continue
           </Button>
         </Form>
@@ -165,23 +166,23 @@ const ShippingScreen = ({ history }) => {
                   })}
               </ListGroup>
             </Form.Group>
-            <Button variant='primary' type='submit'>
+            <Button
+              variant='info'
+              className='my-3'
+              size='sm'
+              onClick={handleNewAddress}
+            >
+              <i className='fas fa-plus' />
+              Add New Address
+            </Button>
+            <Button variant='outline-dark' className='col-12' type='submit'>
               Continue
             </Button>
           </Form>
-          <Button
-            variant='warning'
-            className='mt-3'
-            size={'sm'}
-            onClick={handleNewAddress}
-          >
-            Add New Address
-          </Button>
         </>
       ) : (
         <Form onSubmit={shippingAddressSave}>
-          <Form.Group>
-            <Form.Label>Address</Form.Label>
+          <FloatingLabel className='mb-3' label='Address' controlId='address'>
             <Form.Control
               required
               type='text'
@@ -189,38 +190,39 @@ const ShippingScreen = ({ history }) => {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>City</Form.Label>
+          </FloatingLabel>
+          <FloatingLabel className='mb-3' label='City' controlId='city'>
             <Form.Control
               required
               type='text'
-              placeholder='Enter City'
+              placeholder='City'
               value={city}
               onChange={(e) => setCity(e.target.value)}
             ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Postal Code</Form.Label>
+          </FloatingLabel>
+          <FloatingLabel
+            className='mb-3'
+            label='Postal Code'
+            controlId='postalCode'
+          >
             <Form.Control
               required
               type='text'
-              placeholder='Enter Postal Code'
+              placeholder='Postal Code'
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
             ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Country</Form.Label>
+          </FloatingLabel>
+          <FloatingLabel className='mb-3' label='Country' controlId='country'>
             <Form.Control
               required
               type='text'
-              placeholder='Enter Country'
+              placeholder='Country'
               value={country}
               onChange={(e) => setCountry(e.target.value)}
             ></Form.Control>
-          </Form.Group>
-          <Button type='submit' variant='primary'>
+          </FloatingLabel>
+          <Button className='col-12' type='submit' variant='outline-dark'>
             Continue
           </Button>
         </Form>
