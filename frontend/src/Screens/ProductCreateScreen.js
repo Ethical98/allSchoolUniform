@@ -84,7 +84,7 @@ const ProductCreateScreen = ({ match, history }) => {
 
   const uploadFileHandler = async (e) => {
     const file = e.target.files[0];
-    console.log(file);
+
     const formData = new FormData();
     formData.append('image', file);
     setUploading(true);
@@ -94,9 +94,9 @@ const ProductCreateScreen = ({ match, history }) => {
           'Content-Type': 'multipart/form-data',
         },
       };
-      console.log(formData);
+
       const { data } = await axios.post('/api/upload', formData, config);
-      console.log(data);
+
       setImage(data);
       setUploading(false);
     } catch (error) {
@@ -216,7 +216,6 @@ const ProductCreateScreen = ({ match, history }) => {
       });
     }
   }, [masterSize, size]);
-  console.log(schoolName);
 
   const classTableColumns = [
     {
@@ -225,7 +224,6 @@ const ProductCreateScreen = ({ match, history }) => {
       editable: 'never',
     },
   ];
-  console.log(size, standard);
 
   return (
     <>

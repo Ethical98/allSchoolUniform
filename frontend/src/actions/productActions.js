@@ -231,7 +231,7 @@ export const createProduct = (product) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    console.log(product);
+   
 
     const { data } = await axios.post(`/api/products/`, product, config);
     dispatch({
@@ -265,7 +265,7 @@ export const updateProduct = (product) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    console.log(product);
+   
 
     const { data } = await axios.put(
       `/api/products/${product._id}`,

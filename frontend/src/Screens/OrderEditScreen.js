@@ -308,7 +308,7 @@ const OrderEditScreen = ({ history, match }) => {
       setFilteredData([...products]);
     }
   }, [products]);
-  console.log(newItemsToAdd);
+
   useEffect(() => {
     if (school) {
       setFilteredData(
@@ -318,9 +318,7 @@ const OrderEditScreen = ({ history, match }) => {
       setFilteredData([...products]);
     }
   }, [school, products]);
-  if (productSizes.length > 0 && editIndex === 0 && size) {
-    console.log(productSizes[productSizes.findIndex((x) => x.size === size)]);
-  }
+
   useEffect(() => {
     if (productSizes.length > 0 && editIndex === 0 && size) {
       setCountInStock(
@@ -406,7 +404,6 @@ const OrderEditScreen = ({ history, match }) => {
         totalPrice,
       })
     );
-    // dispatch(updateUser({ _id: userId, name, email, isAdmin, savedAddress }));
   };
 
   const handleEditModalClose = () => {
@@ -438,7 +435,6 @@ const OrderEditScreen = ({ history, match }) => {
     setCountInStock(1);
     setEditModalShow(false);
   };
-  console.log(productSizes);
 
   const handleEditModalShow = (id, oldSize, currIndex, qtyValue) => {
     setSize(oldSize);

@@ -250,7 +250,7 @@ export const editOrder = (order) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    console.log(order);
+    
 
     const { data } = await axios.put(
       `/api/orders/${order.orderId}`,

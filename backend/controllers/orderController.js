@@ -2,6 +2,8 @@ import asyncHandler from 'express-async-handler';
 import Order from '../models/OrderModel.js';
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // @desc Create new order
 // @route GET /api/orders
@@ -47,19 +49,12 @@ const addOrderItems = asyncHandler(async (req, res) => {
     const createdOrder = await order.save();
     res.status(201).json(createdOrder);
 
-    // const CLIENT_ID =
-    //   '335123042167-qm7u26oc6pbkd8mskkbr1vqdr6io0b24.apps.googleusercontent.com';
-    // const CLIENT_SECRET = 'uTH3_a7ShhIjPymVaB8QONaR';
-    // const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
-    // const REFRESH_TOKEN =
-    //   '1//04nAsjtwZdCYMCgYIARAAGAQSNwF-L9IrDJnYxaXzYR4zxZhEKKUKSypRLetfPIMcIWTToQJCH_8dfIqhqCW_5EveSp-gnSYFOL0';
-
     // const oAuth2Client = new google.auth.OAuth2(
-    //   CLIENT_ID,
-    //   CLIENT_SECRET,
-    //   REDIRECT_URI
+    //   OAUTH2_CLIENT_ID,
+    //    OAUTH2_CLIENT_SECRET,
+    //    OAUTH2_REDIRECT_URI
     // );
-    // oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+    // oAuth2Client.setCredentials({  refresh_token:  OAUTH2_REFRESH_TOKEN });
 
     // try {
     //   const accessToken = await oAuth2Client.getAccessToken();
@@ -68,9 +63,9 @@ const addOrderItems = asyncHandler(async (req, res) => {
     //     auth: {
     //       type: 'Oauth2',
     //       user: 'noreply@gouniform.com',
-    //       clientId: CLIENT_ID,
-    //       clientSecret: CLIENT_SECRET,
-    //       refreshToken: REFRESH_TOKEN,
+    //       clientId:  OAUTH2_CLIENT_ID,
+    //       clientSecret:  OAUTH2_CLIENT_SECRET,
+    //       refreshToken:  OAUTH2_REFRESH_TOKEN,
     //       accessToken: accessToken,
     //     },
     //   });
@@ -210,19 +205,12 @@ const getMyOrders = asyncHandler(async (req, res) => {
 });
 
 const sendMail = asyncHandler(async (req, res) => {
-  const CLIENT_ID =
-    '335123042167-qm7u26oc6pbkd8mskkbr1vqdr6io0b24.apps.googleusercontent.com';
-  const CLIENT_SECRET = 'uTH3_a7ShhIjPymVaB8QONaR';
-  const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
-  const REFRESH_TOKEN =
-    '1//04nAsjtwZdCYMCgYIARAAGAQSNwF-L9IrDJnYxaXzYR4zxZhEKKUKSypRLetfPIMcIWTToQJCH_8dfIqhqCW_5EveSp-gnSYFOL0';
-
   const oAuth2Client = new google.auth.OAuth2(
-    CLIENT_ID,
-    CLIENT_SECRET,
-    REDIRECT_URI
+    OAUTH2_CLIENT_ID,
+    OAUTH2_CLIENT_SECRET,
+    OAUTH2_REDIRECT_URI
   );
-  oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+  oAuth2Client.setCredentials({ refresh_token: OAUTH2_REFRESH_TOKEN });
 
   try {
     const accessToken = await oAuth2Client.getAccessToken();
@@ -231,9 +219,9 @@ const sendMail = asyncHandler(async (req, res) => {
       auth: {
         type: 'Oauth2',
         user: 'noreply@gouniform.com',
-        clientId: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-        refreshToken: REFRESH_TOKEN,
+        clientId: OAUTH2_CLIENT_ID,
+        clientSecret: OAUTH2_CLIENT_SECRET,
+        refreshToken: OAUTH2_REFRESH_TOKEN,
         accessToken: accessToken,
       },
     });
@@ -295,7 +283,8 @@ const getOrders = asyncHandler(async (req, res) => {
 // @route POST /api/orders/:id
 // @access Private/Admin
 const editOrderById = asyncHandler(async (req, res) => {
-  const { modifiedOrderItems, shippingAddress, itemsPrice, totalPrice } = req.body;
+  const { modifiedOrderItems, shippingAddress, itemsPrice, totalPrice } =
+    req.body;
 
   const order = await Order.findById(req.params.id);
   if (order) {

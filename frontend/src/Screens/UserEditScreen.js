@@ -125,7 +125,6 @@ const UserEditScreen = ({ history, match }) => {
     const newSavedAddress = [...savedAddress];
     newSavedAddress.splice(index, 1);
     setSavedAddress(newSavedAddress);
-    console.log(savedAddress);
   };
 
   return (

@@ -170,17 +170,7 @@ const createProduct = asyncHandler(async (req, res) => {
     type,
     size,
   } = req.body;
-  console.log(
-    name,
-    schoolName,
-    image,
-    description,
-    brand,
-    category,
-    season,
-    type,
-    size
-  );
+  
   const product = new Product({
     name,
     user: req.user._id,
