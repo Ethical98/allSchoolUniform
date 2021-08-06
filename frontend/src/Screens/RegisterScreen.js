@@ -272,7 +272,7 @@ const RegisterScreen = ({ history, location }) => {
         <Col>
           Have an Account?
           <Link
-            className=' mx-1 col-2 btn btn-outline-info btn-sm'
+            className='btn btn-outline-info btn-sm'
             to={redirect ? `/login?redirect=${redirect}` : '/login'}
           >
             Login

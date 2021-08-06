@@ -1,61 +1,74 @@
-import React from 'react';
-import { Nav } from 'react-bootstrap';
-import { LinkContainer } from 'react-router-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { ProgressBar } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import './css/CheckoutSteps.css';
 
 const CheckoutSteps = ({ step1, step2, step3, step4 }) => {
-  return (
-    <div className='wrapper'>
-      <Nav
-        className='justify-content-center mb-4 checkout-steps'
-        style={{ fontSize: '0.8rem' }}
-      >
-        <Nav.Item>
-          {step1 ? (
-            <LinkContainer to='/login'>
-              <Nav.Link className='active-link'>Sign In </Nav.Link>
-            </LinkContainer>
-          ) : (
-            <Nav.Link className='disabled-link' disabled>
-              Sign In
-            </Nav.Link>
-          )}
-        </Nav.Item>
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (step1 && step2 && step2 && step4) {
+      setValue(100);
+    } else if (step1 && step2 && step3) {
+      setValue(65);
+    } else if (step1 && step2) {
+      setValue(35);
+    } else {
+      setValue(20);
+    }
+  }, [step1, step2, step3, step4]);
 
-        <Nav.Item>
+  return (
+    <>
+      <div className='checkout-steps'>
+        <ProgressBar animated now={value} />
+        <ul className='d-flex align-items-center justify-content-between'>
+          {step1 ? (
+            <Link to='/login'>
+              <li id='step1' className='active'>
+                <i className='fas fa-user step1-icon'></i>
+              </li>
+            </Link>
+          ) : (
+            <li id='step1'>
+              <i className='fas fa-user step1-icon'></i>
+            </li>
+          )}
           {step2 ? (
-            <LinkContainer to='/shipping'>
-              <Nav.Link className='active-link'>Shipping</Nav.Link>
-            </LinkContainer>
+            <Link to='/shipping'>
+              <li id='step2' className='active'>
+                <i className='fas fa-truck step2-icon'></i>
+              </li>
+            </Link>
           ) : (
-            <Nav.Link className='disabled-link'>Shipping</Nav.Link>
+            <li id='step2'>
+              <i className='fas fa-truck step2-icon'></i>
+            </li>
           )}
-        </Nav.Item>
-        <Nav.Item>
           {step3 ? (
-            <LinkContainer to='/payment'>
-              <Nav.Link className='active-link'>Payment</Nav.Link>
-            </LinkContainer>
+            <Link to='/payment'>
+              <li id='step3' className='active'>
+                <i className='fas fa-rupee-sign step3-icon'></i>
+              </li>
+            </Link>
           ) : (
-            <Nav.Link className='disabled-link' disabled>
-              Payment
-            </Nav.Link>
+            <li id='step3'>
+              <i className='fas fa-rupee-sign step3-icon'></i>
+            </li>
           )}
-        </Nav.Item>
-        <Nav.Item>
           {step4 ? (
-            <LinkContainer to='/placeorder'>
-              <Nav.Link className='active-link'>Place Order</Nav.Link>
-            </LinkContainer>
+            <Link to='/placeorder'>
+              <li id='step4' className='active'>
+                <i class='fas fa-receipt step4-icon'></i>
+              </li>
+            </Link>
           ) : (
-            <Nav.Link className='disabled-link' disabled>
-              Place Order
-            </Nav.Link>
+            <li id='step4'>
+              <i class='fas fa-receipt step4-icon'></i>
+            </li>
           )}
-        </Nav.Item>
-        <div class='clear'></div>
-      </Nav>
-    </div>
+        </ul>
+      </div>
+    </>
   );
 };
 

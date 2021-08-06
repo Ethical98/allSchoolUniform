@@ -3,7 +3,7 @@ const schools = [
     name: 'Bal Bharati Public School GRH',
     address:
       'Sir Ganga Ram Hospital Marg, Old Rajinder Nagar, Rajinder Nagar, New Delhi, Delhi 110060',
-    contact: '01125782419',
+    contact: '011-25782419',
     logo: '/images/schoolLogo/bbps.png',
     disabled: false,
   },

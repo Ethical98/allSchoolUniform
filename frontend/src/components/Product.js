@@ -35,7 +35,7 @@ const Product = ({ product }) => {
 
   return (
     <div>
-      <Card className='my-3 p-1 rounded text-center' bg='white'>
+      <Card className='my-3  rounded text-center' bg='white'>
         <Link to={`/products/${product.name}`}>
           <Card.Img
             src={product.image}
@@ -48,7 +48,7 @@ const Product = ({ product }) => {
             to={`/products/${product.name}`}
             style={{ textDecoration: 'none' }}
           >
-            <Card.Title as='div'>
+            <Card.Title as='h6'>
               <strong>{product.name}</strong>
             </Card.Title>
           </Link>
@@ -96,7 +96,7 @@ const Product = ({ product }) => {
               <Col xs>
                 <Button
                   variant='outline-info'
-                  className=' sgButton col-12 '
+                  className='sgButton col-12'
                   size='sm'
                 >
                   Size Guide
@@ -104,13 +104,13 @@ const Product = ({ product }) => {
               </Col>
             </Row>
           </Card>
-
-          <Card.Text>
+          <div className='mb-3'>
             <Rating
               value={product.rating}
               text={`${product.numReviews} reviews`}
             />
-          </Card.Text>
+          </div>
+
           <Button
             variant='dark'
             size='sm'

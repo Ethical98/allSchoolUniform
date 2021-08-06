@@ -1,0 +1,26 @@
+@media (min-width: 576px) {
+  .search-box {
+    width: 100%;
+    margin-left: -5%;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .search-box {
+    width: 100%;
+    margin-left: -5%;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .search-box {
+    width: 90%;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .search-box {
+    width: 140%;
+    margin-left: -30%;
+  }
+}

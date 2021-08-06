@@ -111,35 +111,62 @@ const OrderDetails = ({ match, history }) => {
 
             <ListGroup.Item>
               <h2 className='mt-2'>ORDER ITEMS</h2>
-
+              {order.modified && (
+                <Message variant='info'>Order Has Been Modified!!</Message>
+              )}
               {order.orderItems.length === 0 ? (
                 <Message>Order Is Empty</Message>
               ) : (
                 <ListGroup variant='flush'>
-                  {order.orderItems.map((item, index) => (
-                    <ListGroup.Item key={index}>
-                      <Row>
-                        <Col md={2} lg={1}>
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fluid
-                            rounded
-                          />
-                        </Col>
-                        <Col>
-                          <Link to={`/products/${item.product}`}>
-                            {item.name}
-                          </Link>
-                        </Col>
-                        <Col md={2}>Size: {item.size}</Col>
-                        <Col md={4}>
-                          {item.qty} x ₹{item.price} = ₹
-                          {(item.qty * item.price).toFixed(2)}
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-                  ))}
+                  {!order.modified
+                    ? order.orderItems.map((item, index) => (
+                        <ListGroup.Item key={index}>
+                          <Row>
+                            <Col md={2} lg={1}>
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                fluid
+                                rounded
+                              />
+                            </Col>
+                            <Col>
+                              <Link to={`/products/${item.product}`}>
+                                {item.name}
+                              </Link>
+                            </Col>
+                            <Col md={2}>Size: {item.size}</Col>
+                            <Col md={4}>
+                              {item.qty} x ₹{item.price} = ₹
+                              {(item.qty * item.price).toFixed(2)}
+                            </Col>
+                          </Row>
+                        </ListGroup.Item>
+                      ))
+                    : order.modifiedItems.map((item, index) => (
+                        <ListGroup.Item key={index}>
+                          <Row>
+                            <Col md={2} lg={1}>
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                fluid
+                                rounded
+                              />
+                            </Col>
+                            <Col>
+                              <Link to={`/products/${item.product}`}>
+                                {item.name}
+                              </Link>
+                            </Col>
+                            <Col md={2}>Size: {item.size}</Col>
+                            <Col md={4}>
+                              {item.qty} x ₹{item.price} = ₹
+                              {(item.qty * item.price).toFixed(2)}
+                            </Col>
+                          </Row>
+                        </ListGroup.Item>
+                      ))}
                 </ListGroup>
               )}
             </ListGroup.Item>

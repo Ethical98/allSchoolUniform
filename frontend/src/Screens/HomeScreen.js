@@ -1,5 +1,6 @@
 import React from 'react';
 import { Carousel, Image, Container, Row, Col, Figure } from 'react-bootstrap';
+import { Route } from 'react-router-dom';
 // import url from '../components/asu-top-logo.png';
 import './css/HomeScreen.css';
 import image1 from '../homeScreenBanner/ImageOne.jpg';
@@ -12,6 +13,7 @@ import Logo4 from '../images/SchoolLogo/AGS.jpg';
 import Logo5 from '../images/SchoolLogo/amity.jpg';
 import Logo6 from '../images/SchoolLogo/presentation.png';
 import Logo7 from '../images/SchoolLogo/gdgoenka.jpeg';
+import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 
 const HomeScreen = () => {
   return (
@@ -119,8 +121,16 @@ const HomeScreen = () => {
             </Figure>
           </Col>
         </Row>
+        <div style={{ zIndex: 4 }}>
+          <Route
+            render={({ history }) => (
+              <SearchBoxAutocomplete history={history} />
+            )}
+          />
+        </div>
       </Container>
-      <Carousel className='mt-5'>
+
+      <Carousel className='mt-5' style={{ zIndex: -1 }}>
         <Carousel.Item>
           <Image rounded className='d-block' src={image3} alt='First slide' />
           <Carousel.Caption></Carousel.Caption>

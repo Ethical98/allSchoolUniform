@@ -14,7 +14,7 @@ import Message from '../components/Message';
 import Loader from '../components/Loader';
 import jsonwebtoken from 'jsonwebtoken';
 import {
-  ListProductDetailsById,
+  listProductDetailsById,
   updateProduct,
 } from '../actions/productActions';
 import { listTypes, listTypeSizes } from '../actions/typeActions';
@@ -158,7 +158,7 @@ const ProductEditScreen = ({ match, history }) => {
       history.push('/admin/productlist');
     } else {
       if (!product.name || product._id !== productId) {
-        dispatch(ListProductDetailsById(productId));
+        dispatch(listProductDetailsById(productId));
         dispatch(listClasses());
         dispatch(listTypes());
         dispatch(listSchools());
@@ -197,7 +197,6 @@ const ProductEditScreen = ({ match, history }) => {
     masterTypes,
     masterSchools,
     successUpdate,
-    type,
   ]);
 
   useEffect(() => {
@@ -208,7 +207,7 @@ const ProductEditScreen = ({ match, history }) => {
 
   const uploadFileHandler = async (e) => {
     const file = e.target.files[0];
-   
+
     const formData = new FormData();
     formData.append('image', file);
     setUploading(true);
@@ -218,9 +217,9 @@ const ProductEditScreen = ({ match, history }) => {
           'Content-Type': 'multipart/form-data',
         },
       };
-     
+
       const { data } = await axios.post('/api/upload', formData, config);
-      
+
       setImage(data);
       setUploading(false);
     } catch (error) {
@@ -231,6 +230,7 @@ const ProductEditScreen = ({ match, history }) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
+    window.scrollTo(0, 0);
     dispatch(
       updateProduct({
         _id: productId,
@@ -363,6 +363,7 @@ const ProductEditScreen = ({ match, history }) => {
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                   >
+                    <option value=''>Select</option>
                     {masterType &&
                       masterType.map((x) => (
                         <option key={x.type} value={x.type}>
@@ -626,7 +627,7 @@ const ProductEditScreen = ({ match, history }) => {
             </Row>
 
             <Row className='justify-content-md-center'>
-              <Col md={3} className='text-center'>
+              <Col md={5} className='text-center'>
                 <Button variant='dark' type='submit' className='col-12'>
                   UPDATE
                 </Button>

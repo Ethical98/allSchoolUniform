@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import Header from './components/Header';
@@ -28,8 +28,27 @@ import ProductCreateScreen from './Screens/ProductCreateScreen';
 import AdminHeader from './components/AdminHeader';
 import OrderListScreen from './Screens/OrderListScreen';
 import OrderEditScreen from './Screens/OrderEditScreen';
+import OrderTrackingScreen from './Screens/OrderTrackingScreen';
+import { getCartFromDatabase } from './actions/cartActions';
+import { useDispatch, useSelector } from 'react-redux';
+import SchoolListScreen from './Screens/SchoolListScreen';
+import SchoolEditScreen from './Screens/SchoolEditScreen';
+import SchoolCreateScreen from './Screens/SchoolCreateScreen';
+import TypeListScreen from './Screens/TypeListScreen';
+import TypeEditScreen from './Screens/TypeEditScreen';
+import TypeCreateScreen from './Screens/TypeCreateScreen';
 
 const App = () => {
+  const dispatch = useDispatch();
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
+  useEffect(() => {
+    if (userInfo && userInfo.token) {
+      dispatch(getCartFromDatabase());
+    }
+  }, [userInfo, dispatch]);
+
   return (
     <Router>
       <Header />
@@ -50,26 +69,70 @@ const App = () => {
           <Route path='/login' component={LoginScreen} />
           <Route path='/register' component={RegisterScreen} />
           <Route path='/profile' component={ProfileScreen} exact />
-          <Route path='/products' component={BreadCrumb} />
+          <Route path='/products' component={BreadCrumb} exact />
+          <Route
+            path='/products/schools/:selectedschool'
+            component={BreadCrumb}
+            exact
+          />
+
+          <Route path='/products/:id' component={BreadCrumb} exact />
+          <Route path='/track/:id' component={OrderTrackingScreen} />
           <Row>
             <Col md={3}>
               <Route path='/products' component={Accordion} exact />
+              <Route
+                path='/products/schools/:selectedschool'
+                component={Accordion}
+                exact
+              />
             </Col>
             <Col md={9}>
               <Route path='/products' component={ProductScreen} exact />
+              <Route
+                path='/products/schools/:selectedschool'
+                component={ProductScreen}
+                exact
+              />
             </Col>
           </Row>
-
-          <Route path='/products/:id' component={ProductDescriptionScreen} />
+          <Route
+            path='/products/:id'
+            component={ProductDescriptionScreen}
+            exact
+          />
           <Route path='/cart/:id?' component={CartScreen} />
-
           <Route path='/admin/userlist' component={UserListScreen} />
           <Route path='/admin/user/:id/edit' component={UserEditScreen} />
-          <Route path='/admin/productlist' component={ProductListScreen} />
+          <Route
+            path='/admin/productlist'
+            component={ProductListScreen}
+            exact
+          />
+          <Route
+            path='/admin/productlist/:pageNumber'
+            component={ProductListScreen}
+            exact
+          />
           <Route path='/admin/product/:id/edit' component={ProductEditScreen} />
           <Route path='/admin/product/create' component={ProductCreateScreen} />
           <Route path='/admin/orderlist' component={OrderListScreen} />
-          <Route path='/admin/order/:id/edit' component={OrderEditScreen} />
+          <Route
+            path='/admin/order/:id/edit'
+            component={OrderEditScreen}
+            exact
+          />
+          <Route
+            path='/admin/order/:id/edit/page/:pageNumber'
+            component={OrderEditScreen}
+            exact
+          />
+          <Route path='/admin/schoollist' component={SchoolListScreen} />
+          <Route path='/admin/school/create' component={SchoolCreateScreen} />
+          <Route path='/admin/school/:id/edit' component={SchoolEditScreen} />
+          <Route path='/admin/typelist' component={TypeListScreen} />
+          <Route path='/admin/type/:id/edit' component={TypeEditScreen} />
+          <Route path='/admin/type/create' component={TypeCreateScreen} />
           {/* <Route component={PageNotFoundScreen} exact /> */}
         </Container>
       </main>

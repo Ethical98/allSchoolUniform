@@ -18,6 +18,8 @@ import { makeStyles } from '@material-ui/styles';
 import { listSchools } from '../actions/schoolActions';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { TablePagination } from '@material-ui/core';
+import Paginate from '../components/Paginate';
 
 const useStyles = makeStyles({
   dialog: {
@@ -26,11 +28,12 @@ const useStyles = makeStyles({
 });
 
 const ProductListScreen = ({ history, match }) => {
+  const pageNumber = match.params.pageNumber || 1;
   const classes = useStyles();
   const dispatch = useDispatch();
 
   const productList = useSelector((state) => state.productList);
-  const { loading, products, error } = productList;
+  const { loading, products, error, pages, page } = productList;
 
   const schoolList = useSelector((state) => state.schoolList);
   const { masterSchools } = schoolList;
@@ -87,13 +90,6 @@ const ProductListScreen = ({ history, match }) => {
     },
   ];
 
-  // const productCreate = useSelector((state) => state.productCreate);
-  // const {
-  //   loading: loadingCreate,
-  //   success: successCreate,
-  //   error: errorCreate,
-  // } = productCreate;
-
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
@@ -132,10 +128,10 @@ const ProductListScreen = ({ history, match }) => {
       dispatch(logout());
       history.push('/login');
     } else {
-      dispatch(listProducts());
+      dispatch(listProducts('', pageNumber));
       dispatch(listSchools());
     }
-  }, [dispatch, history, userInfo, successDelete]);
+  }, [dispatch, history, userInfo, successDelete, pageNumber]);
 
   useEffect(() => {
     if (masterSchools) {
@@ -211,52 +207,55 @@ const ProductListScreen = ({ history, match }) => {
       ) : error ? (
         <Message variant='danger'>{error}</Message>
       ) : (
-        <MaterialTable
-          style={{ padding: '1%' }}
-          title='Products'
-          data={filteredData}
-          columns={columns}
-          options={{
-            rowStyle: {
-              color: 'black',
-              border: '1px solid grey',
-            },
-            actionsColumnIndex: -1,
-            paging: false,
-          }}
-          actions={[
-            {
-              icon: 'edit',
-              tooltip: 'Edit Product',
-              onClick: (event, rowData) =>
-                history.push(`/admin/product/${rowData._id}/edit`),
-            },
-            {
-              icon: 'delete',
-              tooltip: 'Delete Product',
-              onClick: (event, rowData) => deleteHandler(rowData._id),
-            },
-            {
-              icon: () => (
-                <Autocomplete
-                  options={masterSchool}
-                  getOptionLabel={(option) => option.name}
-                  onChange={(option, value) => value && setSchool(value.name)}
-                  style={{ width: 250 }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label='Filter By School'
-                      variant='outlined'
-                    />
-                  )}
-                />
-              ),
-              tooltip: 'Delete Product',
-              isFreeAction: true,
-            },
-          ]}
-        />
+        <>
+          <MaterialTable
+            style={{ padding: '1%' }}
+            title='Products'
+            data={filteredData}
+            columns={columns}
+            options={{
+              rowStyle: {
+                color: 'black',
+                border: '1px solid grey',
+              },
+              actionsColumnIndex: -1,
+              paging: false,
+            }}
+            actions={[
+              {
+                icon: 'edit',
+                tooltip: 'Edit',
+                onClick: (event, rowData) =>
+                  history.push(`/admin/product/${rowData._id}/edit`),
+              },
+              {
+                icon: 'delete',
+                tooltip: 'Delete',
+                onClick: (event, rowData) => deleteHandler(rowData._id),
+              },
+              {
+                icon: () => (
+                  <Autocomplete
+                    options={masterSchool}
+                    getOptionLabel={(option) => option.name}
+                    onChange={(option, value) => value && setSchool(value.name)}
+                    style={{ width: 250 }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label='Filter By School'
+                        variant='outlined'
+                      />
+                    )}
+                  />
+                ),
+                tooltip: 'Filter',
+                isFreeAction: true,
+              },
+            ]}
+          />
+          <Paginate pages={pages} page={page} isAdmin='true' />
+        </>
       )}
     </>
   );

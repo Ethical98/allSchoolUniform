@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import jsonwebtoken from 'jsonwebtoken';
+import { Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import {
@@ -10,13 +11,30 @@ import {
   Image,
   NavDropdown,
   Badge,
+  Modal,
+  Form,
+  Row,
+  FloatingLabel,
+  Col,
 } from 'react-bootstrap';
 import url from './asu-top-logo.png';
 import './css/Header.css';
 import { logout } from '../actions/userActions';
 import urlimage from '../seamlessschool-bg.png';
+import SearchBox from './SearchBox';
 
-const Header = () => {
+const Header = ({ location }) => {
+  const [show, setShow] = useState(false);
+  const [orderId, setOrderId] = useState('');
+  const [message, setMessage] = useState('');
+  const [validated, setValidated] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => {
+    setOrderId('');
+    setShow(true);
+    setValidated(false);
+  };
   // const headerRef = useRef();
   // const resizeHeaderOnScroll = () => {
   //   const curr = headerRef.current;
@@ -59,11 +77,27 @@ const Header = () => {
     }
   }, [dispatch, userInfo]);
 
-  const qty = cartItems && cartItems.reduce((acc, item) => acc + item.qty, 0);
+  const qty =
+    cartItems && cartItems.reduce((acc, item) => acc + Number(item.qty), 0);
 
   const logoutHandler = () => {
     dispatch(logout());
   };
+
+  const trackOrderHandler = (e) => {
+    const form = e.currentTarget;
+    e.preventDefault();
+
+    if (form.checkValidity() === false) {
+      e.preventDefault();
+      setMessage('Please Enter Order Id');
+
+      e.stopPropagation();
+    }
+
+    setValidated(true);
+  };
+
   return (
     <header className='header'>
       <Navbar
@@ -75,90 +109,135 @@ const Header = () => {
           color: '#93c0e0',
         }}
       >
+        <Modal
+          show={show}
+          onHide={handleClose}
+          backdrop='static'
+          keyboard={false}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Track Your Order</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form noValidate validated={validated} onSubmit={trackOrderHandler}>
+              <FloatingLabel label='Order Id' className='mb-3'>
+                <Form.Control
+                  required
+                  className='mb-3'
+                  placeholder='Order Id'
+                  value={orderId}
+                  onChange={(e) => setOrderId(e.target.value)}
+                ></Form.Control>
+                <Form.Control.Feedback type='invalid'>
+                  {message}
+                </Form.Control.Feedback>
+              </FloatingLabel>
+              <LinkContainer to={`/track/${orderId}`}>
+                <Button
+                  disabled={orderId.length < 16}
+                  className='float-end'
+                  type='submit'
+                  variant='outline-dark'
+                  onClick={handleClose}
+                >
+                  Track
+                </Button>
+              </LinkContainer>
+            </Form>
+          </Modal.Body>
+        </Modal>
         <Container>
           <LinkContainer to='/'>
             <Navbar.Brand>
-              <Image src={url} className='logo'></Image>
+              <Row>
+                <Image src={url} className='logo'></Image>
+              </Row>
+              <Row>
+                <span
+                  className='text-center'
+                  style={{ color: 'white', fontSize: '0.7rem' }}
+                >
+                  <i className='fas fa-phone-square-alt mx-1' />
+                  (011) 49188800
+                </span>
+              </Row>
             </Navbar.Brand>
           </LinkContainer>
 
-          <Navbar.Text
-            className='me-auto header-text'
-            style={{ color: 'white' }}
-          >
-            Call us on : (011) 49188800
-          </Navbar.Text>
+          <Nav className='d-none d-sm-block'>
+            <Route render={({ history }) => <SearchBox history={history} />} />
+          </Nav>
+          <Row>
+            <Nav>
+              <LinkContainer to='/offers'>
+                <Nav.Link>
+                  <Button variant='outline-light' size='sm'>
+                    OFFERS
+                  </Button>
+                </Nav.Link>
+              </LinkContainer>
 
-          <Nav>
-            <LinkContainer to='/offers'>
-              <Nav.Link>
-                <Button variant='outline-light' size='sm'>
-                  OFFERS
-                </Button>
-              </Nav.Link>
-            </LinkContainer>
-            <LinkContainer to='/track'>
-              <Nav.Link>
+              <Nav.Link onClick={handleShow}>
                 <i className='fas fa-truck' />{' '}
                 <span className='header-text'>TRACK YOUR ORDER</span>
               </Nav.Link>
-            </LinkContainer>
-            <LinkContainer to='/cart'>
-              <Nav.Link>
-                <i className='fas fa-shopping-cart'></i>{' '}
-                <span className='header-text'>CART</span>
-                {qty > 0 && (
-                  <Badge
-                    pill
-                    className='cart-qty primary btn-outline-dark'
-                    bg='primary'
-                  >
-                    {qty}
-                  </Badge>
-                )}
-              </Nav.Link>
-            </LinkContainer>
-            {userInfo ? (
-              <NavDropdown title={user.name} id='username'>
-                {userInfo && userInfo.isAdmin && (
-                  <LinkContainer to='/admin/dashboard'>
-                    <NavDropdown.Item>Dashboard</NavDropdown.Item>
-                  </LinkContainer>
-                )}
-                <LinkContainer to='/profile'>
-                  <NavDropdown.Item>Profile</NavDropdown.Item>
-                </LinkContainer>
-                <NavDropdown.Item onClick={logoutHandler}>
-                  Logout
-                </NavDropdown.Item>
-              </NavDropdown>
-            ) : (
-              <LinkContainer to='/login'>
+
+              <LinkContainer to='/cart'>
                 <Nav.Link>
-                  <i className='fas fa-user'></i>{' '}
-                  <span className='header-text'>SIGN IN</span>
+                  <i className='fas fa-shopping-cart'></i>{' '}
+                  <span className='header-text cart'>CART</span>
+                  {qty > 0 && (
+                    <Badge pill className='cart-qty'>
+                      {qty}
+                    </Badge>
+                  )}
                 </Nav.Link>
               </LinkContainer>
-            )}
-            {/* {userInfo && userInfo.isAdmin && (
-              <NavDropdown title='Admin' id='adminmenu'>
-                <LinkContainer to='/admin/dashboard'>
-                  <NavDropdown.Item>Dashboard</NavDropdown.Item>
+              {userInfo ? (
+                <>
+                  <NavDropdown title={user.name} id='username'>
+                    {userInfo && userInfo.isAdmin && (
+                      <LinkContainer to='/admin/dashboard'>
+                        <NavDropdown.Item>Dashboard</NavDropdown.Item>
+                      </LinkContainer>
+                    )}
+                    <LinkContainer to='/profile'>
+                      <NavDropdown.Item>Profile</NavDropdown.Item>
+                    </LinkContainer>
+                    <NavDropdown.Item onClick={logoutHandler}>
+                      Logout
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                </>
+              ) : (
+                <LinkContainer to='/login'>
+                  <Nav.Link>
+                    <i className='fas fa-user'></i>{' '}
+                    <span className='header-text'>SIGN IN</span>
+                  </Nav.Link>
                 </LinkContainer>
-                <LinkContainer to='/admin/userlist'>
-                  <NavDropdown.Item>Users</NavDropdown.Item>
-                </LinkContainer>
-                <LinkContainer to='/admin/productList'>
-                  <NavDropdown.Item>Products</NavDropdown.Item>
-                </LinkContainer>
-                <LinkContainer to='/admin/orderList'>
-                  <NavDropdown.Item>Orders</NavDropdown.Item>
-                </LinkContainer>
-              </NavDropdown>
-            )} */}
-          </Nav>
+              )}
+            </Nav>
+          </Row>
         </Container>
       </Navbar>
+
+      {!(window.location.pathname === '/') && (
+        <Nav
+          className='d-block d-sm-none'
+          style={{
+            background: `#2c4a77 url(${urlimage})`,
+            borderBottom: '2px solid #ff6a00',
+
+            color: '#93c0e0',
+            marginTop: '17%',
+            height: '60px',
+            padding: '2%',
+          }}
+        >
+          <Route render={({ history }) => <SearchBox history={history} />} />
+        </Nav>
+      )}
     </header>
   );
 };

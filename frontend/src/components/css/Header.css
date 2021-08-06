@@ -1,8 +1,13 @@
 .cart-qty {
   border-radius: 100%;
   position: relative;
-  bottom: 30%;
-  right: 10%;
+  bottom: 12px;
+  left: 2px;
+
+  font-size: 8px;
+}
+.badge {
+  background-color: #ff6a00;
 }
 
 .logo {
@@ -13,19 +18,22 @@
 
 .navbar {
   font-size: small;
-  height: 10vh;
+  height: 12vh;
+}
+.header-text .cart {
+  margin-right: -30%;
 }
 
 @media (max-width: 575.98px) {
-  .cart-qty {
-    position: relative;
-    border-radius: 100%;
-    bottom: 25%;
-  }
   .logo {
-    height: 6vh;
+    height: 40px;
     -webkit-filter: drop-shadow(5px 5px 5px black);
     filter: drop-shadow(5px 5px 5px black);
+  }
+
+  .navbar {
+    font-size: small;
+    height: 80px;
   }
 
   .header-text {
@@ -35,23 +43,13 @@
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-  .cart-qty {
-    position: relative;
-    border-radius: 100%;
-    bottom: 25%;
-  }
-
   .header-text {
     font-size: 0px;
     margin: -1vw;
   }
-}
 
-@media (min-width: 768px) and (max-width: 991.98px) {
-  .cart-qty {
-    position: relative;
-    border-radius: 100%;
-    bottom: 80%;
-    left: 60%;
+  .navbar {
+    font-size: small;
+    height: 80px;
   }
 }

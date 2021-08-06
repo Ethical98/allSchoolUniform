@@ -11,7 +11,10 @@ import {
 } from '../constants/orderConstants';
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
-import { clearCartFromDatabase } from '../actions/cartActions';
+import {
+  clearCartFromDatabase,
+  getCartFromDatabase,
+} from '../actions/cartActions';
 
 const OrderScreen = ({ match, history }) => {
   const orderId = match.params.id;
@@ -54,6 +57,7 @@ const OrderScreen = ({ match, history }) => {
       dispatch({ type: ORDER_CREATE_RESET });
       dispatch(getOrderDetails(orderId));
       dispatch(clearCartFromDatabase());
+      dispatch(getCartFromDatabase());
     }
   }, [dispatch, orderId, order, successPay]);
 

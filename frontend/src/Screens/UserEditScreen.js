@@ -78,7 +78,7 @@ const UserEditScreen = ({ history, match }) => {
   useEffect(() => {
     if (successUpdate) {
       dispatch({ type: USER_UPDATE_RESET });
-      history.push('admin/userlist');
+      history.push('/admin/userlist');
     } else {
       if (!user.name || user._id !== userId) {
         dispatch(getUserDetails(userId));
@@ -94,6 +94,7 @@ const UserEditScreen = ({ history, match }) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
+    window.scrollTo(0, 0);
     dispatch(
       updateUser({ _id: userId, name, email, phone, isAdmin, savedAddress })
     );
@@ -127,6 +128,7 @@ const UserEditScreen = ({ history, match }) => {
     setSavedAddress(newSavedAddress);
   };
 
+  
   return (
     <>
       <Link to='/admin/userlist' className='btn btn-outline-dark my-3'>
@@ -161,7 +163,7 @@ const UserEditScreen = ({ history, match }) => {
                     className='mb-3'
                     required
                     type='name'
-                    placeholder='Enter Name'
+                    placeholder='Name'
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   ></Form.Control>
@@ -175,7 +177,7 @@ const UserEditScreen = ({ history, match }) => {
                     className='mb-3'
                     required
                     type='phone'
-                    placeholder='Enter Mobile '
+                    placeholder='Mobile '
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   ></Form.Control>
@@ -316,7 +318,7 @@ const UserEditScreen = ({ history, match }) => {
               </Col>
             </Row>
             <Row className='justify-content-md-center'>
-              <Col md={3} className='text-center'>
+              <Col md={5} className='text-center'>
                 <Button variant='dark' type='submit' className='col-12'>
                   UPDATE
                 </Button>

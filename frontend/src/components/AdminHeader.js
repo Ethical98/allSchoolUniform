@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
@@ -25,10 +25,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AdminHeader = () => {
+const AdminHeader = ({ location }) => {
   const classes = useStyles();
-
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    let path = location.pathname;
+    if (path === '/admin/dashboard' && value !== 0) setValue(0);
+    else if (path === '/admin/userlist' && value !== 1) setValue(1);
+    else if (path === '/admin/productlist' && value !== 2) setValue(2);
+    else if (path === '/admin/orderlist' && value !== 3) setValue(3);
+    else if (path === '/admin/schoollist' && value !== 4) setValue(4);
+    else if (path === '/admin/typelist' && value !== 5) setValue(5);
+    else if (path === '/admin/homepage' && value !== 6) setValue(6);
+    else if (path === '/admin/extra' && value !== 7) setValue(7);
+  }, [value]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -104,7 +114,7 @@ const AdminHeader = () => {
             />
           </LinkContainer>
           <LinkContainer
-            to='/admin/schoollist'
+            to='/admin/typelist'
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
             <Tab
@@ -126,7 +136,7 @@ const AdminHeader = () => {
             />
           </LinkContainer>
           <LinkContainer
-            to='/admin/homepage'
+            to='/admin/extra'
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
             <Tab

@@ -133,14 +133,14 @@ const UserListScreen = ({ history }) => {
             actions={[
               {
                 icon: 'edit',
-                tooltip: 'Edit User',
+                tooltip: 'Edit',
                 onClick: (event, rowData) =>
                   history.push(`/admin/user/${rowData._id}/edit`),
               },
 
               {
                 icon: 'delete',
-                tooltip: 'Delete User',
+                tooltip: 'Delete',
                 onClick: (event, rowData) => deleteHandler(rowData._id),
               },
             ]}

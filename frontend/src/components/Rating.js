@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-
 const Rating = ({ value, text, color }) => {
   return (
     <div>
@@ -71,7 +70,7 @@ const Rating = ({ value, text, color }) => {
 };
 
 Rating.defaultProps = {
-  color: 'dodgerBlue',
+  color: 'gold',
 };
 
 Rating.propTypes = {

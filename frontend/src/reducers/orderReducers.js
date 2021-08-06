@@ -21,6 +21,22 @@ import {
   ORDER_UPDATE_SUCCESS,
   ORDER_UPDATE_FAIL,
   ORDER_UPDATE_RESET,
+  ORDER_DELIVER_REQUEST,
+  ORDER_DELIVER_SUCCESS,
+  ORDER_DELIVER_FAIL,
+  ORDER_DELIVER_RESET,
+  ORDER_CONFIRM_RESET,
+  ORDER_CONFIRM_FAIL,
+  ORDER_CONFIRM_SUCCESS,
+  ORDER_CONFIRM_REQUEST,
+  ORDER_OUT_FOR_DELIVERY_RESET,
+  ORDER_OUT_FOR_DELIVERY_FAIL,
+  ORDER_OUT_FOR_DELIVERY_SUCCESS,
+  ORDER_OUT_FOR_DELIVERY_REQUEST,
+  ORDER_PROCESSING_RESET,
+  ORDER_PROCESSING_FAIL,
+  ORDER_PROCESSING_SUCCESS,
+  ORDER_PROCESSING_REQUEST,
 } from '../constants/orderConstants';
 
 export const orderCreateReducer = (state = {}, action) => {
@@ -118,6 +134,68 @@ export const orderUpdateReducer = (state = { updatedOrder: {} }, action) => {
       return { loading: false, error: action.payload };
     case ORDER_UPDATE_RESET:
       return { updatedOrder: {} };
+    default:
+      return state;
+  }
+};
+
+export const orderProcessingReducer = (state = {}, action) => {
+  switch (action.type) {
+    case ORDER_PROCESSING_REQUEST:
+      return { loading: true };
+    case ORDER_PROCESSING_SUCCESS:
+      return { loading: false, success: true };
+    case ORDER_PROCESSING_FAIL:
+      return { loading: false, error: action.payload };
+    case ORDER_PROCESSING_RESET:
+      return {};
+    default:
+      return state;
+  }
+};
+
+export const orderOutForDeliveryReducer = (state = {}, action) => {
+  switch (action.type) {
+    case ORDER_OUT_FOR_DELIVERY_REQUEST:
+      return { loading: true };
+    case ORDER_OUT_FOR_DELIVERY_SUCCESS:
+      return { loading: false, success: true };
+    case ORDER_OUT_FOR_DELIVERY_FAIL:
+      return { loading: false, error: action.payload };
+    case ORDER_OUT_FOR_DELIVERY_RESET:
+      return {};
+    default:
+      return state;
+  }
+};
+
+
+export const orderConfirmReducer = (state = {}, action) => {
+  switch (action.type) {
+    case ORDER_CONFIRM_REQUEST:
+      return { loading: true };
+    case ORDER_CONFIRM_SUCCESS:
+      return { loading: false, success: true };
+    case ORDER_CONFIRM_FAIL:
+      return { loading: false, error: action.payload };
+    case ORDER_CONFIRM_RESET:
+      return {};
+    default:
+      return state;
+  }
+};
+
+
+export const orderDeliverReducer = (state = {}, action) => {
+  switch (action.type) {
+    case ORDER_DELIVER_REQUEST:
+      return { loading: true };
+    case ORDER_DELIVER_SUCCESS:
+      return { loading: false, success: true };
+    case ORDER_DELIVER_FAIL:
+      return { loading: false, error: action.payload };
+    case ORDER_DELIVER_RESET:
+      return {};
     default:
       return state;
   }

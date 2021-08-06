@@ -3,7 +3,7 @@ const products = [
     name: 'Shirt_1',
     gender: 'B',
     class: ['X', 'IX', 'IV', 'VI', 'VIII'],
-    schoolName: 'BBPS',
+    schoolName: ['BBPS', 'G.D. Goenka Public School MODEL TOWN'],
     image: '/images/products/airpods.jpg',
     description:
       'Bluetooth technology lets you connect it with compatible devices wirelessly High-quality AAC audio offers immersive listening experience Built-in microphone allows you to take calls while working',
@@ -40,7 +40,7 @@ const products = [
     name: 'Shirt_2',
     gender: 'G',
     class: ['X', 'IX', 'IV', 'VI', 'VII'],
-    schoolName: 'BBPS',
+    schoolName: ['BBPS', 'Presidium School PALAM VIHAR'],
     image: '/images/products/phone.jpg',
     description:
       'Introducing the iPhone 11 Pro. A transformative triple-camera system that adds tons of capability without complexity. An unprecedented leap in battery life',
@@ -75,7 +75,7 @@ const products = [
   },
   {
     name: 'Shirt_3',
-    schoolName: 'BBPS',
+    schoolName: ['BBPS', 'Presidium School PALAM VIHAR'],
     class: ['X', 'IX', 'IV'],
     gender: 'B',
     image: '/images/products/camera.jpg',
@@ -112,7 +112,7 @@ const products = [
   },
   {
     name: 'Shirt_4',
-    schoolName: 'BBPS',
+    schoolName: ['BBPS', 'Presidium School PALAM VIHAR'],
     class: ['X', 'IX', 'Nursery', 'KG', 'V', 'VI', 'IV'],
     gender: 'G',
     image: '/images/products/playstation.jpg',
@@ -150,7 +150,7 @@ const products = [
   },
   {
     name: 'Shirt_5',
-    schoolName: 'BBPS',
+    schoolName: ['BBPS', 'Bal Bharati Public School GRH'],
     class: 'X',
     gender: 'B',
     image: '/images/products/mouse.jpg',
@@ -187,7 +187,7 @@ const products = [
   },
   {
     name: 'Shirt_6',
-    schoolName: 'BBPS',
+    schoolName: ['BBPS', 'Bal Bharati Public School GRH'],
     class: ['X', 'IX', 'Nursery', 'KG'],
     gender: 'G',
     type: 'Trouser',

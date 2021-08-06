@@ -19,31 +19,38 @@ import {
   getCartFromDatabase,
 } from '../actions/cartActions';
 import { logout } from '../actions/userActions';
+import Loader from '../components/Loader';
 // import { LinkContainer } from 'react-router-bootstrap';
 
 const CartScreen = ({ match, location, history }) => {
-  const productId = match.params.id;
-
   // const [customQty, setCustomQty] = useState(false);
   // const [customId, setCustomId] = useState('');
   // const [changedQty, setChangedQty] = useState('');
-
-  const qty = location.search
-    ? Number(location.search.split('q=')[1].split('?')[0])
-    : 1;
-  const index = location.search ? Number(location.search.split('i=')[1]) : 1;
 
   const dispatch = useDispatch();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  useEffect(() => {
-    if (userInfo && userInfo.token) {
-      dispatch(getCartFromDatabase());
-    }
-    // eslint-disable-next-line
-  }, [dispatch, userInfo]);
+  const cart = useSelector((state) => state.cart);
+  const { cartItems, added } = cart;
+
+  // if (userInfo && userInfo.token) {
+  //   dispatch(getCartFromDatabase());
+  // }
+
+  // useEffect(() => {
+  //   if (userInfo && userInfo.token) {
+  //     if (added) {
+  //       dispatch(getCartFromDatabase());
+  //     }
+  //   }
+  // }, [userInfo, dispatch, added]);
+  // useEffect(() => {
+  //   window.addEventListener('beforeunload', () => {
+  //     dispatch(getCartFromDatabase());
+  //   });
+  // }, []);
 
   useEffect(() => {
     if (userInfo && userInfo.token) {
@@ -59,15 +66,6 @@ const CartScreen = ({ match, location, history }) => {
       );
     }
   }, [dispatch, userInfo, history]);
-
-  const cart = useSelector((state) => state.cart);
-  const { cartItems } = cart;
-
-  useEffect(() => {
-    if (productId) {
-      dispatch(addToCart(productId, index, qty));
-    }
-  }, [dispatch, productId, qty, index]);
 
   const checkOutHandler = () => {
     if (userInfo && userInfo.token) {

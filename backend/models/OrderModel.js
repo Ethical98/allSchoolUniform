@@ -30,7 +30,7 @@ const orderSchema = mongoose.Schema(
           ref: 'Product',
         },
         tax: { type: Number },
-        schoolName: { type: String },
+        schoolName: [{ type: String }],
         productCode: { type: String },
       },
     ],
@@ -47,7 +47,7 @@ const orderSchema = mongoose.Schema(
           ref: 'Product',
         },
         tax: { type: Number },
-        schoolName: { type: String },
+        schoolName: [{ type: String }],
         productCode: { type: String },
       },
     ],
@@ -95,13 +95,40 @@ const orderSchema = mongoose.Schema(
     paidAt: {
       type: Date,
     },
-    isDelivered: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    deliveredAt: {
-      type: Date,
+
+    tracking: {
+      isConfirmed: {
+        type: Boolean,
+        required: true,
+        default: false,
+      },
+      isProcessing: {
+        type: Boolean,
+        required: true,
+        default: false,
+      },
+      isOutForDelivery: {
+        type: Boolean,
+        required: true,
+        default: false,
+      },
+      processedAt: {
+        type: Date,
+      },
+      outForDeliveryAt: {
+        type: Date,
+      },
+      confirmedAt: {
+        type: Date,
+      },
+      deliveredAt: {
+        type: Date,
+      },
+      isDelivered: {
+        type: Boolean,
+        required: true,
+        default: false,
+      },
     },
   },
   { timestamps: true }
@@ -109,23 +136,28 @@ const orderSchema = mongoose.Schema(
 
 orderSchema.pre('save', async function (next) {
   const doc = this;
-  const count = await Counter.findByIdAndUpdate(
-    { _id: 'orderId' },
-    { $inc: { seq: 1 } },
-    { new: true, upsert: true }
-  );
+  let count;
+  if (doc.isNew) {
+    count = await Counter.findByIdAndUpdate(
+      { _id: 'orderId' },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+  }
 
   try {
-    const d = new Date();
-    doc.orderId =
-      'ASU' +
-      String(d.getFullYear()) +
-      String(d.getMonth() + 1).padStart(2, '0') +
-      String(d.getDate()).padStart(2, '0') +
-      '-' +
-      String(d.getDay()) +
-      String(count.seq).padStart(5, '0');
-    next();
+    if (doc.isNew) {
+      const d = new Date();
+      doc.orderId =
+        'ASU' +
+        String(d.getFullYear()) +
+        String(d.getMonth() + 1).padStart(2, '0') +
+        String(d.getDate()).padStart(2, '0') +
+        '-' +
+        String(d.getDay()) +
+        String(count.seq).padStart(5, '0');
+      next();
+    }
   } catch (error) {
     throw new Error('Error Creating Order!! Please Try Again..');
   }

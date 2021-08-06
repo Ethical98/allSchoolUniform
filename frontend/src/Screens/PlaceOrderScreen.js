@@ -9,7 +9,6 @@ import {
   payOrderPayU,
   updateOrder,
 } from '../actions/orderActions';
-import { getCartFromDatabase } from '../actions/cartActions';
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
 
@@ -36,12 +35,12 @@ const PlaceOrderScreen = ({ history }) => {
   const orderCreate = useSelector((state) => state.orderCreate);
   const { order, success, error } = orderCreate;
 
-  useEffect(() => {
-    if (cartItems.length !== 0) {
-      dispatch(getCartFromDatabase());
-    }
-    // eslint-disable-next-line
-  }, [dispatch, cartItems.length]);
+  // useEffect(() => {
+  //   if (cartItems.length !== 0) {
+  //     dispatch(getCartFromDatabase());
+  //   }
+  //   // eslint-disable-next-line
+  // }, [dispatch, cartItems.length]);
 
   if (userInfo && userInfo.token) {
     jsonwebtoken.verify(
@@ -75,12 +74,13 @@ const PlaceOrderScreen = ({ history }) => {
         };
         document.body.appendChild(script);
       };
+      addPayUMoneyScript();
 
-      if (!window.bolt) {
-        addPayUMoneyScript();
-      } else {
-        setScriptReady(true);
-      }
+      // if (!window.bolt) {
+      //   addPayUMoneyScript();
+      // } else {
+      //   setScriptReady(true);
+      // }
     }
   }, [dispatch, cart.paymentMethod]);
 

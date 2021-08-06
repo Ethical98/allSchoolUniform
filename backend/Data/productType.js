@@ -102,6 +102,9 @@ const productType = [
         tax: 0,
       },
     ],
+    image: '/images/products/camera.jpg',
+    sizeChart: '/images/products/camera.jpg',
+    sizeGuide: '/images/products/camera.jpg',
   },
   {
     type: 'Trouser',
@@ -215,6 +218,9 @@ const productType = [
         tax: 0,
       },
     ],
+    image: '/images/products/camera.jpg',
+    sizeChart: '/images/products/camera.jpg',
+    sizeGuide: '/images/products/camera.jpg',
   },
 ];
 

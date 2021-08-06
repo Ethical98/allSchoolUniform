@@ -20,7 +20,7 @@ import MaterialTable from 'material-table';
 import { logout } from '../actions/userActions';
 import { createProduct } from '../actions/productActions';
 
-const ProductCreateScreen = ({ match, history }) => {
+const ProductCreateScreen = ({ history }) => {
   const dispatch = useDispatch();
 
   const [name, setName] = useState('');
@@ -106,7 +106,7 @@ const ProductCreateScreen = ({ match, history }) => {
   };
 
   const productCreate = useSelector((state) => state.productCreate);
-  const { loading, error } = productCreate;
+  const { loading, error, success } = productCreate;
 
   const schoolList = useSelector((state) => state.schoolList);
   const { masterSchools } = schoolList;
@@ -159,6 +159,9 @@ const ProductCreateScreen = ({ match, history }) => {
   }, [dispatch, history, userInfo]);
 
   useEffect(() => {
+    if (success) {
+      history.push('/admin/productlist');
+    }
     dispatch(listClasses());
     dispatch(listTypes());
     dispatch(listSchools());
@@ -166,7 +169,7 @@ const ProductCreateScreen = ({ match, history }) => {
     if (masterSizes && masterSizes.variants && type) {
       setMasterSize([...masterSizes.variants]);
     }
-  }, [dispatch, masterSizes, type]);
+  }, [dispatch, masterSizes, type, success, history]);
 
   useEffect(() => {
     if (type) {
@@ -176,6 +179,7 @@ const ProductCreateScreen = ({ match, history }) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
+    window.scrollTo(0, 0);
     dispatch(
       createProduct({
         name,
@@ -570,7 +574,7 @@ const ProductCreateScreen = ({ match, history }) => {
             </Row>
 
             <Row className='justify-content-md-center'>
-              <Col md={3} className='text-center'>
+              <Col md={5} className='text-center'>
                 <Button variant='dark' type='submit' className='col-12'>
                   CREATE
                 </Button>

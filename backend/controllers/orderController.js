@@ -280,7 +280,7 @@ const getOrders = asyncHandler(async (req, res) => {
 });
 
 // @desc Edit order
-// @route POST /api/orders/:id
+// @route PUT /api/orders/:id
 // @access Private/Admin
 const editOrderById = asyncHandler(async (req, res) => {
   const { modifiedOrderItems, shippingAddress, itemsPrice, totalPrice } =
@@ -289,10 +289,9 @@ const editOrderById = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
   if (order) {
     order.shippingAddress = shippingAddress || order.shippingAddress;
-    // order.itemsPrice = itemsPrice || order.itemsPrice;
-    // order.taxPrice = taxPrice || order.taxPrice;
-    // //order.shippingPrice = shippingPrice || order.shippingPrice;
+
     order.totalPrice = totalPrice || order.totalPrice;
+
     if (modifiedOrderItems && modifiedOrderItems.length === 0) {
       order.modified = false;
     } else {
@@ -305,6 +304,116 @@ const editOrderById = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Get order by ORDERID
+// @route GET /api/orders/orderid/:id
+// @access Public
+const getOrderByOrderId = asyncHandler(async (req, res) => {
+  const order = await Order.findOne({ orderId: req.params.id });
+  if (order) {
+    res.json(order);
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
+// @desc Update order to Delivered
+// @route GET /api/orders/:id/deliver
+// @access Private/Admin
+const updateOrderToDelivered = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    if (
+      order.tracking.isConfirmed &&
+      order.tracking.isProcessing &&
+      order.tracking.isOutForDelivery
+    ) {
+      order.tracking.isDelivered = true;
+      order.tracking.deliveredAt = Date.now();
+
+      const updatedOrder = await order.save();
+
+      res.json(updatedOrder);
+    } else {
+      res.status(500);
+      throw new Error('Cannot Update Delivered Before It is out for Delivery');
+    }
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
+// @desc Update order to Out For Delivery
+// @route GET /api/orders/:id/outfordelivery
+// @access Private/Admin
+const updateOrderToOutForDelivery = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    if (order.tracking.isConfirmed && order.tracking.isProcessing) {
+      order.tracking.isOutForDelivery = true;
+      order.tracking.outForDeliveryAt = Date.now();
+
+      const updatedOrder = await order.save();
+
+      res.json(updatedOrder);
+    } else {
+      res.status(500);
+      throw new Error(
+        'Cannot Update To Out For Delivery Before It is under Processing '
+      );
+    }
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
+// @desc Update order to Processing
+// @route GET /api/orders/:id/processing
+// @access Private/Admin
+const updateOrderToProcessing = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    if (order.tracking.isConfirmed) {
+      order.tracking.isProcessing = true;
+      order.tracking.processedAt = Date.now();
+
+      const updatedOrder = await order.save();
+
+      res.json(updatedOrder);
+    } else {
+      res.status(500);
+      throw new Error('Cannot Update To Processing Before It is Confirmed ');
+    }
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
+// @desc Update order to Confirmed
+// @route GET /api/orders/:id/confirm
+// @access Private/Admin
+const updateOrderToConfirmed = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    order.tracking.isConfirmed = true;
+    order.tracking.confirmedAt = Date.now();
+
+    const updatedOrder = await order.save();
+
+    res.json(updatedOrder);
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
 export {
   getOrders,
   addOrderItems,
@@ -313,4 +422,9 @@ export {
   getMyOrders,
   sendMail,
   editOrderById,
+  getOrderByOrderId,
+  updateOrderToConfirmed,
+  updateOrderToOutForDelivery,
+  updateOrderToDelivered,
+  updateOrderToProcessing,
 };

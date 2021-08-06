@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import jsonwebtoken from 'jsonwebtoken';
 import {
@@ -16,21 +16,36 @@ import {
 } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
-import { getOrderDetails, editOrder } from '../actions/orderActions';
-import { USER_UPDATE_RESET } from '../constants/userConstants';
+import {
+  getOrderDetails,
+  editOrder,
+  deliverOrder,
+  outForDeliveryOrder,
+  processOrder,
+  confirmOrder,
+} from '../actions/orderActions';
+import {
+  ORDER_CONFIRM_RESET,
+  ORDER_DELIVER_RESET,
+  ORDER_OUT_FOR_DELIVERY_RESET,
+  ORDER_PROCESSING_RESET,
+  ORDER_UPDATE_RESET,
+} from '../constants/orderConstants';
 import { logout } from '../actions/userActions';
 import Loader from '../components/Loader';
 import MaterialTable from 'material-table';
 import { LinkContainer } from 'react-router-bootstrap';
-import { ListProductDetailsById } from '../actions/productActions';
+import { listProductDetailsById } from '../actions/productActions';
 import { listSchools } from '../actions/schoolActions';
 import { listProducts } from '../actions/productActions';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import Paginate from '../components/Paginate';
 
 const OrderEditScreen = ({ history, match }) => {
   const dispatch = useDispatch();
   const orderId = match.params.id;
+  const pageNumber = match.params.pageNumber || 1;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -41,11 +56,44 @@ const OrderEditScreen = ({ history, match }) => {
   const productDetails = useSelector((state) => state.productDetails);
   const { product } = productDetails;
 
+  const orderUpdate = useSelector((state) => state.orderUpdate);
+  const { loading: loadingUpdate, error: errorUpdate, success } = orderUpdate;
+
+  const orderDeliver = useSelector((state) => state.orderDeliver);
+  const {
+    loading: loadingDeliver,
+    error: errorDeliver,
+    success: successDeliver,
+  } = orderDeliver;
+
+  const orderProcessing = useSelector((state) => state.orderProcessing);
+  const {
+    loading: loadingProcessing,
+    error: errorProcessing,
+    success: successProcessing,
+  } = orderProcessing;
+
+  const orderOutForDelivery = useSelector((state) => state.orderOutForDelivery);
+  const {
+    loading: loadingOutForDelivery,
+    error: errorOutForDelivery,
+    success: successOutForDelivery,
+  } = orderOutForDelivery;
+
+  const orderConfirm = useSelector((state) => state.orderConfirm);
+  const {
+    loading: loadingConfirm,
+    error: errorConfirm,
+    success: successConfirm,
+  } = orderConfirm;
+
   const productList = useSelector((state) => state.productList);
   const {
     loading: loadingProducts,
     error: errorProducts,
     products,
+    pages,
+    page,
   } = productList;
 
   const schoolList = useSelector((state) => state.schoolList);
@@ -67,8 +115,8 @@ const OrderEditScreen = ({ history, match }) => {
   const [countInStock, setCountInStock] = useState(0);
   const [qty, setQty] = useState(1);
   const [itemsPrice, setItemsPrice] = useState('');
-  const [editModalShow, setEditModalShow] = useState(false);
-  const [newProductModalShow, setNewProductModalShow] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showNewProductModal, setShowNewProductModal] = useState(false);
   const [modify, setModify] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [school, setSchool] = useState('');
@@ -82,6 +130,11 @@ const OrderEditScreen = ({ history, match }) => {
   const [newQty, setNewQty] = useState(0);
   const [newSize, setNewSize] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
+  const [showTracking, setShowTracking] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isDelivered, setIsDelivered] = useState(false);
+  const [isOutForDelivery, setIsOutForDelivery] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const orderItemColumns = [
     {
@@ -239,55 +292,80 @@ const OrderEditScreen = ({ history, match }) => {
   }, [dispatch, userInfo, history]);
 
   useEffect(() => {
-    // if (successUpdate) {
-    //   dispatch({ type: USER_UPDATE_RESET });
-    //   history.push('admin/userlist');
-    // } else {
-    if (!order || order._id !== orderId) {
-      dispatch(getOrderDetails(orderId));
-      dispatch(listProducts());
-      dispatch(listSchools());
+    if (success) {
+      dispatch({ type: ORDER_UPDATE_RESET });
+      history.push('/admin/orderlist');
     } else {
-      setName(order.user.name);
-      setEmail(order.user.email);
-      setOrderItems(order.orderItems);
-      setPhone(order.user.phone);
-      setAddress(order.shippingAddress.address);
-      setCity(order.shippingAddress.city);
-      setCountry(order.shippingAddress.country);
-      setPostalCode(order.shippingAddress.postalCode);
-      setPaymentMethod(order.paymentMethod);
-      setTotalPrice(order.totalPrice);
-      setModify(order.modified);
-
-      if (order.modifiedItems.length > 0) {
-        setModifiedOrderItems([...order.modifiedItems]);
-        setItemsPrice(
-          Number(
-            order.modifiedItems
-              .reduce(
-                (acc, item) => acc + item.price * item.qty + Number(item.tax),
-                0
-              )
-              .toFixed(2)
-          )
-        );
+      if (
+        !order ||
+        order._id !== orderId ||
+        successConfirm ||
+        successProcessing ||
+        successOutForDelivery ||
+        successDeliver
+      ) {
+        dispatch({ type: ORDER_DELIVER_RESET });
+        dispatch({ type: ORDER_CONFIRM_RESET });
+        dispatch({ type: ORDER_PROCESSING_RESET });
+        dispatch({ type: ORDER_OUT_FOR_DELIVERY_RESET });
+        dispatch(getOrderDetails(orderId));
+        dispatch(listProducts());
+        dispatch(listSchools());
       } else {
-        setModifiedOrderItems([...order.orderItems.map((a) => ({ ...a }))]);
-        setItemsPrice(
-          Number(
-            order.orderItems
-              .reduce(
-                (acc, item) => acc + item.price * item.qty + Number(item.tax),
-                0
-              )
-              .toFixed(2)
-          )
-        );
+        setName(order.user.name);
+        setEmail(order.user.email);
+        setOrderItems(order.orderItems);
+        setPhone(order.user.phone);
+        setAddress(order.shippingAddress.address);
+        setCity(order.shippingAddress.city);
+        setCountry(order.shippingAddress.country);
+        setPostalCode(order.shippingAddress.postalCode);
+        setPaymentMethod(order.paymentMethod);
+        setTotalPrice(order.totalPrice);
+        setModify(order.modified);
+        setIsProcessing(order.tracking.isProcessing);
+        setIsDelivered(order.tracking.isDelivered);
+        setIsOutForDelivery(order.tracking.isOutForDelivery);
+        setIsConfirmed(order.tracking.isConfirmed);
+
+        if (order.modifiedItems.length > 0) {
+          setModifiedOrderItems([...order.modifiedItems]);
+          setItemsPrice(
+            Number(
+              order.modifiedItems
+                .reduce(
+                  (acc, item) => acc + item.price * item.qty + Number(item.tax),
+                  0
+                )
+                .toFixed(2)
+            )
+          );
+        } else {
+          setModifiedOrderItems([...order.orderItems.map((a) => ({ ...a }))]);
+          setItemsPrice(
+            Number(
+              order.orderItems
+                .reduce(
+                  (acc, item) => acc + item.price * item.qty + Number(item.tax),
+                  0
+                )
+                .toFixed(2)
+            )
+          );
+        }
       }
     }
-    // }
-  }, [order, orderId, dispatch, history]);
+  }, [
+    order,
+    orderId,
+    dispatch,
+    history,
+    success,
+    successConfirm,
+    successDeliver,
+    successOutForDelivery,
+    successProcessing,
+  ]);
 
   useEffect(() => {
     if (userInfo && !userInfo.isAdmin) {
@@ -322,7 +400,7 @@ const OrderEditScreen = ({ history, match }) => {
   useEffect(() => {
     if (productSizes.length > 0 && editIndex === 0 && size) {
       setCountInStock(
-        productSizes[productSizes.findIndex((x) => x.size === size)]
+        productSizes[productSizes.findIndex((x) => x.size === size.toString())]
           .countInStock
       );
     } else if (productSizes.length > 0 && size) {
@@ -357,7 +435,7 @@ const OrderEditScreen = ({ history, match }) => {
 
   const newSizeHandler = (newSizeValue, pId, sizes, name, image) => {
     setNewSize(newSizeValue);
-    const i = sizes.findIndex((x) => x.size === newSizeValue);
+    const i = sizes.findIndex((x) => x.size === newSizeValue.toString());
 
     if (newProducts.some((x) => x.product === pId)) {
       const sameIndex = newProducts.findIndex((x) => x.product === pId);
@@ -395,6 +473,7 @@ const OrderEditScreen = ({ history, match }) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
+    window.scrollTo(0, 0);
     dispatch(
       editOrder({
         orderId,
@@ -406,8 +485,8 @@ const OrderEditScreen = ({ history, match }) => {
     );
   };
 
-  const handleEditModalClose = () => {
-    setEditModalShow(false);
+  const closeEditModalHandle = () => {
+    setShowEditModal(false);
   };
 
   const saveChangesHandler = () => {
@@ -433,46 +512,58 @@ const OrderEditScreen = ({ history, match }) => {
       )
     );
     setCountInStock(1);
-    setEditModalShow(false);
+    setShowEditModal(false);
   };
 
-  const handleEditModalShow = (id, oldSize, currIndex, qtyValue) => {
+  const showEditModalHandle = (id, oldSize, currIndex, qtyValue) => {
     setSize(oldSize);
     setIndex(currIndex);
     setQty(qtyValue);
-    dispatch(ListProductDetailsById(id));
+    dispatch(listProductDetailsById(id));
 
-    setEditModalShow(true);
+    setShowEditModal(true);
   };
 
-  const handleSizeChange = (e) => {
+  const sizeChangeHandle = (e) => {
     setSize(e.target.value);
     setEditIndex(productSizes.findIndex((x) => x.size === e.target.value));
   };
 
-  const handleNewProductModalClose = () => {
-    setNewProductModalShow(false);
+  const closeNewProductModalHandle = () => {
+    setShowNewProductModal(false);
   };
 
-  const handleNewProductModalShow = () => {
-    setNewProductModalShow(true);
+  const showNewProductModalHandle = () => {
+    setShowNewProductModal(true);
     setSchool('');
-    dispatch(listProducts());
+    dispatch(listProducts('', pageNumber));
   };
+  useEffect(() => {
+    dispatch(listProducts('', pageNumber));
+  }, [pageNumber]);
 
   const saveNewItemsHandler = () => {
     setModifiedOrderItems([...modifiedOrderItems, ...newItemsToAdd]);
-    setNewProductModalShow(false);
+    setShowNewProductModal(false);
     setNewItemsToAdd([]);
     setNewSize('');
     setNewQty('');
   };
+
+  const showTrackingHandle = () => {
+    setShowTracking(true);
+  };
+
+  const closeTrackingHandle = () => {
+    setShowTracking(false);
+  };
+
   return (
     <>
       <Modal
         backdrop='static'
-        show={editModalShow}
-        onHide={handleEditModalClose}
+        show={showEditModal}
+        onHide={closeEditModalHandle}
       >
         <Modal.Header closeButton>
           <Modal.Title>Edit Product Size</Modal.Title>
@@ -481,12 +572,16 @@ const OrderEditScreen = ({ history, match }) => {
           <Row>
             <Col md={6}>
               <FloatingLabel label='Size' controlId='size'>
-                <Form.Select value={size} onChange={(e) => handleSizeChange(e)}>
-                  {productSizes.map((x) => (
-                    <option value={x.size} key={x.size}>
-                      {x.size}
-                    </option>
-                  ))}
+                <Form.Select value={size} onChange={(e) => sizeChangeHandle(e)}>
+                  {productSizes
+                    .sort((a, b) => {
+                      return a.size - b.size;
+                    })
+                    .map((x) => (
+                      <option value={x.size} key={x.size}>
+                        {x.size}
+                      </option>
+                    ))}
                 </Form.Select>
               </FloatingLabel>
             </Col>
@@ -516,8 +611,8 @@ const OrderEditScreen = ({ history, match }) => {
       <Modal
         backdrop='static'
         size={'xl'}
-        show={newProductModalShow}
-        onHide={handleNewProductModalClose}
+        show={showNewProductModal}
+        onHide={closeNewProductModalHandle}
       >
         <Modal.Header closeButton>
           <Modal.Title>Add New Product</Modal.Title>
@@ -529,69 +624,78 @@ const OrderEditScreen = ({ history, match }) => {
           ) : errorProducts ? (
             <Message variant='danger'>{errorProducts}</Message>
           ) : (
-            <MaterialTable
-              style={{ padding: '1%' }}
-              title='Products'
-              data={filteredData}
-              columns={newProductColumns}
-              options={{
-                rowStyle: {
-                  color: 'black',
-                  border: '1px solid grey',
-                },
-                actionsColumnIndex: -1,
-                paging: false,
-                selection: true,
-                showTextRowsSelected: false,
-                showSelectAllCheckbox: false,
-                selectionProps: (rowData) => ({
-                  checked:
-                    newItemsToAdd &&
-                    newItemsToAdd.some((x) => x.product === rowData._id),
-                  color: 'primary',
-                }),
-              }}
-              onSelectionChange={(data, selection) => {
-                if (!newSize) {
-                  setMessage('Please Select Size!!');
-                } else if (!newQty) {
-                  setMessage('Please Select Qty');
-                } else {
-                  setNewItemsToAdd([
-                    ...newProducts.filter((addedItem) =>
-                      data.some(
-                        (itemToAdd) => addedItem.product == itemToAdd._id
-                      )
-                    ),
-                  ]);
+            <>
+              <MaterialTable
+                style={{ padding: '1%' }}
+                title='Products'
+                data={filteredData}
+                columns={newProductColumns}
+                options={{
+                  rowStyle: {
+                    color: 'black',
+                    border: '1px solid grey',
+                  },
+                  actionsColumnIndex: -1,
+                  paging: false,
+                  selection: true,
+                  showTextRowsSelected: false,
+                  showSelectAllCheckbox: false,
+                  selectionProps: (rowData) => ({
+                    checked:
+                      newItemsToAdd &&
+                      newItemsToAdd.some((x) => x.product === rowData._id),
+                    color: 'primary',
+                  }),
+                }}
+                onSelectionChange={(data, selection) => {
+                  if (!newSize) {
+                    setMessage('Please Select Size!!');
+                  } else if (!newQty) {
+                    setMessage('Please Select Qty');
+                  } else {
+                    setNewItemsToAdd([
+                      ...newProducts.filter((addedItem) =>
+                        data.some(
+                          (itemToAdd) => addedItem.product == itemToAdd._id
+                        )
+                      ),
+                    ]);
 
-                  setMessage('');
-                }
-              }}
-              actions={[
-                {
-                  icon: () => (
-                    <Autocomplete
-                      options={masterSchool}
-                      getOptionLabel={(option) => option.name}
-                      onChange={(option, value) =>
-                        value ? setSchool(value.name) : setSchool('')
-                      }
-                      style={{ width: 250 }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label='Filter By School'
-                          variant='outlined'
-                        />
-                      )}
-                    />
-                  ),
-                  tooltip: 'Delete Product',
-                  isFreeAction: true,
-                },
-              ]}
-            />
+                    setMessage('');
+                  }
+                }}
+                actions={[
+                  {
+                    icon: () => (
+                      <Autocomplete
+                        options={masterSchool}
+                        getOptionLabel={(option) => option.name}
+                        onChange={(option, value) =>
+                          value ? setSchool(value.name) : setSchool('')
+                        }
+                        style={{ width: 250 }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label='Filter By School'
+                            variant='outlined'
+                          />
+                        )}
+                      />
+                    ),
+                    tooltip: 'Delete Product',
+                    isFreeAction: true,
+                  },
+                ]}
+              />
+              <Paginate
+                orderEdit='true'
+                pages={pages}
+                page={page}
+                isAdmin='true'
+                orderId={orderId}
+              />
+            </>
           )}
         </Modal.Body>
         <Modal.Footer>
@@ -600,6 +704,77 @@ const OrderEditScreen = ({ history, match }) => {
           </Button>
         </Modal.Footer>
       </Modal>
+      <Modal backdrop='static' show={showTracking} onHide={closeTrackingHandle}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Tracking Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Row>
+            <Form>
+              {errorConfirm ? (
+                <Message variant='danger'>{errorConfirm}</Message>
+              ) : errorProcessing ? (
+                <Message variant='danger'>{errorProcessing}</Message>
+              ) : errorOutForDelivery ? (
+                <Message variant='danger'>{errorOutForDelivery}</Message>
+              ) : (
+                errorDeliver && (
+                  <Message variant='danger'>{errorDeliver}</Message>
+                )
+              )}
+              {loadingDeliver ||
+              loadingConfirm ||
+              loadingOutForDelivery ||
+              loadingProcessing ? (
+                <Loader />
+              ) : (
+                <Row>
+                  <Col xs={6}>
+                    <Form.Check
+                      disabled={order && order.tracking.isConfirmed}
+                      checked={order && order.tracking.isConfirmed}
+                      type='switch'
+                      id='custom-switch'
+                      label='Mark As Confirmed'
+                      onChange={(e) => dispatch(confirmOrder(order))}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Form.Check
+                      disabled={order && order.tracking.isProcessing}
+                      checked={order && order.tracking.isProcessing}
+                      type='switch'
+                      id='custom-switch'
+                      label='Mark As Processing'
+                      onChange={(e) => dispatch(processOrder(order))}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Form.Check
+                      disabled={order && order.tracking.isOutForDelivery}
+                      checked={order && order.tracking.isOutForDelivery}
+                      type='switch'
+                      id='custom-switch'
+                      label='Mark As Out For Delivery'
+                      onChange={(e) => dispatch(outForDeliveryOrder(order))}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Form.Check
+                      disabled={order && order.tracking.isDelivered}
+                      checked={order && order.tracking.isDelivered}
+                      type='switch'
+                      id='custom-switch'
+                      label='Mark As Delivered'
+                      onChange={(e) => dispatch(deliverOrder(order))}
+                    />
+                  </Col>{' '}
+                </Row>
+              )}
+            </Form>
+          </Row>
+        </Modal.Body>
+      </Modal>
 
       <Link to='/admin/orderlist' className='btn btn-outline-dark my-3'>
         Go Back
@@ -607,8 +782,8 @@ const OrderEditScreen = ({ history, match }) => {
       <Container>
         <h1>EDIT ORDER</h1>
 
-        {/* {loadingUpdate && <Loader />}
-        {errorUpdate && <Message variant='warning'>{errorUpdate}</Message>} */}
+        {loadingUpdate && <Loader />}
+        {errorUpdate && <Message variant='warning'>{errorUpdate}</Message>}
         {loading ? (
           <Loader />
         ) : error ? (
@@ -617,6 +792,13 @@ const OrderEditScreen = ({ history, match }) => {
           <Form onSubmit={submitHandler}>
             <Row>
               <Col md={4} className='mb-3'>
+                <Button
+                  variant='outline-warning'
+                  className='col-12 mb-3'
+                  onClick={showTrackingHandle}
+                >
+                  EDIT TRACKING DETAILS
+                </Button>
                 <FloatingLabel className='mb-3' controlId='email' label='Email'>
                   <Form.Control
                     className='mb-3'
@@ -749,7 +931,7 @@ const OrderEditScreen = ({ history, match }) => {
                       <InputGroup.Text>Delivered</InputGroup.Text>
                       <InputGroup.Text>
                         {' '}
-                        {order.isDeleiverd ? (
+                        {order.tracking.isDeliverd ? (
                           <i
                             className='fas fa-check'
                             style={{ color: 'green' }}
@@ -768,13 +950,15 @@ const OrderEditScreen = ({ history, match }) => {
               <Col md={8}>
                 <Row className='mb-3'>
                   <Col>
-                    <Button
-                      className='float-end'
-                      variant='outline-info'
-                      onClick={() => setModify(true)}
-                    >
-                      MODIFY ITEMS
-                    </Button>
+                    {!modify && (
+                      <Button
+                        className='float-end'
+                        variant='outline-info'
+                        onClick={() => setModify(true)}
+                      >
+                        MODIFY ITEMS
+                      </Button>
+                    )}
                   </Col>
                 </Row>
                 <Form.Group controlId='orderItems' className='mb-3'>
@@ -812,7 +996,7 @@ const OrderEditScreen = ({ history, match }) => {
                         <Button
                           variant='outline-info'
                           className='my-3 float-end '
-                          onClick={handleNewProductModalShow}
+                          onClick={showNewProductModalHandle}
                         >
                           <i className='fas fa-plus' /> ADD PRODUCT
                         </Button>
@@ -849,7 +1033,7 @@ const OrderEditScreen = ({ history, match }) => {
                           icon: 'edit',
                           tooltip: 'Edit',
                           onClick: (event, rowData) => {
-                            handleEditModalShow(
+                            showEditModalHandle(
                               rowData.product,
                               rowData.size,
                               rowData.tableData.id,
@@ -899,7 +1083,7 @@ const OrderEditScreen = ({ history, match }) => {
               </Col>
             </Row>
             <Row className='justify-content-md-center'>
-              <Col md={3} className='text-center'>
+              <Col md={5} className='text-center'>
                 <Button variant='dark' type='submit' className='col-12'>
                   UPDATE
                 </Button>

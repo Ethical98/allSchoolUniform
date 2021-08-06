@@ -3,6 +3,7 @@ import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import {
   productCreateReducer,
+  productCreateReviewReducer,
   productDeleteReducer,
   productDetailsReducer,
   productListReducer,
@@ -27,11 +28,30 @@ import {
   orderListMyReducer,
   orderListReducer,
   orderUpdateReducer,
+  orderDeliverReducer,
+  orderOutForDeliveryReducer,
+  orderProcessingReducer,
+  orderConfirmReducer,
 } from './reducers/orderReducers';
 import { decryptData } from './utils/Crypto';
-import { typeListReducer, typeSizesListReducer } from './reducers/typeReducers';
+import {
+  typeCreateReducer,
+  typeDeleteReducer,
+  typeDetailsReducer,
+  typeListAllReducer,
+  typeListReducer,
+  typeSizesListReducer,
+  typeUpdateReducer,
+} from './reducers/typeReducers';
 import { classListReducer } from './reducers/classReducers';
-import { schoolListReducer } from './reducers/schoolReducers';
+import {
+  schoolCreateReducer,
+  schoolDeleteReducer,
+  schoolDetailsReducer,
+  schoolListReducer,
+  schoolNameListReducer,
+  schoolUpdateReducer,
+} from './reducers/schoolReducers';
 
 const reducer = combineReducers({
   productList: productListReducer,
@@ -39,10 +59,21 @@ const reducer = combineReducers({
   productDelete: productDeleteReducer,
   productCreate: productCreateReducer,
   productUpdate: productUpdateReducer,
+  productCreateReview: productCreateReviewReducer,
   typeSizesList: typeSizesListReducer,
   typeList: typeListReducer,
+  typeListAll: typeListAllReducer,
   classList: classListReducer,
   schoolList: schoolListReducer,
+  schoolNameList: schoolNameListReducer,
+  schoolCreate: schoolCreateReducer,
+  schoolUpdate: schoolUpdateReducer,
+  schoolDelete: schoolDeleteReducer,
+  schoolDetails: schoolDetailsReducer,
+  typeCreate: typeCreateReducer,
+  typeUpdate: typeUpdateReducer,
+  typeDelete: typeDeleteReducer,
+  typeDetails: typeDetailsReducer,
   cart: cartReducer,
   // cartReset: cartResetReducer,
   userLogin: userLoginReducer,
@@ -60,6 +91,10 @@ const reducer = combineReducers({
   orderListMy: orderListMyReducer,
   orderList: orderListReducer,
   orderUpdate: orderUpdateReducer,
+  orderDeliver: orderDeliverReducer,
+  orderOutForDelivery: orderOutForDeliveryReducer,
+  orderProcessing: orderProcessingReducer,
+  orderConfirm: orderConfirmReducer,
 });
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;

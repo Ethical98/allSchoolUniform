@@ -19,6 +19,7 @@ export const cartReducer = (
     cartItems: [],
     shippingAddress: {},
     cartSuccess: false,
+    added: false,
     cartId: '',
   },
   action
@@ -38,6 +39,7 @@ export const cartReducer = (
       if (existItem) {
         return {
           ...state,
+          added: true,
           cartItems: state.cartItems.map((x) =>
             x._id === existItem._id ? item : x
           ),
@@ -45,6 +47,7 @@ export const cartReducer = (
       } else {
         return {
           ...state,
+          added: true,
           cartItems: [...state.cartItems, item],
         };
       }

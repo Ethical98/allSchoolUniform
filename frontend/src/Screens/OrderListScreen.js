@@ -22,15 +22,11 @@ const OrderListScreen = ({ history }) => {
 
   const [open, setOpen] = useState(false);
 
-  const [deleteId, setDeleteId] = useState('');
-
   const orderList = useSelector((state) => state.orderList);
   const { loading, orders, error } = orderList;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-
-  const classes = useStyles();
 
   const columns = [
     {
@@ -76,11 +72,10 @@ const OrderListScreen = ({ history }) => {
     },
     {
       title: 'Delivered',
-      field: 'isDelivered',
 
       render: (item) =>
-        item.isDelivered ? (
-          item.deliveredAt.substring(0, 10)
+        item.tracking.isDelivered ? (
+          item.tracking.deliveredAt.substring(0, 10)
         ) : (
           <i className='fas fa-times' style={{ color: 'red' }}></i>
         ),
@@ -141,7 +136,7 @@ const OrderListScreen = ({ history }) => {
             actions={[
               {
                 icon: 'edit',
-                tooltip: 'Edit Order',
+                tooltip: 'Edit',
                 onClick: (event, rowData) =>
                   history.push(`/admin/order/${rowData._id}/edit`),
               },
@@ -153,7 +148,7 @@ const OrderListScreen = ({ history }) => {
                 ),
                 tooltip: 'Details',
                 onClick: (event, rowData) =>
-                  history.push(`/admin/order/${rowData._id}/`),
+                  history.push(`/orderdetails/${rowData._id}/`),
               },
             ]}
           />
