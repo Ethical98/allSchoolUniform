@@ -102,7 +102,7 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
 };
 
 export const payOrderPayU =
-  (totalPrice, name, email, mobile, orderId) => async (dispatch, getState) => {
+  (totalPrice, name, email, mobile) => async (dispatch, getState) => {
     try {
       const {
         userLogin: { userInfo },
@@ -115,10 +115,10 @@ export const payOrderPayU =
           Authorization: `Bearer ${userInfo.token}`,
         },
       };
-
+      const d = new Date();
       const pd = {
         key: process.env.REACT_APP_PAYUMONEY_MERCHANT_KEY,
-        txnid: orderId,
+        txnid: d.getTime().toString(),
         hash: '',
         amount: totalPrice,
         firstname: name,

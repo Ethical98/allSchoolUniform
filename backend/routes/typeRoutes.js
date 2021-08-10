@@ -5,6 +5,7 @@ import {
   getProductTypes,
   getSizes,
   getTypeDetails,
+  getTypeImages,
   getTypes,
   updateType,
 } from '../controllers/typeController.js';
@@ -22,6 +23,7 @@ router
   .get(protect, isAdmin, getTypeDetails)
   .put(protect, isAdmin, updateType)
   .delete(protect, isAdmin, deleteType);
+router.route('/:type/images').get(getTypeImages);
 router.route('/:type/sizes').get(protect, isAdmin, getSizes);
 
 export default router;

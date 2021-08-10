@@ -9,6 +9,9 @@ import {
   TYPE_DETAILS_FAIL,
   TYPE_DETAILS_REQUEST,
   TYPE_DETAILS_SUCCESS,
+  TYPE_GET_IMAGES_FAIL,
+  TYPE_GET_IMAGES_REQUEST,
+  TYPE_GET_IMAGES_SUCCESS,
   TYPE_LIST_ALL_FAIL,
   TYPE_LIST_ALL_REQUEST,
   TYPE_LIST_ALL_SUCCESS,
@@ -54,7 +57,6 @@ export const listTypes = () => async (dispatch, getState) => {
   }
 };
 
-
 export const listAllTypes = () => async (dispatch, getState) => {
   try {
     dispatch({ type: TYPE_LIST_ALL_REQUEST });
@@ -78,6 +80,27 @@ export const listAllTypes = () => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: TYPE_LIST_ALL_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const getTypeImages = (type) => async (dispatch) => {
+  try {
+    dispatch({ type: TYPE_GET_IMAGES_REQUEST });
+
+    const { data } = await axios.get(`/api/types/${type}/images`);
+    console.log(data);
+    dispatch({
+      type: TYPE_GET_IMAGES_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: TYPE_GET_IMAGES_FAIL,
       payload:
         error.response && error.response.data.message
           ? error.response.data.message

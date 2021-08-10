@@ -58,22 +58,20 @@ const PlaceOrderScreen = ({ history }) => {
   if (!cart.paymentMethod) {
     history.push('/payment');
   }
-
+  const addPayUMoneyScript = () => {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://checkout-static.citruspay.com/bolt/run/bolt.min.js';
+    //script.src="https://sboxcheckout-static.citruspay.com/bolt/run/bolt.min.js"
+    script.id = 'bolt';
+    script.async = true;
+    script.onLoad = () => {
+      setScriptReady(true);
+    };
+    document.body.appendChild(script);
+  };
   useEffect(() => {
     if (cart.paymentMethod !== 'COD') {
-      const addPayUMoneyScript = () => {
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src =
-          'https://checkout-static.citruspay.com/bolt/run/bolt.min.js';
-        //script.src="https://sboxcheckout-static.citruspay.com/bolt/run/bolt.min.js"
-        script.id = 'bolt';
-        script.async = true;
-        script.onLoad = () => {
-          setScriptReady(true);
-        };
-        document.body.appendChild(script);
-      };
       addPayUMoneyScript();
 
       // if (!window.bolt) {
@@ -90,7 +88,7 @@ const PlaceOrderScreen = ({ history }) => {
         if (errorPay === 'Overlay closed by consumer') {
           setMessage('Payment Canceled Please try again!!');
         }
-        if (success) {
+        if (successPay) {
           dispatch(updateOrder(order._id, paymentResponse));
           history.push(`/order/${order._id}`);
         }
@@ -101,7 +99,7 @@ const PlaceOrderScreen = ({ history }) => {
       }
     }
     // eslint-disable-next-line
-  }, [dispatch, cartId, errorPay, history, success]);
+  }, [dispatch, errorPay, history, success, successPay]);
 
   const addDecimals = (num) => {
     return (Math.round(num * 100) / 100).toFixed(2);
@@ -151,17 +149,14 @@ const PlaceOrderScreen = ({ history }) => {
         })
       );
     } else {
-      if (cartId) {
-        dispatch(
-          payOrderPayU(
-            cart.totalPrice,
-            userInfo.name,
-            userInfo.email,
-            userInfo.phone,
-            cartId
-          )
-        );
-      }
+      dispatch(
+        payOrderPayU(
+          cart.totalPrice,
+          userInfo.name,
+          userInfo.email,
+          userInfo.phone
+        )
+      );
     }
   };
 

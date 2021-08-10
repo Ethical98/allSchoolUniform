@@ -41,6 +41,7 @@ import { listProducts } from '../actions/productActions';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Paginate from '../components/Paginate';
+import DialogBox from '../components/DialogBox';
 
 const OrderEditScreen = ({ history, match }) => {
   const dispatch = useDispatch();
@@ -135,6 +136,7 @@ const OrderEditScreen = ({ history, match }) => {
   const [isDelivered, setIsDelivered] = useState(false);
   const [isOutForDelivery, setIsOutForDelivery] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
 
   const orderItemColumns = [
     {
@@ -327,6 +329,7 @@ const OrderEditScreen = ({ history, match }) => {
         setIsDelivered(order.tracking.isDelivered);
         setIsOutForDelivery(order.tracking.isOutForDelivery);
         setIsConfirmed(order.tracking.isConfirmed);
+        setOrderNumber(order.orderId);
 
         if (order.modifiedItems.length > 0) {
           setModifiedOrderItems([...order.modifiedItems]);
@@ -560,228 +563,221 @@ const OrderEditScreen = ({ history, match }) => {
 
   return (
     <>
-      <Modal
-        backdrop='static'
+      <DialogBox
+        handleClose={closeEditModalHandle}
         show={showEditModal}
-        onHide={closeEditModalHandle}
+        title='Edit Item'
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Product Size</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Row>
-            <Col md={6}>
-              <FloatingLabel label='Size' controlId='size'>
-                <Form.Select value={size} onChange={(e) => sizeChangeHandle(e)}>
-                  {productSizes
-                    .sort((a, b) => {
-                      return a.size - b.size;
-                    })
-                    .map((x) => (
-                      <option value={x.size} key={x.size}>
-                        {x.size}
-                      </option>
-                    ))}
-                </Form.Select>
-              </FloatingLabel>
-            </Col>
-            <Col md='6'>
-              <FloatingLabel label='Qty' controlId='qty'>
-                <Form.Select
-                  value={qty}
-                  onChange={(e) => setQty(Number(e.target.value))}
-                >
-                  {[...Array(countInStock).keys()].map((x) => (
-                    <option key={x + 1} value={x + 1}>
-                      {x + 1}
+        <Row>
+          <Col md={6}>
+            <FloatingLabel label='Size' controlId='size'>
+              <Form.Select value={size} onChange={(e) => sizeChangeHandle(e)}>
+                {productSizes
+                  .sort((a, b) => {
+                    return a.size - b.size;
+                  })
+                  .map((x) => (
+                    <option value={x.size} key={x.size}>
+                      {x.size}
                     </option>
                   ))}
-                </Form.Select>
-              </FloatingLabel>
-            </Col>
-          </Row>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant='primary' onClick={saveChangesHandler}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
+              </Form.Select>
+            </FloatingLabel>
+          </Col>
+          <Col md='6'>
+            <FloatingLabel label='Qty' controlId='qty'>
+              <Form.Select
+                value={qty}
+                onChange={(e) => setQty(Number(e.target.value))}
+              >
+                {[...Array(countInStock).keys()].map((x) => (
+                  <option key={x + 1} value={x + 1}>
+                    {x + 1}
+                  </option>
+                ))}
+              </Form.Select>
+            </FloatingLabel>
+          </Col>
+        </Row>
 
-      <Modal
-        backdrop='static'
-        size={'xl'}
+        <Button
+          className='my-3 float-end'
+          variant='primary'
+          onClick={saveChangesHandler}
+        >
+          Save Changes
+        </Button>
+      </DialogBox>
+
+      <DialogBox
+        handleClose={closeNewProductModalHandle}
         show={showNewProductModal}
-        onHide={closeNewProductModalHandle}
+        title='Add New Product'
+        fullscreen={true}
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Product</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {message && <Message variant='danger'>{message}</Message>}
-          {loadingProducts ? (
-            <Loader />
-          ) : errorProducts ? (
-            <Message variant='danger'>{errorProducts}</Message>
-          ) : (
-            <>
-              <MaterialTable
-                style={{ padding: '1%' }}
-                title='Products'
-                data={filteredData}
-                columns={newProductColumns}
-                options={{
-                  rowStyle: {
-                    color: 'black',
-                    border: '1px solid grey',
-                  },
-                  actionsColumnIndex: -1,
-                  paging: false,
-                  selection: true,
-                  showTextRowsSelected: false,
-                  showSelectAllCheckbox: false,
-                  selectionProps: (rowData) => ({
-                    checked:
-                      newItemsToAdd &&
-                      newItemsToAdd.some((x) => x.product === rowData._id),
-                    color: 'primary',
-                  }),
-                }}
-                onSelectionChange={(data, selection) => {
-                  if (!newSize) {
-                    setMessage('Please Select Size!!');
-                  } else if (!newQty) {
-                    setMessage('Please Select Qty');
-                  } else {
-                    setNewItemsToAdd([
-                      ...newProducts.filter((addedItem) =>
-                        data.some(
-                          (itemToAdd) => addedItem.product == itemToAdd._id
-                        )
-                      ),
-                    ]);
-
-                    setMessage('');
-                  }
-                }}
-                actions={[
-                  {
-                    icon: () => (
-                      <Autocomplete
-                        options={masterSchool}
-                        getOptionLabel={(option) => option.name}
-                        onChange={(option, value) =>
-                          value ? setSchool(value.name) : setSchool('')
-                        }
-                        style={{ width: 250 }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label='Filter By School'
-                            variant='outlined'
-                          />
-                        )}
-                      />
+        {message && <Message variant='danger'>{message}</Message>}
+        {loadingProducts ? (
+          <Loader />
+        ) : errorProducts ? (
+          <Message variant='danger'>{errorProducts}</Message>
+        ) : (
+          <>
+            <MaterialTable
+              style={{ padding: '1%' }}
+              title='Products'
+              data={filteredData}
+              columns={newProductColumns}
+              options={{
+                rowStyle: {
+                  color: 'black',
+                  border: '1px solid grey',
+                },
+                actionsColumnIndex: -1,
+                paging: false,
+                selection: true,
+                showTextRowsSelected: false,
+                showSelectAllCheckbox: false,
+                selectionProps: (rowData) => ({
+                  checked:
+                    newItemsToAdd &&
+                    newItemsToAdd.some((x) => x.product === rowData._id),
+                  color: 'primary',
+                }),
+              }}
+              onSelectionChange={(data, selection) => {
+                if (!newSize) {
+                  setMessage('Please Select Size!!');
+                } else if (!newQty) {
+                  setMessage('Please Select Qty');
+                } else {
+                  setNewItemsToAdd([
+                    ...newProducts.filter((addedItem) =>
+                      data.some(
+                        (itemToAdd) => addedItem.product == itemToAdd._id
+                      )
                     ),
-                    tooltip: 'Delete Product',
-                    isFreeAction: true,
-                  },
-                ]}
-              />
-              <Paginate
-                orderEdit='true'
-                pages={pages}
-                page={page}
-                isAdmin='true'
-                orderId={orderId}
-              />
-            </>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant='primary' onClick={saveNewItemsHandler}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Modal backdrop='static' show={showTracking} onHide={closeTrackingHandle}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Tracking Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Row>
-            <Form>
-              {errorConfirm ? (
-                <Message variant='danger'>{errorConfirm}</Message>
-              ) : errorProcessing ? (
-                <Message variant='danger'>{errorProcessing}</Message>
-              ) : errorOutForDelivery ? (
-                <Message variant='danger'>{errorOutForDelivery}</Message>
-              ) : (
-                errorDeliver && (
-                  <Message variant='danger'>{errorDeliver}</Message>
-                )
-              )}
-              {loadingDeliver ||
-              loadingConfirm ||
-              loadingOutForDelivery ||
-              loadingProcessing ? (
-                <Loader />
-              ) : (
-                <Row>
-                  <Col xs={6}>
-                    <Form.Check
-                      disabled={order && order.tracking.isConfirmed}
-                      checked={order && order.tracking.isConfirmed}
-                      type='switch'
-                      id='custom-switch'
-                      label='Mark As Confirmed'
-                      onChange={(e) => dispatch(confirmOrder(order))}
+                  ]);
+
+                  setMessage('');
+                }
+              }}
+              actions={[
+                {
+                  icon: () => (
+                    <Autocomplete
+                      options={masterSchool}
+                      getOptionLabel={(option) => option.name}
+                      onChange={(option, value) =>
+                        value ? setSchool(value.name) : setSchool('')
+                      }
+                      style={{ width: 250 }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label='Filter By School'
+                          variant='outlined'
+                        />
+                      )}
                     />
-                  </Col>
-                  <Col xs={6}>
-                    <Form.Check
-                      disabled={order && order.tracking.isProcessing}
-                      checked={order && order.tracking.isProcessing}
-                      type='switch'
-                      id='custom-switch'
-                      label='Mark As Processing'
-                      onChange={(e) => dispatch(processOrder(order))}
-                    />
-                  </Col>
-                  <Col xs={6}>
-                    <Form.Check
-                      disabled={order && order.tracking.isOutForDelivery}
-                      checked={order && order.tracking.isOutForDelivery}
-                      type='switch'
-                      id='custom-switch'
-                      label='Mark As Out For Delivery'
-                      onChange={(e) => dispatch(outForDeliveryOrder(order))}
-                    />
-                  </Col>
-                  <Col xs={6}>
-                    <Form.Check
-                      disabled={order && order.tracking.isDelivered}
-                      checked={order && order.tracking.isDelivered}
-                      type='switch'
-                      id='custom-switch'
-                      label='Mark As Delivered'
-                      onChange={(e) => dispatch(deliverOrder(order))}
-                    />
-                  </Col>{' '}
-                </Row>
-              )}
-            </Form>
-          </Row>
-        </Modal.Body>
-      </Modal>
+                  ),
+                  tooltip: 'Delete Product',
+                  isFreeAction: true,
+                },
+              ]}
+            />
+            <Paginate
+              orderEdit='true'
+              pages={pages}
+              page={page}
+              isAdmin='true'
+              orderId={orderId}
+            />
+          </>
+        )}
+
+        <Button
+          className='float-end my-3'
+          variant='primary'
+          onClick={saveNewItemsHandler}
+        >
+          Save Changes
+        </Button>
+      </DialogBox>
+      <DialogBox
+        handleClose={closeTrackingHandle}
+        show={showTracking}
+        title='Edit Tracking Details'
+      >
+        <Row>
+          <Form>
+            {errorConfirm ? (
+              <Message variant='danger'>{errorConfirm}</Message>
+            ) : errorProcessing ? (
+              <Message variant='danger'>{errorProcessing}</Message>
+            ) : errorOutForDelivery ? (
+              <Message variant='danger'>{errorOutForDelivery}</Message>
+            ) : (
+              errorDeliver && <Message variant='danger'>{errorDeliver}</Message>
+            )}
+            {loadingDeliver ||
+            loadingConfirm ||
+            loadingOutForDelivery ||
+            loadingProcessing ? (
+              <Loader />
+            ) : (
+              <Row>
+                <Col xs={6}>
+                  <Form.Check
+                    disabled={isConfirmed}
+                    checked={isConfirmed}
+                    type='switch'
+                    id='custom-switch'
+                    label='Mark As Confirmed'
+                    onChange={(e) => dispatch(confirmOrder(order))}
+                  />
+                </Col>
+                <Col xs={6}>
+                  <Form.Check
+                    disabled={isProcessing}
+                    checked={isProcessing}
+                    type='switch'
+                    id='custom-switch'
+                    label='Mark As Processing'
+                    onChange={(e) => dispatch(processOrder(order))}
+                  />
+                </Col>
+                <Col xs={6}>
+                  <Form.Check
+                    disabled={isOutForDelivery}
+                    checked={isOutForDelivery}
+                    type='switch'
+                    id='custom-switch'
+                    label='Mark As Out For Delivery'
+                    onChange={(e) => dispatch(outForDeliveryOrder(order))}
+                  />
+                </Col>
+                <Col xs={6}>
+                  <Form.Check
+                    disabled={isDelivered}
+                    checked={isDelivered}
+                    type='switch'
+                    id='custom-switch'
+                    label='Mark As Delivered'
+                    onChange={(e) => dispatch(deliverOrder(order))}
+                  />
+                </Col>{' '}
+              </Row>
+            )}
+          </Form>
+        </Row>
+      </DialogBox>
 
       <Link to='/admin/orderlist' className='btn btn-outline-dark my-3'>
         Go Back
       </Link>
       <Container>
         <h1>EDIT ORDER</h1>
-
+        <h5>ORDER ID:{orderNumber}</h5>
         {loadingUpdate && <Loader />}
         {errorUpdate && <Message variant='warning'>{errorUpdate}</Message>}
         {loading ? (

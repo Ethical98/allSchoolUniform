@@ -1,0 +1,17 @@
+.offcanvas-body ul {
+    list-style-type: none;
+  }
+  
+  .offcanvas-title a {
+    color: black;
+    text-decoration: none;
+  }
+  
+  .offcanvas-body ul li {
+    margin-bottom: 10px;
+  }
+  .offcanvas-body ul li a {
+    color: black;
+    text-decoration: none;
+  }
+  

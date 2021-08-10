@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Card, Form, Button, Row, Col } from 'react-bootstrap';
+import {
+  Card,
+  Form,
+  Button,
+  Row,
+  Col,
+  Modal,
+  Tabs,
+  Tab,
+  Image,
+  Offcanvas,
+  ToggleButton,
+} from 'react-bootstrap';
 import Rating from './Rating';
 import { addToCart } from '../actions/cartActions';
-
 import './css/Product.css';
+import { getTypeImages } from '../actions/typeActions';
+import Loader from './Loader';
 
 const Product = ({ product }) => {
   const [index, setIndex] = useState(0);
@@ -14,10 +27,25 @@ const Product = ({ product }) => {
     product.size[0].countInStock
   );
 
+  const typeImages = useSelector((state) => state.typeImages);
+  const { loading, error, images } = typeImages;
+  const [showOffCanvas, setShowOffCanvas] = useState(false);
+
+  const handleOffCanvasClose = () => setShowOffCanvas(false);
+  const handleOffCanvasShow = () => setShowOffCanvas(true);
+
   const dispatch = useDispatch();
   const id = product._id;
 
   const [qty, setQty] = useState(1);
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = (type) => {
+    dispatch(getTypeImages(type));
+    setShow(true);
+  };
 
   const handleChange = (val) => {
     setIndex(product.size.findIndex((x) => x.size === val));
@@ -35,6 +63,65 @@ const Product = ({ product }) => {
 
   return (
     <div>
+      <Offcanvas show={showOffCanvas} onHide={handleOffCanvasClose}>
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Offcanvas</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          Some text as placeholder. In real life you can have the elements you
+          have chosen. Like, text, images, lists, etc.
+        </Offcanvas.Body>
+      </Offcanvas>
+      <Modal
+        show={show}
+        onHide={handleClose}
+        backdrop='static'
+        keyboard={false}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Size Guide</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {loading ? (
+            <Loader />
+          ) : (
+            <Tabs
+              defaultActiveKey='image'
+              id='uncontrolled-tab-example'
+              className='mb-3'
+            >
+              <Tab eventKey='image' title='Image'>
+                <Image
+                  src={images.image}
+                  style={{ width: '20vw' }}
+                  alt='image'
+                />
+              </Tab>
+              <Tab eventKey='sizeGuide' title='Size Guide'>
+                <Image
+                  src={images.sizeGuide}
+                  style={{ width: '20vw' }}
+                  alt='Size Guide'
+                />
+              </Tab>
+              <Tab
+                eventKey='sizeChart'
+                title='Size Chart'
+                style={{ width: '20vw' }}
+                alt='Size Chart'
+              >
+                <Image src={images.sizeChart} />
+              </Tab>
+            </Tabs>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant='secondary' onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <Card className='my-3  rounded text-center' bg='white'>
         <Link to={`/products/${product.name}`}>
           <Card.Img
@@ -58,7 +145,9 @@ const Product = ({ product }) => {
           </Card.Text>
 
           <Card className='sizeCard' bg='white' style={{ padding: '2%' }}>
-            <Card.Text className='text-center'>Choose Your Size</Card.Text>
+            <Card.Text className='text-center size-text'>
+              Choose Your Size
+            </Card.Text>
 
             <Row className='g-1'>
               <Col xs>
@@ -95,6 +184,7 @@ const Product = ({ product }) => {
               </Col>
               <Col xs>
                 <Button
+                  onClick={() => handleShow(product.type)}
                   variant='outline-info'
                   className='sgButton col-12'
                   size='sm'
@@ -104,6 +194,7 @@ const Product = ({ product }) => {
               </Col>
             </Row>
           </Card>
+
           <div className='mb-3'>
             <Rating
               value={product.rating}

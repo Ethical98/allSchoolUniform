@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 const CounterSchema = mongoose.Schema({
   _id: { type: String, required: true },
   seq: { type: Number, default: 0 },
+  prefix: { type: String, default: 'ASU', required: true },
+  suffix: { type: String, default: '' },
 });
 
 const Counter = mongoose.model('Counter', CounterSchema);
@@ -149,13 +151,14 @@ orderSchema.pre('save', async function (next) {
     if (doc.isNew) {
       const d = new Date();
       doc.orderId =
-        'ASU' +
+        count.prefix +
         String(d.getFullYear()) +
         String(d.getMonth() + 1).padStart(2, '0') +
         String(d.getDate()).padStart(2, '0') +
         '-' +
         String(d.getDay()) +
-        String(count.seq).padStart(5, '0');
+        String(count.seq).padStart(5, '0') +
+        count.suffix;
       next();
     }
   } catch (error) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import jsonwebtoken from 'jsonwebtoken';
-import { Route } from 'react-router-dom';
+import { Link, Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import {
@@ -15,22 +15,29 @@ import {
   Form,
   Row,
   FloatingLabel,
-  Col,
 } from 'react-bootstrap';
 import url from './asu-top-logo.png';
 import './css/Header.css';
 import { logout } from '../actions/userActions';
 import urlimage from '../seamlessschool-bg.png';
 import SearchBox from './SearchBox';
+import OffCanvas from './OffCanvas';
+import DialogBox from './DialogBox';
 
-const Header = ({ location }) => {
+const Header = ({ history, location }) => {
   const [show, setShow] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [message, setMessage] = useState('');
   const [validated, setValidated] = useState(false);
 
+  const [showOffCanvas, setShowOffCanvas] = useState(false);
+
+  const handleOffCanvasClose = () => setShowOffCanvas(false);
+  const handleOffCanvasShow = () => setShowOffCanvas(true);
+
   const handleClose = () => setShow(false);
   const handleShow = () => {
+    setShowOffCanvas(false);
     setOrderId('');
     setShow(true);
     setValidated(false);
@@ -100,6 +107,12 @@ const Header = ({ location }) => {
 
   return (
     <header className='header'>
+      <OffCanvas
+        showOffCanvas={showOffCanvas}
+        handleOffCanvasClose={handleOffCanvasClose}
+        userInfo={userInfo}
+        handleShow={handleShow}
+      />
       <Navbar
         variant='dark'
         fixed='top'
@@ -109,43 +122,45 @@ const Header = ({ location }) => {
           color: '#93c0e0',
         }}
       >
-        <Modal
+        <DialogBox
           show={show}
-          onHide={handleClose}
-          backdrop='static'
-          keyboard={false}
+          handleClose={handleClose}
+          handleShow={handleShow}
+          title='Track Your Order'
         >
-          <Modal.Header closeButton>
-            <Modal.Title>Track Your Order</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form noValidate validated={validated} onSubmit={trackOrderHandler}>
-              <FloatingLabel label='Order Id' className='mb-3'>
-                <Form.Control
-                  required
-                  className='mb-3'
-                  placeholder='Order Id'
-                  value={orderId}
-                  onChange={(e) => setOrderId(e.target.value)}
-                ></Form.Control>
-                <Form.Control.Feedback type='invalid'>
-                  {message}
-                </Form.Control.Feedback>
-              </FloatingLabel>
-              <LinkContainer to={`/track/${orderId}`}>
-                <Button
-                  disabled={orderId.length < 16}
-                  className='float-end'
-                  type='submit'
-                  variant='outline-dark'
-                  onClick={handleClose}
-                >
-                  Track
-                </Button>
-              </LinkContainer>
-            </Form>
-          </Modal.Body>
-        </Modal>
+          <Form noValidate validated={validated} onSubmit={trackOrderHandler}>
+            <FloatingLabel label='Order Id' className='mb-3'>
+              <Form.Control
+                required
+                className='mb-3'
+                placeholder='Order Id'
+                value={orderId}
+                onChange={(e) => setOrderId(e.target.value)}
+              ></Form.Control>
+              <Form.Control.Feedback type='invalid'>
+                {message}
+              </Form.Control.Feedback>
+            </FloatingLabel>
+            <LinkContainer to={`/track/${orderId}`}>
+              <Button
+                disabled={orderId.length < 16}
+                className='float-end'
+                type='submit'
+                variant='outline-dark'
+                onClick={handleClose}
+              >
+                Track
+              </Button>
+            </LinkContainer>
+          </Form>
+        </DialogBox>
+        <Button
+          variant='outline-light'
+          className='d-flex d-sm-none mx-1 px-2'
+          onClick={handleOffCanvasShow}
+        >
+          <i className='fas fa-bars'></i>
+        </Button>
         <Container>
           <LinkContainer to='/'>
             <Navbar.Brand>
@@ -154,7 +169,7 @@ const Header = ({ location }) => {
               </Row>
               <Row>
                 <span
-                  className='text-center'
+                  className='text-center pt-1'
                   style={{ color: 'white', fontSize: '0.7rem' }}
                 >
                   <i className='fas fa-phone-square-alt mx-1' />
@@ -164,20 +179,28 @@ const Header = ({ location }) => {
             </Navbar.Brand>
           </LinkContainer>
 
-          <Nav className='d-none d-sm-block'>
-            <Route render={({ history }) => <SearchBox history={history} />} />
-          </Nav>
+          {!(location.pathname === '/') && (
+            <Nav className='d-none d-sm-block'>
+              <Route
+                render={({ history }) => <SearchBox history={history} />}
+              />
+            </Nav>
+          )}
           <Row>
             <Nav>
               <LinkContainer to='/offers'>
                 <Nav.Link>
-                  <Button variant='outline-light' size='sm'>
+                  <Button
+                    className='d-none d-sm-block'
+                    variant='outline-light'
+                    size='sm'
+                  >
                     OFFERS
                   </Button>
                 </Nav.Link>
               </LinkContainer>
 
-              <Nav.Link onClick={handleShow}>
+              <Nav.Link onClick={handleShow} className='d-none d-sm-block'>
                 <i className='fas fa-truck' />{' '}
                 <span className='header-text'>TRACK YOUR ORDER</span>
               </Nav.Link>
@@ -195,7 +218,11 @@ const Header = ({ location }) => {
               </LinkContainer>
               {userInfo ? (
                 <>
-                  <NavDropdown title={user.name} id='username'>
+                  <NavDropdown
+                    title={user.name}
+                    id='username'
+                    className='d-none d-sm-block'
+                  >
                     {userInfo && userInfo.isAdmin && (
                       <LinkContainer to='/admin/dashboard'>
                         <NavDropdown.Item>Dashboard</NavDropdown.Item>
@@ -205,15 +232,17 @@ const Header = ({ location }) => {
                       <NavDropdown.Item>Profile</NavDropdown.Item>
                     </LinkContainer>
                     <NavDropdown.Item onClick={logoutHandler}>
-                      Logout
+                      Logout <i className='fas fa-sign-out-alt'></i>
                     </NavDropdown.Item>
                   </NavDropdown>
+                  <LinkContainer to='/profile'>
+                    <Nav.Link className='d-sm-none'>{userInfo.name}</Nav.Link>
+                  </LinkContainer>
                 </>
               ) : (
                 <LinkContainer to='/login'>
                   <Nav.Link>
-                    <i className='fas fa-user'></i>{' '}
-                    <span className='header-text'>SIGN IN</span>
+                    <i className='fas fa-user'></i> <span>SIGN IN</span>
                   </Nav.Link>
                 </LinkContainer>
               )}
@@ -222,15 +251,15 @@ const Header = ({ location }) => {
         </Container>
       </Navbar>
 
-      {!(window.location.pathname === '/') && (
+      {!(location.pathname === '/') && (
         <Nav
-          className='d-block d-sm-none'
+          className='d-block d-sm-none search-smallscreen'
           style={{
             background: `#2c4a77 url(${urlimage})`,
             borderBottom: '2px solid #ff6a00',
 
             color: '#93c0e0',
-            marginTop: '17%',
+
             height: '60px',
             padding: '2%',
           }}

@@ -10,6 +10,9 @@ import {
   TYPE_DETAILS_REQUEST,
   TYPE_DETAILS_RESET,
   TYPE_DETAILS_SUCCESS,
+  TYPE_GET_IMAGES_FAIL,
+  TYPE_GET_IMAGES_REQUEST,
+  TYPE_GET_IMAGES_SUCCESS,
   TYPE_LIST_ALL_FAIL,
   TYPE_LIST_ALL_REQUEST,
   TYPE_LIST_ALL_SUCCESS,
@@ -117,6 +120,19 @@ export const typeUpdateReducer = (state = { type: {} }, action) => {
       return { loading: false, error: action.payload };
     case TYPE_UPDATE_RESET:
       return { type: {} };
+    default:
+      return state;
+  }
+};
+
+export const typeImagesReducer = (state = { images: {} }, action) => {
+  switch (action.type) {
+    case TYPE_GET_IMAGES_REQUEST:
+      return { loading: true };
+    case TYPE_GET_IMAGES_SUCCESS:
+      return { loading: false, images: action.payload };
+    case TYPE_GET_IMAGES_FAIL:
+      return { loading: false, error: action.payload };
     default:
       return state;
   }

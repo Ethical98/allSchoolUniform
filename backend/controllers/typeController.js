@@ -15,6 +15,22 @@ const getTypes = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Get Images
+// @route GET /api/types/:type/images
+// @access Public
+const getTypeImages = asyncHandler(async (req, res) => {
+  const productType = await ProductType.findOne({
+    type: req.params.type,
+  }).select('image sizeChart sizeGuide');
+
+  if (productType) {
+    res.status(200).json(productType);
+  } else {
+    res.status(404);
+    throw new Error('Type Not Found');
+  }
+});
+
 // @desc Get product Sizes
 // @route GET /api/types/:type/sizes
 // @access Private/Admin
@@ -119,4 +135,5 @@ export {
   updateType,
   deleteType,
   getTypeDetails,
+  getTypeImages,
 };

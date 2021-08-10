@@ -20,6 +20,7 @@ import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { TablePagination } from '@material-ui/core';
 import Paginate from '../components/Paginate';
+import LocalPagination from '../components/LocalPagination';
 
 const useStyles = makeStyles({
   dialog: {
@@ -49,12 +50,18 @@ const ProductListScreen = ({ history, match }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [open, setOpen] = useState(false);
   const [masterSchool, setMasterSchool] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage, setProductsPerPage] = useState(2);
 
   const [deleteId, setDeleteId] = useState('');
 
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const [currentProducts, setCurrentProducts] = useState([]);
+
   useEffect(() => {
     if (products) {
-      setFilteredData(products);
+      setFilteredData([...products]);
     }
   }, [products]);
 
@@ -116,11 +123,10 @@ const ProductListScreen = ({ history, match }) => {
 
   useEffect(() => {
     if (school) {
-      setFilteredData(
-        products.filter((x) => x.schoolName.includes(school.toUpperCase()))
-      );
+      setFilteredData(products.filter((x) => x.schoolName.includes(school)));
     }
   }, [school, products]);
+  console.log(currentProducts);
 
   useEffect(() => {
     dispatch({ type: PRODUCT_CREATE_RESET });
@@ -133,6 +139,13 @@ const ProductListScreen = ({ history, match }) => {
     }
   }, [dispatch, history, userInfo, successDelete, pageNumber]);
 
+  useEffect(() => {
+    if (filteredData) {
+      setCurrentProducts([
+        ...filteredData.slice(indexOfFirstProduct, indexOfLastProduct),
+      ]);
+    }
+  }, [filteredData, indexOfFirstProduct, indexOfLastProduct]);
   useEffect(() => {
     if (masterSchools) {
       setMasterSchool([...masterSchools]);
@@ -150,6 +163,10 @@ const ProductListScreen = ({ history, match }) => {
   };
   const createProductHandler = () => {
     history.push('/admin/product/create');
+  };
+
+  const paging = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -211,7 +228,7 @@ const ProductListScreen = ({ history, match }) => {
           <MaterialTable
             style={{ padding: '1%' }}
             title='Products'
-            data={filteredData}
+            data={currentProducts}
             columns={columns}
             options={{
               rowStyle: {
@@ -253,6 +270,12 @@ const ProductListScreen = ({ history, match }) => {
                 isFreeAction: true,
               },
             ]}
+          />
+          <LocalPagination
+            productsPerPage={productsPerPage}
+            totalProducts={filteredData.length}
+            paging={paging}
+            currentPage={currentPage}
           />
           <Paginate pages={pages} page={page} isAdmin='true' />
         </>
