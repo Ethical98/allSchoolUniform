@@ -104,15 +104,15 @@ const reducer = combineReducers({
 const salt = process.env.REACT_APP_CRYPTO_SALT;
 
 const cartItemsFromStorage = localStorage.getItem('cartItems')
-  ? JSON.parse(decryptData(localStorage.getItem('cartItems'), salt))
+  ? decryptData(localStorage.getItem('cartItems'), salt)
   : [];
 
 const userInfoFromStorage = localStorage.getItem('userInfo')
-  ? JSON.parse(decryptData(localStorage.getItem('userInfo'), salt))
+  ? decryptData(localStorage.getItem('userInfo'), salt)
   : null;
 
 const shippingAddressFromStorage = localStorage.getItem('shippingAddress')
-  ? JSON.parse(decryptData(localStorage.getItem('shippingAddress'), salt))
+  ? decryptData(localStorage.getItem('shippingAddress'), salt)
   : {};
 
 const cartSuccessFromStorage = localStorage.getItem('cartSuccess')
@@ -120,7 +120,7 @@ const cartSuccessFromStorage = localStorage.getItem('cartSuccess')
   : false;
 
 const resetEmailFromStorage = localStorage.getItem('RE')
-  ? JSON.parse(decryptData(localStorage.getItem('RE'), salt))
+  ? decryptData(localStorage.getItem('RE'), salt)
   : '';
 
 const initialState = {
