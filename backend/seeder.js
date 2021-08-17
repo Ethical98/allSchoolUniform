@@ -12,6 +12,8 @@ import classes from './data/classes.js';
 import ProductType from './models/ProductTypesModel.js';
 import productType from './Data/productType.js';
 import schools from './Data/schools.js';
+import home from './Data/homepage.js';
+import Homepage from './models/HomepageModel.js';
 import connectDB from './config/db.js';
 
 // import { ShirtSize } from './models/SizeModel.js';
@@ -30,6 +32,7 @@ const importData = async () => {
     await Cart.deleteMany();
     await ProductType.deleteMany();
     await School.deleteMany();
+    await Homepage.deleteMany();
 
     const createdUsers = await User.insertMany(users);
     const adminUser = createdUsers[0]._id;
@@ -44,6 +47,7 @@ const importData = async () => {
     await Product.insertMany(sampleProducts);
     await Class.insertMany(classes);
     await ProductType.insertMany(productType);
+    await Homepage.insertMany(home);
     // console.log(productType);
     // console.log(products);
     // const firstProduct = insertedProducts[0]._id;
@@ -68,6 +72,7 @@ const destroyData = async () => {
     await Cart.deleteMany();
     await ProductType.deleteMany();
     await School.deleteMany();
+    await Homepage.deleteMany();
 
     console.log('Data Destroyed!'.red.inverse);
     process.exit();

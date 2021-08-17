@@ -32,6 +32,12 @@ const SchoolEditScreen = ({ match, history }) => {
   const [logo, setLogo] = useState('');
   const [address, setAddress] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [state, setState] = useState('');
+  const [country, setCountry] = useState('');
+  const [city, setCity] = useState('');
+  const [email, setEmail] = useState('');
+  const [website, setWebsite] = useState('');
+  const [description, setDescription] = useState('');
 
   const schoolDetails = useSelector((state) => state.schoolDetails);
   const { loading, error, school } = schoolDetails;
@@ -88,6 +94,12 @@ const SchoolEditScreen = ({ match, history }) => {
         setAddress(school.address);
         setContact(school.contact);
         setDisabled(school.disabled);
+        setState(school.state);
+        setDescription(school.description);
+        setEmail(school.email);
+        setWebsite(school.website);
+        setCity(school.city);
+        setCountry(school.country);
       }
     }
   }, [dispatch, history, successUpdate, school, schoolId]);
@@ -163,6 +175,45 @@ const SchoolEditScreen = ({ match, history }) => {
                   onChange={(e) => setContact(e.target.value)}
                 ></Form.Control>
               </FloatingLabel>
+              <FloatingLabel className='mb-3' label='Email' controlId='email'>
+                <Form.Control
+                  className='mb-3'
+                  required
+                  type='email'
+                  placeholder='Email'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                ></Form.Control>
+              </FloatingLabel>
+              <FloatingLabel
+                className='mb-3'
+                label='Website'
+                controlId='website'
+              >
+                <Form.Control
+                  className='mb-3'
+                  required
+                  type='text'
+                  placeholder='Website'
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                ></Form.Control>
+              </FloatingLabel>
+              <FloatingLabel
+                controlId='description'
+                label='Description'
+                className='mb-3'
+              >
+                <Form.Control
+                  required
+                  as='textarea'
+                  style={{ height: '100px' }}
+                  type='text'
+                  placeholder='Description'
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                ></Form.Control>
+              </FloatingLabel>
               <FloatingLabel
                 controlId='address'
                 label='Address'
@@ -178,6 +229,38 @@ const SchoolEditScreen = ({ match, history }) => {
                   onChange={(e) => setAddress(e.target.value)}
                 ></Form.Control>
               </FloatingLabel>
+              <FloatingLabel className='mb-3' label='State' controlId='state'>
+                <Form.Control
+                  required
+                  type='text'
+                  placeholder='State'
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                ></Form.Control>
+              </FloatingLabel>
+              <FloatingLabel className='mb-3' label='City' controlId='city'>
+                <Form.Control
+                  required
+                  type='text'
+                  placeholder='City'
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                ></Form.Control>
+              </FloatingLabel>
+              <FloatingLabel
+                className='mb-3'
+                label='Country'
+                controlId='country'
+              >
+                <Form.Control
+                  required
+                  type='text'
+                  placeholder='Country'
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                ></Form.Control>
+              </FloatingLabel>
+
               <FloatingLabel controlId='logo' label='Logo Url' className='mb-3'>
                 <Form.Control
                   required

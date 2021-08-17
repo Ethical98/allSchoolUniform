@@ -67,6 +67,7 @@ const SearchBoxAutocomplete = ({ history }) => {
               borderRadius: '4px',
               backgroundColor: 'white',
               fontSize: '12px',
+              zIndex: 2,
 
               placeholderColor: 'black',
               clearIconMargin: '3px 8px 0 0',

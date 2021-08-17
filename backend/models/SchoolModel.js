@@ -27,10 +27,31 @@ const schoolSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  // schoolImage: {
-  //   type: String,
-  //   required: true,
-  // },
+  website: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  country: {
+    type: String,
+    required: true,
+    default: 'India',
+  },
+
   disabled: {
     type: Boolean,
     default: false,

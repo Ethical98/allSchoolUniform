@@ -28,6 +28,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { addToCart } from '../actions/cartActions';
 import MaterialRating from '@material-ui/lab/Rating';
 import Box from '@material-ui/core/Box';
+import Meta from '../components/Meta';
 import { PRODUCT_CREATE_REVIEW_RESET } from '../constants/productConstants';
 
 const useStyles = makeStyles({
@@ -149,6 +150,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
         <Message variant='danger'>{error}</Message>
       ) : (
         <>
+          <Meta title={product.name} />
           <Row className='mb-5'>
             <Col md={4}>
               <Image src={product.image} alt={product.name} fluid />

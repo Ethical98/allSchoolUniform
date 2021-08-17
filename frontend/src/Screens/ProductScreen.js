@@ -8,6 +8,8 @@ import { listProducts } from '../actions/productActions';
 import { logout } from '../actions/userActions';
 import Paginate from '../components/Paginate';
 import jsonwebtoken from 'jsonwebtoken';
+import Meta from '../components/Meta';
+import { Link } from 'react-router-dom';
 
 const ProductScreen = ({ history, location, match }) => {
   const school = match.params.selectedschool;
@@ -52,12 +54,18 @@ const ProductScreen = ({ history, location, match }) => {
 
   return (
     <>
+      {keyword && (
+        <Link to='/' className='btn btn-light'>
+          Go Back
+        </Link>
+      )}
       {loading ? (
         <Loader />
       ) : error ? (
         <Message variant='danger'>{error}</Message>
       ) : (
         <>
+          <Meta title={'Products'} />
           <Row>
             {products.map((product, index) => (
               <Col sm={12} md={6} lg={4} xl={4} key={index}>

@@ -54,6 +54,12 @@ const createSchool = asyncHandler(async (req, res) => {
     contact,
     logo,
     disabled,
+    state,
+    city,
+    description,
+    website,
+    email,
+    country,
     user: req.user._id,
   });
   const createdSchool = await school.save();
@@ -80,7 +86,19 @@ const deleteSchool = asyncHandler(async (req, res) => {
 // @access Private/Admin
 const updateSchool = asyncHandler(async (req, res) => {
   const school = await School.findById(req.params.id);
-  const { name, address, logo, contact, disabled } = req.body;
+  const {
+    name,
+    address,
+    logo,
+    contact,
+    disabled,
+    state,
+    city,
+    country,
+    website,
+    email,
+    description,
+  } = req.body;
 
   if (school) {
     school.name = name || school.name;
@@ -88,6 +106,13 @@ const updateSchool = asyncHandler(async (req, res) => {
     school.logo = logo || school.logo;
     school.address = address || school.address;
     school.contact = contact || school.contact;
+    school.description = description || school.description;
+    school.city = city || school.city;
+    school.state = state || school.state;
+    school.country = country || school.country;
+    school.email = email || school.email;
+    school.website = website || school.website;
+
     const updatedSchool = await school.save();
     res.status(200).json(updatedSchool);
   } else {

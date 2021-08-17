@@ -8,3 +8,7 @@ const homePageSchmea = mongoose.Schema({
   homePageCarousel: [{ type: String, required: true }],
   announcement: { type: String },
 });
+
+const Homepage = mongoose.model('Homepage', homePageSchmea);
+
+export default Homepage;

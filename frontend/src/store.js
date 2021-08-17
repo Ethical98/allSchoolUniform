@@ -53,6 +53,7 @@ import {
   schoolNameListReducer,
   schoolUpdateReducer,
 } from './reducers/schoolReducers';
+import { carouselImageListReducer } from './reducers/homeReducer';
 
 const reducer = combineReducers({
   productList: productListReducer,
@@ -97,6 +98,7 @@ const reducer = combineReducers({
   orderOutForDelivery: orderOutForDeliveryReducer,
   orderProcessing: orderProcessingReducer,
   orderConfirm: orderConfirmReducer,
+  carouselImageList: carouselImageListReducer,
 });
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;
