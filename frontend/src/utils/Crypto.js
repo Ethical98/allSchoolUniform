@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 
 export const encryptData = (data, salt) =>
-  CryptoJS.AES.encrypt(JSON.stringify(data), salt).toString();
+  CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(data), salt).toString();
 
 export const decryptData = (ciphertext, salt) => {
   const bytes = CryptoJS.AES.decrypt(ciphertext, salt);
