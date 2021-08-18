@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "./backend/server.js",
+      "use": "@verel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/.*",
+      "dest": "server.js"
+    }
+  ]
+}

@@ -250,9 +250,8 @@ const Header = ({ history, location }) => {
           </Row>
         </Container>
       </Navbar>
-
-      {!(location.pathname === '/') && (
-        <Nav
+      {location.pathname.includes('products') && (
+        <Nav.Link
           className='d-block d-sm-none search-smallscreen'
           style={{
             background: `#2c4a77 url(${urlimage})`,
@@ -265,7 +264,7 @@ const Header = ({ history, location }) => {
           }}
         >
           <Route render={({ history }) => <SearchBox history={history} />} />
-        </Nav>
+        </Nav.Link>
       )}
     </header>
   );

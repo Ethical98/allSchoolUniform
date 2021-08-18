@@ -158,7 +158,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
             <Col md={4}>
               <Card
                 style={{
-                  fontSize: '0.8rem',
+                  fontSize: '0.86rem',
                   textAlign: 'justify',
                   textJustify: 'inter - word',
                 }}

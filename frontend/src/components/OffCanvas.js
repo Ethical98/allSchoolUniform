@@ -32,12 +32,12 @@ const OffCanvas = ({
         </Offcanvas.Header>
         <Offcanvas.Body>
           <ul>
-            {/* {userInfo && userInfo.isAdmin && (
+            {userInfo && userInfo.isAdmin && (
               <li>
                 {' '}
                 <a href='/admin/dashboard'>DashBoard </a>
               </li>
-            )} */}
+            )}
             <li>
               <a href='/'>Home </a>
             </li>
@@ -52,18 +52,20 @@ const OffCanvas = ({
             <li>
               <a href='/profile'>Account</a>
             </li>
-            <li>
-              <a href='#'>
-                <span
-                  onClick={() => {
-                    handleOffCanvasClose();
-                    dispatch(logout());
-                  }}
-                >
-                  Log Out <i className='fas fa-sign-out-alt'></i>
-                </span>
-              </a>
-            </li>
+            {userInfo && (
+              <li>
+                <a href='#'>
+                  <span
+                    onClick={() => {
+                      handleOffCanvasClose();
+                      dispatch(logout());
+                    }}
+                  >
+                    Log Out <i className='fas fa-sign-out-alt'></i>
+                  </span>
+                </a>
+              </li>
+            )}
           </ul>
           <hr className='divider'></hr>
         </Offcanvas.Body>

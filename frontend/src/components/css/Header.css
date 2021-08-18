@@ -9,7 +9,6 @@
   background-color: #ff6a00;
 }
 
-
 .logo {
   height: 40px;
   -webkit-filter: drop-shadow(5px 5px 5px black);
@@ -66,9 +65,19 @@
   .cart-qty {
     border-radius: 100%;
     position: relative;
-    bottom: 32px;
+    bottom: 30px;
     left: 6px;
 
+    font-size: 8px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .cart-qty {
+    border-radius: 100%;
+    position: relative;
+    bottom: 32px;
+    left: 45px;
     font-size: 8px;
   }
 }

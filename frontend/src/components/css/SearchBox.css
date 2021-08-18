@@ -24,3 +24,10 @@
     margin-left: -30%;
   }
 }
+
+@media (min-width: 1200px) {
+  .search-box {
+    width: 140%;
+    margin-left: -30%;
+  }
+}

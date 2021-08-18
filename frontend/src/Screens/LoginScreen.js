@@ -190,6 +190,8 @@ const LoginScreenByPhone = ({ history, location }) => {
       ) : (
         <Form noValidate validated={validated} onSubmit={submitHandler}>
           <Form.Group controlId='emailOrPhone' className='mb-3'>
+            <Form.Text>Email</Form.Text>
+            <br />
             <span className='mb-3'>{inputValue}</span>
 
             <Form.Text

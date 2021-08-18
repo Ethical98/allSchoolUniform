@@ -38,7 +38,11 @@ const HomeScreen = () => {
         <Row>
           <Col>
             <Figure>
-              <Image className='schoolLogo' src={Logo1} rounded />
+              <Image
+                className='schoolLogo'
+                src='uploads/ImageOne.jpg'
+                rounded
+              />
               <Figure.Caption
                 className='text-center'
                 style={{ color: 'white' }}
