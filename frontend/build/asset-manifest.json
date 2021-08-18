@@ -1,0 +1,37 @@
+{
+  "files": {
+    "main.css": "/static/css/main.bea7a494.chunk.css",
+    "main.js": "/static/js/main.dae9e728.chunk.js",
+    "main.js.map": "/static/js/main.dae9e728.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.14c88e61.js",
+    "runtime-main.js.map": "/static/js/runtime-main.14c88e61.js.map",
+    "static/js/2.2557b9fc.chunk.js": "/static/js/2.2557b9fc.chunk.js",
+    "static/js/2.2557b9fc.chunk.js.map": "/static/js/2.2557b9fc.chunk.js.map",
+    "static/js/3.d531a128.chunk.js": "/static/js/3.d531a128.chunk.js",
+    "static/js/3.d531a128.chunk.js.map": "/static/js/3.d531a128.chunk.js.map",
+    "static/js/4.810226db.chunk.js": "/static/js/4.810226db.chunk.js",
+    "static/js/4.810226db.chunk.js.map": "/static/js/4.810226db.chunk.js.map",
+    "static/js/5.507e883e.chunk.js": "/static/js/5.507e883e.chunk.js",
+    "static/js/5.507e883e.chunk.js.map": "/static/js/5.507e883e.chunk.js.map",
+    "static/js/6.bb1f7eba.chunk.js": "/static/js/6.bb1f7eba.chunk.js",
+    "static/js/6.bb1f7eba.chunk.js.map": "/static/js/6.bb1f7eba.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/main.bea7a494.chunk.css.map": "/static/css/main.bea7a494.chunk.css.map",
+    "static/js/2.2557b9fc.chunk.js.LICENSE.txt": "/static/js/2.2557b9fc.chunk.js.LICENSE.txt",
+    "static/js/3.d531a128.chunk.js.LICENSE.txt": "/static/js/3.d531a128.chunk.js.LICENSE.txt",
+    "static/js/4.810226db.chunk.js.LICENSE.txt": "/static/js/4.810226db.chunk.js.LICENSE.txt",
+    "static/js/5.507e883e.chunk.js.LICENSE.txt": "/static/js/5.507e883e.chunk.js.LICENSE.txt",
+    "static/media/AGS.2ed108c2.jpg": "/static/media/AGS.2ed108c2.jpg",
+    "static/media/aadharshilla.e5d89e6c.jpg": "/static/media/aadharshilla.e5d89e6c.jpg",
+    "static/media/amity.3a13c47a.jpg": "/static/media/amity.3a13c47a.jpg",
+    "static/media/presentation.36582317.png": "/static/media/presentation.36582317.png",
+    "static/media/presidium-logo.97475061.jpg": "/static/media/presidium-logo.97475061.jpg",
+    "static/media/seamlessschool-bg.3354a4b0.png": "/static/media/seamlessschool-bg.3354a4b0.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.14c88e61.js",
+    "static/js/2.2557b9fc.chunk.js",
+    "static/css/main.bea7a494.chunk.css",
+    "static/js/main.dae9e728.chunk.js"
+  ]
+}
