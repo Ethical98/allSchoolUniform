@@ -18,11 +18,11 @@ const getClasses = asyncHandler(async (req, res) => {
 // @access Private/Admin
 const createClass = asyncHandler(async (req, res) => {
   const { className } = req.body;
-  console.log(className);
+  
   const standard = new Class({
     class: className,
   });
-  console.log(className);
+  
   const createdClass = await standard.save();
   res.status(201).json(createdClass);
 });
