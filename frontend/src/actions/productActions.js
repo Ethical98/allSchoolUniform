@@ -37,7 +37,7 @@ export const listProducts =
       const { data } = await axios.get(
         `/api/products?category=${category}&season=${season}&standard=${standard}&keyword=${keyword}&school=${school}&pageNumber=${pageNumber}`
       );
-      console.log(data);
+     
       dispatch({
         type: PRODUCT_LIST_SUCCESS,
         payload: data,

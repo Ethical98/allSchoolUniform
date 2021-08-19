@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -6,31 +6,10 @@ import jsonwebtoken from 'jsonwebtoken';
 import { Image, Row, Col, Button } from 'react-bootstrap';
 import { logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
-import MaterialButton from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import { makeStyles } from '@material-ui/styles';
-import {
-  deleteType,
-  listAllTypes,
-  listTypeDetails,
-} from '../actions/typeActions';
-
-const useStyles = makeStyles({
-  dialog: {
-    width: '40vw',
-  },
-});
+import { deleteType, listAllTypes } from '../actions/typeActions';
 
 const TypeListScreen = ({ history }) => {
   const dispatch = useDispatch();
-
-  const [open, setOpen] = useState(false);
-
-  const [deleteId, setDeleteId] = useState('');
 
   const typeListAll = useSelector((state) => state.typeListAll);
   const { loading, masterTypes, error } = typeListAll;
@@ -38,16 +17,8 @@ const TypeListScreen = ({ history }) => {
   const typeDelete = useSelector((state) => state.typeDelete);
   const { success: successDelete } = typeDelete;
 
-  // const typeUpdate = useSelector((state) => state.typeUpdate);
-  // const { success: successUpdate, error: errorUpdate } = typeUpdate;
-
-  // const typeCreate = useSelector((state) => state.typeCreate);
-  // const { success: successCreate, error: errorCreate } = typeCreate;
-
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-
-  const classes = useStyles();
 
   const columns = [
     {
@@ -128,17 +99,6 @@ const TypeListScreen = ({ history }) => {
     }
   }, [dispatch, history, userInfo, successDelete]);
 
-  const deleteHandler = (id) => {
-    setDeleteId(id);
-    setOpen(true);
-  };
-
-  const confirmDeleteHandler = () => {
-    setOpen(false);
-
-    dispatch(deleteType(deleteId));
-  };
-
   return (
     <>
       <Row className='align-items-center'>
@@ -166,11 +126,17 @@ const TypeListScreen = ({ history }) => {
             columns={columns}
             data={masterTypes && masterTypes}
             options={{
-              onPageChange: (data) => {
-                console.log(data);
-              },
               paging: false,
               actionsColumnIndex: -1,
+            }}
+            editable={{
+              onRowDelete: (oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    dispatch(deleteType(oldData._id));
+                    resolve();
+                  }, 1000);
+                }),
             }}
             actions={[
               {
@@ -179,46 +145,8 @@ const TypeListScreen = ({ history }) => {
                 onClick: (event, rowData) =>
                   history.push(`/admin/type/${rowData._id}/edit`),
               },
-
-              {
-                icon: 'delete',
-                tooltip: 'Delete',
-                onClick: (event, rowData) => deleteHandler(rowData._id),
-              },
             ]}
           />
-          <Dialog
-            open={open}
-            onClose={() => setOpen(false)}
-            aria-labelledby='alert-dialog-title'
-            aria-describedby='alert-dialog-description'
-          >
-            <DialogTitle id='alert-dialog-title' className={classes.dialog}>
-              <span className='text-danger'>{'Delete Type'}</span>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText id='alert-dialog-description'>
-                Are You Sure?
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <MaterialButton
-                onClick={() => {
-                  setOpen(false);
-                }}
-                color='primary'
-              >
-                No
-              </MaterialButton>
-              <MaterialButton
-                onClick={confirmDeleteHandler}
-                color='primary'
-                autoFocus
-              >
-                Yes
-              </MaterialButton>
-            </DialogActions>
-          </Dialog>
         </>
       )}
     </>

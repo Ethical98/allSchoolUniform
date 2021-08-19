@@ -59,7 +59,7 @@ const Accordion = ({ history, location, match }) => {
         history.push(`/products?class=${standard}`);
       }
     }
-  }, [category, season, dispatch, standard, pageNumber]);
+  }, [category, season, dispatch, standard, pageNumber, history]);
 
   const seasonChange = (x, checked) => {
     setPageNumber('');
@@ -90,7 +90,7 @@ const Accordion = ({ history, location, match }) => {
         setStandard('');
       }
     }
-    console.log(standard);
+   
   };
 
   return (

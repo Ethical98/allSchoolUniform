@@ -86,12 +86,25 @@ const OrderDetails = ({ match, history }) => {
                 {order.shippingAddress.postalCode},{''}
                 {order.shippingAddress.country}
               </p>
-              {order.isDelivered ? (
+              {order.tracking.isDelivered ? (
                 <Message variant='success'>
-                  Delivered on {order.DeliveredAt}
+                  Delivered on {order.tracking.deliveredAt.substring(0, 10)}
+                </Message>
+              ) : order.tracking.isOutForDelivery ? (
+                <Message variant='info'>
+                  Out For Delivery on{' '}
+                  {order.tracking.outForDeliveryAt.substring(0, 10)}
+                </Message>
+              ) : order.tracking.isProcessing ? (
+                <Message variant='warning'>
+                  Processing on {order.tracking.processedAt.substring(0, 10)}
+                </Message>
+              ) : order.tracking.isConfirmed ? (
+                <Message variant='secondary'>
+                  Confirmed on {order.tracking.confirmedAt.substring(0, 10)}
                 </Message>
               ) : (
-                <Message variant='info'>Not Delivered</Message>
+                <Message>Order Recieved</Message>
               )}
             </ListGroup.Item>
 

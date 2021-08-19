@@ -188,6 +188,7 @@ const ProductEditScreen = ({ match, history }) => {
         }
       }
     }
+    // eslint-disable-next-line
   }, [
     dispatch,
     productId,

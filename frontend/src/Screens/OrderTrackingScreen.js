@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Card, Row, Col, Image } from 'react-bootstrap';
-import FormContainer from '../components/FormContainer';
-import { trackOrder, getOrderDetails } from '../actions/orderActions';
+import { trackOrder } from '../actions/orderActions';
 import { useSelector, useDispatch } from 'react-redux';
 import Loader from '../components/Loader';
 import Message from '../components/Message';

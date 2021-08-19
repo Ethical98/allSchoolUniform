@@ -15,8 +15,6 @@
     "crypto-js": "^4.0.0",
     "firebase": "^8.6.7",
     "material-table": "^1.69.3",
-    "mdb-react-ui-kit": "^1.2.0",
-    "mdbreact": "^5.1.0",
     "otp-input-react": "^0.2.4",
     "react": "^17.0.2",
     "react-bootstrap": "^2.0.0-beta.4",

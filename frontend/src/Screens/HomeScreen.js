@@ -1,15 +1,9 @@
-import React, { useEffect } from 'react';
-import { Carousel, Image, Container, Row, Col, Figure } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Image, Container, Row, Col, Figure } from 'react-bootstrap';
 import { Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Meta from '../components/Meta';
-
-// import url from '../components/asu-top-logo.png';
 import './css/HomeScreen.css';
-// import image1 from '../homeScreenBanner/ImageOne.jpg';
-// import image2 from '../homeScreenBanner/ImageTwo.jpg';
-// import image3 from '../homeScreenBanner/Banner.jpg';
-import Logo1 from '../images/SchoolLogo/presidium-logo.jpg';
 import Logo2 from '../images/SchoolLogo/Bbps.png';
 import Logo3 from '../images/SchoolLogo/aadharshilla.jpg';
 import Logo4 from '../images/SchoolLogo/AGS.jpg';
@@ -19,16 +13,36 @@ import Logo7 from '../images/SchoolLogo/gdgoenka.jpeg';
 import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 import { listCarouselImages } from '../actions/homeActions';
 import CarouselHomeScreen from '../components/CarouselHomeScreen';
+import { listSchoolNames } from '../actions/schoolActions';
 
-const HomeScreen = () => {
+const HomeScreen = ({ history }) => {
   const dispatch = useDispatch();
 
   const carouselImageList = useSelector((state) => state.carouselImageList);
   const { carouselImages } = carouselImageList;
 
+  const [schools, setSchools] = useState([]);
+
+  const schoolNameList = useSelector((state) => state.schoolNameList);
+  const { schoolNames } = schoolNameList;
+
   useEffect(() => {
     dispatch(listCarouselImages());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!(schoolNames && schoolNames.length > 0)) {
+      dispatch(listSchoolNames());
+    } else {
+      setSchools([
+        ...schoolNames.map((x, index) => ({ id: index, name: x.name })),
+      ]);
+    }
+  }, [dispatch, schoolNames]);
+
+  const handleOnSelect = (item) => {
+    history.push(`/products/schools/${item.name}`);
+  };
 
   return (
     <div>
@@ -143,12 +157,17 @@ const HomeScreen = () => {
         <div style={{ zIndex: 4 }}>
           <Route
             render={({ history }) => (
-              <SearchBoxAutocomplete history={history} />
+              <SearchBoxAutocomplete
+                placeholder={'Search School'}
+                history={history}
+                items={schools}
+                handleOnSelect={handleOnSelect}
+              />
             )}
           />
         </div>
       </Container>
-      <CarouselHomeScreen />
+      <CarouselHomeScreen items={carouselImages} />
 
       {/* <Carousel className='mt-5' style={{ zIndex: -1 }}>
         {carouselImages &&

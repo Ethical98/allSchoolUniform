@@ -27,7 +27,12 @@ export const schoolListReducer = (state = { masterSchools: [] }, action) => {
     case SCHOOL_LIST_REQUEST:
       return { loading: true };
     case SCHOOL_LIST_SUCCESS:
-      return { loading: false, masterSchools: action.payload };
+      return {
+        loading: false,
+        masterSchools: action.payload.schools,
+        pages: action.payload.pages,
+        page: action.payload.page,
+      };
     case SCHOOL_LIST_FAIL:
       return { loading: false, error: action.payload };
     default:

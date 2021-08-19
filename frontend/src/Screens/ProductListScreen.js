@@ -8,36 +8,19 @@ import { listProducts, deleteProduct } from '../actions/productActions';
 import { PRODUCT_CREATE_RESET } from '../constants/productConstants';
 import { logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
-import MaterialButton from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import { makeStyles } from '@material-ui/styles';
-import { listSchools } from '../actions/schoolActions';
-import TextField from '@material-ui/core/TextField';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { TablePagination } from '@material-ui/core';
+import { listSchoolNames } from '../actions/schoolActions';
 import Paginate from '../components/Paginate';
-import LocalPagination from '../components/LocalPagination';
+import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 
-const useStyles = makeStyles({
-  dialog: {
-    width: '40vw',
-  },
-});
+const ProductListScreen = ({ history, match, location }) => {
+  const urlSearchParams = new URLSearchParams(location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  const pageNumber = params.page ? params.page : 1;
 
-const ProductListScreen = ({ history, match }) => {
-  const pageNumber = match.params.pageNumber || 1;
-  const classes = useStyles();
   const dispatch = useDispatch();
 
   const productList = useSelector((state) => state.productList);
   const { loading, products, error, pages, page } = productList;
-
-  const schoolList = useSelector((state) => state.schoolList);
-  const { masterSchools } = schoolList;
 
   const productDelete = useSelector((state) => state.productDelete);
   const {
@@ -47,23 +30,21 @@ const ProductListScreen = ({ history, match }) => {
   } = productDelete;
 
   const [school, setSchool] = useState('');
-  const [filteredData, setFilteredData] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [masterSchool, setMasterSchool] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage, setProductsPerPage] = useState(2);
 
-  const [deleteId, setDeleteId] = useState('');
+  const [schools, setSchools] = useState([]);
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const [currentProducts, setCurrentProducts] = useState([]);
+  const schoolNameList = useSelector((state) => state.schoolNameList);
+  const { schoolNames } = schoolNameList;
 
   useEffect(() => {
-    if (products) {
-      setFilteredData([...products]);
+    if (!(schoolNames && schoolNames.length > 0)) {
+      dispatch(listSchoolNames());
+    } else {
+      setSchools([
+        ...schoolNames.map((x, index) => ({ id: index, name: x.name })),
+      ]);
     }
-  }, [products]);
+  }, [dispatch, schoolNames]);
 
   const columns = [
     {
@@ -122,90 +103,37 @@ const ProductListScreen = ({ history, match }) => {
   }, [dispatch, userInfo, history]);
 
   useEffect(() => {
-    if (school) {
-      setFilteredData(products.filter((x) => x.schoolName.includes(school)));
-    }
-  }, [school, products]);
-  console.log(currentProducts);
-
-  useEffect(() => {
     dispatch({ type: PRODUCT_CREATE_RESET });
     if (userInfo && !userInfo.isAdmin) {
       dispatch(logout());
       history.push('/login');
     } else {
-      dispatch(listProducts('', pageNumber));
-      dispatch(listSchools());
+      dispatch(listProducts('', pageNumber, '', '', '', school));
     }
-  }, [dispatch, history, userInfo, successDelete, pageNumber]);
+  }, [dispatch, history, userInfo, successDelete, pageNumber, school]);
 
-  useEffect(() => {
-    if (filteredData) {
-      setCurrentProducts([
-        ...filteredData.slice(indexOfFirstProduct, indexOfLastProduct),
-      ]);
-    }
-  }, [filteredData, indexOfFirstProduct, indexOfLastProduct]);
-  useEffect(() => {
-    if (masterSchools) {
-      setMasterSchool([...masterSchools]);
-    }
-  }, [masterSchools]);
-
-  const deleteHandler = (id) => {
-    setDeleteId(id);
-    setOpen(true);
-  };
-  const confirmDeleteHandler = () => {
-    setOpen(false);
-
-    dispatch(deleteProduct(deleteId));
-  };
   const createProductHandler = () => {
     history.push('/admin/product/create');
   };
 
-  const paging = (page) => {
-    setCurrentPage(page);
+  const handleOnSelect = (item) => {
+    history.push('/admin/productlist/');
+    setSchool(item.name);
   };
 
   return (
     <>
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        aria-labelledby='alert-dialog-title'
-        aria-describedby='alert-dialog-description'
-      >
-        <DialogTitle id='alert-dialog-title' className={classes.dialog}>
-          <span className='text-primary'>{'Delete Product'}</span>
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
-            <span className='text-danger'>Are You Sure?</span>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <MaterialButton
-            onClick={() => {
-              setOpen(false);
-            }}
-            color='primary'
-          >
-            No
-          </MaterialButton>
-          <MaterialButton
-            onClick={confirmDeleteHandler}
-            color='primary'
-            autoFocus
-          >
-            Yes
-          </MaterialButton>
-        </DialogActions>
-      </Dialog>
       <Row className='align-items-center'>
         <Col>
           <h1>PRODUCTS</h1>
+        </Col>
+        <Col className='float-end'>
+          <SearchBoxAutocomplete
+            placeholder={'Filter By School'}
+            onClear={() => setSchool('')}
+            items={schools}
+            handleOnSelect={handleOnSelect}
+          />
         </Col>
         <Col>
           <Button
@@ -228,7 +156,7 @@ const ProductListScreen = ({ history, match }) => {
           <MaterialTable
             style={{ padding: '1%' }}
             title='Products'
-            data={currentProducts}
+            data={products}
             columns={columns}
             options={{
               rowStyle: {
@@ -238,6 +166,15 @@ const ProductListScreen = ({ history, match }) => {
               actionsColumnIndex: -1,
               paging: false,
             }}
+            editable={{
+              onRowDelete: (oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    dispatch(deleteProduct(oldData._id));
+                    resolve();
+                  }, 1000);
+                }),
+            }}
             actions={[
               {
                 icon: 'edit',
@@ -245,39 +182,9 @@ const ProductListScreen = ({ history, match }) => {
                 onClick: (event, rowData) =>
                   history.push(`/admin/product/${rowData._id}/edit`),
               },
-              {
-                icon: 'delete',
-                tooltip: 'Delete',
-                onClick: (event, rowData) => deleteHandler(rowData._id),
-              },
-              {
-                icon: () => (
-                  <Autocomplete
-                    options={masterSchool}
-                    getOptionLabel={(option) => option.name}
-                    onChange={(option, value) => value && setSchool(value.name)}
-                    style={{ width: 250 }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label='Filter By School'
-                        variant='outlined'
-                      />
-                    )}
-                  />
-                ),
-                tooltip: 'Filter',
-                isFreeAction: true,
-              },
             ]}
           />
-          <LocalPagination
-            productsPerPage={productsPerPage}
-            totalProducts={filteredData.length}
-            paging={paging}
-            currentPage={currentPage}
-          />
-          <Paginate pages={pages} page={page} isAdmin='true' />
+          <Paginate pages={pages} page={page} isAdmin={true} products={true} />
         </>
       )}
     </>

@@ -44,7 +44,12 @@ import {
   typeSizesListReducer,
   typeUpdateReducer,
 } from './reducers/typeReducers';
-import { classListReducer } from './reducers/classReducers';
+import {
+  classCreateReducer,
+  classDeleteReducer,
+  classListReducer,
+  classUpdateReducer,
+} from './reducers/classReducers';
 import {
   schoolCreateReducer,
   schoolDeleteReducer,
@@ -67,6 +72,9 @@ const reducer = combineReducers({
   typeListAll: typeListAllReducer,
   typeImages: typeImagesReducer,
   classList: classListReducer,
+  classCreate: classCreateReducer,
+  classDelete: classDeleteReducer,
+  classUpdate: classUpdateReducer,
   schoolList: schoolListReducer,
   schoolNameList: schoolNameListReducer,
   schoolCreate: schoolCreateReducer,

@@ -93,7 +93,7 @@ export const getTypeImages = (type) => async (dispatch) => {
     dispatch({ type: TYPE_GET_IMAGES_REQUEST });
 
     const { data } = await axios.get(`/api/types/${type}/images`);
-    console.log(data);
+   
     dispatch({
       type: TYPE_GET_IMAGES_SUCCESS,
       payload: data,

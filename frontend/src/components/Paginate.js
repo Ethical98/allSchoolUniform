@@ -15,6 +15,7 @@ const Paginate = ({
   orders = false,
   products = false,
   users = false,
+  schools = false,
 }) => {
   return (
     pages > 1 && (
@@ -46,8 +47,16 @@ const Paginate = ({
                   ? `/products?category=${category}&page=${x + 1}`
                   : standard.length > 0
                   ? `/products?class=${standard}&page=${x + 1}`
-                  : `/products?&page=${x + 1}`
-                : `/admin/order/${orderId}/edit?&page=${x + 1}`
+                  : `/products?page=${x + 1}`
+                : isAdmin && products
+                ? `/admin/productlist?page=${x + 1}`
+                : isAdmin && schools
+                ? `/admin/schoollist?page=${x + 1}`
+                : isAdmin && orders
+                ? `/admin/orderlist?page=${x + 1}`
+                : isAdmin && users
+                ? `/admin/userlist?page=${x + 1}`
+                : `/admin/order/${orderId}/edit?page=${x + 1}`
             }
           >
             <Pagination.Item active={x + 1 === page}>{x + 1}</Pagination.Item>

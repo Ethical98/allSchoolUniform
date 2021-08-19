@@ -8,23 +8,14 @@ import {
   Container,
 } from 'react-bootstrap';
 import Loader from '../components/Loader';
-import FormContainer from '../components/FormContainer';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import jsonwebtoken from 'jsonwebtoken';
 import { logout } from '../actions/userActions';
-import {
-  TYPE_CREATE_RESET,
-  TYPE_DETAILS_RESET,
-  TYPE_UPDATE_RESET,
-} from '../constants/typeConstants';
-import {
-  createType,
-  listTypeDetails,
-  updateType,
-} from '../actions/typeActions';
+import { TYPE_CREATE_RESET } from '../constants/typeConstants';
+import { createType } from '../actions/typeActions';
 import MaterialTable from 'material-table';
 
 const TypeCreateScreen = ({ match, history }) => {
@@ -279,7 +270,6 @@ const TypeCreateScreen = ({ match, history }) => {
                     onRowAdd: (newData) =>
                       new Promise((resolve, reject) => {
                         setTimeout(() => {
-                          console.log(newData);
                           setVariants([...variants, newData]);
 
                           resolve();

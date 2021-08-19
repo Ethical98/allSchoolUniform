@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { LinkContainer } from 'react-router-bootstrap';
+import React, { useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
@@ -8,22 +7,16 @@ import jsonwebtoken from 'jsonwebtoken';
 import { logout } from '../actions/userActions';
 import { listOrders } from '../actions/orderActions';
 import MaterialTable from 'material-table';
+import Paginate from '../components/Paginate';
 
-import { makeStyles } from '@material-ui/styles';
-
-const useStyles = makeStyles({
-  dialog: {
-    width: '40vw',
-  },
-});
-
-const OrderListScreen = ({ history }) => {
+const OrderListScreen = ({ history, location }) => {
+  const urlSearchParams = new URLSearchParams(location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  const pageNumber = params.page ? params.page : 1;
   const dispatch = useDispatch();
 
-  const [open, setOpen] = useState(false);
-
   const orderList = useSelector((state) => state.orderList);
-  const { loading, orders, error } = orderList;
+  const { loading, orders, error, pages, page } = orderList;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -44,6 +37,10 @@ const OrderListScreen = ({ history }) => {
       title: 'User',
       field: 'user',
       render: (item) => item.user.name,
+    },
+    {
+      title: 'Mobile',
+      field: 'phone',
     },
     {
       title: 'Date',
@@ -105,12 +102,12 @@ const OrderListScreen = ({ history }) => {
 
   useEffect(() => {
     if (userInfo && userInfo.isAdmin) {
-      dispatch(listOrders());
+      dispatch(listOrders(pageNumber));
     } else {
       dispatch(logout());
       history.push('/login');
     }
-  }, [dispatch, history, userInfo]);
+  }, [dispatch, history, userInfo, pageNumber]);
 
   return (
     <>
@@ -130,6 +127,7 @@ const OrderListScreen = ({ history }) => {
               rowStyle: {
                 color: 'black',
               },
+              paging: false,
 
               actionsColumnIndex: -1,
             }}
@@ -152,6 +150,7 @@ const OrderListScreen = ({ history }) => {
               },
             ]}
           />
+          <Paginate pages={pages} page={page} isAdmin={true} orders={true} />
         </>
       )}
     </>

@@ -9,7 +9,6 @@ import {
   Container,
   FloatingLabel,
   Image,
-  Modal,
   ListGroup,
   Card,
   InputGroup,
@@ -36,17 +35,19 @@ import Loader from '../components/Loader';
 import MaterialTable from 'material-table';
 import { LinkContainer } from 'react-router-bootstrap';
 import { listProductDetailsById } from '../actions/productActions';
-import { listSchools } from '../actions/schoolActions';
+import { listSchoolNames, listSchools } from '../actions/schoolActions';
 import { listProducts } from '../actions/productActions';
-import TextField from '@material-ui/core/TextField';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import Paginate from '../components/Paginate';
 import DialogBox from '../components/DialogBox';
+import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 
-const OrderEditScreen = ({ history, match }) => {
+const OrderEditScreen = ({ history, match, location }) => {
   const dispatch = useDispatch();
   const orderId = match.params.id;
-  const pageNumber = match.params.pageNumber || 1;
+  const urlSearchParams = new URLSearchParams(location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+
+  const pageNumber = params.page ? params.page : 1;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -97,8 +98,8 @@ const OrderEditScreen = ({ history, match }) => {
     page,
   } = productList;
 
-  const schoolList = useSelector((state) => state.schoolList);
-  const { masterSchools } = schoolList;
+  const schoolNameList = useSelector((state) => state.schoolNameList);
+  const { schoolNames } = schoolNameList;
 
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -121,8 +122,6 @@ const OrderEditScreen = ({ history, match }) => {
   const [modify, setModify] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [school, setSchool] = useState('');
-  const [filteredData, setFilteredData] = useState([]);
-  const [masterSchool, setMasterSchool] = useState([]);
   const [countInStockIndex, setCountInStockIndex] = useState(0);
   const [productId, setProductId] = useState('');
   const [editIndex, setEditIndex] = useState(0);
@@ -137,6 +136,7 @@ const OrderEditScreen = ({ history, match }) => {
   const [isOutForDelivery, setIsOutForDelivery] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [schools, setSchools] = useState([]);
 
   const orderItemColumns = [
     {
@@ -273,6 +273,16 @@ const OrderEditScreen = ({ history, match }) => {
   ];
 
   useEffect(() => {
+    if (!(schoolNames && schoolNames.length > 0)) {
+      dispatch(listSchoolNames());
+    } else {
+      setSchools([
+        ...schoolNames.map((x, index) => ({ id: index, name: x.name })),
+      ]);
+    }
+  }, [dispatch, schoolNames]);
+
+  useEffect(() => {
     if (!userInfo) {
       history.push('/login');
     }
@@ -385,22 +395,6 @@ const OrderEditScreen = ({ history, match }) => {
   }, [product]);
 
   useEffect(() => {
-    if (newProducts) {
-      setFilteredData([...products]);
-    }
-  }, [products]);
-
-  useEffect(() => {
-    if (school) {
-      setFilteredData(
-        products.filter((x) => x.schoolName.includes(school.toUpperCase()))
-      );
-    } else {
-      setFilteredData([...products]);
-    }
-  }, [school, products]);
-
-  useEffect(() => {
     if (productSizes.length > 0 && editIndex === 0 && size) {
       setCountInStock(
         productSizes[productSizes.findIndex((x) => x.size === size.toString())]
@@ -410,12 +404,6 @@ const OrderEditScreen = ({ history, match }) => {
       setCountInStock(productSizes[editIndex].countInStock);
     } // eslint-disable-next-line
   }, [productSizes, size, editIndex]);
-
-  useEffect(() => {
-    if (masterSchools) {
-      setMasterSchool([...masterSchools]);
-    }
-  }, [masterSchools]);
 
   useEffect(() => {
     setItemsPrice(
@@ -538,12 +526,14 @@ const OrderEditScreen = ({ history, match }) => {
 
   const showNewProductModalHandle = () => {
     setShowNewProductModal(true);
+    history.push(`/admin/order/${orderId}/edit`);
+
     setSchool('');
-    dispatch(listProducts('', pageNumber));
+    dispatch(listProducts('', pageNumber, '', '', '', school));
   };
   useEffect(() => {
-    dispatch(listProducts('', pageNumber));
-  }, [pageNumber]);
+    dispatch(listProducts('', pageNumber, '', '', '', school));
+  }, [pageNumber, dispatch, school]);
 
   const saveNewItemsHandler = () => {
     setModifiedOrderItems([...modifiedOrderItems, ...newItemsToAdd]);
@@ -559,6 +549,11 @@ const OrderEditScreen = ({ history, match }) => {
 
   const closeTrackingHandle = () => {
     setShowTracking(false);
+  };
+
+  const handleOnSelect = (item) => {
+    history.push(`/admin/order/${orderId}/edit`);
+    setSchool(item.name);
   };
 
   return (
@@ -615,6 +610,15 @@ const OrderEditScreen = ({ history, match }) => {
         title='Add New Product'
         fullscreen={true}
       >
+        <div className='w-50'>
+          <SearchBoxAutocomplete
+            placeholder={'Filter By School'}
+            onClear={() => setSchool('')}
+            items={schools}
+            handleOnSelect={handleOnSelect}
+          />
+        </div>
+
         {message && <Message variant='danger'>{message}</Message>}
         {loadingProducts ? (
           <Loader />
@@ -625,7 +629,7 @@ const OrderEditScreen = ({ history, match }) => {
             <MaterialTable
               style={{ padding: '1%' }}
               title='Products'
-              data={filteredData}
+              data={products}
               columns={newProductColumns}
               options={{
                 rowStyle: {
@@ -653,7 +657,7 @@ const OrderEditScreen = ({ history, match }) => {
                   setNewItemsToAdd([
                     ...newProducts.filter((addedItem) =>
                       data.some(
-                        (itemToAdd) => addedItem.product == itemToAdd._id
+                        (itemToAdd) => addedItem.product === itemToAdd._id
                       )
                     ),
                   ]);
@@ -661,29 +665,6 @@ const OrderEditScreen = ({ history, match }) => {
                   setMessage('');
                 }
               }}
-              actions={[
-                {
-                  icon: () => (
-                    <Autocomplete
-                      options={masterSchool}
-                      getOptionLabel={(option) => option.name}
-                      onChange={(option, value) =>
-                        value ? setSchool(value.name) : setSchool('')
-                      }
-                      style={{ width: 250 }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label='Filter By School'
-                          variant='outlined'
-                        />
-                      )}
-                    />
-                  ),
-                  tooltip: 'Delete Product',
-                  isFreeAction: true,
-                },
-              ]}
             />
             <Paginate
               orderEdit='true'
@@ -692,16 +673,15 @@ const OrderEditScreen = ({ history, match }) => {
               isAdmin='true'
               orderId={orderId}
             />
+            <Button
+              className='float-start my-3'
+              variant='primary'
+              onClick={saveNewItemsHandler}
+            >
+              Save Changes
+            </Button>
           </>
         )}
-
-        <Button
-          className='float-end my-3'
-          variant='primary'
-          onClick={saveNewItemsHandler}
-        >
-          Save Changes
-        </Button>
       </DialogBox>
       <DialogBox
         handleClose={closeTrackingHandle}

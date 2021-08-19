@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -6,38 +6,24 @@ import jsonwebtoken from 'jsonwebtoken';
 import { Image, Row, Col, Button } from 'react-bootstrap';
 import { logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
-import MaterialButton from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import { makeStyles } from '@material-ui/styles';
 import { deleteSchool, listSchools } from '../actions/schoolActions';
+import Paginate from '../components/Paginate';
 
-const useStyles = makeStyles({
-  dialog: {
-    width: '40vw',
-  },
-});
+const SchoolListScreen = ({ history, location }) => {
+  const urlSearchParams = new URLSearchParams(location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  const pageNumber = params.page ? params.page : 1;
 
-const SchoolListScreen = ({ history }) => {
   const dispatch = useDispatch();
 
-  const [open, setOpen] = useState(false);
-
-  const [deleteId, setDeleteId] = useState('');
-
   const schoolList = useSelector((state) => state.schoolList);
-  const { loading, masterSchools, error } = schoolList;
+  const { loading, masterSchools, error, pages, page } = schoolList;
 
   const schoolDelete = useSelector((state) => state.schoolDelete);
   const { success: successDelete } = schoolDelete;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-
-  const classes = useStyles();
 
   const columns = [
     {
@@ -96,23 +82,12 @@ const SchoolListScreen = ({ history }) => {
 
   useEffect(() => {
     if (userInfo && userInfo.isAdmin) {
-      dispatch(listSchools());
+      dispatch(listSchools(pageNumber));
     } else {
       dispatch(logout());
       history.push('/login');
     }
-  }, [dispatch, history, userInfo, successDelete]);
-
-  const deleteHandler = (id) => {
-    setDeleteId(id);
-    setOpen(true);
-  };
-
-  const confirmDeleteHandler = () => {
-    setOpen(false);
-
-    dispatch(deleteSchool(deleteId));
-  };
+  }, [dispatch, history, userInfo, successDelete, pageNumber]);
 
   return (
     <>
@@ -127,6 +102,13 @@ const SchoolListScreen = ({ history }) => {
             onClick={() => history.push('/admin/school/create')}
           >
             <i className='fas fa-plus' /> ADD SCHOOL
+          </Button>
+          <Button
+            variant='outline-primary'
+            className='m-3  float-end'
+            onClick={() => history.push('/admin/classlist')}
+          >
+            CLASSES
           </Button>
         </Col>
       </Row>
@@ -144,11 +126,17 @@ const SchoolListScreen = ({ history }) => {
               rowStyle: {
                 color: 'black',
               },
-              onPageChange: (data) => {
-                console.log(data);
-              },
               paging: false,
               actionsColumnIndex: -1,
+            }}
+            editable={{
+              onRowDelete: (oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    dispatch(deleteSchool(oldData._id));
+                    resolve();
+                  }, 1000);
+                }),
             }}
             actions={[
               {
@@ -157,46 +145,9 @@ const SchoolListScreen = ({ history }) => {
                 onClick: (event, rowData) =>
                   history.push(`/admin/school/${rowData._id}/edit`),
               },
-
-              {
-                icon: 'delete',
-                tooltip: 'Delete',
-                onClick: (event, rowData) => deleteHandler(rowData._id),
-              },
             ]}
           />
-          <Dialog
-            open={open}
-            onClose={() => setOpen(false)}
-            aria-labelledby='alert-dialog-title'
-            aria-describedby='alert-dialog-description'
-          >
-            <DialogTitle id='alert-dialog-title' className={classes.dialog}>
-              <span className='text-danger'>{'Delete School'}</span>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText id='alert-dialog-description'>
-                Are You Sure?
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <MaterialButton
-                onClick={() => {
-                  setOpen(false);
-                }}
-                color='primary'
-              >
-                No
-              </MaterialButton>
-              <MaterialButton
-                onClick={confirmDeleteHandler}
-                color='primary'
-                autoFocus
-              >
-                Yes
-              </MaterialButton>
-            </DialogActions>
-          </Dialog>
+          <Paginate pages={pages} page={page} isAdmin={true} schools={true} />
         </>
       )}
     </>

@@ -13,14 +13,8 @@ import {
   FloatingLabel,
 } from 'react-bootstrap';
 import Message from '../components/Message';
-import {
-  addToCart,
-  removeFromCart,
-  getCartFromDatabase,
-} from '../actions/cartActions';
+import { addToCart, removeFromCart } from '../actions/cartActions';
 import { logout } from '../actions/userActions';
-import Loader from '../components/Loader';
-// import { LinkContainer } from 'react-router-bootstrap';
 
 const CartScreen = ({ match, location, history }) => {
   // const [customQty, setCustomQty] = useState(false);
@@ -78,12 +72,7 @@ const CartScreen = ({ match, location, history }) => {
   const removeFromCartHandler = (id) => {
     dispatch(removeFromCart(id));
   };
-  // const handleCustomQty = (id, q) => {
-  //   console.log('Hello');
-  //   setCustomId(id);
-  //   setChangedQty(q);
-  //   setCustomQty(true);
-  // };
+
   return (
     <Row>
       <Col md={8} className='mb-3'>

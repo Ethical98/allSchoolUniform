@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Button, Offcanvas } from 'react-bootstrap';
+import React from 'react';
+import { Offcanvas } from 'react-bootstrap';
 import { logout } from '../actions/userActions';
 import { useDispatch } from 'react-redux';
 import './css/OffCanvas.css';
@@ -45,7 +45,7 @@ const OffCanvas = ({
               <a href='/offers'>Offers </a>
             </li>
             <li>
-              <a href='#'>
+              <a href='/#'>
                 <span onClick={handleShow}>Track Your Order</span>
               </a>
             </li>
@@ -54,7 +54,7 @@ const OffCanvas = ({
             </li>
             {userInfo && (
               <li>
-                <a href='#'>
+                <a href='/#'>
                   <span
                     onClick={() => {
                       handleOffCanvasClose();

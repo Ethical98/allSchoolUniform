@@ -115,7 +115,9 @@ export const orderListReducer = (state = { orders: [] }, action) => {
     case ORDER_LIST_SUCCESS:
       return {
         loading: false,
-        orders: action.payload,
+        orders: action.payload.orders,
+        pages: action.payload.pages,
+        page: action.payload.page,
       };
     case ORDER_LIST_FAIL:
       return { loading: false, error: action.payload };
@@ -169,7 +171,6 @@ export const orderOutForDeliveryReducer = (state = {}, action) => {
   }
 };
 
-
 export const orderConfirmReducer = (state = {}, action) => {
   switch (action.type) {
     case ORDER_CONFIRM_REQUEST:
@@ -184,7 +185,6 @@ export const orderConfirmReducer = (state = {}, action) => {
       return state;
   }
 };
-
 
 export const orderDeliverReducer = (state = {}, action) => {
   switch (action.type) {

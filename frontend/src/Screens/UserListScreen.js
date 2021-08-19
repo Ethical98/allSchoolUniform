@@ -1,41 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import jsonwebtoken from 'jsonwebtoken';
 import { deleteUser, listUsers, logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
-import MaterialButton from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import { makeStyles } from '@material-ui/styles';
+import Paginate from '../components/Paginate';
 
-const useStyles = makeStyles({
-  dialog: {
-    width: '40vw',
-  },
-});
+const UserListScreen = ({ history, location }) => {
+  const urlSearchParams = new URLSearchParams(location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  const pageNumber = params.page ? params.page : 1;
 
-const UserListScreen = ({ history }) => {
   const dispatch = useDispatch();
 
-  const [open, setOpen] = useState(false);
-
-  const [deleteId, setDeleteId] = useState('');
-
   const userList = useSelector((state) => state.userList);
-  const { loading, users, error } = userList;
+  const { loading, users, error, pages, page } = userList;
 
   const userDelete = useSelector((state) => state.userDelete);
   const { success: successDelete } = userDelete;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-
-  const classes = useStyles();
 
   const columns = [
     {
@@ -92,23 +78,12 @@ const UserListScreen = ({ history }) => {
 
   useEffect(() => {
     if (userInfo && userInfo.isAdmin) {
-      dispatch(listUsers());
+      dispatch(listUsers(pageNumber));
     } else {
       dispatch(logout());
       history.push('/login');
     }
-  }, [dispatch, history, successDelete, userInfo]);
-
-  const deleteHandler = (id) => {
-    setDeleteId(id);
-    setOpen(true);
-  };
-
-  const confirmDeleteHandler = () => {
-    setOpen(false);
-
-    dispatch(deleteUser(deleteId));
-  };
+  }, [dispatch, history, successDelete, userInfo, pageNumber]);
 
   return (
     <>
@@ -127,122 +102,32 @@ const UserListScreen = ({ history }) => {
               rowStyle: {
                 color: 'black',
               },
-
+              paging: false,
               actionsColumnIndex: -1,
             }}
+            editable={{
+              isDeleteHidden: (rowData) => rowData.name === 'Admin User',
+              isEditHidden: (rowData) => rowData.name === 'Admin User',
+              onRowDelete: (oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    dispatch(deleteUser(oldData._id));
+                    resolve();
+                  }, 1000);
+                }),
+            }}
             actions={[
-              {
+              (rowData) => ({
                 icon: 'edit',
                 tooltip: 'Edit',
                 onClick: (event, rowData) =>
                   history.push(`/admin/user/${rowData._id}/edit`),
-              },
-
-              {
-                icon: 'delete',
-                tooltip: 'Delete',
-                onClick: (event, rowData) => deleteHandler(rowData._id),
-              },
+                disabled: rowData.name === 'Admin User',
+              }),
             ]}
           />
-          <Dialog
-            open={open}
-            onClose={() => setOpen(false)}
-            aria-labelledby='alert-dialog-title'
-            aria-describedby='alert-dialog-description'
-          >
-            <DialogTitle id='alert-dialog-title' className={classes.dialog}>
-              <span className='text-danger'>{'Delete User'}</span>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText id='alert-dialog-description'>
-                Are You Sure?
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <MaterialButton
-                onClick={() => {
-                  setOpen(false);
-                }}
-                color='primary'
-              >
-                No
-              </MaterialButton>
-              <MaterialButton
-                onClick={confirmDeleteHandler}
-                color='primary'
-                autoFocus
-              >
-                Yes
-              </MaterialButton>
-            </DialogActions>
-          </Dialog>
+          <Paginate pages={pages} page={page} isAdmin={true} users={true} />
         </>
-
-        // <Table striped bordered hover responsive className='table-sm'>
-        //   <thead>
-        //     <tr>
-        //       <th>S.NO.</th>
-        //       <th>NAME</th>
-        //       <th>EMAIL</th>
-        //       <th>PHONE</th>
-        //       <th>ADMIN</th>
-        //       <th>SAVED ADDRESS</th>
-        //       <th></th>
-        //     </tr>
-        //   </thead>
-        //   <tbody>
-        //     {users.map((user, index) => (
-        //       <tr key={user._id}>
-        //         <td>{index + 1}</td>
-        //         <td>{user.name}</td>
-        //         <td>
-        //           <a href={`mailto:${user.email}`}>{user.email}</a>
-        //         </td>
-        //         <td>{user.phone}</td>
-        //         <td>
-        //           {user.isAdmin ? (
-        //             <i className='fas fa-check' style={{ color: 'green' }}></i>
-        //           ) : (
-        //             <i className='fas fa-times' style={{ color: 'red' }}></i>
-        //           )}
-        //         </td>
-        //         <td>
-        //           {user.savedAddress.length > 0 ? (
-        //             user.savedAddress.map((x, index) => (
-        //               <li key={index}>
-        //                 {x.address}
-        //                 <br />
-        //                 {x.city}
-        //                 <br />
-        //                 {x.postalCode}
-        //                 <br />
-        //                 {x.country}
-        //               </li>
-        //             ))
-        //           ) : (
-        //             <i className='fas fa-times' style={{ color: 'red' }}></i>
-        //           )}
-        //         </td>
-
-        //         <td>
-        //           <LinkContainer to={`/admin/user/${user._id}/edit`}>
-        //             <Button variant='light' className='btn-sm mx-2'>
-        //               <i className='fas fa-edit'></i>
-        //             </Button>
-        //           </LinkContainer>
-        //           <Button
-        //             variant='danger'
-        //             className='btn-sm mx-2'
-        //             onClick={() => deleteHandler(user._id)}
-        //           >
-        //             <i className='fas fa-trash'></i>
-        //           </Button>
-        //         </td>
-        //       </tr>
-        //     ))}
-        //   </tbody>
-        // </Table>
       )}
     </>
   );

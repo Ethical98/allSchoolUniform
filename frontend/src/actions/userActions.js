@@ -321,9 +321,7 @@ export const loginByOTP = (phone) => async (dispatch) => {
 export const configureCaptcha = (id) => {
   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(id, {
     size: 'invisible',
-    callback: (response) => {
-      console.log(response);
-    },
+    callback: (response) => {},
     defaultCountry: 'IN',
   });
 };
@@ -359,7 +357,6 @@ export const getOTP = (phone) => async (dispatch) => {
     //   window.recaptchaVerifier.reset(widgetId);
     // });
   } catch (error) {
-    console.log(error);
     // window.recaptchaVerifier.render().then((widgetId) => {
     //   window.recaptchaVerifier.reset(widgetId);
     // });
@@ -480,38 +477,43 @@ export const clearResetPasswordRequest = () => async (dispatch) => {
   localStorage.removeItem('RE');
 };
 
-export const listUsers = () => async (dispatch, getState) => {
-  try {
-    dispatch({
-      type: USER_LIST_REQUEST,
-    });
+export const listUsers =
+  (pageNumber = '') =>
+  async (dispatch, getState) => {
+    try {
+      dispatch({
+        type: USER_LIST_REQUEST,
+      });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
 
-    const { data } = await axios.get('/api/users', config);
+      const { data } = await axios.get(
+        `/api/users?pageNumber=${pageNumber}`,
+        config
+      );
 
-    dispatch({
-      type: USER_LIST_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: USER_LIST_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: USER_LIST_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: USER_LIST_FAIL,
+        payload:
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message,
+      });
+    }
+  };
 
 export const deleteUser = (id) => async (dispatch, getState) => {
   try {

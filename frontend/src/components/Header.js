@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import jsonwebtoken from 'jsonwebtoken';
-import { Link, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import {
@@ -11,7 +11,6 @@ import {
   Image,
   NavDropdown,
   Badge,
-  Modal,
   Form,
   Row,
   FloatingLabel,
@@ -42,24 +41,7 @@ const Header = ({ history, location }) => {
     setShow(true);
     setValidated(false);
   };
-  // const headerRef = useRef();
-  // const resizeHeaderOnScroll = () => {
-  //   const curr = headerRef.current;
-  //   console.log(headerRef.current.classList);
 
-  //   const distanceY = window.pageYOffset || document.documentElement.scrollTop,
-  //     shrinkOn = 200;
-
-  //   if (distanceY > shrinkOn) {
-  //     curr.classList.add('bg-primary');
-  //     console.log('hello');
-  //   } else {
-  //     curr.classList.remove('bg-light');
-  //     // headerEl.classList.remove('smaller');
-  //   }
-  // };
-
-  // window.addEventListener('scroll', resizeHeaderOnScroll);
   const [user, setUser] = useState({});
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart);

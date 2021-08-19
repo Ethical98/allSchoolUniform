@@ -8,7 +8,6 @@ import {
   Container,
 } from 'react-bootstrap';
 import Loader from '../components/Loader';
-import FormContainer from '../components/FormContainer';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -45,7 +44,7 @@ const TypeEditScreen = ({ match, history }) => {
     error: errorUpdate,
     success: successUpdate,
   } = typeUpdate;
-  console.log(variants);
+
   const variantColumns = [
     {
       title: '#',
@@ -298,7 +297,6 @@ const TypeEditScreen = ({ match, history }) => {
                     onRowAdd: (newData) =>
                       new Promise((resolve, reject) => {
                         setTimeout(() => {
-                          console.log(newData);
                           setVariants([...variants, newData]);
 
                           resolve();

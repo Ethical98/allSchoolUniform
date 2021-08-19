@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Row, Col } from 'react-bootstrap';
 import Message from '../components/Message';
@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom';
 
 const ProductScreen = ({ history, location, match }) => {
   const school = match.params.selectedschool;
-  console.log(school);
+ 
 
   const urlSearchParams = new URLSearchParams(location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
@@ -80,6 +80,7 @@ const ProductScreen = ({ history, location, match }) => {
             category={category ? category : ''}
             season={season ? season : ''}
             standard={standard ? standard : ''}
+            products={true}
           />
         </>
       )}

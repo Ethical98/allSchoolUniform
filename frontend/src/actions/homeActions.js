@@ -10,7 +10,7 @@ export const listCarouselImages = () => async (dispatch) => {
     dispatch({ type: CAROUSEL_IMAGES_REQUEST });
 
     const { data } = await axios.get('/api/home/carousel');
-    console.log(data.homePageCarousel);
+   
 
     dispatch({
       type: CAROUSEL_IMAGES_SUCCESS,

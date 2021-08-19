@@ -11,8 +11,6 @@ import {
   Tabs,
   Tab,
   Image,
-  Offcanvas,
-  ToggleButton,
 } from 'react-bootstrap';
 import Rating from './Rating';
 import { addToCart } from '../actions/cartActions';
@@ -28,11 +26,7 @@ const Product = ({ product }) => {
   );
 
   const typeImages = useSelector((state) => state.typeImages);
-  const { loading, error, images } = typeImages;
-  const [showOffCanvas, setShowOffCanvas] = useState(false);
-
-  const handleOffCanvasClose = () => setShowOffCanvas(false);
-  const handleOffCanvasShow = () => setShowOffCanvas(true);
+  const { loading, images } = typeImages;
 
   const dispatch = useDispatch();
   const id = product._id;
@@ -63,15 +57,6 @@ const Product = ({ product }) => {
 
   return (
     <div>
-      <Offcanvas show={showOffCanvas} onHide={handleOffCanvasClose}>
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Offcanvas</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
-          Some text as placeholder. In real life you can have the elements you
-          have chosen. Like, text, images, lists, etc.
-        </Offcanvas.Body>
-      </Offcanvas>
       <Modal
         show={show}
         onHide={handleClose}

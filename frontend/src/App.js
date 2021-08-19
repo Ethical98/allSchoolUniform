@@ -37,7 +37,7 @@ import SchoolCreateScreen from './Screens/SchoolCreateScreen';
 import TypeListScreen from './Screens/TypeListScreen';
 import TypeEditScreen from './Screens/TypeEditScreen';
 import TypeCreateScreen from './Screens/TypeCreateScreen';
-import OffCanvas from './components/OffCanvas';
+import ClassListScreen from './Screens/ClassListScreen';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -138,7 +138,7 @@ const App = () => {
           <Route path='/admin/typelist' component={TypeListScreen} />
           <Route path='/admin/type/:id/edit' component={TypeEditScreen} />
           <Route path='/admin/type/create' component={TypeCreateScreen} />
-          <Route path='/off' component={OffCanvas} />
+          <Route path='/admin/classlist' component={ClassListScreen} />
 
           {/* <Route component={PageNotFoundScreen} exact /> */}
         </Container>

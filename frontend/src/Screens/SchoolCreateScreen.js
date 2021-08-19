@@ -187,7 +187,6 @@ const SchoolCreateScreen = ({ history }) => {
                 className='mb-3'
               >
                 <Form.Control
-                  required
                   as='textarea'
                   style={{ height: '100px' }}
                   type='text'

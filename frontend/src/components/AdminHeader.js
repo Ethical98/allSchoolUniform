@@ -38,7 +38,7 @@ const AdminHeader = ({ location }) => {
     else if (path === '/admin/typelist' && value !== 5) setValue(5);
     else if (path === '/admin/homepage' && value !== 6) setValue(6);
     else if (path === '/admin/extra' && value !== 7) setValue(7);
-  }, [value]);
+  }, [value, location.pathname]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
