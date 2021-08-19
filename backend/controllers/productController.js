@@ -182,7 +182,7 @@ const filterProducts = asyncHandler(async (req, res) => {
       }
     : {};
 
-  const pageSize = 2;
+  const pageSize = 10;
   const page = Number(req.query.pageNumber) || 1;
 
   const count = await Product.countDocuments({
@@ -322,8 +322,6 @@ const createProductReview = asyncHandler(async (req, res) => {
     throw new Error('Product not Found');
   }
 });
-
-
 
 // @desc Get top rated products
 // @route POST /api/products/top

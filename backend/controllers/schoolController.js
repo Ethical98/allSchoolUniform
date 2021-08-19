@@ -5,10 +5,14 @@ import School from '../models/SchoolModel.js';
 // @route GET /api/schools
 // @access Private/Admin
 const getSchools = asyncHandler(async (req, res) => {
-  const schools = await School.find();
-
+  const pageSize = 10;
+  const page = Number(req.query.pageNumber) || 1;
+  const schools = await School.find()
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+  const count = await School.countDocuments({});
   if (schools) {
-    res.json(schools);
+    res.json({ schools, page, pages: Math.ceil(count / pageSize) });
   } else {
     res.status(404);
     throw new Error('School List empty');

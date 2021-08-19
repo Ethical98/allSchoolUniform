@@ -25,9 +25,11 @@ router
   .put(protect, isAdmin, editOrderById);
 router.route('/:id/pay').put(protect, updateOrderTopaid);
 router.route('/orderid/:id').get(getOrderByOrderId);
-router.route('/:id/deliver').put(updateOrderToDelivered);
-router.route('/:id/confirm').put(updateOrderToConfirmed);
-router.route('/:id/processing').put(updateOrderToProcessing);
-router.route('/:id/outfordelivery').put(updateOrderToOutForDelivery);
+router.route('/:id/deliver').put(protect, isAdmin, updateOrderToDelivered);
+router.route('/:id/confirm').put(protect, isAdmin, updateOrderToConfirmed);
+router.route('/:id/processing').put(protect, isAdmin, updateOrderToProcessing);
+router
+  .route('/:id/outfordelivery')
+  .put(protect, isAdmin, updateOrderToOutForDelivery);
 
 export default router;

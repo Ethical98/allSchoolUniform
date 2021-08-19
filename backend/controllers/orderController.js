@@ -26,6 +26,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     const order = new Order({
       orderItems,
       user: req.user._id,
+      phone: req.user.phone,
       shippingAddress,
       paymentMethod,
       itemsPrice,
@@ -269,10 +270,16 @@ const sendMail = asyncHandler(async (req, res) => {
 // @route GET /api/orders
 // @access Private?Admin
 const getOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({}).populate('user', 'id name');
+  const pageSize = 10;
+  const page = Number(req.query.pageNumber) || 1;
+  const count = await Order.countDocuments({});
+  const orders = await Order.find({})
+    .populate('user', 'id name')
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
 
   if (orders.length > 0) {
-    res.json(orders);
+    res.json({ orders, page, pages: Math.ceil(count / pageSize) });
   } else {
     res.status(404);
     throw new Error('No orders Found');
