@@ -27,6 +27,7 @@ const ProductCreateScreen = ({ history }) => {
 
   const [image, setImage] = useState('');
   const [type, setType] = useState('');
+  const [isActive, setIsActive] = useState(false);
   //   const [masterClass, setMasterClass] = useState('');
   const [standard, setStandard] = useState('');
   const [schoolName, setSchoolName] = useState(['BBPS']);
@@ -192,6 +193,7 @@ const ProductCreateScreen = ({ history }) => {
         standard,
         description,
         schoolName,
+        isActive,
       })
     );
   };
@@ -349,6 +351,15 @@ const ProductCreateScreen = ({ history }) => {
                     onChange={(e) => setDescription(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
+                <Form.Group controlId='isActive' className='mb-3'>
+                  <Form.Check
+                    className='mb-3'
+                    type='checkbox'
+                    label='Is Active'
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                  ></Form.Check>
+                </Form.Group>
               </Col>
 
               <Col md={9}>

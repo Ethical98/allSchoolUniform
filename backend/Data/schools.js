@@ -10,7 +10,7 @@ const schools = [
     city: 'Delhi',
     country: 'India',
     logo: '/images/schoolLogo/bbps.png',
-    disabled: false,
+    isActive: true,
   },
   {
     name: 'Presidium School PALAM VIHAR',
@@ -23,7 +23,7 @@ const schools = [
     city: 'Gurugram',
     country: 'India',
     logo: '/images/schoolLogo/presidium.jpg',
-    disabled: false,
+    isActive: true,
   },
   {
     name: 'G.D. Goenka Public School MODEL TOWN',
@@ -35,7 +35,7 @@ const schools = [
     city: 'Delhi',
     country: 'India',
     logo: '/images/schoolLogo/gdgoenka.jpeg',
-    disabled: false,
+    isActive: true,
   },
 ];
 

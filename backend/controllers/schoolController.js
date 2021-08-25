@@ -37,7 +37,7 @@ const getSchoolDetails = asyncHandler(async (req, res) => {
 // @route GET /api/schools/:id
 // @access Public
 const getSchoolNames = asyncHandler(async (req, res) => {
-  const schoolNames = await School.find().select('name');
+  const schoolNames = await School.find().select('name isActive');
 
   if (schoolNames) {
     res.json(schoolNames);
@@ -64,6 +64,7 @@ const createSchool = asyncHandler(async (req, res) => {
     website,
     email,
     country,
+    isActive,
     user: req.user._id,
   });
   const createdSchool = await school.save();
@@ -102,6 +103,7 @@ const updateSchool = asyncHandler(async (req, res) => {
     website,
     email,
     description,
+    isActive,
   } = req.body;
 
   if (school) {
@@ -116,6 +118,7 @@ const updateSchool = asyncHandler(async (req, res) => {
     school.country = country || school.country;
     school.email = email || school.email;
     school.website = website || school.website;
+    school.isActive = isActive;
 
     const updatedSchool = await school.save();
     res.status(200).json(updatedSchool);

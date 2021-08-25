@@ -556,12 +556,29 @@ const OrderEditScreen = ({ history, match, location }) => {
     setSchool(item.name);
   };
 
+  const SaveNewItemsButton = () => (
+    <Button className='my-3' variant='primary' onClick={saveNewItemsHandler}>
+      Save Changes
+    </Button>
+  );
+
+  const SaveChangesButton = () => (
+    <Button
+      className='my-3 float-end'
+      variant='primary'
+      onClick={saveChangesHandler}
+    >
+      Save Changes
+    </Button>
+  );
+
   return (
     <>
       <DialogBox
         handleClose={closeEditModalHandle}
         show={showEditModal}
         title='Edit Item'
+        footer={<SaveChangesButton />}
       >
         <Row>
           <Col md={6}>
@@ -594,14 +611,6 @@ const OrderEditScreen = ({ history, match, location }) => {
             </FloatingLabel>
           </Col>
         </Row>
-
-        <Button
-          className='my-3 float-end'
-          variant='primary'
-          onClick={saveChangesHandler}
-        >
-          Save Changes
-        </Button>
       </DialogBox>
 
       <DialogBox
@@ -609,6 +618,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         show={showNewProductModal}
         title='Add New Product'
         fullscreen={true}
+        footer={<SaveNewItemsButton />}
       >
         <div className='w-50'>
           <SearchBoxAutocomplete
@@ -629,7 +639,7 @@ const OrderEditScreen = ({ history, match, location }) => {
             <MaterialTable
               style={{ padding: '1%' }}
               title='Products'
-              data={products}
+              data={products.filter((x) => x.isActive === true)}
               columns={newProductColumns}
               options={{
                 rowStyle: {
@@ -673,13 +683,6 @@ const OrderEditScreen = ({ history, match, location }) => {
               isAdmin='true'
               orderId={orderId}
             />
-            <Button
-              className='float-start my-3'
-              variant='primary'
-              onClick={saveNewItemsHandler}
-            >
-              Save Changes
-            </Button>
           </>
         )}
       </DialogBox>

@@ -35,6 +35,7 @@ const products = [
         openingQty: 0,
       },
     ],
+    isActive: true,
   },
   {
     name: 'Shirt_2',
@@ -72,6 +73,7 @@ const products = [
         openingQty: 0,
       },
     ],
+    isActive: true,
   },
   {
     name: 'Shirt_3',
@@ -109,6 +111,7 @@ const products = [
         openingQty: 0,
       },
     ],
+    isActive: true,
   },
   {
     name: 'Shirt_4',
@@ -147,6 +150,7 @@ const products = [
         openingQty: 0,
       },
     ],
+    isActive: true,
   },
   {
     name: 'Shirt_5',
@@ -184,6 +188,7 @@ const products = [
         openingQty: 0,
       },
     ],
+    isActive: true,
   },
   {
     name: 'Shirt_6',
@@ -221,6 +226,7 @@ const products = [
         openingQty: 0,
       },
     ],
+    isActive: true,
   },
 ];
 

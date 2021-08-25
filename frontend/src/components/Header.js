@@ -87,6 +87,20 @@ const Header = ({ history, location }) => {
     setValidated(true);
   };
 
+  const TrackButton = () => (
+    <LinkContainer to={`/track/${orderId}`}>
+      <Button
+        disabled={orderId.length < 16}
+        className='float-end'
+        type='submit'
+        variant='outline-dark'
+        onClick={handleClose}
+      >
+        Track
+      </Button>
+    </LinkContainer>
+  );
+
   return (
     <header className='header'>
       <OffCanvas
@@ -109,6 +123,7 @@ const Header = ({ history, location }) => {
           handleClose={handleClose}
           handleShow={handleShow}
           title='Track Your Order'
+          footer={<TrackButton />}
         >
           <Form noValidate validated={validated} onSubmit={trackOrderHandler}>
             <FloatingLabel label='Order Id' className='mb-3'>
@@ -123,17 +138,6 @@ const Header = ({ history, location }) => {
                 {message}
               </Form.Control.Feedback>
             </FloatingLabel>
-            <LinkContainer to={`/track/${orderId}`}>
-              <Button
-                disabled={orderId.length < 16}
-                className='float-end'
-                type='submit'
-                variant='outline-dark'
-                onClick={handleClose}
-              >
-                Track
-              </Button>
-            </LinkContainer>
           </Form>
         </DialogBox>
         <Button

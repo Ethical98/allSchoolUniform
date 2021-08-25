@@ -58,7 +58,20 @@ import {
   schoolNameListReducer,
   schoolUpdateReducer,
 } from './reducers/schoolReducers';
-import { carouselImageListReducer } from './reducers/homeReducer';
+import {
+  announcementAddReducer,
+  announcementDeleteReducer,
+  announcementListReducer,
+  announcementUpdateReducer,
+  carouselImageAddReducer,
+  carouselImageDeleteReducer,
+  carouselImageListReducer,
+  carouselImageUpdateReducer,
+  headerBackgroundDetailsReducer,
+  headerBackgroundUpdateReducer,
+  statisticsDetailsReducer,
+  statisticsUpdateReducer,
+} from './reducers/homeReducer';
 
 const reducer = combineReducers({
   productList: productListReducer,
@@ -107,6 +120,17 @@ const reducer = combineReducers({
   orderProcessing: orderProcessingReducer,
   orderConfirm: orderConfirmReducer,
   carouselImageList: carouselImageListReducer,
+  carouselImageUpdate: carouselImageUpdateReducer,
+  carouselImageDelete: carouselImageDeleteReducer,
+  carouselImageAdd: carouselImageAddReducer,
+  statisticsDetails: statisticsDetailsReducer,
+  statisticsUpdate: statisticsUpdateReducer,
+  headerBackgroundDetails: headerBackgroundDetailsReducer,
+  headerBackgroundUpdate: headerBackgroundUpdateReducer,
+  announcementList: announcementListReducer,
+  announcementUpdate: announcementUpdateReducer,
+  announcementDelete: announcementDeleteReducer,
+  announcementAdd: announcementAddReducer,
 });
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;

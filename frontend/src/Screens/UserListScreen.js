@@ -106,7 +106,7 @@ const UserListScreen = ({ history, location }) => {
               actionsColumnIndex: -1,
             }}
             editable={{
-              isDeleteHidden: (rowData) => rowData.name === 'Admin User',
+              isDeleteHidden: (rowData) => rowData.isAdmin === true,
               isEditHidden: (rowData) => rowData.name === 'Admin User',
               onRowDelete: (oldData) =>
                 new Promise((resolve, reject) => {
@@ -122,7 +122,7 @@ const UserListScreen = ({ history, location }) => {
                 tooltip: 'Edit',
                 onClick: (event, rowData) =>
                   history.push(`/admin/user/${rowData._id}/edit`),
-                disabled: rowData.name === 'Admin User',
+                disabled: rowData.isAdmin === true,
               }),
             ]}
           />

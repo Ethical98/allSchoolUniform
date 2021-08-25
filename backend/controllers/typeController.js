@@ -5,7 +5,7 @@ import ProductType from '../models/ProductTypesModel.js';
 // @route GET /api/types
 // @access Private/Admin
 const getTypes = asyncHandler(async (req, res) => {
-  const productType = await ProductType.find().select('type');
+  const productType = await ProductType.find().select('type isActive');
 
   if (productType) {
     res.json(productType);
@@ -79,13 +79,15 @@ const getTypeDetails = asyncHandler(async (req, res) => {
 // @route POST /api/types
 // @access Private/Admin
 const createType = asyncHandler(async (req, res) => {
-  const { typeName, variants, sizeGuide, sizeChart, typeImage } = req.body;
+  const { typeName, variants, sizeGuide, sizeChart, typeImage, isActive } =
+    req.body;
   const productType = new ProductType({
     type: typeName,
     variants,
     sizeGuide,
     sizeChart,
     image: typeImage,
+    isActive,
   });
   const createdType = await productType.save();
   res.status(201).json(createdType);
@@ -111,7 +113,8 @@ const deleteType = asyncHandler(async (req, res) => {
 // @access Private/Admin
 const updateType = asyncHandler(async (req, res) => {
   const productType = await ProductType.findById(req.params.id);
-  const { typeName, variants, typeImage, sizeGuide, sizeChart } = req.body;
+  const { typeName, variants, typeImage, sizeGuide, sizeChart, isActive } =
+    req.body;
 
   if (productType) {
     productType.type = typeName || productType.type;
@@ -119,7 +122,9 @@ const updateType = asyncHandler(async (req, res) => {
     productType.image = typeImage || productType.image;
     productType.sizeChart = sizeChart || productType.sizeChart;
     productType.sizeGuide = sizeGuide || productType.sizeGuide;
+    productType.isActive = isActive;
     const updatedType = await productType.save();
+
     res.status(200).json(updatedType);
   } else {
     res.status(404);

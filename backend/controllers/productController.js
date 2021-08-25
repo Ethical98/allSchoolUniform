@@ -231,6 +231,7 @@ const createProduct = asyncHandler(async (req, res) => {
     type,
     size,
     standard,
+    isActive,
   } = req.body;
 
   const product = new Product({
@@ -244,6 +245,7 @@ const createProduct = asyncHandler(async (req, res) => {
     season,
     type,
     size,
+    isActive,
     class: standard,
   });
 
@@ -266,6 +268,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     season,
     size,
     type,
+    isActive,
   } = req.body;
 
   const product = await Product.findById(req.params.id);
@@ -280,6 +283,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.brand = brand;
     product.season = season;
     product.size = [...size];
+    product.isActive = isActive;
 
     const updatedProduct = await product.save();
     res.status(201).json(updatedProduct);

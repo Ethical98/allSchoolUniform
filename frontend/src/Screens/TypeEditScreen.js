@@ -31,6 +31,7 @@ const TypeEditScreen = ({ match, history }) => {
   const [sizeGuide, setSizeGuide] = useState('');
   const [sizeChart, setSizeChart] = useState('');
   const [variants, setVariants] = useState([]);
+  const [isActive, setIsActive] = useState(false);
   const [uploadingTypeImage, setUploadingTypeImage] = useState(false);
   const [uploadingSizeGuide, setUploadingSizeGuide] = useState(false);
   const [uploadingSizeChart, setUploadingSizeChart] = useState(false);
@@ -54,6 +55,27 @@ const TypeEditScreen = ({ match, history }) => {
       render: (rowData) => rowData.tableData.id + 1,
     },
     { title: 'Size', field: 'size' },
+    {
+      title: 'Active',
+      field: 'isActive',
+      render: (rowData) =>
+        rowData.isActive ? (
+          <i className='fas fa-check'></i>
+        ) : (
+          <i className='fas fa-times'></i>
+        ),
+      editComponent: (props) => (
+        <Form.Group controlId='isActive' className='mb-3'>
+          <Form.Check
+            className='mb-3'
+            type='checkbox'
+            label='Is Active'
+            checked={props.value}
+            onChange={(e) => props.onChange(e.target.checked)}
+          ></Form.Check>
+        </Form.Group>
+      ),
+    },
   ];
 
   const userLogin = useSelector((state) => state.userLogin);
@@ -101,6 +123,7 @@ const TypeEditScreen = ({ match, history }) => {
         setSizeGuide(type.sizeGuide);
         setSizeChart(type.sizeChart);
         setVariants([...type.variants]);
+        setIsActive(type.isActive);
       }
     }
   }, [dispatch, history, successUpdate, type, typeId]);
@@ -185,6 +208,7 @@ const TypeEditScreen = ({ match, history }) => {
         sizeGuide,
         sizeChart,
         variants,
+        isActive,
       })
     );
   };
@@ -282,6 +306,15 @@ const TypeEditScreen = ({ match, history }) => {
                     custom
                     onChange={uploadSizeChartFileHandler}
                   />
+                </Form.Group>
+                <Form.Group controlId='isActive' className='mb-3'>
+                  <Form.Check
+                    className='mb-3'
+                    type='checkbox'
+                    label='Is Active'
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                  ></Form.Check>
                 </Form.Group>
               </Col>
               <Col className='mb-3'>

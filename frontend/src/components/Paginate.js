@@ -16,6 +16,7 @@ const Paginate = ({
   products = false,
   users = false,
   schools = false,
+  school = '',
 }) => {
   return (
     pages > 1 && (
@@ -25,25 +26,91 @@ const Paginate = ({
             key={x + 1}
             to={
               !isAdmin && products
-                ? keyword
+                ? keyword &&
+                  category.length > 0 &&
+                  season.length > 0 &&
+                  standard.length > 0 &&
+                  keyword
+                  ? `/products?search=${keyword}&season=${season}&category=${category}&class=${standard}&page=${
+                      x + 1
+                    }`
+                  : category.length > 0 && season.length > 0 && keyword
+                  ? `/products?search=${keyword}&season=${season}&category=${category}}&page=${
+                      x + 1
+                    }`
+                  : category.length > 0 && standard.length > 0 && keyword
+                  ? `/products?search=${keyword}&category=${category}&class=${standard}&page=${
+                      x + 1
+                    }`
+                  : season.length > 0 && standard.length > 0 && keyword
+                  ? `/products?search=${keyword}&season=${season}&class=${standard}&page=${
+                      x + 1
+                    }`
+                  : season.length > 0 && keyword
+                  ? `/products?search=${keyword}&season=${season}&page=${x + 1}`
+                  : category.length > 0 && keyword
+                  ? `/products?search=${keyword}&category=${category}&page=${
+                      x + 1
+                    }`
+                  : standard.length > 0 && keyword
+                  ? `/products?search=${keyword}&class=${standard}&page=${
+                      x + 1
+                    }`
+                  : keyword &&
+                    category.length > 0 &&
+                    season.length > 0 &&
+                    standard.length > 0 &&
+                    school
+                  ? `/products?season=${season}&category=${category}&class=${standard}&school=${school}&page=${
+                      x + 1
+                    }`
+                  : category.length > 0 && season.length > 0 && school
+                  ? `/products?search=${keyword}&season=${season}&category=${category}&school=${school}&page=${
+                      x + 1
+                    }`
+                  : category.length > 0 && standard.length > 0 && school
+                  ? `/products?search=${keyword}&category=${category}&class=${standard}&school=${school}&page=${
+                      x + 1
+                    }`
+                  : season.length > 0 && standard.length > 0 && school
+                  ? `/products?search=${keyword}&season=${season}&class=${standard}&school=${school}&page=${
+                      x + 1
+                    }`
+                  : season.length > 0 && school
+                  ? `/products?search=${keyword}&season=${season}&school=${school}&page=${
+                      x + 1
+                    }`
+                  : category.length > 0 && school
+                  ? `/products?search=${keyword}&category=${category}&school=${school}&page=${
+                      x + 1
+                    }`
+                  : standard.length > 0 && school
+                  ? `/products?search=${keyword}&class=${standard}&school=${school}&page=${
+                      x + 1
+                    }`
+                  : keyword
                   ? `/products?search=${keyword}&page=${x + 1}`
-                  : category && season && standard.length > 0
+                  : school
+                  ? `/products/schools/${school}?page=${x + 1}`
+                  : category.length > 0 &&
+                    season.length > 0 &&
+                    standard.length > 0
                   ? `/products?season=${season}&category=${category}&class=${standard}&page=${
                       x + 1
                     }`
-                  : category && season
+                  : category.length > 0 && season.length > 0
                   ? `/products?season=${season}&category=${category}&page=${
                       x + 1
                     }`
-                  : category && standard.length > 0
+                  : category.length > 0 && standard.length > 0
                   ? `/products?category=${category}&class=${standard}&page=${
                       x + 1
                     }`
-                  : season && standard.length > 0
+                  : season.length > 0 && standard.length > 0
                   ? `/products?season=${season}&class=${standard}&page=${x + 1}`
-                  : season
+                  : season.length > 0
                   ? `/products?season=${season}&page=${x + 1}`
-                  : category
+                  : category.length > 0
                   ? `/products?category=${category}&page=${x + 1}`
                   : standard.length > 0
                   ? `/products?class=${standard}&page=${x + 1}`

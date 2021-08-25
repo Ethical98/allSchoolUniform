@@ -27,7 +27,7 @@ const SchoolEditScreen = ({ match, history }) => {
   const dispatch = useDispatch();
 
   const [contact, setContact] = useState('');
-  const [disabled, setDisabled] = useState('');
+  const [isActive, setIsActive] = useState(false);
   const [name, setName] = useState('');
   const [logo, setLogo] = useState('');
   const [address, setAddress] = useState('');
@@ -93,7 +93,7 @@ const SchoolEditScreen = ({ match, history }) => {
         setLogo(school.logo);
         setAddress(school.address);
         setContact(school.contact);
-        setDisabled(school.disabled);
+        setIsActive(school.isActive);
         setState(school.state);
         setDescription(school.description);
         setEmail(school.email);
@@ -131,7 +131,7 @@ const SchoolEditScreen = ({ match, history }) => {
     e.preventDefault();
     window.scrollTo(0, 0);
     dispatch(
-      updateSchool({ _id: schoolId, name, contact, address, disabled, logo })
+      updateSchool({ _id: schoolId, name, contact, address, isActive, logo })
     );
   };
   return (
@@ -275,13 +275,13 @@ const SchoolEditScreen = ({ match, history }) => {
                 <Form.Control type='file' custom onChange={uploadFileHandler} />
               </Form.Group>
 
-              <Form.Group controlId='disabled' className='mb-3'>
+              <Form.Group controlId='isActive' className='mb-3'>
                 <Form.Check
                   className='mb-3'
                   type='checkbox'
-                  label='Disabled'
-                  checked={disabled}
-                  onChange={(e) => setDisabled(e.target.checked)}
+                  label='Is Active'
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
                 ></Form.Check>
               </Form.Group>
 

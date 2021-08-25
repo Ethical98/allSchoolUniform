@@ -34,6 +34,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
       shippingPrice,
       totalPrice,
     });
+
     // console.log(orderItems);
     // const imageArray = [];
     // for (var i = 0; i < orderItems.length; i++) {

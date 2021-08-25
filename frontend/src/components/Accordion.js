@@ -12,6 +12,8 @@ const Accordion = ({ history, location, match }) => {
   const urlSearchParams = new URLSearchParams(location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
 
+  const school = match.params.selectedschool;
+
   const [pageNumber, setPageNumber] = useState(params.pageNumber || 1);
 
   useEffect(() => {
@@ -19,44 +21,114 @@ const Accordion = ({ history, location, match }) => {
   }, [dispatch]);
 
   const [category, setCategory] = useState(
-    params.category ? params.category : ''
+    params.category ? params.category.split(',') : []
   );
 
-  const [season, setSeason] = useState(params.season ? params.season : '');
+  const [season, setSeason] = useState(
+    params.season ? params.season.split(',') : []
+  );
   const [standard, setStandard] = useState(
     params.class ? params.class.split(',') : []
   );
 
+  const keyword = params.search ? params.search : '';
+
   useEffect(() => {
-    if (category && season && standard.length > 0) {
+    if (category.length > 0 && season.length > 0 && standard.length > 0) {
       if (!pageNumber) {
-        history.push(
-          `/products?season=${season}&category=${category}&class=${standard}`
-        );
+        if (school) {
+          history.push(
+            `/products/schools/${school}?season=${season}&category=${category}&class=${standard}`
+          );
+        } else if (keyword) {
+          history.push(
+            `/products?search=${keyword}&season=${season}&category=${category}&class=${standard}`
+          );
+        } else {
+          history.push(
+            `/products?season=${season}&category=${category}&class=${standard}`
+          );
+        }
       }
-    } else if (category && season) {
+    } else if (category.length > 0 && season.length > 0) {
       if (!pageNumber) {
-        history.push(`/products?season=${season}&category=${category}`);
+        if (school) {
+          history.push(
+            `/products/schools/${school}?season=${season}&category=${category}`
+          );
+        } else if (keyword) {
+          history.push(
+            `/products?search=${keyword}&season=${season}&category=${category}`
+          );
+        } else {
+          history.push(`/products?season=${season}&category=${category}`);
+        }
       }
-    } else if (category && standard.length > 0) {
+    } else if (category.length > 0 && standard.length > 0) {
       if (!pageNumber) {
-        history.push(`/products?category=${category}&class=${standard}`);
+        if (school) {
+          history.push(
+            `/products/schools/${school}?category=${category}&class=${standard}`
+          );
+        } else if (keyword) {
+          history.push(
+            `/products?search=${keyword}&category=${category}&class=${standard}`
+          );
+        } else {
+          history.push(`/products?category=${category}&class=${standard}`);
+        }
       }
-    } else if (season && standard.length > 0) {
+    } else if (season.length > 0 && standard.length > 0) {
       if (!pageNumber) {
-        history.push(`/products?season=${season}&class=${standard}`);
+        if (school) {
+          history.push(
+            `/products/schools/${school}?season=${season}&class=${standard}`
+          );
+        } else if (keyword) {
+          history.push(
+            `/products?search=${keyword}&season=${season}&class=${standard}`
+          );
+        } else {
+          history.push(`/products?season=${season}&class=${standard}`);
+        }
       }
-    } else if (season) {
+    } else if (season.length > 0) {
       if (!pageNumber) {
-        history.push(`/products?season=${season}`);
+        if (school) {
+          history.push(`/products/schools/${school}&season=${season}`);
+        } else if (keyword) {
+          history.push(`/products?search=${keyword}&season=${season}`);
+        } else {
+          history.push(`/products?season=${season}`);
+        }
       }
-    } else if (category) {
+    } else if (category.length > 0) {
       if (!pageNumber) {
-        history.push(`/products?category=${category}`);
+        if (school) {
+          history.push(`/products/schools/${school}?category=${category}`);
+        } else if (keyword) {
+          history.push(`/products?search=${keyword}&category=${category}`);
+        } else {
+          history.push(`/products?category=${category}`);
+        }
       }
     } else if (standard.length > 0) {
       if (!pageNumber) {
-        history.push(`/products?class=${standard}`);
+        if (school) {
+          history.push(`/products/schools/${school}?class=${standard}`);
+        } else if (keyword) {
+          history.push(`/products?search=${keyword}&class=${standard}`);
+        } else {
+          history.push(`/products?class=${standard}`);
+        }
+      }
+    } else {
+      if (school) {
+        history.push(`/products/schools/${school}`);
+      } else if (keyword) {
+        history.push(`/products?search=${keyword}`);
+      } else {
+        history.push('/products');
       }
     }
   }, [category, season, dispatch, standard, pageNumber, history]);
@@ -64,17 +136,23 @@ const Accordion = ({ history, location, match }) => {
   const seasonChange = (x, checked) => {
     setPageNumber('');
     if (checked) {
-      setSeason(x);
+      setSeason([...season, x]);
     } else {
-      setSeason('');
+      const dataDelete = [...season];
+      const index = season.indexOf(x);
+      dataDelete.splice(index, 1);
+      setSeason([...dataDelete]);
     }
   };
   const categoryChange = (x, checked) => {
     setPageNumber('');
     if (checked) {
-      setCategory(x);
+      setCategory([...category, x]);
     } else {
-      setCategory('');
+      const dataDelete = [...category];
+      const index = category.indexOf(x);
+      dataDelete.splice(index, 1);
+      setCategory([...dataDelete]);
     }
   };
   const standardChange = (x, checked) => {
@@ -90,7 +168,6 @@ const Accordion = ({ history, location, match }) => {
         setStandard('');
       }
     }
-   
   };
 
   return (
@@ -142,9 +219,9 @@ const Accordion = ({ history, location, match }) => {
         <div id='ProductCategory' className='collapse show'>
           <Form className='m-3'>
             <Form.Check
-              checked={category === 'Boys'}
+              checked={category.includes('Boys')}
               name='Category'
-              type='radio'
+              type='checkbox'
               value='Boys'
               label='Boys'
               onChange={(event) =>
@@ -152,9 +229,9 @@ const Accordion = ({ history, location, match }) => {
               }
             ></Form.Check>
             <Form.Check
-              checked={category === 'Girls'}
+              checked={category.includes('Girls')}
               name='Category'
-              type='radio'
+              type='checkbox'
               value='Girls'
               label='Girls'
               onChange={(event) =>
@@ -177,9 +254,9 @@ const Accordion = ({ history, location, match }) => {
         <div id='SeasonalClothing' className='collapse show'>
           <Form className='m-3'>
             <Form.Check
-              checked={season === 'Winter'}
+              checked={season.includes('Winter')}
               name='Seasonal'
-              type='radio'
+              type='checkbox'
               value='Winter'
               label='Winter'
               onChange={(event) =>
@@ -187,9 +264,9 @@ const Accordion = ({ history, location, match }) => {
               }
             />
             <Form.Check
-              checked={season === 'Summer'}
+              checked={season.includes('Summer')}
               name='Seasonal'
-              type='radio'
+              type='checkbox'
               value='Summer'
               label='Summer'
               onChange={(event) =>
@@ -213,20 +290,21 @@ const Accordion = ({ history, location, match }) => {
           <ListGroup>
             <ListGroup.Item style={{ border: 0 }}>
               {masterClasses &&
-                masterClasses.map((x) => {
-                  return (
-                    <Form.Check
-                      checked={standard.includes(x.class)}
-                      key={x._id}
-                      value={x.class}
-                      type='checkbox'
-                      label={x.class}
-                      onChange={(e) =>
-                        standardChange(x.class, e.target.checked)
-                      }
-                    />
-                  );
-                })}
+                masterClasses.map(
+                  (x) =>
+                    x.isActive === true && (
+                      <Form.Check
+                        checked={standard.includes(x.class)}
+                        key={x._id}
+                        value={x.class}
+                        type='checkbox'
+                        label={x.class}
+                        onChange={(e) =>
+                          standardChange(x.class, e.target.checked)
+                        }
+                      />
+                    )
+                )}
             </ListGroup.Item>
           </ListGroup>
         </div>

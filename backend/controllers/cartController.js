@@ -16,6 +16,7 @@ const addToCart = asyncHandler(async (req, res) => {
       const existItem = cart.cartItems.find((x) => x._id == addItem._id);
 
       if (existItem) {
+       
         cart.cartItems = cart.cartItems.map((x) =>
           x._id == existItem._id ? addItem : x
         );
@@ -35,6 +36,7 @@ const addToCart = asyncHandler(async (req, res) => {
       });
       await cart.save();
       res.json({ Message: 'ITEM ADDED' });
+      // res.json(cart.cartItems);
     }
   }
 });
@@ -51,14 +53,20 @@ const cartItemRemove = asyncHandler(async (req, res) => {
   } else {
     const cart = await Cart.findOne({ user: req.user._id });
 
-    cart.cartItems = cart.cartItems.filter((x) => x.id != id);
+    await Cart.updateOne(
+      { user: req.user._id },
+      { $pull: { cartItems: { _id: id } } }
+    );
+
+    // cart.cartItems = cart.cartItems.filter((x) => x.id != id);
 
     if (cart.cartItems.length == 0) {
       await Cart.deleteOne({ user: req.user._id });
-
+      // res.json({ cartItems: [] });
       res.json({ Message: 'Cart Cleared' });
     } else {
-      await cart.save();
+      res.json();
+      // res.json(cart.cartItems);
       res.json({ Message: 'Item Deleted' });
     }
   }

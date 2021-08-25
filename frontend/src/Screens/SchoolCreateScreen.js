@@ -22,7 +22,7 @@ const SchoolCreateScreen = ({ history }) => {
   const dispatch = useDispatch();
 
   const [contact, setContact] = useState('');
-  const [disabled, setDisabled] = useState(false);
+  const [isActive, setIsActive] = useState(false);
   const [name, setName] = useState('');
   const [logo, setLogo] = useState('');
   const [address, setAddress] = useState('');
@@ -106,7 +106,7 @@ const SchoolCreateScreen = ({ history }) => {
         name,
         contact,
         address,
-        disabled,
+        isActive,
         logo,
         state,
         city,
@@ -256,13 +256,13 @@ const SchoolCreateScreen = ({ history }) => {
                 <Form.Control type='file' custom onChange={uploadFileHandler} />
               </Form.Group>
 
-              <Form.Group controlId='disabled' className='mb-3'>
+              <Form.Group controlId='isActive' className='mb-3'>
                 <Form.Check
                   className='mb-3'
                   type='checkbox'
-                  label='Disabled'
-                  checked={disabled}
-                  onChange={(e) => setDisabled(e.target.checked)}
+                  label='Is Active'
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
                 ></Form.Check>
               </Form.Group>
 

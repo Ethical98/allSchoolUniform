@@ -35,7 +35,11 @@ const HomeScreen = ({ history }) => {
       dispatch(listSchoolNames());
     } else {
       setSchools([
-        ...schoolNames.map((x, index) => ({ id: index, name: x.name })),
+        ...schoolNames.map((x, index) => ({
+          id: index,
+          name: x.name,
+          isActive: x.isActive,
+        })),
       ]);
     }
   }, [dispatch, schoolNames]);
@@ -160,7 +164,7 @@ const HomeScreen = ({ history }) => {
               <SearchBoxAutocomplete
                 placeholder={'Search School'}
                 history={history}
-                items={schools}
+                items={schools.filter((x) => x.isActive === true)}
                 handleOnSelect={handleOnSelect}
               />
             )}
@@ -168,27 +172,6 @@ const HomeScreen = ({ history }) => {
         </div>
       </Container>
       <CarouselHomeScreen items={carouselImages} />
-
-      {/* <Carousel className='mt-5' style={{ zIndex: -1 }}>
-        {carouselImages &&
-          carouselImages.map((x, index) => (
-            <Carousel.Item key={index}>
-              <Image rounded className='d-block' src={x} alt='First slide' />
-              <Carousel.Caption></Carousel.Caption>
-            </Carousel.Item>
-          ))} */}
-
-      {/* <Carousel.Item>
-          <Image rounded className='d-block ' src={image2} alt='Second slide' />
-
-          <Carousel.Caption></Carousel.Caption>
-        </Carousel.Item>
-        <Carousel.Item>
-          <Image rounded className='d-block ' src={image1} alt='Third slide' />
-
-          <Carousel.Caption></Carousel.Caption>
-        </Carousel.Item> */}
-      {/* </Carousel> */}
     </div>
   );
 };

@@ -41,7 +41,11 @@ const ProductListScreen = ({ history, match, location }) => {
       dispatch(listSchoolNames());
     } else {
       setSchools([
-        ...schoolNames.map((x, index) => ({ id: index, name: x.name })),
+        ...schoolNames.map((x, index) => ({
+          id: index,
+          name: x.name,
+          isActive: x.isActive,
+        })),
       ]);
     }
   }, [dispatch, schoolNames]);
@@ -131,7 +135,7 @@ const ProductListScreen = ({ history, match, location }) => {
           <SearchBoxAutocomplete
             placeholder={'Filter By School'}
             onClear={() => setSchool('')}
-            items={schools}
+            items={schools.filter((x) => x.isActive === true)}
             handleOnSelect={handleOnSelect}
           />
         </Col>

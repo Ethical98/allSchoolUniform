@@ -17,6 +17,7 @@ import { addToCart } from '../actions/cartActions';
 import './css/Product.css';
 import { getTypeImages } from '../actions/typeActions';
 import Loader from './Loader';
+import DialogBox from './DialogBox';
 
 const Product = ({ product }) => {
   const [index, setIndex] = useState(0);
@@ -54,10 +55,50 @@ const Product = ({ product }) => {
   const addToCartHandler = (id, qty) => {
     dispatch(addToCart(id, index, qty));
   };
+  const CloseButton = () => (
+    <Button variant='secondary' onClick={handleClose}>
+      Close
+    </Button>
+  );
 
   return (
     <div>
-      <Modal
+      <DialogBox
+        show={show}
+        handleClose={handleClose}
+        title={'Size Guide'}
+        footer={<CloseButton />}
+      >
+        {loading ? (
+          <Loader />
+        ) : (
+          <Tabs
+            defaultActiveKey='image'
+            id='uncontrolled-tab-example'
+            className='mb-3'
+          >
+            <Tab eventKey='image' title='Image'>
+              <Image src={images.image} style={{ width: '20vw' }} alt='image' />
+            </Tab>
+            <Tab eventKey='sizeGuide' title='Size Guide'>
+              <Image
+                src={images.sizeGuide}
+                style={{ width: '20vw' }}
+                alt='Size Guide'
+              />
+            </Tab>
+            <Tab
+              eventKey='sizeChart'
+              title='Size Chart'
+              style={{ width: '20vw' }}
+              alt='Size Chart'
+            >
+              <Image src={images.sizeChart} />
+            </Tab>
+          </Tabs>
+        )}
+      </DialogBox>
+      {/* <Modal
         show={show}
         onHide={handleClose}
         backdrop='static'
@@ -105,7 +146,7 @@ const Product = ({ product }) => {
             Close
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Modal> */}
 
       <Card className='my-3  rounded text-center' bg='white'>
         <Link to={`/products/${product.name}`}>
@@ -146,27 +187,27 @@ const Product = ({ product }) => {
                     .sort((a, b) => {
                       return a.size - b.size;
                     })
-                    .map((x) => {
-                      return (
-                        <option key={x._id} value={x.size}>
-                          {x.size}
-                        </option>
-                      );
-                    })}
+                    .map((x) => (
+                      <option key={x._id} value={x.size}>
+                        {x.size}
+                      </option>
+                    ))}
                 </Form.Select>
               </Col>
-              <Col xs>
-                <Form.Select
-                  size='sm'
-                  onChange={(e) => setQty(Number(e.target.value))}
-                >
-                  {[...Array(countInStock).keys()].map((x) => (
-                    <option key={x + 1} value={x + 1}>
-                      {x + 1}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Col>
+              {countInStock > 0 && (
+                <Col xs>
+                  <Form.Select
+                    size='sm'
+                    onChange={(e) => setQty(Number(e.target.value))}
+                  >
+                    {[...Array(countInStock).keys()].map((x) => (
+                      <option key={x + 1} value={x + 1}>
+                        {x + 1}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Col>
+              )}
               <Col xs>
                 <Button
                   onClick={() => handleShow(product.type)}
@@ -190,6 +231,7 @@ const Product = ({ product }) => {
           <Button
             variant='dark'
             size='sm'
+            disabled={countInStock === 0}
             className='mb-3'
             onClick={() => addToCartHandler(id, qty)}
           >

@@ -2,11 +2,29 @@ import mongoose from 'mongoose';
 
 const homePageSchmea = mongoose.Schema({
   headerBackground: {
-    type: String,
-    required: true,
+    image: { type: String, required: true },
+    isActive: { type: Boolean, required: true, default: false },
   },
-  homePageCarousel: [{ type: String, required: true }],
-  announcement: { type: String },
+  homePageCarousel: [
+    {
+      image: { type: String, required: true },
+      isActive: { type: Boolean, required: true, default: false },
+      displayOrder: { type: Number, required: true, unique: true },
+    },
+  ],
+  announcement: {
+    image: { type: String },
+    isActive: { type: Boolean, default: false },
+  },
+  statistics: [
+    {
+      totalParents: { type: Number, default: 18921 },
+      totalSchools: { type: Number, default: 645 },
+      totalProducts: { type: Number, default: 387 },
+      totalHappyParents: { type: Number, default: 15650 },
+      isActive: { type: Boolean, default: true },
+    },
+  ],
 });
 
 const Homepage = mongoose.model('Homepage', homePageSchmea);

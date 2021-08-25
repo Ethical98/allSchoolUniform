@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import jsonwebtoken from 'jsonwebtoken';
-import { Row, Col, Button } from 'react-bootstrap';
+import { Row, Col, Button, Form } from 'react-bootstrap';
 import { logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
 
@@ -44,6 +44,28 @@ const ClassListScreen = ({ history, location }) => {
     {
       title: 'Class',
       field: 'class',
+    },
+
+    {
+      title: 'Active',
+      field: 'isActive',
+      render: (rowData) =>
+        rowData.isActive ? (
+          <i className='fas fa-check'></i>
+        ) : (
+          <i className='fas fa-times'></i>
+        ),
+      editComponent: (props) => (
+        <Form.Group controlId='isActive' className='mb-3'>
+          <Form.Check
+            className='mb-3'
+            type='checkbox'
+            label='Is Active'
+            checked={props.value}
+            onChange={(e) => props.onChange(e.target.checked)}
+          ></Form.Check>
+        </Form.Group>
+      ),
     },
   ];
 

@@ -17,12 +17,13 @@ const getClasses = asyncHandler(async (req, res) => {
 // @route POST /api/classes
 // @access Private/Admin
 const createClass = asyncHandler(async (req, res) => {
-  const { className } = req.body;
-  
+  const { className, isActive } = req.body;
+
   const standard = new Class({
     class: className,
+    isActive,
   });
-  
+
   const createdClass = await standard.save();
   res.status(201).json(createdClass);
 });
@@ -49,7 +50,8 @@ const updateClass = asyncHandler(async (req, res) => {
   const standard = await Class.findById(req.params.id);
 
   if (standard) {
-    standard.class = req.body.class;
+    standard.class = req.body.class || standard.class;
+    standard.isActive = req.body.isActive;
 
     const updatedClass = await standard.save();
     res.status(200).json(updatedClass);

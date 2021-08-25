@@ -47,6 +47,7 @@ const ProductEditScreen = ({ match, history }) => {
   const [size, setSize] = useState([]);
   const [message, setMessage] = useState('');
   const [masterSchool, setMasterSchool] = useState([]);
+  const [isActive, setIsActive] = useState(false);
 
   const [masterSize, setMasterSize] = useState([]);
 
@@ -160,7 +161,6 @@ const ProductEditScreen = ({ match, history }) => {
       if (!product.name || product._id !== productId) {
         dispatch(listProductDetailsById(productId));
         dispatch(listClasses());
-        dispatch(listTypes());
         dispatch(listSchools());
       } else {
         setType(product.type);
@@ -176,15 +176,19 @@ const ProductEditScreen = ({ match, history }) => {
         setStandard([...product.class]);
         setSchoolName([...product.schoolName]);
         setDescription(product.description);
+        setIsActive(product.isActive);
         setBrand(product.brand);
         if (masterSchools) {
-          setMasterSchool([...masterSchools]);
+          setMasterSchool([
+            ...masterSchools.filter((x) => x.isActive === true),
+          ]);
         }
         if (masterClasses) {
-          setMasterClass([...masterClasses]);
+          setMasterClass([...masterClasses.filter((x) => x.isActive === true)]);
         }
         if (masterTypes) {
-          setMasterType([...masterTypes]);
+          console.log(masterTypes);
+          setMasterType([...masterTypes.filter((x) => x.isActive === true)]);
         }
       }
     }
@@ -205,6 +209,10 @@ const ProductEditScreen = ({ match, history }) => {
       setMasterSize([...masterSizes.variants]);
     }
   }, [masterSizes, dispatch, product.type]);
+
+  useEffect(() => {
+    dispatch(listTypes());
+  }, [dispatch]);
 
   const uploadFileHandler = async (e) => {
     const file = e.target.files[0];
@@ -245,6 +253,7 @@ const ProductEditScreen = ({ match, history }) => {
         description,
         season,
         standard,
+        isActive,
       })
     );
   };
@@ -412,6 +421,15 @@ const ProductEditScreen = ({ match, history }) => {
                     onChange={(e) => setDescription(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
+                <Form.Group controlId='isActive' className='mb-3'>
+                  <Form.Check
+                    className='mb-3'
+                    type='checkbox'
+                    label='Is Active'
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                  ></Form.Check>
+                </Form.Group>
               </Col>
 
               <Col md={9}>
@@ -427,7 +445,7 @@ const ProductEditScreen = ({ match, history }) => {
                             border: '3px solid grey',
                           }}
                           title='Size Variants'
-                          data={masterSize}
+                          data={masterSize.filter((x) => x.isActive === true)}
                           columns={sizeTableColumns}
                           options={{
                             rowStyle: {

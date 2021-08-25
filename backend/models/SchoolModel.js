@@ -6,10 +6,8 @@ const schoolSchema = mongoose.Schema({
     required: true,
     ref: 'User',
   },
-  orderId: {
-    type: mongoose.Schema.Types.ObjectId,
-
-    ref: 'Order',
+  orders: {
+    type: Number,
   },
   name: {
     type: String,
@@ -52,7 +50,7 @@ const schoolSchema = mongoose.Schema({
     default: 'India',
   },
 
-  disabled: {
+  isActive: {
     type: Boolean,
     default: false,
     rquired: true,

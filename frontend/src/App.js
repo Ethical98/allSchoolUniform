@@ -38,6 +38,7 @@ import TypeListScreen from './Screens/TypeListScreen';
 import TypeEditScreen from './Screens/TypeEditScreen';
 import TypeCreateScreen from './Screens/TypeCreateScreen';
 import ClassListScreen from './Screens/ClassListScreen';
+import HomepageEditScreen from './Screens/HomepageEditScreen';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -139,6 +140,7 @@ const App = () => {
           <Route path='/admin/type/:id/edit' component={TypeEditScreen} />
           <Route path='/admin/type/create' component={TypeCreateScreen} />
           <Route path='/admin/classlist' component={ClassListScreen} />
+          <Route path='/admin/homepage' component={HomepageEditScreen} />
 
           {/* <Route component={PageNotFoundScreen} exact /> */}
         </Container>

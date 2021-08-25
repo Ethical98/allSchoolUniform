@@ -8,6 +8,7 @@ const variantSchema = mongoose.Schema({
   discount: { type: Number, default: 0 },
   alertOnQty: { type: Number, default: 0 },
   tax: { type: Number, default: 0 },
+  isActive: { type: Boolean, rquired: true, default: false },
 });
 
 const productTypesSchema = mongoose.Schema({
@@ -21,6 +22,7 @@ const productTypesSchema = mongoose.Schema({
   sizeChart: { type: String, required: true },
   imageFour: { type: String },
   variants: [variantSchema],
+  isActive: { type: Boolean, rquired: true, default: false },
 });
 
 const ProductType = mongoose.model('ProductType', productTypesSchema);

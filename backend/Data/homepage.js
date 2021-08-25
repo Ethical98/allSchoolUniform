@@ -1,11 +1,15 @@
 const home = [
   {
-    headerBackground: 'uploads/seamlessschool-bg.png',
+    headerBackground: {
+      image: '/uploads/seamlessschool-bg.png',
+      isActive: true,
+    },
     homePageCarousel: [
-      'uploads/Banner.jpg',
-      'uploads/ImageOne.jpg',
-      'uploads/ImageTwo.jpg',
+      { image: '/uploads/Banner.jpg', isActive: true, displayOrder: 1 },
+      { image: '/uploads/ImageOne.jpg', isActive: true, displayOrder: 2 },
+      { image: '/uploads/ImageTwo.jpg', isActive: true, displayOrder: 3 },
     ],
+    statistics: [{}],
   },
 ];
 

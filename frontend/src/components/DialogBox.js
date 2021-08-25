@@ -6,6 +6,7 @@ const DialogBox = ({
   handleClose,
   show,
   title,
+  footer,
   fullscreen = false,
 }) => {
   return (
@@ -20,6 +21,7 @@ const DialogBox = ({
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>{children}</Modal.Body>
+      <Modal.Footer>{footer}</Modal.Footer>
     </Modal>
   );
 };

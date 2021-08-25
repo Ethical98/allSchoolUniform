@@ -10,6 +10,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '28',
@@ -19,6 +20,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '29',
@@ -28,6 +30,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '30',
@@ -37,6 +40,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '32',
@@ -46,6 +50,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '34',
@@ -55,6 +60,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '36',
@@ -64,6 +70,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '38',
@@ -73,6 +80,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '40',
@@ -82,6 +90,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '42',
@@ -91,6 +100,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '44',
@@ -100,11 +110,13 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
     ],
     image: '/images/products/camera.jpg',
     sizeChart: '/images/products/camera.jpg',
     sizeGuide: '/images/products/camera.jpg',
+    isActive: true,
   },
   {
     type: 'Trouser',
@@ -117,6 +129,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '38L/28W',
@@ -126,6 +139,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '38L/30W',
@@ -135,6 +149,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '40L/30W',
@@ -144,6 +159,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '40L/32W',
@@ -153,6 +169,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '40L/34W',
@@ -162,6 +179,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '42L/30W',
@@ -171,6 +189,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '42L/32W',
@@ -180,6 +199,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '42L/34W',
@@ -189,6 +209,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '44L/32W',
@@ -198,6 +219,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '44L/34W',
@@ -207,6 +229,7 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
       {
         size: '44L/36W',
@@ -216,11 +239,13 @@ const productType = [
         alertOnQty: 0,
         discount: 0.0,
         tax: 0,
+        isActive: true,
       },
     ],
     image: '/images/products/camera.jpg',
     sizeChart: '/images/products/camera.jpg',
     sizeGuide: '/images/products/camera.jpg',
+    isActive: true,
   },
 ];
 

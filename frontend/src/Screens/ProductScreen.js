@@ -13,12 +13,11 @@ import { Link } from 'react-router-dom';
 
 const ProductScreen = ({ history, location, match }) => {
   const school = match.params.selectedschool;
- 
 
   const urlSearchParams = new URLSearchParams(location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
-  const category = params.category ? params.category : '';
-  const season = params.season ? params.season : '';
+  const category = params.category ? params.category.split(',').join('|') : '';
+  const season = params.season ? params.season.split(',').join('|') : '';
   const standard = params.class ? params.class.split(',').join('|') : '';
   const pageNumber = params.page ? params.page : 1;
   const keyword = params.search ? params.search : '';
@@ -67,11 +66,14 @@ const ProductScreen = ({ history, location, match }) => {
         <>
           <Meta title={'Products'} />
           <Row>
-            {products.map((product, index) => (
-              <Col sm={12} md={6} lg={4} xl={4} key={index}>
-                <Product product={product} />
-              </Col>
-            ))}
+            {products.map(
+              (product, index) =>
+                product.isActive === true && (
+                  <Col sm={12} md={6} lg={4} xl={4} key={index}>
+                    <Product product={product} />
+                  </Col>
+                )
+            )}
           </Row>
           <Paginate
             pages={pages}
@@ -80,6 +82,7 @@ const ProductScreen = ({ history, location, match }) => {
             category={category ? category : ''}
             season={season ? season : ''}
             standard={standard ? standard : ''}
+            school={school ? school : ''}
             products={true}
           />
         </>

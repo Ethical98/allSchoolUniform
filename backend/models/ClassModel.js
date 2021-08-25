@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 
 const classSchema = mongoose.Schema({
   class: { type: String, required: true },
+  isActive: { type: Boolean, required: true, default: false },
 });
 
 // classSchema.pre('save', async (next) => {
@@ -16,7 +17,7 @@ const classSchema = mongoose.Schema({
 //     { $inc: { seq: 1 } },
 //     { new: true, upsert: true }
 //   );
-  
+
 //   doc._id = id.seq;
 //   next();
 // });
