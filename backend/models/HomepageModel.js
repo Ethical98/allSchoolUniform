@@ -12,10 +12,13 @@ const homePageSchmea = mongoose.Schema({
       displayOrder: { type: Number, required: true, unique: true },
     },
   ],
-  announcement: {
-    image: { type: String },
-    isActive: { type: Boolean, default: false },
-  },
+  announcements: [
+    {
+      image: { type: String },
+      isActive: { type: Boolean, default: false },
+      displayOrder: { type: Number, unique: true },
+    },
+  ],
   statistics: [
     {
       totalParents: { type: Number, default: 18921 },

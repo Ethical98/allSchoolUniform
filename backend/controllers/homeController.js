@@ -42,8 +42,6 @@ const updateCarouselImages = asyncHandler(async (req, res) => {
 // @route DELETE /api/home/carousel
 // @access Private/Admin
 const deleteCarouselImages = asyncHandler(async (req, res) => {
-  // const { id } = req.body;
-  console.log(req.params.id);
   const images = await Homepage.findOne();
 
   if (images.homePageCarousel.some((x) => x._id == req.params.id)) {
@@ -167,16 +165,10 @@ const updateHeaderBackground = asyncHandler(async (req, res) => {
 // @route GET /api/home/announcement
 // @access Public
 const getAnnouncement = asyncHandler(async (req, res) => {
-  const announcement = await Homepage.findOne().select('announcements');
+  const homepage = await Homepage.findOne().select('announcements -_id');
 
-  if (announcement) {
-    const announcements = [
-      {
-        image: announcement.image,
-        isActive: announcement.isActive,
-      },
-    ];
-    res.json(announcements);
+  if (homepage) {
+    res.json(homepage.announcements);
   } else {
     res.status(404);
     throw new Error('Not Found');
@@ -190,9 +182,20 @@ const updateAnnouncement = asyncHandler(async (req, res) => {
   const { newData } = req.body;
   const homepage = await Homepage.findOne();
 
+  await Homepage.updateOne(
+    { 'announcements._id': newData._id },
+    {
+      $set: {
+        'announcements.$.image': newData.image,
+        'announcements.$.isActive': newData.isActive,
+        'announcements.$.displayOrder': newData.displayOrder,
+      },
+    }
+  );
   if (homepage) {
-    homepage.announcement.image = newData.image;
-    homepage.announcement.isActive = newData.isActive;
+    homepage.announcements.image = newData.image;
+    homepage.announcements.isActive = newData.isActive;
+    homepage.announcements.displayOrder = newData.displayOrder;
   }
   res.status(200);
   res.json({ message: 'Updated' });
@@ -204,10 +207,10 @@ const updateAnnouncement = asyncHandler(async (req, res) => {
 const deleteAnnouncement = asyncHandler(async (req, res) => {
   const homepage = await Homepage.findOne();
 
-  if (homepage.announcement.some((x) => x._id == req.params.id)) {
+  if (homepage.announcements.some((x) => x._id == req.params.id)) {
     await Homepage.updateOne(
       {},
-      { $pull: { announcement: { _id: req.params.id } } }
+      { $pull: { announcements: { _id: req.params.id } } }
     );
     res.status(200);
     res.json({ message: 'Announcement Deleted' });
@@ -221,18 +224,18 @@ const deleteAnnouncement = asyncHandler(async (req, res) => {
 // @route POST /api/home/announcement
 // @access Private/Admin
 const addAnnouncement = asyncHandler(async (req, res) => {
-  const { image, isActive } = req.body;
+  const { image, isActive, displayOrder } = req.body;
 
   const homepage = await Homepage.findOne();
 
   if (homepage) {
-    homepage.announcement = [
-      ...homepage.announcement,
-      { image: image, isActive: isActive },
+    homepage.announcements = [
+      ...homepage.announcements,
+      { image: image, isActive: isActive, displayOrder: displayOrder },
     ];
     const addedAnnouncement = await homepage.save();
     res.status(200);
-    res.json(addedAnnouncement.announcement);
+    res.json(addedAnnouncement.announcements);
   }
 });
 

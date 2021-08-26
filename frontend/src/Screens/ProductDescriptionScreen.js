@@ -150,7 +150,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
         <Message variant='danger'>{error}</Message>
       ) : (
         <>
-          <Meta title={product.name} />
+          <Meta title={product.name} description={'hello'} keyword={'hello'} />
           <Row className='mb-5'>
             <Col md={4}>
               <Image src={product.image} alt={product.name} fluid />

@@ -50,7 +50,7 @@ const HomeScreen = ({ history }) => {
 
   return (
     <div>
-      <Meta />
+      <Meta description={'hello from asu'} />
       <Container>
         <h4 className='text-center'>Commonly Searched Schools</h4>
         <Row>

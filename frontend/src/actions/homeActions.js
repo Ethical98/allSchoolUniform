@@ -43,7 +43,7 @@ export const listCarouselImages = () => async (dispatch) => {
     dispatch({ type: CAROUSEL_IMAGES_REQUEST });
 
     const { data } = await axios.get('/api/home/carousel');
-
+    console.log(data);
     dispatch({
       type: CAROUSEL_IMAGES_SUCCESS,
       payload: data.homePageCarousel,
@@ -268,6 +268,7 @@ export const listAnnouncements = () => async (dispatch) => {
     dispatch({ type: ANNOUNCEMENT_LIST_REQUEST });
 
     const { data } = await axios.get('/api/home/announcement');
+    console.log(data);
 
     dispatch({
       type: ANNOUNCEMENT_LIST_SUCCESS,

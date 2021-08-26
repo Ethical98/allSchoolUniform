@@ -4,11 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import MaterialTable from 'material-table';
 import AdminVerticalNav from '../components/AdminVerticalNav';
 import {
+  addAnnouncement,
   addCarouselImages,
+  deleteAnnouncement,
   deleteCarouselImages,
   getHeaderBackgroundDetails,
   getStatisticsDetails,
+  listAnnouncements,
   listCarouselImages,
+  updateAnnouncement,
   updateCarouselImages,
   updateHeaderBackground,
   updateStatistics,
@@ -18,6 +22,7 @@ import axios from 'axios';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import {
+  ANNOUNCEMENT_UPDATE_RESET,
   CAROUSEL_IMAGES_ADD_RESET,
   CAROUSEL_IMAGES_UPDATE_RESET,
   HEADER_BG_UPDATE_RESET,
@@ -49,6 +54,22 @@ const HomepageEditScreen = ({ location, history }) => {
   const statisticsUpdate = useSelector((state) => state.statisticsUpdate);
   const { success: successUpdateStatistics } = statisticsUpdate;
 
+  const announcementList = useSelector((state) => state.announcementList);
+  const {
+    loading: loadingAnnouncements,
+    announcements,
+    error: errorAnnouncements,
+  } = announcementList;
+
+  const announcementUpdate = useSelector((state) => state.announcementUpdate);
+  const { success: successUpdateAnnouncement } = announcementUpdate;
+
+  const announcementDelete = useSelector((state) => state.announcementDelete);
+  const { success: successDeleteAnnouncement } = announcementDelete;
+
+  const announcementAdd = useSelector((state) => state.announcementAdd);
+  const { success: successAddAnnouncement } = announcementAdd;
+
   const headerBackgroundDetails = useSelector(
     (state) => state.headerBackgroundDetails
   );
@@ -68,6 +89,7 @@ const HomepageEditScreen = ({ location, history }) => {
   const [bannerImages, setBannerImages] = useState([]);
   const [statistics, setStatistics] = useState([]);
   const [headerbg, setHeaderbg] = useState([]);
+  const [announcementsList, setAnnouncementsList] = useState([]);
 
   let image = '';
 
@@ -118,6 +140,17 @@ const HomepageEditScreen = ({ location, history }) => {
   }, [dispatch, successUpdateHeaderBackground]);
 
   useEffect(() => {
+    if (successUpdateAnnouncement)
+      dispatch({ type: ANNOUNCEMENT_UPDATE_RESET });
+    dispatch(listAnnouncements());
+  }, [
+    dispatch,
+    successUpdateAnnouncement,
+    successAddAnnouncement,
+    successDeleteAnnouncement,
+  ]);
+
+  useEffect(() => {
     if (carouselImages.length > 0) setBannerImages([...carouselImages]);
   }, [carouselImages]);
 
@@ -128,6 +161,10 @@ const HomepageEditScreen = ({ location, history }) => {
   useEffect(() => {
     if (headerBackground.length > 0) setHeaderbg([...headerBackground]);
   }, [headerBackground]);
+
+  useEffect(() => {
+    if (announcements.length > 0) setAnnouncementsList([...announcements]);
+  }, [announcements]);
 
   const uploadFileHandler = async (e) => {
     const file = e.target.files[0];
@@ -182,7 +219,70 @@ const HomepageEditScreen = ({ location, history }) => {
           value={props.value}
           onChange={(e) => props.onChange(e.target.value)}
         >
-          {[...Array(carouselImages.length).keys()].map((x) => (
+          {[...Array(bannerImages.length).keys()].map((x) => (
+            <option key={x + 1} value={x + 1}>
+              {x + 1}
+            </option>
+          ))}
+        </Form.Select>
+      ),
+    },
+    {
+      title: 'Is Active',
+      field: 'isActive',
+      render: (rowData) =>
+        rowData.isActive ? (
+          <i className='fas fa-check'></i>
+        ) : (
+          <i className='fas fa-times'></i>
+        ),
+      editComponent: (props) => (
+        <Form.Group controlId='isActive' className='mb-3'>
+          <Form.Check
+            className='mb-3'
+            type='checkbox'
+            label='Is Active'
+            checked={props.value}
+            onChange={(e) => props.onChange(e.target.checked)}
+          ></Form.Check>
+        </Form.Group>
+      ),
+    },
+  ];
+
+  const AnnouncementColumns = [
+    {
+      title: '#',
+      render: (rowData) => rowData.tableData.id + 1,
+    },
+    {
+      title: 'Image',
+      render: (rowData) => (
+        <Image src={`${rowData.image}`} className='w-25'></Image>
+      ),
+    },
+    {
+      title: 'URL',
+      field: 'image',
+      editComponent: (props) => (
+        <>
+          <Form.Group controlId='formFile' className='mb-3'>
+            <Form.Label>Upload Image</Form.Label>
+            <Form.Control size='sm' type='file' onChange={uploadFileHandler} />
+          </Form.Group>
+        </>
+      ),
+    },
+    {
+      title: 'Display Order',
+      field: 'displayOrder',
+      editable: 'onUpdate',
+      editComponent: (props) => (
+        <Form.Select
+          value={props.value}
+          onChange={(e) => props.onChange(e.target.value)}
+        >
+          {[...Array(announcementsList.length).keys()].map((x) => (
             <option key={x + 1} value={x + 1}>
               {x + 1}
             </option>
@@ -302,7 +402,71 @@ const HomepageEditScreen = ({ location, history }) => {
   const TabContent = () => (
     <Tab.Content>
       <Tab.Pane eventKey='announcements'>
-        <MaterialTable title='Announcements' options={{ paging: false }} />
+        {loadingAnnouncements ? (
+          <Loader />
+        ) : errorAnnouncements ? (
+          <Message variant='danger'>{errorAnnouncements}</Message>
+        ) : (
+          <MaterialTable
+            title='Announcements'
+            data={announcementsList}
+            columns={AnnouncementColumns}
+            options={{ paging: false, actionsColumnIndex: -1 }}
+            editable={{
+              onRowAdd: (newData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    newData.displayOrder = announcements
+                      ? announcements.length + 1
+                      : 1;
+                    newData.image = image;
+                    setAnnouncementsList([...announcementsList, newData]);
+                    dispatch(addAnnouncement(newData));
+                    image = '';
+
+                    resolve();
+                  }, 1000);
+                }),
+              onRowUpdate: (newData, oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    if (image) {
+                      newData.image = image;
+                      console.log(newData);
+                      dispatch(updateAnnouncement(newData));
+                    } else {
+                      const dataUpdate = [...announcementsList];
+                      const index = oldData.tableData.id;
+                      dataUpdate[index] = newData;
+                      console.log(newData);
+                      setAnnouncementsList([...dataUpdate]);
+                      dispatch(updateAnnouncement(newData));
+                    }
+                    image = '';
+
+                    resolve();
+                  }, 1000);
+                }),
+              onRowDelete: (oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    const dataDelete = [...announcementsList];
+                    const index = oldData.tableData.id;
+                    dataDelete.splice(index, 1);
+                    if (dataDelete.length > 0) {
+                      setAnnouncementsList([...dataDelete]);
+                    } else {
+                      setAnnouncementsList([]);
+                    }
+
+                    dispatch(deleteAnnouncement(oldData._id));
+
+                    resolve();
+                  }, 1000);
+                }),
+            }}
+          />
+        )}
       </Tab.Pane>
       <Tab.Pane mountOnEnter eventKey='carousel'>
         {loading ? (
@@ -310,58 +474,61 @@ const HomepageEditScreen = ({ location, history }) => {
         ) : error ? (
           <Message variant='danger'>{error}</Message>
         ) : (
-          <div>
-            <MaterialTable
-              title='Carousel'
-              data={bannerImages}
-              columns={CarouselImagesColumns}
-              options={{ paging: false, actionsColumnIndex: -1 }}
-              editable={{
-                onRowAdd: (newData) =>
-                  new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                      newData.displayOrder = bannerImages.length + 1;
+          <MaterialTable
+            title='Carousel'
+            data={bannerImages}
+            columns={CarouselImagesColumns}
+            options={{ paging: false, actionsColumnIndex: -1 }}
+            editable={{
+              onRowAdd: (newData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    newData.displayOrder = bannerImages.length + 1;
+                    newData.image = image;
+                    setBannerImages([...bannerImages, newData]);
+                    dispatch(addCarouselImages(newData));
+                    image = '';
+
+                    resolve();
+                  }, 1000);
+                }),
+              onRowUpdate: (newData, oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    if (image) {
                       newData.image = image;
-                      setBannerImages([...bannerImages, newData]);
-                      dispatch(addCarouselImages(newData));
-                      image = '';
-
-                      resolve();
-                    }, 1000);
-                  }),
-                onRowUpdate: (newData, oldData) =>
-                  new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                      if (image) {
-                        newData.image = image;
-                        dispatch(updateCarouselImages(newData));
-                      } else {
-                        const dataUpdate = [...bannerImages];
-                        const index = oldData.tableData.id;
-                        dataUpdate[index] = newData;
-                        setBannerImages([...dataUpdate]);
-                        dispatch(updateCarouselImages(newData));
-                      }
-                      image = '';
-
-                      resolve();
-                    }, 1000);
-                  }),
-                onRowDelete: (oldData) =>
-                  new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                      const dataDelete = [...bannerImages];
+                      dispatch(updateCarouselImages(newData));
+                    } else {
+                      const dataUpdate = [...bannerImages];
                       const index = oldData.tableData.id;
-                      dataDelete.splice(index, 1);
-                      setBannerImages([...dataDelete]);
-                      dispatch(deleteCarouselImages(oldData._id));
+                      dataUpdate[index] = newData;
+                      setBannerImages([...dataUpdate]);
+                      dispatch(updateCarouselImages(newData));
+                    }
+                    image = '';
 
-                      resolve();
-                    }, 1000);
-                  }),
-              }}
-            />
-          </div>
+                    resolve();
+                  }, 1000);
+                }),
+              onRowDelete: (oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    const dataDelete = [...bannerImages];
+                    const index = oldData.tableData.id;
+                    dataDelete.splice(index, 1);
+                    if (dataDelete.length > 0) {
+                      setBannerImages([...dataDelete]);
+                    } else {
+                      setBannerImages([]);
+                    }
+
+                    dispatch(deleteCarouselImages(oldData._id));
+
+                    resolve();
+                  }, 1000);
+                }),
+            }}
+          />
         )}
       </Tab.Pane>
       <Tab.Pane eventKey='statistics'>
@@ -410,7 +577,7 @@ const HomepageEditScreen = ({ location, history }) => {
                   setTimeout(() => {
                     if (image) {
                       newData.image = image;
-                      
+
                       dispatch(updateHeaderBackground(newData));
                       image = '';
                     } else {
