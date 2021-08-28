@@ -43,7 +43,7 @@ export const listCarouselImages = () => async (dispatch) => {
     dispatch({ type: CAROUSEL_IMAGES_REQUEST });
 
     const { data } = await axios.get('/api/home/carousel');
-    console.log(data);
+    
     dispatch({
       type: CAROUSEL_IMAGES_SUCCESS,
       payload: data.homePageCarousel,
@@ -107,7 +107,7 @@ export const deleteCarouselImages = (id) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    console.log(id);
+   
     await axios.delete(`/api/home/carousel/${id}`, config);
     dispatch({
       type: CAROUSEL_IMAGES_DELETE_SUCCESS,
@@ -128,7 +128,7 @@ export const addCarouselImages = (newData) => async (dispatch, getState) => {
     dispatch({
       type: CAROUSEL_IMAGES_ADD_REQUEST,
     });
-    console.log(newData);
+   
     const {
       userLogin: { userInfo },
     } = getState();
@@ -193,7 +193,7 @@ export const updateStatistics = (newData) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    console.log(newData);
+
     await axios.put(`/api/home/statistics`, { newData }, config);
     dispatch({
       type: STATISTICS_UPDATE_SUCCESS,
@@ -268,7 +268,7 @@ export const listAnnouncements = () => async (dispatch) => {
     dispatch({ type: ANNOUNCEMENT_LIST_REQUEST });
 
     const { data } = await axios.get('/api/home/announcement');
-    console.log(data);
+    
 
     dispatch({
       type: ANNOUNCEMENT_LIST_SUCCESS,
@@ -337,7 +337,7 @@ export const deleteAnnouncement = (id) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-    console.log(id);
+
     await axios.delete(`/api/home/announcement/${id}`, config);
     dispatch({
       type: ANNOUNCEMENT_DELETE_SUCCESS,
@@ -358,7 +358,7 @@ export const addAnnouncement = (newData) => async (dispatch, getState) => {
     dispatch({
       type: ANNOUNCEMENT_ADD_REQUEST,
     });
-    console.log(newData);
+   
     const {
       userLogin: { userInfo },
     } = getState();

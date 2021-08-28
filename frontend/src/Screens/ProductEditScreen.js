@@ -187,12 +187,11 @@ const ProductEditScreen = ({ match, history }) => {
           setMasterClass([...masterClasses.filter((x) => x.isActive === true)]);
         }
         if (masterTypes) {
-          console.log(masterTypes);
           setMasterType([...masterTypes.filter((x) => x.isActive === true)]);
         }
       }
     }
-     // eslint-disable-next-line
+    // eslint-disable-next-line
   }, [
     dispatch,
     productId,

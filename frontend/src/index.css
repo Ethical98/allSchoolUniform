@@ -12,7 +12,12 @@ h1 {
   font-size: 1.8rem;
   padding: 1rem 0;
 }
-
+.search-sm {
+  border-bottom: 2px solid #ff6a00;
+  color: #93c0e0;
+  padding: 2px;
+  height: 50px;
+}
 h2 {
   font-size: 1.4rem;
   padding: 0.5rem, 0;

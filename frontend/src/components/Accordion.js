@@ -171,8 +171,8 @@ const Accordion = ({ history, location, match }) => {
   };
 
   return (
-    <div className='.d-none .d-md-block'>
-      <Card id='Acc' className='d-sm-none d-md-block'>
+    <div >
+      <Card id='Acc'>
         <Card.Header className='text-center'>
           Buy Uniform in 3 Easy Steps
         </Card.Header>

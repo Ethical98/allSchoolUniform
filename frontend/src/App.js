@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Nav, Navbar } from 'react-bootstrap';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Accordion from './components/Accordion';
@@ -39,6 +39,8 @@ import TypeEditScreen from './Screens/TypeEditScreen';
 import TypeCreateScreen from './Screens/TypeCreateScreen';
 import ClassListScreen from './Screens/ClassListScreen';
 import HomepageEditScreen from './Screens/HomepageEditScreen';
+import Filter from './components/Filter';
+import SearchBox from './components/SearchBox';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -59,6 +61,18 @@ const App = () => {
         )}
       />
 
+      <Route path='/products'>
+        <div
+          className='d-flex d-sm-none search-sm text-center'
+          style={{ marginTop: '70px' }}
+        >
+          <SearchBox />
+        </div>
+      </Route>
+
+      {/* <div className='d-flex d-sm-none' style={{ marginTop: '70px' }}>
+       
+      </div> */}
       <main style={{ marginTop: '15vh' }}>
         <Route path='/admin' component={AdminHeader} />
         <Route path='/' component={HomeScreen} exact />
@@ -84,24 +98,14 @@ const App = () => {
 
           <Route path='/products/:id' component={BreadCrumb} exact />
           <Route path='/track/:id' component={OrderTrackingScreen} />
-          <Row>
-            <Col md={3}>
-              <Route path='/products' component={Accordion} exact />
-              <Route
-                path='/products/schools/:selectedschool'
-                component={Accordion}
-                exact
-              />
-            </Col>
-            <Col md={9}>
-              <Route path='/products' component={ProductScreen} exact />
-              <Route
-                path='/products/schools/:selectedschool'
-                component={ProductScreen}
-                exact
-              />
-            </Col>
-          </Row>
+
+          <Route path='/products' component={ProductScreen} exact />
+          <Route
+            path='/products/schools/:selectedschool'
+            component={ProductScreen}
+            exact
+          />
+
           <Route
             path='/products/:id'
             component={ProductDescriptionScreen}

@@ -15,7 +15,7 @@ import {
   Row,
   FloatingLabel,
 } from 'react-bootstrap';
-import url from './asu-top-logo.png';
+
 import './css/Header.css';
 import { logout } from '../actions/userActions';
 import urlimage from '../seamlessschool-bg.png';
@@ -102,13 +102,50 @@ const Header = ({ history, location }) => {
   );
 
   return (
-    <header className='header'>
+    <header className='header d-flex flex-column'>
       <OffCanvas
         showOffCanvas={showOffCanvas}
         handleOffCanvasClose={handleOffCanvasClose}
         userInfo={userInfo}
         handleShow={handleShow}
-      />
+      >
+        <ul>
+          {userInfo && userInfo.isAdmin && (
+            <li>
+              <a href='/admin/dashboard'>DashBoard </a>
+            </li>
+          )}
+          <li>
+            <a href='/'>Home </a>
+          </li>
+          <li>
+            <a href='/offers'>Offers </a>
+          </li>
+          <li>
+            <a href='/#'>
+              <span onClick={handleShow}>Track Your Order</span>
+            </a>
+          </li>
+          <li>
+            <a href='/profile'>Account</a>
+          </li>
+          {userInfo && (
+            <li>
+              <a href='/#'>
+                <span
+                  onClick={() => {
+                    handleOffCanvasClose();
+                    dispatch(logout());
+                  }}
+                >
+                  Log Out <i className='fas fa-sign-out-alt'></i>
+                </span>
+              </a>
+            </li>
+          )}
+        </ul>
+        <hr className='divider'></hr>
+      </OffCanvas>
       <Navbar
         variant='dark'
         fixed='top'
@@ -151,7 +188,7 @@ const Header = ({ history, location }) => {
           <LinkContainer to='/'>
             <Navbar.Brand>
               <Row>
-                <Image src={url} className='logo'></Image>
+                <Image src='/uploads/asu-top-logo.png' className='logo'></Image>
               </Row>
               <Row>
                 <span
@@ -236,22 +273,20 @@ const Header = ({ history, location }) => {
           </Row>
         </Container>
       </Navbar>
-      {location.pathname.includes('products') && (
-        <Nav.Link
-          className='d-block d-sm-none search-smallscreen'
+
+      {/* {location.pathname.includes('products') && (
+        <div
+          className='d-sm-none search-smallscreen'
           style={{
             background: `#2c4a77 url(${urlimage})`,
-            borderBottom: '2px solid #ff6a00',
-
-            color: '#93c0e0',
-
-            height: '60px',
-            padding: '2%',
+           
           }}
         >
-          <Route render={({ history }) => <SearchBox history={history} />} />
-        </Nav.Link>
-      )}
+          <Nav>
+            <Route render={({ history }) => <SearchBox history={history} />} />
+          </Nav>
+        </div>
+      )} */}
     </header>
   );
 };

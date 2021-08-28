@@ -51,13 +51,24 @@ const getSchoolNames = asyncHandler(async (req, res) => {
 // @route POST /api/schools
 // @access Private/Admin
 const createSchool = asyncHandler(async (req, res) => {
-  const { name, address, contact, logo, disabled } = req.body;
+  const {
+    name,
+    address,
+    contact,
+    logo,
+    state,
+    city,
+    description,
+    website,
+    email,
+    country,
+    isActive,
+  } = req.body;
   const school = new School({
     name,
     address,
     contact,
     logo,
-    disabled,
     state,
     city,
     description,

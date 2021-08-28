@@ -20,6 +20,7 @@ import {
   SCHOOL_UPDATE_SUCCESS,
   SCHOOL_UPDATE_FAIL,
   SCHOOL_UPDATE_RESET,
+  SCHOOL_NAME_LIST_RESET,
 } from '../constants/schoolConstants';
 
 export const schoolListReducer = (state = { masterSchools: [] }, action) => {
@@ -48,6 +49,8 @@ export const schoolNameListReducer = (state = { schoolNames: [] }, action) => {
       return { loading: false, schoolNames: action.payload };
     case SCHOOL_NAME_LIST_FAIL:
       return { loading: false, error: action.payload };
+    case SCHOOL_NAME_LIST_RESET:
+      return { schoolNames: [] };
     default:
       return state;
   }

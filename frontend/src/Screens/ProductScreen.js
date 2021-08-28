@@ -10,6 +10,8 @@ import Paginate from '../components/Paginate';
 import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
 import { Link } from 'react-router-dom';
+import Accordion from '../components/Accordion';
+import { Route } from 'react-router-dom';
 
 const ProductScreen = ({ history, location, match }) => {
   const school = match.params.selectedschool;
@@ -66,14 +68,29 @@ const ProductScreen = ({ history, location, match }) => {
         <>
           <Meta title={'Products'} />
           <Row>
-            {products.map(
-              (product, index) =>
-                product.isActive === true && (
-                  <Col sm={12} md={6} lg={4} xl={4} key={index}>
-                    <Product product={product} />
-                  </Col>
-                )
-            )}
+            <Col sm={6} md={3} className='d-none d-sm-block'>
+              <Route
+                render={({ history, location, match }) => (
+                  <Accordion
+                    history={history}
+                    location={location}
+                    match={match}
+                  />
+                )}
+              />
+            </Col>
+            <Col sm={6} md={9}>
+              <Row>
+                {products.map(
+                  (product, index) =>
+                    product.isActive === true && (
+                      <Col sm={12} md={6} lg={4} xl={4} key={index}>
+                        <Product product={product} />
+                      </Col>
+                    )
+                )}
+              </Row>
+            </Col>
           </Row>
           <Paginate
             pages={pages}

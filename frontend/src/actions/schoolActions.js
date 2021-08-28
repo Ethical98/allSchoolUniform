@@ -191,7 +191,7 @@ export const createSchool = (school) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
-
+ 
     const { data } = await axios.post(`/api/schools/`, school, config);
     dispatch({
       type: SCHOOL_CREATE_SUCCESS,

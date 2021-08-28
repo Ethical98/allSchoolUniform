@@ -2,13 +2,16 @@ import React from 'react';
 import { Offcanvas } from 'react-bootstrap';
 import { logout } from '../actions/userActions';
 import { useDispatch } from 'react-redux';
+import { Route } from 'react-router-dom';
 import './css/OffCanvas.css';
+import Accordion from './Accordion';
 
 const OffCanvas = ({
   handleOffCanvasClose,
   showOffCanvas,
   userInfo,
   handleShow,
+  children,
 }) => {
   const dispatch = useDispatch();
   return (
@@ -31,43 +34,12 @@ const OffCanvas = ({
           </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <ul>
-            {userInfo && userInfo.isAdmin && (
-              <li>
-                {' '}
-                <a href='/admin/dashboard'>DashBoard </a>
-              </li>
+          {children}
+          {/* <Route
+            render={({ history, location, match }) => (
+              <Accordion history={history} location={location} match={match} />
             )}
-            <li>
-              <a href='/'>Home </a>
-            </li>
-            <li>
-              <a href='/offers'>Offers </a>
-            </li>
-            <li>
-              <a href='/#'>
-                <span onClick={handleShow}>Track Your Order</span>
-              </a>
-            </li>
-            <li>
-              <a href='/profile'>Account</a>
-            </li>
-            {userInfo && (
-              <li>
-                <a href='/#'>
-                  <span
-                    onClick={() => {
-                      handleOffCanvasClose();
-                      dispatch(logout());
-                    }}
-                  >
-                    Log Out <i className='fas fa-sign-out-alt'></i>
-                  </span>
-                </a>
-              </li>
-            )}
-          </ul>
-          <hr className='divider'></hr>
+          /> */}
         </Offcanvas.Body>
       </Offcanvas>
     </div>

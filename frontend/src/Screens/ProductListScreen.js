@@ -23,11 +23,7 @@ const ProductListScreen = ({ history, match, location }) => {
   const { loading, products, error, pages, page } = productList;
 
   const productDelete = useSelector((state) => state.productDelete);
-  const {
-    loading: loadingDelete,
-    success: successDelete,
-    error: errorDelete,
-  } = productDelete;
+  const { success: successDelete, error: errorDelete } = productDelete;
 
   const [school, setSchool] = useState('');
 
@@ -149,7 +145,7 @@ const ProductListScreen = ({ history, match, location }) => {
           </Button>
         </Col>
       </Row>
-      {loadingDelete && <Loader />}
+
       {errorDelete && <Message varaint='danger'>{errorDelete}</Message>}
       {loading ? (
         <Loader />
@@ -164,7 +160,6 @@ const ProductListScreen = ({ history, match, location }) => {
             columns={columns}
             options={{
               rowStyle: {
-                color: 'black',
                 border: '1px solid grey',
               },
               actionsColumnIndex: -1,

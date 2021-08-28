@@ -15,7 +15,7 @@ import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import jsonwebtoken from 'jsonwebtoken';
 import { logout } from '../actions/userActions';
-import { SCHOOL_CREATE_RESET } from '../constants/schoolConstants';
+import { SCHOOL_CREATE_RESET, SCHOOL_NAME_LIST_RESET } from '../constants/schoolConstants';
 import { createSchool } from '../actions/schoolActions';
 
 const SchoolCreateScreen = ({ history }) => {
@@ -71,6 +71,7 @@ const SchoolCreateScreen = ({ history }) => {
   useEffect(() => {
     if (success) {
       dispatch({ type: SCHOOL_CREATE_RESET });
+      dispatch({ type: SCHOOL_NAME_LIST_RESET });
       history.push('/admin/schoollist');
     }
   }, [dispatch, history, success]);

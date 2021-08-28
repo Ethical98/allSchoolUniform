@@ -432,13 +432,13 @@ const HomepageEditScreen = ({ location, history }) => {
                   setTimeout(() => {
                     if (image) {
                       newData.image = image;
-                      console.log(newData);
+                    
                       dispatch(updateAnnouncement(newData));
                     } else {
                       const dataUpdate = [...announcementsList];
                       const index = oldData.tableData.id;
                       dataUpdate[index] = newData;
-                      console.log(newData);
+                     
                       setAnnouncementsList([...dataUpdate]);
                       dispatch(updateAnnouncement(newData));
                     }
@@ -550,7 +550,7 @@ const HomepageEditScreen = ({ location, history }) => {
                     const index = oldData.tableData.id;
                     dataUpdate[index] = newData;
                     setStatistics([...dataUpdate]);
-                    console.log(newData);
+                   
                     dispatch(updateStatistics(newData));
 
                     resolve();

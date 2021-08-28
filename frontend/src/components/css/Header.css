@@ -46,6 +46,10 @@
 
   .search-smallscreen {
     margin-top: 60px;
+    border-bottom: 2px solid #ff6a00;
+    color: #93c0e0;
+    height: 60px;
+    padding: 2%;
   }
 }
 

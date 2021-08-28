@@ -17,6 +17,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import { logout } from '../actions/userActions';
 import {
   SCHOOL_DETAILS_RESET,
+  SCHOOL_NAME_LIST_RESET,
   SCHOOL_UPDATE_RESET,
 } from '../constants/schoolConstants';
 import { listSchoolDetails, updateSchool } from '../actions/schoolActions';
@@ -84,6 +85,7 @@ const SchoolEditScreen = ({ match, history }) => {
     if (successUpdate) {
       dispatch({ type: SCHOOL_UPDATE_RESET });
       dispatch({ type: SCHOOL_DETAILS_RESET });
+      dispatch({ type: SCHOOL_NAME_LIST_RESET });
       history.push('/admin/schoollist');
     } else {
       if (!school.name || school._id !== schoolId) {

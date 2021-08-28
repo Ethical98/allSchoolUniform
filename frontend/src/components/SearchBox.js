@@ -15,9 +15,10 @@ const SearchBox = ({ history }) => {
   };
 
   return (
-    <Form onSubmit={submitHandler} className='search-box'>
-      <InputGroup>
+    <Form onSubmit={submitHandler}>
+      <InputGroup className='search-box'>
         <Form.Control
+          className='input-search'
           type='text'
           name='q'
           onChange={(e) => setKeyword(e.target.value)}

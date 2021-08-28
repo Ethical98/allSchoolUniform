@@ -10,7 +10,7 @@ const Footer = () => {
   };
   return (
     <footer
-      className='mt-3 p-4'
+      className='mt-5 p-4'
       style={{
         background: `#2c4a77 url("uploads/seamlessschool-bg.png")`,
         borderTop: '2px solid #ff6a00',
@@ -60,10 +60,26 @@ const Footer = () => {
         </Row>
         <hr className='divider'></hr>
         <Row className='m-0'>
-          &copy;2013-2021 AllSchoolUniform
+          <Col>
+            <p>&copy;2013-2021 AllSchoolUniform</p>
+          </Col>
+
           <Col className='me-auto'>
-            <Image src='uploads/visa-color.png' />
-            <Image rounded src='uploads/mastercard-color.png' />
+            <Image
+              className='float-end payment-logo'
+              rounded
+              src='uploads/cod.png'
+            />
+            <Image
+              className='float-end payment-logo'
+              rounded
+              src='uploads/netbanking.png'
+            />
+            <Image className='float-end payment-logo' src='uploads/visa.png' />
+            <Image
+              className='float-end payment-logo'
+              src='uploads/mastercard.png'
+            />
           </Col>
         </Row>
       </Container>
