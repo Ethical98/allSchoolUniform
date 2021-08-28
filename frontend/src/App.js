@@ -63,8 +63,13 @@ const App = () => {
 
       <Route path='/products'>
         <div
-          className='d-flex d-sm-none search-sm text-center'
-          style={{ marginTop: '70px' }}
+          className='  d-flex d-sm-none align-items-center search-sm'
+          style={{
+            marginTop: '60px',
+            background: `#2c4a77 url("uploads/seamlessschool-bg.png")`,
+            padding: '2%',
+            marginBottom: '-12vh',
+          }}
         >
           <SearchBox />
         </div>
@@ -73,7 +78,7 @@ const App = () => {
       {/* <div className='d-flex d-sm-none' style={{ marginTop: '70px' }}>
        
       </div> */}
-      <main style={{ marginTop: '15vh' }}>
+      <main>
         <Route path='/admin' component={AdminHeader} />
         <Route path='/' component={HomeScreen} exact />
 

@@ -151,8 +151,6 @@ const Header = ({ history, location }) => {
         fixed='top'
         style={{
           background: `#2c4a77 url(${urlimage})`,
-          borderBottom: '2px solid #ff6a00',
-          color: '#93c0e0',
         }}
       >
         <DialogBox

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Row, Col, Image } from 'react-bootstrap';
-import './Footer.css';
+import './css/Footer.css';
 
 const Footer = () => {
   const liStyle = {
@@ -19,7 +19,7 @@ const Footer = () => {
     >
       <Container>
         <Row className='g-0 hr'>
-          <Col md>
+          <Col sm>
             <ul>
               <h6>Know Us</h6>
               <li style={liStyle}>About Us</li>
@@ -29,7 +29,7 @@ const Footer = () => {
               <li style={liStyle}>Terms & Conditions</li>
             </ul>
           </Col>
-          <Col md>
+          <Col sm>
             <ul>
               <h6>Shipping & Policies</h6>
               <li style={liStyle}>FAQs</li>
@@ -39,7 +39,7 @@ const Footer = () => {
               <li style={liStyle}>Vouchers Terms and Conditions</li>
             </ul>
           </Col>
-          <Col md>
+          <Col sm>
             <ul>
               <h6>Customer Support</h6>
               <li style={liStyle}>My Account</li>
@@ -48,7 +48,7 @@ const Footer = () => {
               <li className='ms-2'>Meet Us: (Mon-Sat) 10:00 AM to 6:00 PM</li>
             </ul>
           </Col>
-          <Col md>
+          <Col sm>
             <ul>
               <h6>Support</h6>
               <li> Net Banking</li>

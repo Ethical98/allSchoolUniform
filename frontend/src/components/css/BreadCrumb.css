@@ -1,9 +1,5 @@
 .navigationCrumb {
-  height: 8vh;
   border: 1px solid black;
-  border-radius: 15px;
-
-  padding: 1%;
 }
 
 .navigationCrumb a {
@@ -11,7 +7,7 @@
   text-decoration: none;
 }
 
-@media (max-width: 576px) {
+/* @media (max-width: 576px) {
   .navigationCrumb {
     height: 12vh;
     border: 1px solid black;
@@ -19,4 +15,4 @@
     background-color: lightorange;
     padding: 1%;
   }
-}
+} */

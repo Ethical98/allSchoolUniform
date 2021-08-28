@@ -18,6 +18,8 @@
 .navbar {
   font-size: small;
   height: 70px;
+  border-bottom: 2px solid #ff6a00;
+  color: #93c0e0;
 }
 .header-text .cart {
   margin-right: -30%;
@@ -37,6 +39,8 @@
   .navbar {
     font-size: small;
     height: 60px;
+    border-bottom: 0px;
+    color: #93c0e0;
   }
 
   .header-text {

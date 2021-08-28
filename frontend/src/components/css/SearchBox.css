@@ -2,12 +2,12 @@
 }
 
 .search-box {
-  width: 92vw;
+  width: 95vw;
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
   .search-box {
-    width: 150%;
+    width: 30vw;
     margin-left: -5%;
   }
 }
