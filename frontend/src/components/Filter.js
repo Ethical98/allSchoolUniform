@@ -6,17 +6,7 @@ import OffCanvas from './OffCanvas';
 
 const Filter = ({ match, history, location }) => {
   const [open, setOpen] = useState(false);
-  //   function CustomToggle({ children, eventKey }) {
-  //     const decoratedOnClick = useAccordionButton(eventKey, () =>
-  //       console.log('totally custom!')
-  //     );
-
-  //     return (
-  //       <Button type='button' onClick={decoratedOnClick}>
-  //         {children}
-  //       </Button>
-  //     );
-  //   }
+ 
 
   return (
     <div className='d-block d-sm-none' style={{ marginBottom: '-99vh' }}>

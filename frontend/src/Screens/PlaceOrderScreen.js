@@ -166,7 +166,7 @@ const PlaceOrderScreen = ({ history }) => {
       {message && <Message variant='warning'>{message}</Message>}
       <Row>
         <Col md={8}>
-          <Card rounded>
+          <Card>
             <ListGroup variant='flush'>
               <ListGroup.Item>
                 <h2>SHIPPING</h2>

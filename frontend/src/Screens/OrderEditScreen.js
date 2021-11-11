@@ -40,6 +40,9 @@ import { listProducts } from '../actions/productActions';
 import Paginate from '../components/Paginate';
 import DialogBox from '../components/DialogBox';
 import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
+import { jsPDF } from 'jspdf';
+import Invoice from '../components/Invoice/Invoice';
+import { PDFViewer, usePDF } from '@react-pdf/renderer';
 
 const OrderEditScreen = ({ history, match, location }) => {
   const dispatch = useDispatch();
@@ -137,6 +140,16 @@ const OrderEditScreen = ({ history, match, location }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
   const [schools, setSchools] = useState([]);
+  const [instance, updateInstance] = usePDF({
+    document: (
+      <Invoice
+        name={name}
+        email={email}
+        order={order && order}
+        isAdmin={true}
+      />
+    ),
+  });
 
   const orderItemColumns = [
     {
@@ -164,6 +177,10 @@ const OrderEditScreen = ({ history, match, location }) => {
     {
       title: 'Qty',
       field: 'qty',
+    },
+    {
+      title: 'Discount',
+      field: 'disc',
     },
     {
       title: 'Price',
@@ -340,6 +357,16 @@ const OrderEditScreen = ({ history, match, location }) => {
         setIsOutForDelivery(order.tracking.isOutForDelivery);
         setIsConfirmed(order.tracking.isConfirmed);
         setOrderNumber(order.orderId);
+        updateInstance({
+          document: (
+            <Invoice
+              name={name}
+              email={email}
+              order={order && order}
+              isAdmin={true}
+            />
+          ),
+        });
 
         if (order.modifiedItems.length > 0) {
           setModifiedOrderItems([...order.modifiedItems]);
@@ -1056,11 +1083,19 @@ const OrderEditScreen = ({ history, match, location }) => {
                           </Row>
                         </ListGroup.Item>
                       </ListGroup>
+                      {order && (
+                        <a href={instance.url} download={`${orderNumber}.pdf`}>
+                          <Button variant='dark' className='col-12'>
+                            Download Invoice
+                          </Button>
+                        </a>
+                      )}
                     </Card>
                   </Col>
                 </Form.Group>
               </Col>
             </Row>
+
             <Row className='justify-content-md-center'>
               <Col md={5} className='text-center'>
                 <Button variant='dark' type='submit' className='col-12'>

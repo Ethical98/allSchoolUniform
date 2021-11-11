@@ -36,6 +36,9 @@ const cartSchema = new mongoose.Schema(
         tax: {
           type: Number,
         },
+        disc: {
+          type: Number,
+        },
         size: {
           type: Number,
           required: true,

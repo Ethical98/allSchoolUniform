@@ -7,6 +7,8 @@ import Loader from '../components/Loader';
 import { getOrderDetails } from '../actions/orderActions';
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
+import Invoice from '../components/Invoice/Invoice';
+import { PDFViewer, usePDF } from '@react-pdf/renderer';
 
 const OrderDetails = ({ match, history }) => {
   const orderId = match.params.id;
@@ -18,6 +20,18 @@ const OrderDetails = ({ match, history }) => {
 
   const orderDetails = useSelector((state) => state.orderDetails);
   const { order, loading, error } = orderDetails;
+
+  const [instance, updateInstance] = usePDF({
+    document: order ? (
+      <Invoice
+        name={order.user ? order.user.name : ''}
+        email={order.user ? order.user.email : ''}
+        order={order && order}
+      />
+    ) : (
+      <div>Bill</div>
+    ),
+  });
 
   useEffect(() => {
     if (!userInfo) {
@@ -43,6 +57,16 @@ const OrderDetails = ({ match, history }) => {
   useEffect(() => {
     if (!order || order._id !== orderId) {
       dispatch(getOrderDetails(orderId));
+    } else {
+      updateInstance({
+        document: (
+          <Invoice
+            name={order.user.name}
+            email={order.user.email}
+            order={order && order}
+          />
+        ),
+      });
     }
   }, [dispatch, orderId, order]);
 
@@ -218,6 +242,19 @@ const OrderDetails = ({ match, history }) => {
             </ListGroup>
           </Card>
         </Col>
+        {/* <PDFViewer width='100%' height='600' className='app'>
+          <Invoice
+            name={order.user.name}
+            email={order.user.email}
+            order={order && order}
+            isAdmin={false}
+          />
+        </PDFViewer> */}
+        {order.tracking.isDelivered && (
+          <a href={instance.url} download={`${order.orderId}.pdf`}>
+            Download Invoice
+          </a>
+        )}
       </Row>
     </>
   );

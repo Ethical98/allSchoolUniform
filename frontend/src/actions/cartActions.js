@@ -44,6 +44,7 @@ export const addToCart = (id, index, qty) => async (dispatch, getState) => {
         countInStock: data.size[index].countInStock,
         tax: data.size[index].tax,
         schoolName: data.schoolName,
+        disc: data.size[index].discount,
         qty,
         index,
       };
@@ -64,6 +65,7 @@ export const addToCart = (id, index, qty) => async (dispatch, getState) => {
           image: data.image,
           countInStock: data.size[index].countInStock,
           tax: data.size[index].tax,
+          disc: data.size[index].discount,
           size: data.size[index].size,
           schoolName: data.schoolName,
           qty,

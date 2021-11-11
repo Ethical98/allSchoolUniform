@@ -58,12 +58,12 @@ const CheckoutSteps = ({ step1, step2, step3, step4 }) => {
           {step4 ? (
             <Link to='/placeorder'>
               <li id='step4' className='active'>
-                <i class='fas fa-receipt step4-icon'></i>
+                <i className='fas fa-receipt step4-icon'></i>
               </li>
             </Link>
           ) : (
             <li id='step4'>
-              <i class='fas fa-receipt step4-icon'></i>
+              <i className='fas fa-receipt step4-icon'></i>
             </li>
           )}
         </ul>

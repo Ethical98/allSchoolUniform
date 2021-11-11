@@ -42,6 +42,8 @@ import HomepageEditScreen from './Screens/HomepageEditScreen';
 import Filter from './components/Filter';
 import SearchBox from './components/SearchBox';
 
+import InvoiceScreen from './Screens/InvoiceScreen';
+
 const App = () => {
   const dispatch = useDispatch();
   const userLogin = useSelector((state) => state.userLogin);
@@ -150,7 +152,7 @@ const App = () => {
           <Route path='/admin/type/create' component={TypeCreateScreen} />
           <Route path='/admin/classlist' component={ClassListScreen} />
           <Route path='/admin/homepage' component={HomepageEditScreen} />
-
+          {/* {<Route pah='bill' component={InvoiceScreen} />} */}
           {/* <Route component={PageNotFoundScreen} exact /> */}
         </Container>
       </main>
