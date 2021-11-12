@@ -131,7 +131,16 @@ const Accordion = ({ history, location, match }) => {
         history.push('/products');
       }
     }
-  }, [category, season, dispatch, standard, pageNumber, history]);
+  }, [
+    category,
+    season,
+    dispatch,
+    standard,
+    pageNumber,
+    history,
+    school,
+    keyword,
+  ]);
 
   const seasonChange = (x, checked) => {
     setPageNumber('');
@@ -171,7 +180,7 @@ const Accordion = ({ history, location, match }) => {
   };
 
   return (
-    <div >
+    <div>
       <Card id='Acc'>
         <Card.Header className='text-center'>
           Buy Uniform in 3 Easy Steps

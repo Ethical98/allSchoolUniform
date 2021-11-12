@@ -1,4 +1,3 @@
-import MaterialTable from 'material-table';
 import React from 'react';
 import { Nav, Tab, Col, Row } from 'react-bootstrap';
 

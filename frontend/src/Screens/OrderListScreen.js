@@ -9,6 +9,7 @@ import { listOrders } from '../actions/orderActions';
 import MaterialTable from 'material-table';
 import Paginate from '../components/Paginate';
 
+
 const OrderListScreen = ({ history, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
   const params = Object.fromEntries(urlSearchParams.entries());

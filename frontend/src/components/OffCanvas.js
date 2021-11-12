@@ -1,10 +1,6 @@
 import React from 'react';
 import { Offcanvas } from 'react-bootstrap';
-import { logout } from '../actions/userActions';
-import { useDispatch } from 'react-redux';
-import { Route } from 'react-router-dom';
 import './css/OffCanvas.css';
-import Accordion from './Accordion';
 
 const OffCanvas = ({
   handleOffCanvasClose,
@@ -13,7 +9,6 @@ const OffCanvas = ({
   handleShow,
   children,
 }) => {
-  const dispatch = useDispatch();
   return (
     <div>
       <Offcanvas

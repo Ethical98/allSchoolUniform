@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Nav, Tab, Image, Form } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import MaterialTable from 'material-table';
@@ -74,8 +74,6 @@ const HomepageEditScreen = ({ location, history }) => {
     (state) => state.headerBackgroundDetails
   );
   const {
-    loading: loadingHeaderbg,
-    error: errorHeaderbg,
     headerBackground,
   } = headerBackgroundDetails;
 

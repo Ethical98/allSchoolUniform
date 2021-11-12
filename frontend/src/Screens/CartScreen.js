@@ -27,7 +27,7 @@ const CartScreen = ({ match, location, history }) => {
   const { userInfo } = userLogin;
 
   const cart = useSelector((state) => state.cart);
-  const { cartItems, added } = cart;
+  const { cartItems} = cart;
 
   // if (userInfo && userInfo.token) {
   //   dispatch(getCartFromDatabase());

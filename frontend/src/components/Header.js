@@ -115,6 +115,11 @@ const Header = ({ history, location }) => {
               <a href='/admin/dashboard'>DashBoard </a>
             </li>
           )}
+          {userInfo && userInfo.isAdmin && (
+            <li>
+              <a href='/newCustomerByAdmin'>Add New Customer</a>
+            </li>
+          )}
           <li>
             <a href='/'>Home </a>
           </li>
@@ -220,6 +225,14 @@ const Header = ({ history, location }) => {
                   </Button>
                 </Nav.Link>
               </LinkContainer>
+              {userInfo && userInfo.isAdmin && (
+                <LinkContainer to='/newCustomerByAdmin'>
+                  <Nav.Link>
+                    <i className='fas fa-plus' />
+                    <span className='mx-1'>New Customer</span>
+                  </Nav.Link>
+                </LinkContainer>
+              )}
 
               <Nav.Link onClick={handleShow} className='d-none d-sm-block'>
                 <i className='fas fa-truck' />{' '}

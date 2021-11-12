@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { Container, Row, Col, Nav, Navbar } from 'react-bootstrap';
+import { Container} from 'react-bootstrap';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Accordion from './components/Accordion';
 import ProductScreen from './Screens/ProductScreen';
 import BreadCrumb from './components/BreadCrumb';
 import ProductDescriptionScreen from './Screens/ProductDescriptionScreen';
@@ -39,10 +38,8 @@ import TypeEditScreen from './Screens/TypeEditScreen';
 import TypeCreateScreen from './Screens/TypeCreateScreen';
 import ClassListScreen from './Screens/ClassListScreen';
 import HomepageEditScreen from './Screens/HomepageEditScreen';
-import Filter from './components/Filter';
 import SearchBox from './components/SearchBox';
-
-import InvoiceScreen from './Screens/InvoiceScreen';
+import NewCustomerByAdminScreen from './Screens/NewCustomerByAdminScreen';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -97,6 +94,11 @@ const App = () => {
           <Route path='/register' component={RegisterScreen} />
           <Route path='/profile' component={ProfileScreen} exact />
           <Route path='/products' component={BreadCrumb} exact />
+          <Route
+            path='/newcustomerbyadmin'
+            component={NewCustomerByAdminScreen}
+            exact
+          />
           <Route
             path='/products/schools/:selectedschool'
             component={BreadCrumb}

@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { Collapse, Card, Button, Nav } from 'react-bootstrap';
-import Accordion from './Accordion';
-import { Route } from 'react-router-dom';
+import { Collapse, Card, Button } from 'react-bootstrap';
 import OffCanvas from './OffCanvas';
 
-const Filter = ({ match, history, location }) => {
+const Filter = () => {
   const [open, setOpen] = useState(false);
- 
 
   return (
     <div className='d-block d-sm-none' style={{ marginBottom: '-99vh' }}>

@@ -7,7 +7,6 @@ import {
   Button,
   Row,
   Col,
-  Modal,
   Tabs,
   Tab,
   Image,

@@ -40,9 +40,8 @@ import { listProducts } from '../actions/productActions';
 import Paginate from '../components/Paginate';
 import DialogBox from '../components/DialogBox';
 import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
-import { jsPDF } from 'jspdf';
 import Invoice from '../components/Invoice/Invoice';
-import { PDFViewer, usePDF } from '@react-pdf/renderer';
+import { usePDF } from '@react-pdf/renderer';
 
 const OrderEditScreen = ({ history, match, location }) => {
   const dispatch = useDispatch();
@@ -323,6 +322,7 @@ const OrderEditScreen = ({ history, match, location }) => {
   useEffect(() => {
     if (success) {
       dispatch({ type: ORDER_UPDATE_RESET });
+
       history.push('/admin/orderlist');
     } else {
       if (
@@ -357,12 +357,14 @@ const OrderEditScreen = ({ history, match, location }) => {
         setIsOutForDelivery(order.tracking.isOutForDelivery);
         setIsConfirmed(order.tracking.isConfirmed);
         setOrderNumber(order.orderId);
+
         updateInstance({
           document: (
             <Invoice
               name={name}
               email={email}
               order={order && order}
+              total={order.totalPrice}
               isAdmin={true}
             />
           ),
@@ -405,6 +407,9 @@ const OrderEditScreen = ({ history, match, location }) => {
     successDeliver,
     successOutForDelivery,
     successProcessing,
+    name,
+    email,
+    updateInstance,
   ]);
 
   useEffect(() => {

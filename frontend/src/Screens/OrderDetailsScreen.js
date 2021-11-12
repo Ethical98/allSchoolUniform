@@ -8,7 +8,7 @@ import { getOrderDetails } from '../actions/orderActions';
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
 import Invoice from '../components/Invoice/Invoice';
-import { PDFViewer, usePDF } from '@react-pdf/renderer';
+import { usePDF } from '@react-pdf/renderer';
 
 const OrderDetails = ({ match, history }) => {
   const orderId = match.params.id;
@@ -68,7 +68,7 @@ const OrderDetails = ({ match, history }) => {
         ),
       });
     }
-  }, [dispatch, orderId, order]);
+  }, [dispatch, orderId, order, updateInstance]);
 
   useEffect(() => {
     if (!userInfo) {
