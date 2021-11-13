@@ -15,8 +15,12 @@ import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import jsonwebtoken from 'jsonwebtoken';
 import { logout } from '../actions/userActions';
-import { SCHOOL_CREATE_RESET, SCHOOL_NAME_LIST_RESET } from '../constants/schoolConstants';
+import {
+  SCHOOL_CREATE_RESET,
+  SCHOOL_NAME_LIST_RESET,
+} from '../constants/schoolConstants';
 import { createSchool } from '../actions/schoolActions';
+import Meta from '../components/Meta';
 
 const SchoolCreateScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -120,6 +124,10 @@ const SchoolCreateScreen = ({ history }) => {
   };
   return (
     <>
+      <Meta
+        title={'Add School - AllSchoolUniform'}
+        description={'Add New School Page'}
+      />
       <Link to='/admin/schoollist' className='btn btn-outline-dark my-3'>
         Go Back
       </Link>

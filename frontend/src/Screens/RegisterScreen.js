@@ -16,6 +16,7 @@ import { mergeCartWithDatabase } from '../actions/cartActions';
 import OtpInput from 'react-otp-input';
 import validator from 'validator';
 import './css/RegisterScreen.css';
+import Meta from '../components/Meta';
 
 const RegisterScreen = ({ history, location }) => {
   const dispatch = useDispatch();
@@ -129,6 +130,8 @@ const RegisterScreen = ({ history, location }) => {
   };
 
   return (
+    <>
+    <Meta title={'Sign Up - AllSchoolUniform'} description={'Sign Up New User'} />
     <FormContainer>
       <h1>SIGN UP</h1>
       {loading || otpLoading ? (
@@ -280,6 +283,7 @@ const RegisterScreen = ({ history, location }) => {
         </Col>
       </Row>
     </FormContainer>
+    </>
   );
 };
 

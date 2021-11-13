@@ -21,6 +21,7 @@ import {
   SCHOOL_UPDATE_RESET,
 } from '../constants/schoolConstants';
 import { listSchoolDetails, updateSchool } from '../actions/schoolActions';
+import Meta from '../components/Meta';
 
 const SchoolEditScreen = ({ match, history }) => {
   const schoolId = match.params.id;
@@ -138,6 +139,10 @@ const SchoolEditScreen = ({ match, history }) => {
   };
   return (
     <>
+      <Meta
+        title={'Edit School - AllSchoolUniform'}
+        description={'Edit School Page'}
+      />
       <Link to='/admin/schoollist' className='btn btn-outline-dark my-3'>
         Go Back
       </Link>

@@ -42,6 +42,7 @@ import DialogBox from '../components/DialogBox';
 import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
+import Meta from '../components/Meta';
 
 const OrderEditScreen = ({ history, match, location }) => {
   const dispatch = useDispatch();
@@ -409,7 +410,6 @@ const OrderEditScreen = ({ history, match, location }) => {
     successProcessing,
     name,
     email,
-    updateInstance,
   ]);
 
   useEffect(() => {
@@ -606,6 +606,13 @@ const OrderEditScreen = ({ history, match, location }) => {
 
   return (
     <>
+      <Meta
+        title={`Order Edit #${order.orderId} - Allschooluniform`}
+        description={'Order Edit'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details'
+        }
+      />
       <DialogBox
         handleClose={closeEditModalHandle}
         show={showEditModal}

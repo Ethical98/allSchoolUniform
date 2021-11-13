@@ -8,6 +8,7 @@ import Loader from '../components/Loader';
 import validator from 'validator';
 import './css/RegisterScreen.css';
 import jsonwebtoken from 'jsonwebtoken';
+import Meta from '../components/Meta';
 
 const NewCustomerByAdmin = ({ history }) => {
   const dispatch = useDispatch();
@@ -46,7 +47,6 @@ const NewCustomerByAdmin = ({ history }) => {
   }, [history, userLoginInfo]);
 
   useEffect(() => {
-
     if (success) {
       history.push('/products');
     }
@@ -69,59 +69,66 @@ const NewCustomerByAdmin = ({ history }) => {
   };
 
   return (
-    <FormContainer>
-      <h1>ADD NEW CUSTOMER</h1>
-      {loading ? (
-        <Loader />
-      ) : (
-        error && <Message variant='danger'>{error}</Message>
-      )}
-      {message && <Message variant='danger'>{message}</Message>}
-      <Form onSubmit={submitHandler}>
-        <InputGroup className='mb-3'>
-          <InputGroup.Text id='email' style={{ width: '2.5rem' }}>
-            <i className='fas fa-envelope' />
-          </InputGroup.Text>
-          <Form.Control
-            required
-            type='email'
-            placeholder='Email'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          ></Form.Control>
-        </InputGroup>
+    <>
+    <Meta
+        title={'Add New Cutomer - Allschooluniform'}
+        description={'New Customer By Admin'}
+        keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,customer,admin'}
+      />
+      <FormContainer>
+        <h1>ADD NEW CUSTOMER</h1>
+        {loading ? (
+          <Loader />
+        ) : (
+          error && <Message variant='danger'>{error}</Message>
+        )}
+        {message && <Message variant='danger'>{message}</Message>}
+        <Form onSubmit={submitHandler}>
+          <InputGroup className='mb-3'>
+            <InputGroup.Text id='email' style={{ width: '2.5rem' }}>
+              <i className='fas fa-envelope' />
+            </InputGroup.Text>
+            <Form.Control
+              required
+              type='email'
+              placeholder='Email'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            ></Form.Control>
+          </InputGroup>
 
-        <InputGroup controlId='name' className='mb-3'>
-          <InputGroup.Text id='name'>
-            <i className='fas fa-user' />
-          </InputGroup.Text>
-          <Form.Control
-            required
-            type='name'
-            placeholder='Name'
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          ></Form.Control>
-        </InputGroup>
+          <InputGroup controlId='name' className='mb-3'>
+            <InputGroup.Text id='name'>
+              <i className='fas fa-user' />
+            </InputGroup.Text>
+            <Form.Control
+              required
+              type='name'
+              placeholder='Name'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            ></Form.Control>
+          </InputGroup>
 
-        <InputGroup controlId='phone' className='mb-3'>
-          <InputGroup.Text id='phone' style={{ width: '2.5rem' }}>
-            <i className='fas fa-phone-alt' />
-          </InputGroup.Text>
-          <Form.Control
-            required
-            type='phone'
-            placeholder='Phone'
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          ></Form.Control>
-        </InputGroup>
+          <InputGroup controlId='phone' className='mb-3'>
+            <InputGroup.Text id='phone' style={{ width: '2.5rem' }}>
+              <i className='fas fa-phone-alt' />
+            </InputGroup.Text>
+            <Form.Control
+              required
+              type='phone'
+              placeholder='Phone'
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            ></Form.Control>
+          </InputGroup>
 
-        <Button type='submit' variant='info' className='col-12'>
-          REGISTER
-        </Button>
-      </Form>
-    </FormContainer>
+          <Button type='submit' variant='info' className='col-12'>
+            REGISTER
+          </Button>
+        </Form>
+      </FormContainer>
+    </>
   );
 };
 

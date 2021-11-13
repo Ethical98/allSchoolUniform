@@ -20,6 +20,7 @@ import {
 import jsonwebtoken from 'jsonwebtoken';
 import { listMyOrders } from '../actions/orderActions';
 import './css/ProfileScreen.css';
+import Meta from '../components/Meta';
 
 const ProfileScreen = ({ history }) => {
   const [phone, setPhone] = useState('');
@@ -97,6 +98,7 @@ const ProfileScreen = ({ history }) => {
 
   return (
     <>
+      <Meta title={'Profile - AllSchoolUniform'} description={'View Profile'} />
       <Row className='mb-3'>
         <Col md={4}>
           <h2>PROFILE</h2>

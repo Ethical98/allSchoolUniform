@@ -29,6 +29,7 @@ import {
   STATISTICS_UPDATE_RESET,
 } from '../constants/homeConstants';
 import jsonwebtoken from 'jsonwebtoken';
+import Meta from '../components/Meta';
 
 const HomepageEditScreen = ({ location, history }) => {
   const dispatch = useDispatch();
@@ -73,9 +74,7 @@ const HomepageEditScreen = ({ location, history }) => {
   const headerBackgroundDetails = useSelector(
     (state) => state.headerBackgroundDetails
   );
-  const {
-    headerBackground,
-  } = headerBackgroundDetails;
+  const { headerBackground } = headerBackgroundDetails;
 
   const headerBackgroundUpdate = useSelector(
     (state) => state.headerBackgroundUpdate
@@ -430,13 +429,13 @@ const HomepageEditScreen = ({ location, history }) => {
                   setTimeout(() => {
                     if (image) {
                       newData.image = image;
-                    
+
                       dispatch(updateAnnouncement(newData));
                     } else {
                       const dataUpdate = [...announcementsList];
                       const index = oldData.tableData.id;
                       dataUpdate[index] = newData;
-                     
+
                       setAnnouncementsList([...dataUpdate]);
                       dispatch(updateAnnouncement(newData));
                     }
@@ -548,7 +547,7 @@ const HomepageEditScreen = ({ location, history }) => {
                     const index = oldData.tableData.id;
                     dataUpdate[index] = newData;
                     setStatistics([...dataUpdate]);
-                   
+
                     dispatch(updateStatistics(newData));
 
                     resolve();
@@ -598,6 +597,11 @@ const HomepageEditScreen = ({ location, history }) => {
   );
   return (
     <div>
+      <Meta
+        title={'Homepage Edit -AllschoolUniform'}
+        description={'Edit Asu Homepage'}
+        keyword={'Edit,homepage, Allschooluniform ,uniform'}
+      />
       <AdminVerticalNav
         tabContent={<TabContent />}
         currentKey={key}

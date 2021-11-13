@@ -7,6 +7,7 @@ import { Image, Row, Col, Button } from 'react-bootstrap';
 import { logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
 import { deleteType, listAllTypes } from '../actions/typeActions';
+import Meta from '../components/Meta';
 
 const TypeListScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -101,6 +102,10 @@ const TypeListScreen = ({ history }) => {
 
   return (
     <>
+      <Meta
+        title={'Product Type List - AllSchoolUniform'}
+        description={'Product List Page'}
+      />
       <Row className='align-items-center'>
         <Col>
           <h1>TYPES</h1>

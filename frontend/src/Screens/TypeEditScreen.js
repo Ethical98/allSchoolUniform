@@ -20,6 +20,7 @@ import {
 } from '../constants/typeConstants';
 import { listTypeDetails, updateType } from '../actions/typeActions';
 import MaterialTable from 'material-table';
+import Meta from '../components/Meta';
 
 const TypeEditScreen = ({ match, history }) => {
   const typeId = match.params.id;
@@ -214,6 +215,10 @@ const TypeEditScreen = ({ match, history }) => {
   };
   return (
     <>
+      <Meta
+        title={'Edit Product Type - AllSchoolUniform'}
+        description={'Edit Product Type Page'}
+      />
       <Link to='/admin/typelist' className='btn btn-outline-dark my-3'>
         Go Back
       </Link>

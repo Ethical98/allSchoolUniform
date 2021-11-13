@@ -66,7 +66,7 @@ const ProductScreen = ({ history, location, match }) => {
         <Message variant='danger'>{error}</Message>
       ) : (
         <>
-          <Meta title={'Products'} />
+          <Meta title={'Products - AllschoolUniform'} />
           <Row>
             <Col sm={6} md={3} className='d-none d-sm-block'>
               <Route

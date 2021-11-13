@@ -50,7 +50,10 @@ const HomeScreen = ({ history }) => {
 
   return (
     <div>
-      <Meta description={'hello from asu'} />
+      <Meta
+        description={'Buy School Uniforms Online'}
+        keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online'}
+      />
       <Container>
         <h4 className='text-center'>Commonly Searched Schools</h4>
         <Row>

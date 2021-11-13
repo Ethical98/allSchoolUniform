@@ -14,6 +14,7 @@ import {
 import { mergeCartWithDatabase } from '../actions/cartActions';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
+import Meta from '../components/Meta';
 
 const LoginScreenByPhone = ({ history, location }) => {
   const phoneInfo = useSelector((state) => state.userOtpVerification);
@@ -130,126 +131,137 @@ const LoginScreenByPhone = ({ history, location }) => {
   }, [otpError]);
 
   return (
-    <FormContainer>
-      <h1>SIGN IN</h1>
-      {loading || otpLoading ? (
-        <Loader />
-      ) : sent ? (
-        <Message variant='success'>OTP SENT</Message>
-      ) : otpError ? (
-        <Message variant='danger'>{otpError}</Message>
-      ) : error ? (
-        <Message variant='danger'>{error}</Message>
-      ) : (
-        invalidInputError && (
-          <Message variant='danger'>{invalidInputError}</Message>
-        )
-      )}
-      {!continueClicked ? (
-        <Form
-          noValidate
-          validated={validated}
-          onSubmit={onSubmitHandlerFormOne}
-        >
-          <Form.Group controlId='emailOrPhone' className='mb-3'>
-            <FloatingLabel
-              controlId='emailOrPhone'
-              label='Email or Phone'
-              className='mb-3'
-            >
-              <Form.Control
-                value={inputValue}
-                required
-                placeholder='Enter Email or Mobile'
-                onChange={(e) => {
-                  setInputValue(e.target.value);
-                }}
-              ></Form.Control>
-              <Form.Control.Feedback type='invalid'>
-                {message}
-              </Form.Control.Feedback>
-            </FloatingLabel>
-          </Form.Group>
-          <Button variant='outline-dark' type='submit' className='col-12 mb-3'>
-            Continue
-          </Button>
-          <Row className='py-3'>
-            <Col className='text-center'>
-              New Customer?{' '}
-              <Link
-                style={{ textDecoration: 'none' }}
-                to={redirect ? `/register?redirect=${redirect}` : '/register'}
+    <>
+      <Meta
+        title={'Login - Allschooluniform'}
+        description={'Buy School Uniforms Online'}
+        keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login'}
+      />
+      <FormContainer>
+        <h1>SIGN IN</h1>
+        {loading || otpLoading ? (
+          <Loader />
+        ) : sent ? (
+          <Message variant='success'>OTP SENT</Message>
+        ) : otpError ? (
+          <Message variant='danger'>{otpError}</Message>
+        ) : error ? (
+          <Message variant='danger'>{error}</Message>
+        ) : (
+          invalidInputError && (
+            <Message variant='danger'>{invalidInputError}</Message>
+          )
+        )}
+        {!continueClicked ? (
+          <Form
+            noValidate
+            validated={validated}
+            onSubmit={onSubmitHandlerFormOne}
+          >
+            <Form.Group controlId='emailOrPhone' className='mb-3'>
+              <FloatingLabel
+                controlId='emailOrPhone'
+                label='Email or Phone'
+                className='mb-3'
               >
-                <Button variant='info' className='col-12 mb-3'>
-                  Register
-                </Button>
-              </Link>
-            </Col>
-          </Row>
-        </Form>
-      ) : (
-        <Form noValidate validated={validated} onSubmit={submitHandler}>
-          <Form.Group controlId='emailOrPhone' className='mb-3'>
-            <Form.Text>Email</Form.Text>
-            <br />
-            <span className='mb-3'>{inputValue}</span>
+                <Form.Control
+                  value={inputValue}
+                  required
+                  placeholder='Enter Email or Mobile'
+                  onChange={(e) => {
+                    setInputValue(e.target.value);
+                  }}
+                ></Form.Control>
+                <Form.Control.Feedback type='invalid'>
+                  {message}
+                </Form.Control.Feedback>
+              </FloatingLabel>
+            </Form.Group>
+            <Button
+              variant='outline-dark'
+              type='submit'
+              className='col-12 mb-3'
+            >
+              Continue
+            </Button>
+            <Row className='py-3'>
+              <Col className='text-center'>
+                New Customer?{' '}
+                <Link
+                  style={{ textDecoration: 'none' }}
+                  to={redirect ? `/register?redirect=${redirect}` : '/register'}
+                >
+                  <Button variant='info' className='col-12 mb-3'>
+                    Register
+                  </Button>
+                </Link>
+              </Col>
+            </Row>
+          </Form>
+        ) : (
+          <Form noValidate validated={validated} onSubmit={submitHandler}>
+            <Form.Group controlId='emailOrPhone' className='mb-3'>
+              <Form.Text>Email</Form.Text>
+              <br />
+              <span className='mb-3'>{inputValue}</span>
 
-            <Form.Text
-              className='float-end mb-3'
-              style={{ textDecoration: 'none' }}
-              as={Link}
-              to='/login'
-              onClick={() => setContinueClicked(false)}
-            >
-              Change?
-            </Form.Text>
-          </Form.Group>
-          <Form.Group controlId='password'>
-            <FloatingLabel
-              label='Password'
-              controlId='password'
-              className='mb-3'
-            >
-              <Form.Control
-                value={password}
-                required
-                type='password'
-                placeholder='Password'
-                onChange={(e) => setPassword(e.target.value)}
-              ></Form.Control>
-              <Form.Control.Feedback type='invalid'>
-                {passwordMessage}
-              </Form.Control.Feedback>
               <Form.Text
-                as={Link}
-                to='/forgotpassword'
+                className='float-end mb-3'
                 style={{ textDecoration: 'none' }}
+                as={Link}
+                to='/login'
+                onClick={() => setContinueClicked(false)}
               >
-                Forgot Password?
+                Change?
               </Form.Text>
-            </FloatingLabel>
-          </Form.Group>
-
-          <Button variant='secondary' type='submit' className='col-12 mb-3'>
-            Sign-In
-          </Button>
-          <Row className='py-3'>
-            <Col className='text-center'>
-              Or {/* <Link style={{ textDecoration: 'none' }} to='/otp'> */}
-              <div id='login-otp'></div>
-              <Button
-                variant='dark'
-                className='col-12 mb-3'
-                onClick={getOtpHandler}
+            </Form.Group>
+            <Form.Group controlId='password'>
+              <FloatingLabel
+                label='Password'
+                controlId='password'
+                className='mb-3'
               >
-                Get an OTP on your phone
-              </Button>
-              {/* </Link> */}
-            </Col>
-          </Row>
-        </Form>
-      )}
-    </FormContainer>
+                <Form.Control
+                  value={password}
+                  required
+                  type='password'
+                  placeholder='Password'
+                  onChange={(e) => setPassword(e.target.value)}
+                ></Form.Control>
+                <Form.Control.Feedback type='invalid'>
+                  {passwordMessage}
+                </Form.Control.Feedback>
+                <Form.Text
+                  as={Link}
+                  to='/forgotpassword'
+                  style={{ textDecoration: 'none' }}
+                >
+                  Forgot Password?
+                </Form.Text>
+              </FloatingLabel>
+            </Form.Group>
+
+            <Button variant='secondary' type='submit' className='col-12 mb-3'>
+              Sign-In
+            </Button>
+            <Row className='py-3'>
+              <Col className='text-center'>
+                Or {/* <Link style={{ textDecoration: 'none' }} to='/otp'> */}
+                <div id='login-otp'></div>
+                <Button
+                  variant='dark'
+                  className='col-12 mb-3'
+                  onClick={getOtpHandler}
+                >
+                  Get an OTP on your phone
+                </Button>
+                {/* </Link> */}
+              </Col>
+            </Row>
+          </Form>
+        )}
+      </FormContainer>
+    </>
   );
 };
 

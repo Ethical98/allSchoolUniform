@@ -17,6 +17,7 @@ import { logout } from '../actions/userActions';
 import { TYPE_CREATE_RESET } from '../constants/typeConstants';
 import { createType } from '../actions/typeActions';
 import MaterialTable from 'material-table';
+import Meta from '../components/Meta';
 
 const TypeCreateScreen = ({ match, history }) => {
   const dispatch = useDispatch();
@@ -189,6 +190,10 @@ const TypeCreateScreen = ({ match, history }) => {
   };
   return (
     <>
+      <Meta
+        title={'Add Product Type - AllSchoolUniform'}
+        description={'New Product Type Page'}
+      />
       <Link to='/admin/typelist' className='btn btn-outline-dark my-3'>
         Go Back
       </Link>

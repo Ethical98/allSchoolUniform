@@ -6,6 +6,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import { deleteUser, listUsers, logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
 import Paginate from '../components/Paginate';
+import Meta from '../components/Meta';
 
 const UserListScreen = ({ history, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
@@ -87,6 +88,10 @@ const UserListScreen = ({ history, location }) => {
 
   return (
     <>
+      <Meta
+        title={'User List- AllSchoolUniform'}
+        description={'User List Page'}
+      />
       <h1>USERS</h1>
       {loading ? (
         <Loader />

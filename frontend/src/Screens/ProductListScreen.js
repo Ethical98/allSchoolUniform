@@ -11,6 +11,7 @@ import MaterialTable from 'material-table';
 import { listSchoolNames } from '../actions/schoolActions';
 import Paginate from '../components/Paginate';
 import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
+import Meta from '../components/Meta';
 
 const ProductListScreen = ({ history, match, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
@@ -123,6 +124,10 @@ const ProductListScreen = ({ history, match, location }) => {
 
   return (
     <>
+      <Meta
+        title={'Product List - AllSchoolUniform'}
+        description={'List Product'}
+      />
       <Row className='align-items-center'>
         <Col>
           <h1>PRODUCTS</h1>

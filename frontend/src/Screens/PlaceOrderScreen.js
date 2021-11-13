@@ -11,6 +11,7 @@ import {
 } from '../actions/orderActions';
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
+import Meta from '../components/Meta';
 
 const PlaceOrderScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -162,6 +163,13 @@ const PlaceOrderScreen = ({ history }) => {
 
   return (
     <>
+      <Meta
+        title={`Place Order - Allschooluniform`}
+        description={'Place New Order'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details'
+        }
+      />
       <CheckoutSteps step1 step2 step3 step4 />
       {message && <Message variant='warning'>{message}</Message>}
       <Row>

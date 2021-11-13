@@ -6,6 +6,7 @@ import { Button, Form, ListGroup } from 'react-bootstrap';
 import { savePaymentMethod } from '../actions/cartActions';
 import { logout } from '../actions/userActions';
 import CheckoutSteps from '../components/CheckoutSteps';
+import Meta from '../components/Meta';
 
 const PaymentScreen = ({ history }) => {
   const userLogin = useSelector((state) => state.userLogin);
@@ -58,44 +59,53 @@ const PaymentScreen = ({ history }) => {
   };
 
   return (
-    <FormContainer>
-      <CheckoutSteps step1 step2 step3 />
-      <h1>PAYMENT METHOD</h1>
-      <Form onSubmit={submitHandler}>
-        <Form.Group className='mb-3'>
-          <Form.Label as='legend'>Select Method</Form.Label>
+    <>
+      <Meta
+        title={`Payment  - Allschooluniform`}
+        description={'Order Payment'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details'
+        }
+      />
+      <FormContainer>
+        <CheckoutSteps step1 step2 step3 />
+        <h1>PAYMENT METHOD</h1>
+        <Form onSubmit={submitHandler}>
+          <Form.Group className='mb-3'>
+            <Form.Label as='legend'>Select Method</Form.Label>
 
-          <ListGroup>
-            <ListGroup.Item>
-              <Form.Check
-                required
-                type='radio'
-                label='Cash On Delivery'
-                id='COD'
-                name='paymentMethod'
-                value='COD'
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              ></Form.Check>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <Form.Check
-                required
-                type='radio'
-                label='PayUMoney/Debit/Credit Card'
-                id='PayU'
-                name='paymentMethod'
-                value='PayU'
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              ></Form.Check>
-            </ListGroup.Item>
-          </ListGroup>
-        </Form.Group>
+            <ListGroup>
+              <ListGroup.Item>
+                <Form.Check
+                  required
+                  type='radio'
+                  label='Cash On Delivery'
+                  id='COD'
+                  name='paymentMethod'
+                  value='COD'
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                ></Form.Check>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <Form.Check
+                  required
+                  type='radio'
+                  label='PayUMoney/Debit/Credit Card'
+                  id='PayU'
+                  name='paymentMethod'
+                  value='PayU'
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                ></Form.Check>
+              </ListGroup.Item>
+            </ListGroup>
+          </Form.Group>
 
-        <Button type='submit' className='col-12' variant='outline-dark'>
-          Continue
-        </Button>
-      </Form>
-    </FormContainer>
+          <Button type='submit' className='col-12' variant='outline-dark'>
+            Continue
+          </Button>
+        </Form>
+      </FormContainer>
+    </>
   );
 };
 

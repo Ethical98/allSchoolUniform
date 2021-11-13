@@ -26,6 +26,7 @@ import {
   PRODUCT_DETAILS_RESET,
   PRODUCT_UPDATE_RESET,
 } from '../constants/productConstants';
+import Meta from '../components/Meta';
 
 const ProductEditScreen = ({ match, history }) => {
   const dispatch = useDispatch();
@@ -292,6 +293,10 @@ const ProductEditScreen = ({ match, history }) => {
 
   return (
     <>
+      <Meta
+        title={'Product Edit - AllSchoolUniform'}
+        description={'Edit Product'}
+      />
       <Link to='/admin/productList' className='btn btn-outline-dark my-3'>
         Go Back
       </Link>

@@ -9,6 +9,7 @@ import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
 import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
+import Meta from '../components/Meta';
 
 const OrderDetails = ({ match, history }) => {
   const orderId = match.params.id;
@@ -90,6 +91,13 @@ const OrderDetails = ({ match, history }) => {
     <Message variant='danger'>{error}</Message>
   ) : (
     <>
+      <Meta
+        title={`Order Details #${order.orderId} - Allschooluniform`}
+        description={'Order Details'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details'
+        }
+      />
       <h1>ORDER #{order.orderId}</h1>
 
       <Row>

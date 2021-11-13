@@ -8,6 +8,7 @@ import { logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
 import { deleteSchool, listSchools } from '../actions/schoolActions';
 import Paginate from '../components/Paginate';
+import Meta from '../components/Meta';
 
 const SchoolListScreen = ({ history, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
@@ -91,6 +92,10 @@ const SchoolListScreen = ({ history, location }) => {
 
   return (
     <>
+      <Meta
+        title={'List School - AllSchoolUniform'}
+        description={'School List Page'}
+      />
       <Row className='align-items-center'>
         <Col>
           <h1>SCHOOLS</h1>

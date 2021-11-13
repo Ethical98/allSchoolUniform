@@ -13,6 +13,7 @@ import {
 } from '../actions/userActions';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
+import Meta from '../components/Meta';
 
 const LoginScreenOtp = ({ history }) => {
   const [OTP, setOTP] = useState('');
@@ -72,6 +73,13 @@ const LoginScreenOtp = ({ history }) => {
         <Loader />
       ) : (
         <>
+          <Meta
+            title={'Login By OTP - Allschooluniform'}
+            description={'Login By OTP'}
+            keyword={
+              'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,OTP'
+            }
+          />
           <Form onSubmit={submitHandler}>
             <Form.Group className='mb-3'>
               <FloatingLabel controlId='phone' label='Phone' className='mb-3'>

@@ -15,6 +15,7 @@ import {
 import Message from '../components/Message';
 import { addToCart, removeFromCart } from '../actions/cartActions';
 import { logout } from '../actions/userActions';
+import Meta from '../components/Meta';
 
 const CartScreen = ({ match, location, history }) => {
   // const [customQty, setCustomQty] = useState(false);
@@ -27,7 +28,7 @@ const CartScreen = ({ match, location, history }) => {
   const { userInfo } = userLogin;
 
   const cart = useSelector((state) => state.cart);
-  const { cartItems} = cart;
+  const { cartItems } = cart;
 
   // if (userInfo && userInfo.token) {
   //   dispatch(getCartFromDatabase());
@@ -74,39 +75,52 @@ const CartScreen = ({ match, location, history }) => {
   };
 
   return (
-    <Row>
-      <Col md={8} className='mb-3'>
-        <Button variant='outline-dark' onClick={() => history.goBack()}>
-          <i className='fas fa-arrow-left me-2' />
-          CONTINUE SHOPPING
-        </Button>
-        <h1>SHOPPING CART</h1>
-        {cartItems && cartItems.length === 0 ? (
-          <Message>
-            Your Cart is Empty <Link to='/products'> Go Back</Link>
-          </Message>
-        ) : (
-          <Card rounded='true'>
-            <ListGroup variant='flush'>
-              {cartItems &&
-                cartItems.map((item) => (
-                  <ListGroup.Item key={item._id}>
-                    <Row className='g-2'>
-                      <Col xs={2}>
-                        <Image src={item.image} alt={item.name} fluid rounded />
-                      </Col>
-                      <Col xs={2}>
-                        <Link
-                          to={`/products/${item.name}`}
-                          style={{ textDecoration: 'none', color: 'black' }}
-                        >
-                          {item.name}
-                        </Link>
-                      </Col>
-                      <Col xs={2}>Size: {item.size}</Col>
-                      <Col xs={2}>₹{item.price}</Col>
-                      <Col xs={2}>
-                        {/* {item.qty > 10 && !customQty ? (
+    <>
+      <Meta
+        title={'Cart - AllschoolUniform'}
+        description={'Build Your Cart'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,cart'
+        }
+      />
+      <Row>
+        <Col md={8} className='mb-3'>
+          <Button variant='outline-dark' onClick={() => history.goBack()}>
+            <i className='fas fa-arrow-left me-2' />
+            CONTINUE SHOPPING
+          </Button>
+          <h1>SHOPPING CART</h1>
+          {cartItems && cartItems.length === 0 ? (
+            <Message>
+              Your Cart is Empty <Link to='/products'> Go Back</Link>
+            </Message>
+          ) : (
+            <Card rounded='true'>
+              <ListGroup variant='flush'>
+                {cartItems &&
+                  cartItems.map((item) => (
+                    <ListGroup.Item key={item._id}>
+                      <Row className='g-2'>
+                        <Col xs={2}>
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fluid
+                            rounded
+                          />
+                        </Col>
+                        <Col xs={2}>
+                          <Link
+                            to={`/products/${item.name}`}
+                            style={{ textDecoration: 'none', color: 'black' }}
+                          >
+                            {item.name}
+                          </Link>
+                        </Col>
+                        <Col xs={2}>Size: {item.size}</Col>
+                        <Col xs={2}>₹{item.price}</Col>
+                        <Col xs={2}>
+                          {/* {item.qty > 10 && !customQty ? (
                           <InputGroup size='sm'>
                             <Form.Control
                               value={item.qty}
@@ -121,26 +135,26 @@ const CartScreen = ({ match, location, history }) => {
                             </InputGroup.Text>
                           </InputGroup>
                         ) : !(customId === item.product) ? ( */}
-                        <FloatingLabel label='QTY'>
-                          <Form.Select
-                            value={item.qty}
-                            onChange={(e) =>
-                              dispatch(
-                                addToCart(
-                                  item.product,
-                                  item.index,
-                                  Number(e.target.value)
+                          <FloatingLabel label='QTY'>
+                            <Form.Select
+                              value={item.qty}
+                              onChange={(e) =>
+                                dispatch(
+                                  addToCart(
+                                    item.product,
+                                    item.index,
+                                    Number(e.target.value)
+                                  )
                                 )
-                              )
-                            }
-                          >
-                            {[...Array(item.countInStock).keys()].map((x) => (
-                              <option key={x + 1} value={x + 1}>
-                                {x + 1}
-                              </option>
-                            ))}
-                          </Form.Select>
-                          {/* <span
+                              }
+                            >
+                              {[...Array(item.countInStock).keys()].map((x) => (
+                                <option key={x + 1} value={x + 1}>
+                                  {x + 1}
+                                </option>
+                              ))}
+                            </Form.Select>
+                            {/* <span
                               style={{ fontSize: '0.7rem' }}
                               onClick={() =>
                                 handleCustomQty(item.product, item.qty)
@@ -148,8 +162,8 @@ const CartScreen = ({ match, location, history }) => {
                             >
                               Custom Qty?
                             </span> */}
-                        </FloatingLabel>
-                        {/* ) : (
+                          </FloatingLabel>
+                          {/* ) : (
                         <InputGroup size='sm'>
                           <Form.Control
                             value={changedQty || item.qty}
@@ -172,53 +186,54 @@ const CartScreen = ({ match, location, history }) => {
                           <p onClick={() => setCustomId('')}>Cancel?</p>
                         </InputGroup>
                         )} */}
-                      </Col>
-                      <Col xs={2}>
-                        <Button
-                          type='button'
-                          variant='light'
-                          onClick={() => removeFromCartHandler(item._id)}
-                        >
-                          <i className='fas fa-trash'></i>
-                        </Button>
-                      </Col>
-                    </Row>
-                  </ListGroup.Item>
-                ))}
+                        </Col>
+                        <Col xs={2}>
+                          <Button
+                            type='button'
+                            variant='light'
+                            onClick={() => removeFromCartHandler(item._id)}
+                          >
+                            <i className='fas fa-trash'></i>
+                          </Button>
+                        </Col>
+                      </Row>
+                    </ListGroup.Item>
+                  ))}
+              </ListGroup>
+            </Card>
+          )}
+        </Col>
+        <Col md={4}>
+          <Card>
+            <ListGroup variant='flush'>
+              <ListGroup.Item>
+                <h2>
+                  Subtotal (
+                  {cartItems &&
+                    cartItems.reduce((acc, item) => acc + item.qty, 0)}
+                  ) Items
+                </h2>
+                ₹
+                {cartItems &&
+                  cartItems
+                    .reduce((acc, item) => acc + item.qty * item.price, 0)
+                    .toFixed(2)}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <Button
+                  variant='outline-success'
+                  className='col-12'
+                  disabled={cartItems.length === 0}
+                  onClick={checkOutHandler}
+                >
+                  Proceed To Checkout
+                </Button>
+              </ListGroup.Item>
             </ListGroup>
           </Card>
-        )}
-      </Col>
-      <Col md={4}>
-        <Card>
-          <ListGroup variant='flush'>
-            <ListGroup.Item>
-              <h2>
-                Subtotal (
-                {cartItems &&
-                  cartItems.reduce((acc, item) => acc + item.qty, 0)}
-                ) Items
-              </h2>
-              ₹
-              {cartItems &&
-                cartItems
-                  .reduce((acc, item) => acc + item.qty * item.price, 0)
-                  .toFixed(2)}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <Button
-                variant='outline-success'
-                className='col-12'
-                disabled={cartItems.length === 0}
-                onClick={checkOutHandler}
-              >
-                Proceed To Checkout
-              </Button>
-            </ListGroup.Item>
-          </ListGroup>
-        </Card>
-      </Col>
-    </Row>
+        </Col>
+      </Row>
+    </>
   );
 };
 

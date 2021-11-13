@@ -8,7 +8,7 @@ import { logout } from '../actions/userActions';
 import { listOrders } from '../actions/orderActions';
 import MaterialTable from 'material-table';
 import Paginate from '../components/Paginate';
-
+import Meta from '../components/Meta';
 
 const OrderListScreen = ({ history, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
@@ -112,6 +112,13 @@ const OrderListScreen = ({ history, location }) => {
 
   return (
     <>
+      <Meta
+        title={`Orders List - Allschooluniform`}
+        description={'Orders'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details,orders'
+        }
+      />
       <h1>ORDERS</h1>
       {loading ? (
         <Loader />

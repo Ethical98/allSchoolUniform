@@ -13,6 +13,7 @@ import {
   listClasses,
   updateClass,
 } from '../actions/classActions';
+import Meta from '../components/Meta';
 
 const ClassListScreen = ({ history, location }) => {
   const dispatch = useDispatch();
@@ -114,6 +115,13 @@ const ClassListScreen = ({ history, location }) => {
 
   return (
     <>
+      <Meta
+        title={'Class List - AllschoolUniform'}
+        description={'Class List ASU'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,classes,school'
+        }
+      />
       <Row className='align-items-center'>
         <Col>
           <h1>CLASSES</h1>

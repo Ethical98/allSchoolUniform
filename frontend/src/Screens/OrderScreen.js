@@ -15,6 +15,7 @@ import {
   clearCartFromDatabase,
   getCartFromDatabase,
 } from '../actions/cartActions';
+import Meta from '../components/Meta';
 
 const OrderScreen = ({ match, history }) => {
   const orderId = match.params.id;
@@ -81,6 +82,13 @@ const OrderScreen = ({ match, history }) => {
     <Message variant='danger'>{error}</Message>
   ) : (
     <>
+      <Meta
+        title={`Order Confirmed} - Allschooluniform`}
+        description={'Order Confirmed'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details'
+        }
+      />
       <h1>ORDER CONFIRMATION</h1>
 
       <Row>

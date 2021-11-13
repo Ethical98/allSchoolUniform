@@ -16,6 +16,7 @@ import { getUserDetails, updateUser } from '../actions/userActions';
 import { USER_UPDATE_RESET } from '../constants/userConstants';
 import { logout } from '../actions/userActions';
 import Loader from '../components/Loader';
+import Meta from '../components/Meta';
 
 const UserEditScreen = ({ history, match }) => {
   const dispatch = useDispatch();
@@ -128,9 +129,12 @@ const UserEditScreen = ({ history, match }) => {
     setSavedAddress(newSavedAddress);
   };
 
-  
   return (
     <>
+      <Meta
+        title={'User Edit - AllSchoolUniform'}
+        description={'User Edit Page'}
+      />
       <Link to='/admin/userlist' className='btn btn-outline-dark my-3'>
         Go Back
       </Link>

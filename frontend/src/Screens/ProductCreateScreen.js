@@ -19,6 +19,7 @@ import { listSchools } from '../actions/schoolActions';
 import MaterialTable from 'material-table';
 import { logout } from '../actions/userActions';
 import { createProduct } from '../actions/productActions';
+import Meta from '../components/Meta';
 
 const ProductCreateScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -233,6 +234,13 @@ const ProductCreateScreen = ({ history }) => {
 
   return (
     <>
+      <Meta
+        title={`Add Product - Allschooluniform`}
+        description={'Add New Product Page'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details'
+        }
+      />
       <Link to='/admin/productList' className='btn btn-outline-dark my-3'>
         Go Back
       </Link>
