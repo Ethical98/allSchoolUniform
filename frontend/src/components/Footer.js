@@ -4,7 +4,7 @@ import './css/Footer.css';
 
 const Footer = () => {
   const liStyle = {
-    background: "url('uploads/tie.png') no-repeat",
+    background: "url('/uploads/tie.png') no-repeat",
     backgroundPosition: '0px 4px',
     paddingLeft: '10px',
   };
@@ -68,17 +68,17 @@ const Footer = () => {
             <Image
               className='float-end payment-logo'
               rounded
-              src='uploads/cod.png'
+              src='/uploads/cod.png'
             />
             <Image
               className='float-end payment-logo'
               rounded
-              src='uploads/netbanking.png'
+              src='/uploads/netbanking.png'
             />
             <Image className='float-end payment-logo' src='uploads/visa.png' />
             <Image
               className='float-end payment-logo'
-              src='uploads/mastercard.png'
+              src='/uploads/mastercard.png'
             />
           </Col>
         </Row>
