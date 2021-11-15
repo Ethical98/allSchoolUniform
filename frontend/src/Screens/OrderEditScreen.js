@@ -607,7 +607,7 @@ const OrderEditScreen = ({ history, match, location }) => {
   return (
     <>
       <Meta
-        title={`Order Edit #${order.orderId} - Allschooluniform`}
+        title={`Order Edit #${order ? order.orderId : ''} - Allschooluniform`}
         description={'Order Edit'}
         keyword={
           'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details'
