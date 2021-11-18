@@ -61,6 +61,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
   const [index, setIndex] = useState(0);
   const [productPrice, setProductPrice] = useState(0);
   const [countInStock, setCountInStock] = useState(0);
+  const [productDisc, setProductDisc] = useState(0);
 
   const [show, setShow] = useState(false);
 
@@ -83,6 +84,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
     if (product && product.size) {
       setProductPrice(product.size[index].price);
       setCountInStock(product.size[index].countInStock);
+      setProductDisc(product.size[index].discount);
     }
   }, [product, index]);
 
@@ -151,7 +153,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
       ) : (
         <>
           <Meta
-            title={`${product.name} - AllschoolUniform`}
+            title={`${product.name ? product.name : ''} - AllschoolUniform`}
             description={`${product.description}`}
             keyword={`${product.title}`}
           />
@@ -177,7 +179,31 @@ const ProductDescriptionScreen = ({ history, match }) => {
                       text={`${product.numReviews} reviews`}
                     />
                   </ListGroup.Item>
-                  <ListGroup.Item>Price: ₹{productPrice}</ListGroup.Item>
+                  <ListGroup.Item>
+                    <div>
+                      MRP: ₹
+                      <span
+                        style={{
+                          textDecorationLine: 'line-through',
+                          textDecorationStyle: 'solid',
+                          color: 'red',
+                        }}
+                      >
+                        {productPrice}
+                      </span>
+                      <span className='mx-1'>
+                        {productPrice - productPrice * (productDisc / 100)}
+                      </span>
+                    </div>
+                    <div>
+                      Price: ₹
+                      {productPrice - productPrice * (productDisc / 100)}
+                    </div>
+                    <div>
+                      You Save: ₹{productPrice * (productDisc / 100)} (
+                      {productDisc}%)
+                    </div>
+                  </ListGroup.Item>
                   <ListGroup.Item>
                     Description: {product.description}
                   </ListGroup.Item>
@@ -197,7 +223,9 @@ const ProductDescriptionScreen = ({ history, match }) => {
                     <Row>
                       <Col>Price:</Col>
                       <Col>
-                        <strong>₹{productPrice}</strong>
+                        <strong>
+                          ₹ {productPrice - productPrice * (productDisc / 100)}
+                        </strong>
                       </Col>
                     </Row>
                   </ListGroup.Item>

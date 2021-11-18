@@ -16,7 +16,6 @@ const addToCart = asyncHandler(async (req, res) => {
       const existItem = cart.cartItems.find((x) => x._id == addItem._id);
 
       if (existItem) {
-       
         cart.cartItems = cart.cartItems.map((x) =>
           x._id == existItem._id ? addItem : x
         );
@@ -65,7 +64,6 @@ const cartItemRemove = asyncHandler(async (req, res) => {
       // res.json({ cartItems: [] });
       res.json({ Message: 'Cart Cleared' });
     } else {
-      res.json();
       // res.json(cart.cartItems);
       res.json({ Message: 'Item Deleted' });
     }
@@ -89,6 +87,8 @@ const getCart = asyncHandler(async (req, res) => {
 // @access Private
 const mergeCart = asyncHandler(async (req, res) => {
   const { cartItems } = req.body;
+  console.log('Items from body');
+  console.log(cartItems);
 
   const cart = await Cart.findOne({ user: req.user._id });
   if (cart) {
@@ -101,11 +101,17 @@ const mergeCart = asyncHandler(async (req, res) => {
               : x.qty)
       )
     );
-    await cart.save();
+
     const products = cartItems.filter(
       (itemToAdd) =>
-        !cart.cartItems.some((addedItem) => itemToAdd.size == addedItem.size)
+        !cart.cartItems.some((addedItem) =>
+          itemToAdd.product == addedItem.product
+            ? itemToAdd.size == addedItem.size
+            : itemToAdd.product == addedItem.product
+        )
     );
+    console.log('filtered Items');
+    console.log(products);
     cart.cartItems = [...cart.cartItems, ...products];
     const finalCart = await cart.save();
     res.json(finalCart.cartItems);

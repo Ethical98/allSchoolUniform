@@ -24,6 +24,7 @@ const Product = ({ product }) => {
   const [countInStock, setCountInStock] = useState(
     product.size[0].countInStock
   );
+  const [productDisc, setProductDisc] = useState(product.size[0].discount);
 
   const typeImages = useSelector((state) => state.typeImages);
   const { loading, images } = typeImages;
@@ -46,8 +47,10 @@ const Product = ({ product }) => {
   };
 
   useEffect(() => {
+  
     setProductPrice(product.size[index].price);
     setCountInStock(product.size[index].countInStock);
+    setProductDisc(product.size[index].discount);
     // eslint-disable-next-line
   }, [index]);
 
@@ -166,7 +169,19 @@ const Product = ({ product }) => {
           </Link>
 
           <Card.Text className='text-center' as='h6'>
-            ₹{productPrice}
+            ₹{' '}
+            <span
+              style={{
+                textDecorationLine: 'line-through',
+                textDecorationStyle: 'solid',
+                color: 'red',
+              }}
+            >
+              {productPrice}
+            </span>
+            <span className='mx-1'>
+              {productPrice - productPrice * (productDisc / 100)}
+            </span>
           </Card.Text>
 
           <Card className='sizeCard' bg='white' style={{ padding: '2%' }}>
