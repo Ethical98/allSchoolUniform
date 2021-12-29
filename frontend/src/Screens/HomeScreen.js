@@ -14,6 +14,8 @@ import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 import { listCarouselImages } from '../actions/homeActions';
 import CarouselHomeScreen from '../components/CarouselHomeScreen';
 import { listSchoolNames } from '../actions/schoolActions';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const HomeScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -50,6 +52,7 @@ const HomeScreen = ({ history }) => {
 
   return (
     <div>
+      <Header />
       <Meta
         description={'Buy School Uniforms Online'}
         keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online'}
@@ -175,6 +178,7 @@ const HomeScreen = ({ history }) => {
         </div>
       </Container>
       <CarouselHomeScreen items={carouselImages} />
+      <Footer />
     </div>
   );
 };

@@ -104,7 +104,7 @@ const Header = () => {
   );
 
   return (
-    <header className='header d-flex flex-column'>
+    <header className='header'>
       <OffCanvas
         showOffCanvas={showOffCanvas}
         handleOffCanvasClose={handleOffCanvasClose}

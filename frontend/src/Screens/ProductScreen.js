@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import Accordion from '../components/Accordion';
 import { Route } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
+import BreadCrumb from '../components/BreadCrumb';
 
 const ProductScreen = ({ history, location, match }) => {
   const school = match.params.selectedschool;
@@ -55,18 +56,19 @@ const ProductScreen = ({ history, location, match }) => {
   }, [dispatch, userInfo, history]);
 
   return (
-    <>
-      {keyword && (
-        <Link to='/' className='btn btn-light'>
+    <PageLayout>
+      {/* {keyword && (
+        <Link to='/' className='mb-3 btn btn-light'>
           Go Back
         </Link>
-      )}
+      )} */}
       {loading ? (
         <Loader />
       ) : error ? (
         <Message variant='danger'>{error}</Message>
       ) : (
-        <PageLayout>
+        <>
+          <BreadCrumb />
           <Meta title={'Products - AllschoolUniform'} />
           <Row>
             <Col sm={6} md={3} className='d-none d-sm-block'>
@@ -103,9 +105,9 @@ const ProductScreen = ({ history, location, match }) => {
             school={school ? school : ''}
             products={true}
           />
-        </PageLayout>
+        </>
       )}
-    </>
+    </PageLayout>
   );
 };
 

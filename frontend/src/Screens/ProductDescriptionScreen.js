@@ -31,6 +31,8 @@ import Box from '@material-ui/core/Box';
 import Meta from '../components/Meta';
 import { PRODUCT_CREATE_REVIEW_RESET } from '../constants/productConstants';
 import PageLayout from '../components/PageLayout';
+import { useParams } from 'react-router-dom';
+import BreadCrumb from '../components/BreadCrumb';
 
 const useStyles = makeStyles({
   root: {
@@ -40,7 +42,8 @@ const useStyles = makeStyles({
   },
 });
 
-const ProductDescriptionScreen = ({ history, match }) => {
+const ProductDescriptionScreen = ({ history }) => {
+  const { id } = useParams();
   const labels = {
     0.5: 'Useless',
     1: 'Useless+',
@@ -111,8 +114,8 @@ const ProductDescriptionScreen = ({ history, match }) => {
       setComment('');
       dispatch({ type: PRODUCT_CREATE_REVIEW_RESET });
     }
-    dispatch(listProductDetails(match.params.id));
-  }, [dispatch, match, successProductReview]);
+    dispatch(listProductDetails(id));
+  }, [dispatch, id, successProductReview]);
 
   const addToCartHandler = () => {
     dispatch(addToCart(product._id, index, qty));
@@ -147,12 +150,14 @@ const ProductDescriptionScreen = ({ history, match }) => {
       >
         Go Back
       </Button>
+
       {loading ? (
         <Loader />
       ) : error ? (
         <Message variant='danger'>{error}</Message>
       ) : (
         <>
+          <BreadCrumb />
           <Meta
             title={`${product.name ? product.name : ''} - AllschoolUniform`}
             description={`${product.description}`}

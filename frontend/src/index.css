@@ -1,5 +1,4 @@
 main {
-  margin-top: 15vh;
   min-height: 100vh;
   margin-bottom: 10vh;
 }
@@ -39,6 +38,7 @@ h2 {
 }
 
 body {
+  padding-top: 80px;
   font-family: 'Lato', sans-serif;
   font-family: 'Noto Sans JP', sans-serif;
   font-family: Roboto, Helvetica, Arial, sans-serif;

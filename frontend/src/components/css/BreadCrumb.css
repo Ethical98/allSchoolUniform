@@ -1,5 +1,11 @@
 .navigationCrumb {
-  border: 1px solid black;
+  border: 2px solid black;
+  border-radius: 8px;
+  padding: 5px 0 0 3px;
+  height: 40px;
+}
+.navigationCrumb:hover {
+  border: 2px solid black;
 }
 
 .navigationCrumb a {

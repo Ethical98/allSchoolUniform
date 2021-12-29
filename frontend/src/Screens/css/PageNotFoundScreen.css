@@ -1,0 +1,20 @@
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+}
+.not-found-heading {
+  margin: -10px 0 -30px;
+  font-size: calc(17vw + 40px);
+  opacity: 0.8;
+  letter-spacing: -17px;
+}
+.not-found-content {
+  opacity: 0.8;
+  font-size: 20px;
+  margin: 8px 0 38px 0;
+  font-weight: bold;
+}

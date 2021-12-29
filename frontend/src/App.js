@@ -40,6 +40,7 @@ import HomepageEditScreen from './Screens/HomepageEditScreen';
 import SearchBox from './components/SearchBox';
 import NewCustomerByAdminScreen from './Screens/NewCustomerByAdminScreen';
 import PageNotFoundScreen from './Screens/PageNotFoundScreen';
+import AdminDashBoardScreen from './Screens/AdminDashBoardScreen';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -54,8 +55,6 @@ const App = () => {
 
   return (
     <Router>
-      <Header />
-
       {/* <Route path='/products'>
         <div
           className='  d-flex d-sm-none align-items-center search-sm'
@@ -74,109 +73,83 @@ const App = () => {
        
       </div> */}
 
-      <main>
-        <Switch>
-          {/* <> */}
-          {/* <Route path='/admin' component={AdminHeader} /> */}
-          <Route path='/' component={HomeScreen} exact />
+      <Switch>
+        {/* <> */}
+        {/* <Route path='/admin' component={AdminHeader} /> */}
+        <Route path='/' component={HomeScreen} exact />
 
-          {/* <Container> */}
-          <Route path='/orderdetails/:id' component={OrderDetailsScreen} />
-          <Route path='/forgotpassword' component={ForgotPasswordScreen} />
-          <Route path='/resetpassword' component={ResetPasswordScreen} />
-          <Route path='/order/:id' component={OrderScreen} />
-          <Route path='/shipping' component={ShippingScreen} />
-          <Route path='/payment' component={PaymentScreen} />
-          <Route path='/placeorder' component={PlaceOrderScreen} />
-          <Route path='/otp' component={LoginScreenOTP} />
-          <Route path='/login' component={LoginScreen} />
-          <Route path='/register' component={RegisterScreen} />
-          <Route path='/profile' component={ProfileScreen} exact />
-          {/* <Route path='/products' component={BreadCrumb} exact /> */}
-          <Route
-            path='/newcustomerbyadmin'
-            component={NewCustomerByAdminScreen}
-            exact
-          />
-
-          <Route
-            path='/products/schools/:selectedschool'
-            exact
-            render={(props) => (
-              <>
-                <BreadCrumb {...props} />
-                <ProductScreen {...props} />
-              </>
-            )}
-          ></Route>
-
-          <Route path='/products/:id' exact>
-            <BreadCrumb />
-            <ProductDescriptionScreen />
-          </Route>
-          <Route path='/track/:id' component={OrderTrackingScreen} />
-          <Route
-            path='/products'
-            render={(props) => (
-              <>
-                <BreadCrumb {...props} />
-                <ProductScreen {...props} />
-              </>
-            )}
-            exact
-          />
-          {/* <Route
+        {/* <Container> */}
+        <Route path='/orderdetails/:id' component={OrderDetailsScreen} />
+        <Route path='/forgotpassword' component={ForgotPasswordScreen} />
+        <Route path='/resetpassword' component={ResetPasswordScreen} />
+        <Route path='/order/:id' component={OrderScreen} />
+        <Route path='/shipping' component={ShippingScreen} />
+        <Route path='/payment' component={PaymentScreen} />
+        <Route path='/placeorder' component={PlaceOrderScreen} />
+        <Route path='/otp' component={LoginScreenOTP} />
+        <Route path='/login' component={LoginScreen} />
+        <Route path='/register' component={RegisterScreen} />
+        <Route path='/profile' component={ProfileScreen} exact />
+        {/* <Route path='/products' component={BreadCrumb} exact /> */}
+        <Route
+          path='/newcustomerbyadmin'
+          component={NewCustomerByAdminScreen}
+          exact
+        />
+        <Route
+          path='/products/schools/:selectedschool'
+          exact
+          component={ProductScreen}
+        />
+        <Route
+          path='/products/:id'
+          component={ProductDescriptionScreen}
+          exact
+        />
+        <Route path='/track/:id' component={OrderTrackingScreen} />
+        <Route path='/products' component={ProductScreen} exact />
+        {/* <Route
               path='/products/schools/:selectedschool'
               component={ProductScreen}
               exact
             /> */}
-          {/* <Route
+        {/* <Route
               path='/products/:id'
               component={ProductDescriptionScreen}
               exact
             /> */}
-          <Route path='/cart/:id?' component={CartScreen} />
-          <Route path='/admin/userlist' component={UserListScreen} />
-          <Route path='/admin/user/:id/edit' component={UserEditScreen} />
-          <Route
-            path='/admin/productlist'
-            component={ProductListScreen}
-            exact
-          />
-          <Route
-            path='/admin/productlist/:pageNumber'
-            component={ProductListScreen}
-            exact
-          />
-          <Route path='/admin/product/:id/edit' component={ProductEditScreen} />
-          <Route path='/admin/product/create' component={ProductCreateScreen} />
-          <Route path='/admin/orderlist' component={OrderListScreen} />
-          <Route
-            path='/admin/order/:id/edit'
-            component={OrderEditScreen}
-            exact
-          />
-          <Route
-            path='/admin/order/:id/edit/page/:pageNumber'
-            component={OrderEditScreen}
-            exact
-          />
-          <Route path='/admin/schoollist' component={SchoolListScreen} />
-          <Route path='/admin/school/create' component={SchoolCreateScreen} />
-          <Route path='/admin/school/:id/edit' component={SchoolEditScreen} />
-          <Route path='/admin/typelist' component={TypeListScreen} />
-          <Route path='/admin/type/:id/edit' component={TypeEditScreen} />
-          <Route path='/admin/type/create' component={TypeCreateScreen} />
-          <Route path='/admin/classlist' component={ClassListScreen} />
-          <Route path='/admin/homepage' component={HomepageEditScreen} />
-          <Route path='*' component={PageNotFoundScreen} />
-          {/* {<Route pah='bill' component={InvoiceScreen} />} */}
-          {/* </Container> */}
-          {/* </> */}
-        </Switch>
-      </main>
-
-      <Footer />
+        <Route path='/cart/:id?' component={CartScreen} />
+        <Route path='/admin/dashboard' component={AdminDashBoardScreen} />
+        <Route path='/admin/userlist' component={UserListScreen} />
+        <Route path='/admin/user/:id/edit' component={UserEditScreen} />
+        <Route path='/admin/productlist' component={ProductListScreen} exact />
+        <Route
+          path='/admin/productlist/:pageNumber'
+          component={ProductListScreen}
+          exact
+        />
+        <Route path='/admin/product/:id/edit' component={ProductEditScreen} />
+        <Route path='/admin/product/create' component={ProductCreateScreen} />
+        <Route path='/admin/orderlist' component={OrderListScreen} />
+        <Route path='/admin/order/:id/edit' component={OrderEditScreen} exact />
+        <Route
+          path='/admin/order/:id/edit/page/:pageNumber'
+          component={OrderEditScreen}
+          exact
+        />
+        <Route path='/admin/schoollist' component={SchoolListScreen} />
+        <Route path='/admin/school/create' component={SchoolCreateScreen} />
+        <Route path='/admin/school/:id/edit' component={SchoolEditScreen} />
+        <Route path='/admin/typelist' component={TypeListScreen} />
+        <Route path='/admin/type/:id/edit' component={TypeEditScreen} />
+        <Route path='/admin/type/create' component={TypeCreateScreen} />
+        <Route path='/admin/classlist' component={ClassListScreen} />
+        <Route path='/admin/homepage' component={HomepageEditScreen} />
+        <Route path='*' component={PageNotFoundScreen} />
+        {/* {<Route pah='bill' component={InvoiceScreen} />} */}
+        {/* </Container> */}
+        {/* </> */}
+      </Switch>
     </Router>
   );
 };

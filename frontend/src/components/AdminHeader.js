@@ -17,7 +17,7 @@ function a11yProps(index) {
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-
+    marginTop: '-10px',
     backgroundImage: `url(${urlimage})`,
   },
   tab: {
@@ -52,8 +52,6 @@ const AdminHeader = () => {
         position='static'
         style={{
           background: `#2c4a77 url(${urlimage})`,
-          height: '10vh',
-          marginTop: '-5vh',
         }}
       >
         <Tabs
