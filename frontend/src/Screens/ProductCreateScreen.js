@@ -20,6 +20,7 @@ import MaterialTable from 'material-table';
 import { logout } from '../actions/userActions';
 import { createProduct } from '../actions/productActions';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const ProductCreateScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -233,7 +234,7 @@ const ProductCreateScreen = ({ history }) => {
   ];
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={`Add Product - Allschooluniform`}
         description={'Add New Product Page'}
@@ -602,7 +603,7 @@ const ProductCreateScreen = ({ history }) => {
           </Form>
         )}
       </Container>
-    </>
+    </AdminPageLayout>
   );
 };
 

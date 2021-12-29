@@ -15,6 +15,7 @@ import { mergeCartWithDatabase } from '../actions/cartActions';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const LoginScreenByPhone = ({ history, location }) => {
   const phoneInfo = useSelector((state) => state.userOtpVerification);
@@ -131,7 +132,7 @@ const LoginScreenByPhone = ({ history, location }) => {
   }, [otpError]);
 
   return (
-    <>
+    <PageLayout>
       <Meta
         title={'Login - Allschooluniform'}
         description={'Buy School Uniforms Online'}
@@ -261,7 +262,7 @@ const LoginScreenByPhone = ({ history, location }) => {
           </Form>
         )}
       </FormContainer>
-    </>
+    </PageLayout>
   );
 };
 

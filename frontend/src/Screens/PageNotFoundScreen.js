@@ -1,7 +1,8 @@
 import React from 'react';
+import PageLayout from '../components/PageLayout';
 
 const PageNotFoundScreen = () => {
-  return <div>Not Found</div>;
+  return <PageLayout>Not Found</PageLayout>;
 };
 
 export default PageNotFoundScreen;

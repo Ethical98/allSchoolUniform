@@ -13,6 +13,7 @@ import CheckoutSteps from '../components/CheckoutSteps';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const ShippingScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -79,7 +80,7 @@ const ShippingScreen = ({ history }) => {
   };
 
   return (
-    <>
+    <PageLayout>
       <Meta
         title={'Shipping - AllSchoolUniform'}
         description={'Enter Shipping Details'}
@@ -234,7 +235,7 @@ const ShippingScreen = ({ history }) => {
           </Form>
         )}
       </FormContainer>
-    </>
+    </PageLayout>
   );
 };
 

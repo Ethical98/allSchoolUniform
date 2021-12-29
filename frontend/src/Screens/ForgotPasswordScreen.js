@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const ForgotPasswordScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -38,7 +39,7 @@ const ForgotPasswordScreen = ({ history }) => {
   }, [linkSentSuccess]);
 
   return (
-    <>
+    <PageLayout>
       <Meta
         title={'Forgot Password - AllSchoolUniform'}
         description={'Reset Password'}
@@ -88,7 +89,7 @@ const ForgotPasswordScreen = ({ history }) => {
           </Card.Footer>
         </Card>
       </FormContainer>
-    </>
+    </PageLayout>
   );
 };
 

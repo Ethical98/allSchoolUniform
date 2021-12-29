@@ -17,6 +17,7 @@ import { USER_UPDATE_RESET } from '../constants/userConstants';
 import { logout } from '../actions/userActions';
 import Loader from '../components/Loader';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const UserEditScreen = ({ history, match }) => {
   const dispatch = useDispatch();
@@ -130,7 +131,7 @@ const UserEditScreen = ({ history, match }) => {
   };
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'User Edit - AllSchoolUniform'}
         description={'User Edit Page'}
@@ -331,7 +332,7 @@ const UserEditScreen = ({ history, match }) => {
           </Form>
         )}
       </Container>
-    </>
+    </AdminPageLayout>
   );
 };
 

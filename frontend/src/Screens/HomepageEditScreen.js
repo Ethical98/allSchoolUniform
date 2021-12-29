@@ -30,6 +30,7 @@ import {
 } from '../constants/homeConstants';
 import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const HomepageEditScreen = ({ location, history }) => {
   const dispatch = useDispatch();
@@ -596,7 +597,7 @@ const HomepageEditScreen = ({ location, history }) => {
     </Tab.Content>
   );
   return (
-    <div>
+    <AdminPageLayout>
       <Meta
         title={'Homepage Edit -AllschoolUniform'}
         description={'Edit Asu Homepage'}
@@ -630,7 +631,7 @@ const HomepageEditScreen = ({ location, history }) => {
           </Nav.Link>
         </Nav.Item>
       </AdminVerticalNav>
-    </div>
+    </AdminPageLayout>
   );
 };
 

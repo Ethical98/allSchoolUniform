@@ -7,6 +7,7 @@ import { deleteUser, listUsers, logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
 import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const UserListScreen = ({ history, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
@@ -87,7 +88,7 @@ const UserListScreen = ({ history, location }) => {
   }, [dispatch, history, successDelete, userInfo, pageNumber]);
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'User List- AllSchoolUniform'}
         description={'User List Page'}
@@ -134,7 +135,7 @@ const UserListScreen = ({ history, location }) => {
           <Paginate pages={pages} page={page} isAdmin={true} users={true} />
         </>
       )}
-    </>
+    </AdminPageLayout>
   );
 };
 

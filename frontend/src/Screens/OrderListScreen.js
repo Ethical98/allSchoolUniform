@@ -9,6 +9,7 @@ import { listOrders } from '../actions/orderActions';
 import MaterialTable from 'material-table';
 import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const OrderListScreen = ({ history, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
@@ -111,7 +112,7 @@ const OrderListScreen = ({ history, location }) => {
   }, [dispatch, history, userInfo, pageNumber]);
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={`Orders List - Allschooluniform`}
         description={'Orders'}
@@ -161,7 +162,7 @@ const OrderListScreen = ({ history, location }) => {
           <Paginate pages={pages} page={page} isAdmin={true} orders={true} />
         </>
       )}
-    </>
+    </AdminPageLayout>
   );
 };
 

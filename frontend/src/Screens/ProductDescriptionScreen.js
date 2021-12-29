@@ -30,6 +30,7 @@ import MaterialRating from '@material-ui/lab/Rating';
 import Box from '@material-ui/core/Box';
 import Meta from '../components/Meta';
 import { PRODUCT_CREATE_REVIEW_RESET } from '../constants/productConstants';
+import PageLayout from '../components/PageLayout';
 
 const useStyles = makeStyles({
   root: {
@@ -138,7 +139,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
   );
 
   return (
-    <>
+    <PageLayout>
       <Button
         variant='outline-dark'
         className='my-4'
@@ -393,7 +394,7 @@ const ProductDescriptionScreen = ({ history, match }) => {
           </Row>
         </>
       )}
-    </>
+    </PageLayout>
   );
 };
 

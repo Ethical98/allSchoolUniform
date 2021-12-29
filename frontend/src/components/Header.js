@@ -22,8 +22,10 @@ import urlimage from '../seamlessschool-bg.png';
 import SearchBox from './SearchBox';
 import OffCanvas from './OffCanvas';
 import DialogBox from './DialogBox';
+import { useLocation } from 'react-router-dom';
 
-const Header = ({ history, location }) => {
+const Header = () => {
+  const location = useLocation();
   const [show, setShow] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [message, setMessage] = useState('');

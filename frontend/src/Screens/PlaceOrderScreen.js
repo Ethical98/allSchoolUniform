@@ -12,6 +12,7 @@ import {
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const PlaceOrderScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -162,7 +163,7 @@ const PlaceOrderScreen = ({ history }) => {
   };
 
   return (
-    <>
+    <PageLayout>
       <Meta
         title={`Place Order - Allschooluniform`}
         description={'Place New Order'}
@@ -284,7 +285,7 @@ const PlaceOrderScreen = ({ history }) => {
           </Card>
         </Col>
       </Row>
-    </>
+    </PageLayout>
   );
 };
 

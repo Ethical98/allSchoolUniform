@@ -17,6 +17,7 @@ import OtpInput from 'react-otp-input';
 import validator from 'validator';
 import './css/RegisterScreen.css';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const RegisterScreen = ({ history, location }) => {
   const dispatch = useDispatch();
@@ -130,7 +131,7 @@ const RegisterScreen = ({ history, location }) => {
   };
 
   return (
-    <>
+    <PageLayout>
     <Meta title={'Sign Up - AllSchoolUniform'} description={'Sign Up New User'} />
     <FormContainer>
       <h1>SIGN UP</h1>
@@ -283,7 +284,7 @@ const RegisterScreen = ({ history, location }) => {
         </Col>
       </Row>
     </FormContainer>
-    </>
+    </PageLayout>
   );
 };
 

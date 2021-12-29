@@ -10,6 +10,7 @@ import FormContainer from '../components/FormContainer';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const ResetPasswordScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -47,7 +48,7 @@ const ResetPasswordScreen = ({ history }) => {
     }
   }, [passwordUpdated, history, userInfo, dispatch]);
   return (
-    <>
+    <PageLayout>
       <Meta
         title={'Reset Password - AllSchoolUniform'}
         description={'Enter New Password to reset'}
@@ -113,7 +114,7 @@ const ResetPasswordScreen = ({ history }) => {
           </Card.Footer>
         </Card>
       </FormContainer>
-    </>
+    </PageLayout>
   );
 };
 

@@ -10,6 +10,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const OrderDetails = ({ match, history }) => {
   const orderId = match.params.id;
@@ -90,7 +91,7 @@ const OrderDetails = ({ match, history }) => {
   ) : error ? (
     <Message variant='danger'>{error}</Message>
   ) : (
-    <>
+    <PageLayout>
       <Meta
         title={`Order Details #${order.orderId} - Allschooluniform`}
         description={'Order Details'}
@@ -264,7 +265,7 @@ const OrderDetails = ({ match, history }) => {
           </a>
         )}
       </Row>
-    </>
+    </PageLayout>
   );
 };
 

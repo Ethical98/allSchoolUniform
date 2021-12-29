@@ -7,6 +7,7 @@ import { savePaymentMethod } from '../actions/cartActions';
 import { logout } from '../actions/userActions';
 import CheckoutSteps from '../components/CheckoutSteps';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const PaymentScreen = ({ history }) => {
   const userLogin = useSelector((state) => state.userLogin);
@@ -59,7 +60,7 @@ const PaymentScreen = ({ history }) => {
   };
 
   return (
-    <>
+    <PageLayout>
       <Meta
         title={`Payment  - Allschooluniform`}
         description={'Order Payment'}
@@ -105,7 +106,7 @@ const PaymentScreen = ({ history }) => {
           </Button>
         </Form>
       </FormContainer>
-    </>
+    </PageLayout>
   );
 };
 

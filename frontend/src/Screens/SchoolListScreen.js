@@ -9,6 +9,7 @@ import MaterialTable from 'material-table';
 import { deleteSchool, listSchools } from '../actions/schoolActions';
 import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const SchoolListScreen = ({ history, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
@@ -91,7 +92,7 @@ const SchoolListScreen = ({ history, location }) => {
   }, [dispatch, history, userInfo, successDelete, pageNumber]);
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'List School - AllSchoolUniform'}
         description={'School List Page'}
@@ -155,7 +156,7 @@ const SchoolListScreen = ({ history, location }) => {
           <Paginate pages={pages} page={page} isAdmin={true} schools={true} />
         </>
       )}
-    </>
+    </AdminPageLayout>
   );
 };
 

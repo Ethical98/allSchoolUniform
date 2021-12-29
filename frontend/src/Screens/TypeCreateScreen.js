@@ -18,6 +18,7 @@ import { TYPE_CREATE_RESET } from '../constants/typeConstants';
 import { createType } from '../actions/typeActions';
 import MaterialTable from 'material-table';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const TypeCreateScreen = ({ match, history }) => {
   const dispatch = useDispatch();
@@ -189,7 +190,7 @@ const TypeCreateScreen = ({ match, history }) => {
     );
   };
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'Add Product Type - AllSchoolUniform'}
         description={'New Product Type Page'}
@@ -348,7 +349,7 @@ const TypeCreateScreen = ({ match, history }) => {
           </Form>
         )}
       </Container>
-    </>
+    </AdminPageLayout>
   );
 };
 

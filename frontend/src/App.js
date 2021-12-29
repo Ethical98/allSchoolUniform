@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { Container} from 'react-bootstrap';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ProductScreen from './Screens/ProductScreen';
@@ -40,6 +39,7 @@ import ClassListScreen from './Screens/ClassListScreen';
 import HomepageEditScreen from './Screens/HomepageEditScreen';
 import SearchBox from './components/SearchBox';
 import NewCustomerByAdminScreen from './Screens/NewCustomerByAdminScreen';
+import PageNotFoundScreen from './Screens/PageNotFoundScreen';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -54,13 +54,9 @@ const App = () => {
 
   return (
     <Router>
-      <Route
-        render={({ history, location }) => (
-          <Header history={history} location={location} />
-        )}
-      />
+      <Header />
 
-      <Route path='/products'>
+      {/* <Route path='/products'>
         <div
           className='  d-flex d-sm-none align-items-center search-sm'
           style={{
@@ -72,16 +68,19 @@ const App = () => {
         >
           <SearchBox />
         </div>
-      </Route>
+      </Route> */}
 
       {/* <div className='d-flex d-sm-none' style={{ marginTop: '70px' }}>
        
       </div> */}
-      <main>
-        <Route path='/admin' component={AdminHeader} />
-        <Route path='/' component={HomeScreen} exact />
 
-        <Container>
+      <main>
+        <Switch>
+          {/* <> */}
+          {/* <Route path='/admin' component={AdminHeader} /> */}
+          <Route path='/' component={HomeScreen} exact />
+
+          {/* <Container> */}
           <Route path='/orderdetails/:id' component={OrderDetailsScreen} />
           <Route path='/forgotpassword' component={ForgotPasswordScreen} />
           <Route path='/resetpassword' component={ResetPasswordScreen} />
@@ -93,33 +92,49 @@ const App = () => {
           <Route path='/login' component={LoginScreen} />
           <Route path='/register' component={RegisterScreen} />
           <Route path='/profile' component={ProfileScreen} exact />
-          <Route path='/products' component={BreadCrumb} exact />
+          {/* <Route path='/products' component={BreadCrumb} exact /> */}
           <Route
             path='/newcustomerbyadmin'
             component={NewCustomerByAdminScreen}
             exact
           />
+
           <Route
             path='/products/schools/:selectedschool'
-            component={BreadCrumb}
             exact
-          />
+            render={(props) => (
+              <>
+                <BreadCrumb {...props} />
+                <ProductScreen {...props} />
+              </>
+            )}
+          ></Route>
 
-          <Route path='/products/:id' component={BreadCrumb} exact />
+          <Route path='/products/:id' exact>
+            <BreadCrumb />
+            <ProductDescriptionScreen />
+          </Route>
           <Route path='/track/:id' component={OrderTrackingScreen} />
-
-          <Route path='/products' component={ProductScreen} exact />
           <Route
-            path='/products/schools/:selectedschool'
-            component={ProductScreen}
+            path='/products'
+            render={(props) => (
+              <>
+                <BreadCrumb {...props} />
+                <ProductScreen {...props} />
+              </>
+            )}
             exact
           />
-
-          <Route
-            path='/products/:id'
-            component={ProductDescriptionScreen}
-            exact
-          />
+          {/* <Route
+              path='/products/schools/:selectedschool'
+              component={ProductScreen}
+              exact
+            /> */}
+          {/* <Route
+              path='/products/:id'
+              component={ProductDescriptionScreen}
+              exact
+            /> */}
           <Route path='/cart/:id?' component={CartScreen} />
           <Route path='/admin/userlist' component={UserListScreen} />
           <Route path='/admin/user/:id/edit' component={UserEditScreen} />
@@ -154,9 +169,11 @@ const App = () => {
           <Route path='/admin/type/create' component={TypeCreateScreen} />
           <Route path='/admin/classlist' component={ClassListScreen} />
           <Route path='/admin/homepage' component={HomepageEditScreen} />
+          <Route path='*' component={PageNotFoundScreen} />
           {/* {<Route pah='bill' component={InvoiceScreen} />} */}
-          {/* <Route component={PageNotFoundScreen} exact /> */}
-        </Container>
+          {/* </Container> */}
+          {/* </> */}
+        </Switch>
       </main>
 
       <Footer />

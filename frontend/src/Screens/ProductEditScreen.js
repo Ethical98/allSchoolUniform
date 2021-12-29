@@ -27,6 +27,7 @@ import {
   PRODUCT_UPDATE_RESET,
 } from '../constants/productConstants';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const ProductEditScreen = ({ match, history }) => {
   const dispatch = useDispatch();
@@ -292,7 +293,7 @@ const ProductEditScreen = ({ match, history }) => {
   ];
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'Product Edit - AllSchoolUniform'}
         description={'Edit Product'}
@@ -659,7 +660,7 @@ const ProductEditScreen = ({ match, history }) => {
           </Form>
         )}
       </Container>
-    </>
+    </AdminPageLayout>
   );
 };
 

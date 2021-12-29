@@ -12,6 +12,7 @@ import Meta from '../components/Meta';
 import { Link } from 'react-router-dom';
 import Accordion from '../components/Accordion';
 import { Route } from 'react-router-dom';
+import PageLayout from '../components/PageLayout';
 
 const ProductScreen = ({ history, location, match }) => {
   const school = match.params.selectedschool;
@@ -65,7 +66,7 @@ const ProductScreen = ({ history, location, match }) => {
       ) : error ? (
         <Message variant='danger'>{error}</Message>
       ) : (
-        <>
+        <PageLayout>
           <Meta title={'Products - AllschoolUniform'} />
           <Row>
             <Col sm={6} md={3} className='d-none d-sm-block'>
@@ -102,7 +103,7 @@ const ProductScreen = ({ history, location, match }) => {
             school={school ? school : ''}
             products={true}
           />
-        </>
+        </PageLayout>
       )}
     </>
   );

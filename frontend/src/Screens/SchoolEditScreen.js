@@ -22,6 +22,7 @@ import {
 } from '../constants/schoolConstants';
 import { listSchoolDetails, updateSchool } from '../actions/schoolActions';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const SchoolEditScreen = ({ match, history }) => {
   const schoolId = match.params.id;
@@ -138,7 +139,7 @@ const SchoolEditScreen = ({ match, history }) => {
     );
   };
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'Edit School - AllSchoolUniform'}
         description={'Edit School Page'}
@@ -303,7 +304,7 @@ const SchoolEditScreen = ({ match, history }) => {
           )}
         </FormContainer>
       </Container>
-    </>
+    </AdminPageLayout>
   );
 };
 

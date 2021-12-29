@@ -5,6 +5,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { LinkContainer } from 'react-router-bootstrap';
 import urlimage from '../seamlessschool-bg.png';
+import { useLocation } from 'react-router-dom';
 
 function a11yProps(index) {
   return {
@@ -25,7 +26,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AdminHeader = ({ location }) => {
+const AdminHeader = () => {
+  const location = useLocation();
   const classes = useStyles();
   const [value, setValue] = useState(0);
   useEffect(() => {

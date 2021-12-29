@@ -21,6 +21,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import { listMyOrders } from '../actions/orderActions';
 import './css/ProfileScreen.css';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const ProfileScreen = ({ history }) => {
   const [phone, setPhone] = useState('');
@@ -97,7 +98,7 @@ const ProfileScreen = ({ history }) => {
   };
 
   return (
-    <>
+    <PageLayout>
       <Meta title={'Profile - AllSchoolUniform'} description={'View Profile'} />
       <Row className='mb-3'>
         <Col md={4}>
@@ -268,7 +269,7 @@ const ProfileScreen = ({ history }) => {
           )}
         </Col>
       </Row>
-    </>
+    </PageLayout>
   );
 };
 

@@ -9,6 +9,7 @@ import validator from 'validator';
 import './css/RegisterScreen.css';
 import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const NewCustomerByAdmin = ({ history }) => {
   const dispatch = useDispatch();
@@ -69,7 +70,7 @@ const NewCustomerByAdmin = ({ history }) => {
   };
 
   return (
-    <>
+    <PageLayout>
     <Meta
         title={'Add New Cutomer - Allschooluniform'}
         description={'New Customer By Admin'}
@@ -128,7 +129,7 @@ const NewCustomerByAdmin = ({ history }) => {
           </Button>
         </Form>
       </FormContainer>
-    </>
+    </PageLayout>
   );
 };
 

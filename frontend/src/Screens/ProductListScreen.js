@@ -12,6 +12,7 @@ import { listSchoolNames } from '../actions/schoolActions';
 import Paginate from '../components/Paginate';
 import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const ProductListScreen = ({ history, match, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
@@ -123,7 +124,7 @@ const ProductListScreen = ({ history, match, location }) => {
   };
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'Product List - AllSchoolUniform'}
         description={'List Product'}
@@ -191,7 +192,7 @@ const ProductListScreen = ({ history, match, location }) => {
           <Paginate pages={pages} page={page} isAdmin={true} products={true} />
         </>
       )}
-    </>
+    </AdminPageLayout>
   );
 };
 

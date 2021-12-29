@@ -16,6 +16,7 @@ import Message from '../components/Message';
 import { addToCart, removeFromCart } from '../actions/cartActions';
 import { logout } from '../actions/userActions';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const CartScreen = ({ match, location, history }) => {
   // const [customQty, setCustomQty] = useState(false);
@@ -75,7 +76,7 @@ const CartScreen = ({ match, location, history }) => {
   };
 
   return (
-    <>
+    <PageLayout>
       <Meta
         title={'Cart - AllschoolUniform'}
         description={'Build Your Cart'}
@@ -233,7 +234,7 @@ const CartScreen = ({ match, location, history }) => {
           </Card>
         </Col>
       </Row>
-    </>
+    </PageLayout>
   );
 };
 

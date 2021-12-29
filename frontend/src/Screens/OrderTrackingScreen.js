@@ -6,6 +6,7 @@ import Loader from '../components/Loader';
 import Message from '../components/Message';
 import './css/OrderTrackingScreen.css';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const OrderTrackingScreen = ({ match }) => {
   const orderId = match.params.id;
@@ -22,7 +23,7 @@ const OrderTrackingScreen = ({ match }) => {
   }, [dispatch, orderId, order]);
 
   return (
-    <>
+    <PageLayout>
       <Meta
         title={`Order Tracking #${order.orderId} - Allschooluniform`}
         description={'Order Tracking Details'}
@@ -166,7 +167,7 @@ const OrderTrackingScreen = ({ match }) => {
           )}
         </Col>
       </Row>
-    </>
+    </PageLayout>
   );
 };
 

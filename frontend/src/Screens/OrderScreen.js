@@ -16,6 +16,7 @@ import {
   getCartFromDatabase,
 } from '../actions/cartActions';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const OrderScreen = ({ match, history }) => {
   const orderId = match.params.id;
@@ -81,7 +82,7 @@ const OrderScreen = ({ match, history }) => {
   ) : error ? (
     <Message variant='danger'>{error}</Message>
   ) : (
-    <>
+    <PageLayout>
       <Meta
         title={`Order Confirmed} - Allschooluniform`}
         description={'Order Confirmed'}
@@ -223,7 +224,7 @@ const OrderScreen = ({ match, history }) => {
           </Card>
         </Col>
       </Row>
-    </>
+    </PageLayout>
   );
 };
 

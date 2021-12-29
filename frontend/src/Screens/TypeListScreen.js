@@ -8,6 +8,7 @@ import { logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
 import { deleteType, listAllTypes } from '../actions/typeActions';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const TypeListScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -101,7 +102,7 @@ const TypeListScreen = ({ history }) => {
   }, [dispatch, history, userInfo, successDelete]);
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'Product Type List - AllSchoolUniform'}
         description={'Product List Page'}
@@ -154,7 +155,7 @@ const TypeListScreen = ({ history }) => {
           />
         </>
       )}
-    </>
+    </AdminPageLayout>
   );
 };
 

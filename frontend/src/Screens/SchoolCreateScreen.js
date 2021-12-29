@@ -21,6 +21,7 @@ import {
 } from '../constants/schoolConstants';
 import { createSchool } from '../actions/schoolActions';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const SchoolCreateScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -123,7 +124,7 @@ const SchoolCreateScreen = ({ history }) => {
     );
   };
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'Add School - AllSchoolUniform'}
         description={'Add New School Page'}
@@ -286,7 +287,7 @@ const SchoolCreateScreen = ({ history }) => {
           )}
         </FormContainer>
       </Container>
-    </>
+    </AdminPageLayout>
   );
 };
 

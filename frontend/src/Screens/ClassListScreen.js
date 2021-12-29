@@ -14,6 +14,7 @@ import {
   updateClass,
 } from '../actions/classActions';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const ClassListScreen = ({ history, location }) => {
   const dispatch = useDispatch();
@@ -114,7 +115,7 @@ const ClassListScreen = ({ history, location }) => {
   }, [masterClasses]);
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'Class List - AllschoolUniform'}
         description={'Class List ASU'}
@@ -178,7 +179,7 @@ const ClassListScreen = ({ history, location }) => {
           />
         </>
       )}
-    </>
+    </AdminPageLayout>
   );
 };
 

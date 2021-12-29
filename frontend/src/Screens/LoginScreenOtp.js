@@ -14,6 +14,7 @@ import {
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Meta from '../components/Meta';
+import PageLayout from '../components/PageLayout';
 
 const LoginScreenOtp = ({ history }) => {
   const [OTP, setOTP] = useState('');
@@ -59,93 +60,99 @@ const LoginScreenOtp = ({ history }) => {
   };
 
   return (
-    <FormContainer>
-      {userLoading || loading ? (
-        <Loader />
-      ) : userError ? (
-        <Message variant='danger'>{userError}</Message>
-      ) : error ? (
-        <Message variant='danger'>{error.code}</Message>
-      ) : (
-        sent && <Message variant='success'>OTP SENT</Message>
-      )}
-      {!phone ? (
-        <Loader />
-      ) : (
-        <>
-          <Meta
-            title={'Login By OTP - Allschooluniform'}
-            description={'Login By OTP'}
-            keyword={
-              'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,OTP'
-            }
-          />
-          <Form onSubmit={submitHandler}>
-            <Form.Group className='mb-3'>
-              <FloatingLabel controlId='phone' label='Phone' className='mb-3'>
-                <Form.Control
-                  value={phone}
-                  placeholder='Phone'
-                  readOnly
-                ></Form.Control>
-                <Form.Text
-                  style={{ textDecoration: 'none' }}
-                  as={Link}
-                  to='/login'
-                  onClick={() => dispatch(cancelOtpRequest(phone))}
-                >
-                  Change?
+    <PageLayout>
+      <FormContainer>
+        {userLoading || loading ? (
+          <Loader />
+        ) : userError ? (
+          <Message variant='danger'>{userError}</Message>
+        ) : error ? (
+          <Message variant='danger'>{error.code}</Message>
+        ) : (
+          sent && <Message variant='success'>OTP SENT</Message>
+        )}
+        {!phone ? (
+          <Loader />
+        ) : (
+          <>
+            <Meta
+              title={'Login By OTP - Allschooluniform'}
+              description={'Login By OTP'}
+              keyword={
+                'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,OTP'
+              }
+            />
+            <Form onSubmit={submitHandler}>
+              <Form.Group className='mb-3'>
+                <FloatingLabel controlId='phone' label='Phone' className='mb-3'>
+                  <Form.Control
+                    value={phone}
+                    placeholder='Phone'
+                    readOnly
+                  ></Form.Control>
+                  <Form.Text
+                    style={{ textDecoration: 'none' }}
+                    as={Link}
+                    to='/login'
+                    onClick={() => dispatch(cancelOtpRequest(phone))}
+                  >
+                    Change?
+                  </Form.Text>
+                </FloatingLabel>
+
+                <Form.Text>
+                  We’ve sent a One Time Password (OTP) to the mobile number
+                  above. Please enter it to complete verification
                 </Form.Text>
-              </FloatingLabel>
+              </Form.Group>
 
-              <Form.Text>
-                We’ve sent a One Time Password (OTP) to the mobile number above.
-                Please enter it to complete verification
+              <Form.Group className='mb-3'>
+                <FloatingLabel
+                  label='Enter OTP'
+                  controlId='otp'
+                  className='mb-3'
+                >
+                  <Form.Control
+                    value={OTP}
+                    placeholder='Enter OTP'
+                    onChange={(e) => setOTP(e.target.value)}
+                  ></Form.Control>
+                </FloatingLabel>
+              </Form.Group>
+              <Button variant='info' type='submit' className='col-12 mb-3'>
+                Sign In
+              </Button>
+            </Form>
+            <div id='resend-otp'></div>
+            <Row>
+              <Form.Text
+                as={Link}
+                to='/otp'
+                style={{ textDecoration: 'none' }}
+                className='text-center'
+                onClick={resendOtpHandler}
+              >
+                Resend OTP
               </Form.Text>
-            </Form.Group>
-
-            <Form.Group className='mb-3'>
-              <FloatingLabel label='Enter OTP' controlId='otp' className='mb-3'>
-                <Form.Control
-                  value={OTP}
-                  placeholder='Enter OTP'
-                  onChange={(e) => setOTP(e.target.value)}
-                ></Form.Control>
-              </FloatingLabel>
-            </Form.Group>
-            <Button variant='info' type='submit' className='col-12 mb-3'>
-              Sign In
-            </Button>
-          </Form>
-          <div id='resend-otp'></div>
-          <Row>
-            <Form.Text
-              as={Link}
-              to='/otp'
-              style={{ textDecoration: 'none' }}
-              className='text-center'
-              onClick={resendOtpHandler}
-            >
-              Resend OTP
-            </Form.Text>
-          </Row>
-          <Row>
-            <span as={Link} className='text-center'>
-              or
-            </span>
-          </Row>
-          <Link to='/login'>
-            <Button
-              variant='info'
-              className='col-12 mb-3'
-              onClick={() => dispatch(cancelOtpRequest(phone))}
-            >
-              Sign-In with your password
-            </Button>
-          </Link>
-        </>
-      )}
-    </FormContainer>
+            </Row>
+            <Row>
+              <span as={Link} className='text-center'>
+                or
+              </span>
+            </Row>
+            <Link to='/login'>
+              <Button
+                variant='info'
+                className='col-12 mb-3'
+                onClick={() => dispatch(cancelOtpRequest(phone))}
+              >
+                Sign-In with your password
+              </Button>
+            </Link>
+          </>
+        )}
+      </FormContainer>
+    </PageLayout>
   );
 };
 

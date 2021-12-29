@@ -43,6 +43,7 @@ import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const OrderEditScreen = ({ history, match, location }) => {
   const dispatch = useDispatch();
@@ -605,7 +606,7 @@ const OrderEditScreen = ({ history, match, location }) => {
   );
 
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={`Order Edit #${order ? order.orderId : ''} - Allschooluniform`}
         description={'Order Edit'}
@@ -1118,7 +1119,7 @@ const OrderEditScreen = ({ history, match, location }) => {
           </Form>
         )}
       </Container>
-    </>
+    </AdminPageLayout>
   );
 };
 

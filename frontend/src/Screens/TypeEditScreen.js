@@ -21,6 +21,7 @@ import {
 import { listTypeDetails, updateType } from '../actions/typeActions';
 import MaterialTable from 'material-table';
 import Meta from '../components/Meta';
+import AdminPageLayout from '../components/AdminPageLayout';
 
 const TypeEditScreen = ({ match, history }) => {
   const typeId = match.params.id;
@@ -214,7 +215,7 @@ const TypeEditScreen = ({ match, history }) => {
     );
   };
   return (
-    <>
+    <AdminPageLayout>
       <Meta
         title={'Edit Product Type - AllSchoolUniform'}
         description={'Edit Product Type Page'}
@@ -376,7 +377,7 @@ const TypeEditScreen = ({ match, history }) => {
           </Form>
         )}
       </Container>
-    </>
+    </AdminPageLayout>
   );
 };
 
