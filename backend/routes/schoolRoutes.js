@@ -15,7 +15,7 @@ router
   .route('/')
   .get(protect, isAdmin, getSchools)
   .post(protect, isAdmin, createSchool);
-router.route('/name').get(getSchoolNames);
+router.route('/name/:keyword').get(getSchoolNames);
 router
   .route('/:id')
   .get(protect, isAdmin, getSchoolDetails)

@@ -37,13 +37,27 @@ const getSchoolDetails = asyncHandler(async (req, res) => {
 // @route GET /api/schools/:id
 // @access Public
 const getSchoolNames = asyncHandler(async (req, res) => {
-  const schoolNames = await School.find().select('name isActive');
+  const { keyword } = req.params;
+  console.log(keyword);
+
+  const keyword1 = keyword
+    ? {
+        name: {
+          $regex: keyword,
+          $options: 'i',
+        },
+      }
+    : {};
+  console.log(keyword1);
+
+  const schoolNames = await School.find(keyword1).select('name isActive');
 
   if (schoolNames) {
     res.json(schoolNames);
   } else {
-    res.status(404);
-    throw new Error('School List empty');
+    res.json([]);
+    // res.status(404);
+    // throw new Error('School List empty');
   }
 });
 

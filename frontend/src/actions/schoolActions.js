@@ -55,11 +55,11 @@ export const listSchools =
     }
   };
 
-export const listSchoolNames = () => async (dispatch) => {
+export const listSchoolNames = (keyword) => async (dispatch) => {
   try {
     dispatch({ type: SCHOOL_NAME_LIST_REQUEST });
 
-    const { data } = await axios.get('/api/schools/name');
+    const { data } = await axios.get(`/api/schools/name/${keyword}`);
 
     dispatch({
       type: SCHOOL_NAME_LIST_SUCCESS,
@@ -191,7 +191,7 @@ export const createSchool = (school) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
- 
+
     const { data } = await axios.post(`/api/schools/`, school, config);
     dispatch({
       type: SCHOOL_CREATE_SUCCESS,

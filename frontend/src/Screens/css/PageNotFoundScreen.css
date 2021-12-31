@@ -5,6 +5,7 @@
   align-items: center;
   overflow: hidden;
   font-family: 'Montserrat', sans-serif;
+  height: 80vh;
 }
 .not-found-heading {
   margin: -10px 0 -30px;

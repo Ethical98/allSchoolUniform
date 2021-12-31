@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Container, Row, Col, Figure } from 'react-bootstrap';
+import {
+  Image,
+  Container,
+  Row,
+  Col,
+  Figure,
+  Form,
+  InputGroup,
+} from 'react-bootstrap';
 import { Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Meta from '../components/Meta';
@@ -16,14 +24,21 @@ import CarouselHomeScreen from '../components/CarouselHomeScreen';
 import { listSchoolNames } from '../actions/schoolActions';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import {
+  AsyncTypeahead,
+  Typeahead,
+  Menu,
+  MenuItem,
+} from 'react-bootstrap-typeahead';
 
 const HomeScreen = ({ history }) => {
   const dispatch = useDispatch();
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [options, setOptions] = useState([]);
+
   const carouselImageList = useSelector((state) => state.carouselImageList);
   const { carouselImages } = carouselImageList;
-
-  const [schools, setSchools] = useState([]);
 
   const schoolNameList = useSelector((state) => state.schoolNameList);
   const { schoolNames } = schoolNameList;
@@ -32,22 +47,51 @@ const HomeScreen = ({ history }) => {
     dispatch(listCarouselImages());
   }, [dispatch]);
 
+  // useEffect(() => {
+  //   if (!(schoolNames && schoolNames.length > 0)) {
+  //     dispatch(listSchoolNames());
+  //   } else {
+  //     setSchools([
+  //       ...schoolNames.map((x, index) => ({
+  //         id: index,
+  //         name: x.name,
+  //         isActive: x.isActive,
+  //       })),
+  //     ]);
+  //   }
+  // }, [dispatch, schoolNames]);
   useEffect(() => {
-    if (!(schoolNames && schoolNames.length > 0)) {
-      dispatch(listSchoolNames());
-    } else {
-      setSchools([
-        ...schoolNames.map((x, index) => ({
-          id: index,
-          name: x.name,
-          isActive: x.isActive,
-        })),
-      ]);
+    if (schoolNames) {
+      setOptions(schoolNames);
+      setIsLoading(false);
     }
-  }, [dispatch, schoolNames]);
+  }, [schoolNames]);
 
-  const handleOnSelect = (item) => {
-    history.push(`/products/schools/${item.name}`);
+  const handleChange = (item) => {
+    history.push(`/products/schools/${item[0].name}`);
+  };
+
+  const handleSearch = (query) => {
+    setIsLoading(true);
+    dispatch(listSchoolNames(query));
+  };
+  const filterBy = () => true;
+
+  const props = {
+    renderInput: ({ inputRef, referenceElementRef, ...inputProps }) => (
+      <InputGroup className='mb-3'>
+        <Form.Control
+          {...inputProps}
+          ref={(node) => {
+            inputRef(node);
+            referenceElementRef(node);
+          }}
+        />
+        <InputGroup.Text id='basic-addon1'>
+          <i className='fas fa-search' />
+        </InputGroup.Text>
+      </InputGroup>
+    ),
   };
 
   return (
@@ -164,8 +208,8 @@ const HomeScreen = ({ history }) => {
             </Figure>
           </Col>
         </Row>
-        <div style={{ zIndex: 4 }}>
-          <Route
+        <div className='mb-5'>
+          {/* <Route
             render={({ history }) => (
               <SearchBoxAutocomplete
                 placeholder={'Search School'}
@@ -174,6 +218,19 @@ const HomeScreen = ({ history }) => {
                 handleOnSelect={handleOnSelect}
               />
             )}
+          /> */}
+
+          <AsyncTypeahead
+            
+            filterBy={filterBy}
+            id='async-example'
+            isLoading={isLoading}
+            labelKey={'name'}
+            minLength={3}
+            onChange={(value) => handleChange(value)}
+            onSearch={handleSearch}
+            options={options}
+            placeholder='Enter School Name..'
           />
         </div>
       </Container>

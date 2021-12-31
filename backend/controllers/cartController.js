@@ -11,9 +11,13 @@ const addToCart = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('No cart items to add');
   } else {
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({
+      user: req.user._id,
+    });
+   
     if (cart) {
       const existItem = cart.cartItems.find((x) => x._id == addItem._id);
+      console.log(existItem._id);
 
       if (existItem) {
         cart.cartItems = cart.cartItems.map((x) =>

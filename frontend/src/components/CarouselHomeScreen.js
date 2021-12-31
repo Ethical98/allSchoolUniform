@@ -5,11 +5,7 @@ import './css/CarouselHomeScreen.css';
 
 const CarouselHomeScreen = ({ items = [] }) => {
   return (
-    <Carousel
-      pause='hover'
-      className='bg-dark banner-carousel'
-      style={{ zIndex: 1 }}
-    >
+    <Carousel pause='hover' className='bg-dark banner-carousel'>
       {items
         .sort((a, b) => {
           return a.displayOrder - b.displayOrder;
