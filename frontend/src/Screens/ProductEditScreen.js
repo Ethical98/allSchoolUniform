@@ -35,6 +35,7 @@ const ProductEditScreen = ({ match, history }) => {
   const productId = match.params.id;
 
   const [name, setName] = useState('');
+  const [SKU, setSKU] = useState('');
 
   const [image, setImage] = useState('');
   const [type, setType] = useState('');
@@ -180,6 +181,7 @@ const ProductEditScreen = ({ match, history }) => {
         setDescription(product.description);
         setIsActive(product.isActive);
         setBrand(product.brand);
+        setSKU(product.SKU);
         if (masterSchools) {
           setMasterSchool([
             ...masterSchools.filter((x) => x.isActive === true),
@@ -244,6 +246,7 @@ const ProductEditScreen = ({ match, history }) => {
     dispatch(
       updateProduct({
         _id: productId,
+        SKU,
         name,
         category,
         brand,
@@ -317,6 +320,15 @@ const ProductEditScreen = ({ match, history }) => {
           <Form onSubmit={submitHandler}>
             <Row>
               <Col md={3}>
+                <FloatingLabel controlId='sku' label='SKU' className='mb-3'>
+                  <Form.Control
+                    required
+                    type='text'
+                    placeholder='Enter SKU'
+                    value={SKU}
+                    onChange={(e) => setSKU(e.target.value)}
+                  ></Form.Control>
+                </FloatingLabel>
                 <FloatingLabel controlId='name' label='Name' className='mb-3'>
                   <Form.Control
                     required

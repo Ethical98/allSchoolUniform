@@ -30,6 +30,7 @@ const ProductCreateScreen = ({ history }) => {
   const [image, setImage] = useState('');
   const [type, setType] = useState('');
   const [isActive, setIsActive] = useState(false);
+  const [SKU, setSKU] = useState('');
   //   const [masterClass, setMasterClass] = useState('');
   const [standard, setStandard] = useState('');
   const [schoolName, setSchoolName] = useState(['BBPS']);
@@ -186,6 +187,7 @@ const ProductCreateScreen = ({ history }) => {
     dispatch(
       createProduct({
         name,
+        SKU,
         type,
         brand,
         season,
@@ -262,6 +264,15 @@ const ProductCreateScreen = ({ history }) => {
           <Form onSubmit={submitHandler}>
             <Row>
               <Col md={3}>
+                <FloatingLabel controlId='sku' label='SKU' className='mb-3'>
+                  <Form.Control
+                    required
+                    type='text'
+                    placeholder='Enter SKU'
+                    value={SKU}
+                    onChange={(e) => setSKU(e.target.value)}
+                  ></Form.Control>
+                </FloatingLabel>
                 <FloatingLabel className='mb-3' label='Name' controlId='name'>
                   <Form.Control
                     required

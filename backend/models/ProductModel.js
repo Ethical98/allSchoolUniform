@@ -34,6 +34,7 @@ const productSchema = mongoose.Schema(
       required: true,
       ref: 'User',
     },
+    SKU: { type: String, rquired: true, unique: true },
 
     season: { type: String, required: true },
     name: {

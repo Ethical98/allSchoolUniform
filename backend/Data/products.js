@@ -1,5 +1,6 @@
 const products = [
   {
+    SKU: '123',
     name: 'Shirt_1',
     gender: 'B',
     class: ['X', 'IX', 'IV', 'VI', 'VIII'],
@@ -38,6 +39,7 @@ const products = [
     isActive: true,
   },
   {
+    SKU: '1234',
     name: 'Shirt_2',
     gender: 'G',
     class: ['X', 'IX', 'IV', 'VI', 'VII'],
@@ -76,6 +78,7 @@ const products = [
     isActive: true,
   },
   {
+    SKU: '12345',
     name: 'Shirt_3',
     schoolName: ['BBPS', 'Presidium School PALAM VIHAR'],
     class: ['X', 'IX', 'IV'],
@@ -114,6 +117,7 @@ const products = [
     isActive: true,
   },
   {
+    SKU: '123456',
     name: 'Shirt_4',
     schoolName: ['BBPS', 'Presidium School PALAM VIHAR'],
     class: ['X', 'IX', 'Nursery', 'KG', 'V', 'VI', 'IV'],
@@ -153,6 +157,7 @@ const products = [
     isActive: true,
   },
   {
+    SKU: '1234567',
     name: 'Shirt_5',
     schoolName: ['BBPS', 'Bal Bharati Public School GRH'],
     class: 'X',
@@ -191,6 +196,7 @@ const products = [
     isActive: true,
   },
   {
+    SKU: '12345678',
     name: 'Shirt_6',
     schoolName: ['BBPS', 'Bal Bharati Public School GRH'],
     class: ['X', 'IX', 'Nursery', 'KG'],

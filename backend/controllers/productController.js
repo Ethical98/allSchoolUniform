@@ -222,6 +222,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 const createProduct = asyncHandler(async (req, res) => {
   const {
     name,
+    SKU,
     schoolName,
     image,
     description,
@@ -236,6 +237,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
   const product = new Product({
     name,
+    SKU,
     user: req.user._id,
     schoolName,
     image,
@@ -259,6 +261,7 @@ const createProduct = asyncHandler(async (req, res) => {
 const updateProduct = asyncHandler(async (req, res) => {
   const {
     name,
+    SKU,
     standard,
     schoolName,
     image,
@@ -284,6 +287,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.season = season;
     product.size = [...size];
     product.isActive = isActive;
+    product.SKU = SKU;
 
     const updatedProduct = await product.save();
     res.status(201).json(updatedProduct);
