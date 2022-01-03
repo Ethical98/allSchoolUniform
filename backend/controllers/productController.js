@@ -233,6 +233,7 @@ const createProduct = asyncHandler(async (req, res) => {
     size,
     standard,
     isActive,
+    SEOKeywords,
   } = req.body;
 
   const product = new Product({
@@ -248,6 +249,7 @@ const createProduct = asyncHandler(async (req, res) => {
     type,
     size,
     isActive,
+    SEOKeywords,
     class: standard,
   });
 
@@ -272,6 +274,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     size,
     type,
     isActive,
+    SEOKeywords,
   } = req.body;
 
   const product = await Product.findById(req.params.id);
@@ -288,6 +291,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.size = [...size];
     product.isActive = isActive;
     product.SKU = SKU;
+    product.SEOKeywords = SEOKeywords;
 
     const updatedProduct = await product.save();
     res.status(201).json(updatedProduct);

@@ -31,6 +31,7 @@ const ProductCreateScreen = ({ history }) => {
   const [type, setType] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [SKU, setSKU] = useState('');
+  const [SEOKeywords, setSEOKeywords] = useState(undefined);
   //   const [masterClass, setMasterClass] = useState('');
   const [standard, setStandard] = useState('');
   const [schoolName, setSchoolName] = useState(['BBPS']);
@@ -198,6 +199,7 @@ const ProductCreateScreen = ({ history }) => {
         description,
         schoolName,
         isActive,
+        SEOKeywords,
       })
     );
   };
@@ -369,6 +371,21 @@ const ProductCreateScreen = ({ history }) => {
                     placeholder='Enter Description'
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                  ></Form.Control>
+                </FloatingLabel>
+                <FloatingLabel
+                  controlId='seoKeywords'
+                  label='SEO Keywords'
+                  className='mb-3'
+                >
+                  <Form.Control
+                    required
+                    as='textarea'
+                    style={{ height: '100px' }}
+                    type='text'
+                    placeholder='SEO Keywords'
+                    value={SEOKeywords}
+                    onChange={(e) => setSEOKeywords(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
                 <Form.Group controlId='isActive' className='mb-3'>

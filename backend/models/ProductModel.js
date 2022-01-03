@@ -82,7 +82,9 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-
+    SEOKeywords: {
+      type: String,
+    },
     class: [{ type: String, required: true }],
     // productCode: {
     //   type: String,
