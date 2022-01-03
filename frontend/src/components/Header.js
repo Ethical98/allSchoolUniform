@@ -23,9 +23,12 @@ import SearchBox from './SearchBox';
 import OffCanvas from './OffCanvas';
 import DialogBox from './DialogBox';
 import { useLocation } from 'react-router-dom';
+import useWindowDimensions from '../utils/useWindowDimensions';
+import HeaderSmall from './HeaderSmall';
 
 const Header = () => {
   const location = useLocation();
+  const { height, width } = useWindowDimensions();
   const [show, setShow] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [message, setMessage] = useState('');
@@ -104,190 +107,203 @@ const Header = () => {
   );
 
   return (
-    <header className='header'>
-      <OffCanvas
-        showOffCanvas={showOffCanvas}
-        handleOffCanvasClose={handleOffCanvasClose}
-        userInfo={userInfo}
-        handleShow={handleShow}
-      >
-        <ul>
-          {userInfo && userInfo.isAdmin && (
-            <li>
-              <a href='/admin/dashboard'>DashBoard </a>
-            </li>
-          )}
-          {userInfo && userInfo.isAdmin && (
-            <li>
-              <a href='/newCustomerByAdmin'>Add New Customer</a>
-            </li>
-          )}
-          <li>
-            <a href='/'>Home </a>
-          </li>
-          <li>
-            <a href='/offers'>Offers </a>
-          </li>
-          <li>
-            <a href='/#'>
-              <span onClick={handleShow}>Track Your Order</span>
-            </a>
-          </li>
-          <li>
-            <a href='/profile'>Account</a>
-          </li>
-          {userInfo && (
-            <li>
-              <a href='/#'>
-                <span
-                  onClick={() => {
-                    handleOffCanvasClose();
-                    dispatch(logout());
-                  }}
-                >
-                  Log Out <i className='fas fa-sign-out-alt'></i>
-                </span>
-              </a>
-            </li>
-          )}
-        </ul>
-        <hr className='divider'></hr>
-      </OffCanvas>
-      <Navbar
-        variant='dark'
-        fixed='top'
-        style={{
-          background: `#2c4a77 url(${urlimage})`,
-        }}
-      >
-        <DialogBox
-          show={show}
-          handleClose={handleClose}
-          handleShow={handleShow}
-          title='Track Your Order'
-          footer={<TrackButton />}
-        >
-          <Form noValidate validated={validated} onSubmit={trackOrderHandler}>
-            <FloatingLabel label='Order Id' className='mb-3'>
-              <Form.Control
-                required
-                className='mb-3'
-                placeholder='Order Id'
-                value={orderId}
-                onChange={(e) => setOrderId(e.target.value)}
-              ></Form.Control>
-              <Form.Control.Feedback type='invalid'>
-                {message}
-              </Form.Control.Feedback>
-            </FloatingLabel>
-          </Form>
-        </DialogBox>
-        <Button
-          variant='outline-light'
-          className='d-flex d-sm-none mx-1 px-2'
-          onClick={handleOffCanvasShow}
-        >
-          <i className='fas fa-bars'></i>
-        </Button>
-        <Container>
-          <LinkContainer to='/'>
-            <Navbar.Brand>
-              <Row>
-                <Image src='/uploads/asu-top-logo.png' className='logo'></Image>
-              </Row>
-              <Row>
-                <span
-                  className='text-center pt-1'
-                  style={{ color: 'white', fontSize: '0.7rem' }}
-                >
-                  <i className='fas fa-phone-square-alt mx-1' />
-                  (011) 49188800
-                </span>
-              </Row>
-            </Navbar.Brand>
-          </LinkContainer>
-
-          {!(location.pathname === '/') && (
-            <Nav className='d-none d-sm-block'>
-              <Route
-                render={({ history }) => <SearchBox history={history} />}
-              />
-            </Nav>
-          )}
-          <Row>
-            <Nav>
-              <LinkContainer to='/offers'>
-                <Nav.Link>
-                  <Button
-                    className='d-none d-sm-block'
-                    variant='outline-light'
-                    size='sm'
-                  >
-                    OFFERS
-                  </Button>
-                </Nav.Link>
-              </LinkContainer>
+    <>
+      {width < 575.98 ? (
+        <HeaderSmall />
+      ) : (
+        <header className='header'>
+          <OffCanvas
+            showOffCanvas={showOffCanvas}
+            handleOffCanvasClose={handleOffCanvasClose}
+            userInfo={userInfo}
+            handleShow={handleShow}
+          >
+            <ul>
               {userInfo && userInfo.isAdmin && (
-                <LinkContainer to='/newCustomerByAdmin'>
-                  <Nav.Link>
-                    <i className='fas fa-plus' />
-                    <span className='mx-1'>New Customer</span>
-                  </Nav.Link>
-                </LinkContainer>
+                <li>
+                  <a href='/admin/dashboard'>DashBoard </a>
+                </li>
               )}
-
-              <Nav.Link onClick={handleShow} className='d-none d-sm-block'>
-                <i className='fas fa-truck' />{' '}
-                <span className='header-text'>TRACK YOUR ORDER</span>
-              </Nav.Link>
-
-              <LinkContainer to='/cart'>
-                <Nav.Link>
-                  <i className='fas fa-shopping-cart'></i>{' '}
-                  <span className='header-text cart'>CART</span>
-                  {qty > 0 && (
-                    <Badge pill className='cart-qty'>
-                      {qty}
-                    </Badge>
-                  )}
-                </Nav.Link>
+              {userInfo && userInfo.isAdmin && (
+                <li>
+                  <a href='/newCustomerByAdmin'>Add New Customer</a>
+                </li>
+              )}
+              <li>
+                <a href='/'>Home </a>
+              </li>
+              <li>
+                <a href='/offers'>Offers </a>
+              </li>
+              <li>
+                <a href='/#'>
+                  <span onClick={handleShow}>Track Your Order</span>
+                </a>
+              </li>
+              <li>
+                <a href='/profile'>Account</a>
+              </li>
+              {userInfo && (
+                <li>
+                  <a href='/#'>
+                    <span
+                      onClick={() => {
+                        handleOffCanvasClose();
+                        dispatch(logout());
+                      }}
+                    >
+                      Log Out <i className='fas fa-sign-out-alt'></i>
+                    </span>
+                  </a>
+                </li>
+              )}
+            </ul>
+            <hr className='divider'></hr>
+          </OffCanvas>
+          <Navbar
+            variant='dark'
+            fixed='top'
+            style={{
+              background: `#2c4a77 url(${urlimage})`,
+            }}
+          >
+            <DialogBox
+              show={show}
+              handleClose={handleClose}
+              handleShow={handleShow}
+              title='Track Your Order'
+              footer={<TrackButton />}
+            >
+              <Form
+                noValidate
+                validated={validated}
+                onSubmit={trackOrderHandler}
+              >
+                <FloatingLabel label='Order Id' className='mb-3'>
+                  <Form.Control
+                    required
+                    className='mb-3'
+                    placeholder='Order Id'
+                    value={orderId}
+                    onChange={(e) => setOrderId(e.target.value)}
+                  ></Form.Control>
+                  <Form.Control.Feedback type='invalid'>
+                    {message}
+                  </Form.Control.Feedback>
+                </FloatingLabel>
+              </Form>
+            </DialogBox>
+            <Button
+              variant='outline-light'
+              className='d-flex d-sm-none mx-1 px-2'
+              onClick={handleOffCanvasShow}
+            >
+              <i className='fas fa-bars'></i>
+            </Button>
+            <Container>
+              <LinkContainer to='/'>
+                <Navbar.Brand>
+                  <Row>
+                    <Image
+                      src='/uploads/asu-top-logo.png'
+                      className='logo'
+                    ></Image>
+                  </Row>
+                  <Row>
+                    <span
+                      className='text-center pt-1'
+                      style={{ color: 'white', fontSize: '0.7rem' }}
+                    >
+                      <i className='fas fa-phone-square-alt mx-1' />
+                      (011) 49188800
+                    </span>
+                  </Row>
+                </Navbar.Brand>
               </LinkContainer>
-              {userInfo ? (
-                <>
-                  <NavDropdown
-                    title={user.name}
-                    id='username'
-                    className='d-none d-sm-block'
-                  >
-                    {userInfo && userInfo.isAdmin && (
-                      <LinkContainer to='/admin/dashboard'>
-                        <NavDropdown.Item>Dashboard</NavDropdown.Item>
-                      </LinkContainer>
-                    )}
-                    <LinkContainer to='/profile'>
-                      <NavDropdown.Item>Profile</NavDropdown.Item>
-                    </LinkContainer>
-                    <NavDropdown.Item onClick={logoutHandler}>
-                      Logout <i className='fas fa-sign-out-alt'></i>
-                    </NavDropdown.Item>
-                  </NavDropdown>
-                  <LinkContainer to='/profile'>
-                    <Nav.Link className='d-sm-none'>{userInfo.name}</Nav.Link>
-                  </LinkContainer>
-                </>
-              ) : (
-                <LinkContainer to='/login'>
-                  <Nav.Link>
-                    <i className='fas fa-user'></i> <span>SIGN IN</span>
-                  </Nav.Link>
-                </LinkContainer>
-              )}
-            </Nav>
-          </Row>
-        </Container>
-      </Navbar>
 
-      {/* {location.pathname.includes('products') && (
+              {!(location.pathname === '/') && (
+                <Nav className='d-none d-sm-block'>
+                  <Route
+                    render={({ history }) => <SearchBox history={history} />}
+                  />
+                </Nav>
+              )}
+              <Row>
+                <Nav>
+                  <LinkContainer to='/offers'>
+                    <Nav.Link>
+                      <Button
+                        className='d-none d-sm-block'
+                        variant='outline-light'
+                        size='sm'
+                      >
+                        OFFERS
+                      </Button>
+                    </Nav.Link>
+                  </LinkContainer>
+                  {userInfo && userInfo.isAdmin && (
+                    <LinkContainer to='/newCustomerByAdmin'>
+                      <Nav.Link>
+                        <i className='fas fa-plus' />
+                        <span className='mx-1'>New Customer</span>
+                      </Nav.Link>
+                    </LinkContainer>
+                  )}
+
+                  <Nav.Link onClick={handleShow} className='d-none d-sm-block'>
+                    <i className='fas fa-truck' />{' '}
+                    <span className='header-text'>TRACK YOUR ORDER</span>
+                  </Nav.Link>
+
+                  <LinkContainer to='/cart'>
+                    <Nav.Link>
+                      <i className='fas fa-shopping-cart'></i>{' '}
+                      <span className='header-text cart'>CART</span>
+                      {qty > 0 && (
+                        <Badge pill className='cart-qty'>
+                          {qty}
+                        </Badge>
+                      )}
+                    </Nav.Link>
+                  </LinkContainer>
+                  {userInfo ? (
+                    <>
+                      <NavDropdown
+                        title={user.name}
+                        id='username'
+                        className='d-none d-sm-block'
+                      >
+                        {userInfo && userInfo.isAdmin && (
+                          <LinkContainer to='/admin/dashboard'>
+                            <NavDropdown.Item>Dashboard</NavDropdown.Item>
+                          </LinkContainer>
+                        )}
+                        <LinkContainer to='/profile'>
+                          <NavDropdown.Item>Profile</NavDropdown.Item>
+                        </LinkContainer>
+                        <NavDropdown.Item onClick={logoutHandler}>
+                          Logout <i className='fas fa-sign-out-alt'></i>
+                        </NavDropdown.Item>
+                      </NavDropdown>
+                      <LinkContainer to='/profile'>
+                        <Nav.Link className='d-sm-none'>
+                          {userInfo.name}
+                        </Nav.Link>
+                      </LinkContainer>
+                    </>
+                  ) : (
+                    <LinkContainer to='/login'>
+                      <Nav.Link>
+                        <i className='fas fa-user'></i> <span>SIGN IN</span>
+                      </Nav.Link>
+                    </LinkContainer>
+                  )}
+                </Nav>
+              </Row>
+            </Container>
+          </Navbar>
+
+          {/* {location.pathname.includes('products') && (
         <div
           className='d-sm-none search-smallscreen'
           style={{
@@ -300,7 +316,9 @@ const Header = () => {
           </Nav>
         </div>
       )} */}
-    </header>
+        </header>
+      )}
+    </>
   );
 };
 

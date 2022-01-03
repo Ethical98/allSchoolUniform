@@ -38,7 +38,6 @@ const getSchoolDetails = asyncHandler(async (req, res) => {
 // @access Public
 const getSchoolNames = asyncHandler(async (req, res) => {
   const { keyword } = req.params;
-  console.log(keyword);
 
   const keyword1 = keyword
     ? {
@@ -48,7 +47,6 @@ const getSchoolNames = asyncHandler(async (req, res) => {
         },
       }
     : {};
-  console.log(keyword1);
 
   const schoolNames = await School.find(keyword1).select('name isActive');
 
