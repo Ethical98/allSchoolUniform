@@ -340,33 +340,34 @@ const ProductEditScreen = ({ match, history }) => {
                     onChange={(e) => setName(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
-
                 <FloatingLabel
-                  controlId='category'
                   label='Category'
                   className='mb-3'
+                  controlId='category'
                 >
-                  <Form.Control
-                    required
-                    type='text'
-                    placeholder='Enter Category'
+                  <Form.Select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                  ></Form.Control>
+                  >
+                    <option value='Boys'>Boys</option>
+                    <option value='Girls'>Girls</option>
+                    <option value='Unisex'>Unisex</option>
+                  </Form.Select>
                 </FloatingLabel>
-
                 <FloatingLabel
-                  controlId='season'
-                  label='Season'
                   className='mb-3'
+                  label='Season'
+                  controlId='season'
                 >
-                  <Form.Control
+                  <Form.Select
                     required
-                    type='text'
-                    placeholder='Enter season'
                     value={season}
                     onChange={(e) => setSeason(e.target.value)}
-                  ></Form.Control>
+                  >
+                    <option value='Summer'>Summer</option>
+                    <option value='Winter'>Winter</option>
+                    <option value='All Season'>All Season</option>
+                  </Form.Select>
                 </FloatingLabel>
 
                 <FloatingLabel controlId='brand' label='Brand' className='mb-3'>

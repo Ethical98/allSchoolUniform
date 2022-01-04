@@ -289,26 +289,29 @@ const ProductCreateScreen = ({ history }) => {
                   className='mb-3'
                   controlId='category'
                 >
-                  <Form.Control
-                    required
-                    type='text'
-                    placeholder='Enter Category'
+                  <Form.Select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                  ></Form.Control>
+                  >
+                    <option value='Boys'>Boys</option>
+                    <option value='Girls'>Girls</option>
+                    <option value='Unisex'>Unisex</option>
+                  </Form.Select>
                 </FloatingLabel>
                 <FloatingLabel
                   className='mb-3'
                   label='Season'
                   controlId='season'
                 >
-                  <Form.Control
+                  <Form.Select
                     required
-                    type='text'
-                    placeholder='season'
                     value={season}
                     onChange={(e) => setSeason(e.target.value)}
-                  ></Form.Control>
+                  >
+                    <option value='Summer'>Summer</option>
+                    <option value='Winter'>Winter</option>
+                    <option value='All Season'>All Season</option>
+                  </Form.Select>
                 </FloatingLabel>
                 <FloatingLabel className='mb-3' label='Brand' controlId='brand'>
                   <Form.Control
@@ -323,7 +326,6 @@ const ProductCreateScreen = ({ history }) => {
                   <Form.Select
                     as='select'
                     required
-                    type='text'
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                   >

@@ -28,7 +28,7 @@ import HeaderSmall from './HeaderSmall';
 
 const Header = () => {
   const location = useLocation();
-  const { height, width } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const [show, setShow] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [message, setMessage] = useState('');

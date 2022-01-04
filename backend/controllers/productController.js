@@ -31,7 +31,7 @@ const getProducts = asyncHandler(async (req, res) => {
   const categoryKeyword = req.query.category
     ? {
         category: {
-          $regex: req.query.category,
+          $regex: `${req.query.category}|unisex`,
           $options: 'i',
         },
       }
@@ -40,7 +40,7 @@ const getProducts = asyncHandler(async (req, res) => {
   const seasonKeyword = req.query.season
     ? {
         season: {
-          $regex: req.query.season,
+          $regex: `${req.query.season}|all season`,
           $options: 'i',
         },
       }
@@ -64,11 +64,19 @@ const getProducts = asyncHandler(async (req, res) => {
       }
     : {};
 
+  const unisexCategory = {
+    category: {
+      $regex: 'Unisex',
+      $options: 'i',
+    },
+  };
+
   const count = await Product.countDocuments({
     $and: [
       { $or: [{ ...searchKeyword }, { ...schoolKeyword }] },
       {
         $and: [
+          // { ...unisexCategory },
           { ...categoryKeyword },
           { ...seasonKeyword },
           { ...classesKeyword },
@@ -85,6 +93,8 @@ const getProducts = asyncHandler(async (req, res) => {
       { $or: [{ ...searchKeyword }, { ...schoolKeyword }] },
       {
         $and: [
+          // { ...unisexCategory },
+
           { ...categoryKeyword },
           { ...seasonKeyword },
           { ...classesKeyword },
@@ -173,6 +183,13 @@ const filterProducts = asyncHandler(async (req, res) => {
       }
     : {};
 
+  const unisexCategory = {
+    category: {
+      $regex: 'Unisex',
+      $options: 'i',
+    },
+  };
+
   const keyword3 = classes
     ? {
         class: {
@@ -182,15 +199,35 @@ const filterProducts = asyncHandler(async (req, res) => {
       }
     : {};
 
+  const allSeason = {
+    season: {
+      $regex: 'All Season',
+      $options: 'i',
+    },
+  };
+
   const pageSize = 10;
   const page = Number(req.query.pageNumber) || 1;
 
   const count = await Product.countDocuments({
-    $and: [{ ...keyword1 }, { ...keyword2 }, { ...keyword3 }],
+    $and: [
+      // { ...keyword2 },
+      // { ...keyword3 },
+      { ...unisexCategory },
+      { ...keyword1 },
+      // { ...allSeason },
+    ],
   });
 
   const products = await Product.find({
-    $and: [{ ...keyword1 }, { ...keyword2 }, { ...keyword3 }],
+    $and: [
+      { ...unisexCategory },
+      { ...keyword1 },
+      // { ...keyword2 },
+      // { ...keyword3 },
+
+      // { ...allSeason },
+    ],
   })
     .sort({
       name: 'asc',

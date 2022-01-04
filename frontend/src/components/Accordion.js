@@ -95,7 +95,7 @@ const Accordion = ({ history, location, match }) => {
     } else if (season.length > 0) {
       if (!pageNumber) {
         if (school) {
-          history.push(`/products/schools/${school}&season=${season}`);
+          history.push(`/products/schools/${school}?season=${season}`);
         } else if (keyword) {
           history.push(`/products?search=${keyword}&season=${season}`);
         } else {
@@ -187,31 +187,31 @@ const Accordion = ({ history, location, match }) => {
         </Card.Header>
         <div>
           <Form className='m-3'>
-            <Form.Control as='select'>
+            <Form.Select as='select'>
               <option value=''>Select State</option>
               <option>2</option>
               <option>3</option>
               <option>4</option>
               <option>5</option>
-            </Form.Control>
+            </Form.Select>
           </Form>
           <Form className='m-3'>
-            <Form.Control as='select'>
+            <Form.Select as='select'>
               <option value=''>Select City</option>
               <option>2</option>
               <option>3</option>
               <option>4</option>
               <option>5</option>
-            </Form.Control>
+            </Form.Select>
           </Form>
           <Form className='m-3'>
-            <Form.Control as='select'>
+            <Form.Select as='select'>
               <option value=''>Select School</option>
               <option>2</option>
               <option>3</option>
               <option>4</option>
               <option>5</option>
-            </Form.Control>
+            </Form.Select>
           </Form>
         </div>
         <Card.Header

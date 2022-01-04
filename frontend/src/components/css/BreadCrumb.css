@@ -2,6 +2,7 @@
   border: 2px solid black;
   border-radius: 8px;
   padding: 5px 0 0 3px;
+  font-size: medium;
   height: 40px;
 }
 .navigationCrumb:hover {
@@ -13,12 +14,8 @@
   text-decoration: none;
 }
 
-/* @media (max-width: 576px) {
+@media (max-width: 576px) {
   .navigationCrumb {
-    height: 12vh;
-    border: 1px solid black;
-    border-radius: 15px;
-    background-color: lightorange;
-    padding: 1%;
+    font-size: small;
   }
-} */
+}

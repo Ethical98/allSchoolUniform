@@ -13,6 +13,7 @@ import Paginate from '../components/Paginate';
 import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
+import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 
 const ProductListScreen = ({ history, match, location }) => {
   const urlSearchParams = new URLSearchParams(location.search);
@@ -20,6 +21,9 @@ const ProductListScreen = ({ history, match, location }) => {
   const pageNumber = params.page ? params.page : 1;
 
   const dispatch = useDispatch();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [options, setOptions] = useState([]);
 
   const productList = useSelector((state) => state.productList);
   const { loading, products, error, pages, page } = productList;
@@ -34,19 +38,19 @@ const ProductListScreen = ({ history, match, location }) => {
   const schoolNameList = useSelector((state) => state.schoolNameList);
   const { schoolNames } = schoolNameList;
 
-  useEffect(() => {
-    if (!(schoolNames && schoolNames.length > 0)) {
-      dispatch(listSchoolNames());
-    } else {
-      setSchools([
-        ...schoolNames.map((x, index) => ({
-          id: index,
-          name: x.name,
-          isActive: x.isActive,
-        })),
-      ]);
-    }
-  }, [dispatch, schoolNames]);
+  // useEffect(() => {
+  //   if (!(schoolNames && schoolNames.length > 0)) {
+  //     dispatch(listSchoolNames());
+  //   } else {
+  //     setSchools([
+  //       ...schoolNames.map((x, index) => ({
+  //         id: index,
+  //         name: x.name,
+  //         isActive: x.isActive,
+  //       })),
+  //     ]);
+  //   }
+  // }, [dispatch, schoolNames]);
 
   const columns = [
     {
@@ -123,6 +127,28 @@ const ProductListScreen = ({ history, match, location }) => {
     setSchool(item.name);
   };
 
+  useEffect(() => {
+    if (schoolNames) {
+      setOptions(schoolNames);
+      setIsLoading(false);
+    }
+  }, [schoolNames]);
+
+  const handleChange = (item) => {
+    if (item.length > 0) {
+      history.push('/admin/productlist/');
+      setSchool(item[0].name);
+    } else {
+      setSchool('');
+    }
+  };
+
+  const handleSearch = (query) => {
+    setIsLoading(true);
+    dispatch(listSchoolNames(query));
+  };
+  const filterBy = () => true;
+
   return (
     <AdminPageLayout>
       <Meta
@@ -134,12 +160,20 @@ const ProductListScreen = ({ history, match, location }) => {
           <h1>PRODUCTS</h1>
         </Col>
         <Col className='float-end'>
-          <SearchBoxAutocomplete
-            placeholder={'Filter By School'}
-            onClear={() => setSchool('')}
-            items={schools.filter((x) => x.isActive === true)}
-            handleOnSelect={handleOnSelect}
-          />
+          <div>
+            <AsyncTypeahead
+              clearButton={true} 
+              filterBy={filterBy}
+              id='async-example'
+              isLoading={isLoading}
+              labelKey={'name'}
+              minLength={3}
+              onChange={(value) => handleChange(value)}
+              onSearch={handleSearch}
+              options={options}
+              placeholder='Enter School Name..'
+            />
+          </div>
         </Col>
         <Col>
           <Button

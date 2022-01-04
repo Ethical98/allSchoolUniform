@@ -24,12 +24,7 @@ import CarouselHomeScreen from '../components/CarouselHomeScreen';
 import { listSchoolNames } from '../actions/schoolActions';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import {
-  AsyncTypeahead,
-  Typeahead,
-  Menu,
-  MenuItem,
-} from 'react-bootstrap-typeahead';
+import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 
 const HomeScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -77,139 +72,123 @@ const HomeScreen = ({ history }) => {
   };
   const filterBy = () => true;
 
-  const props = {
-    renderInput: ({ inputRef, referenceElementRef, ...inputProps }) => (
-      <InputGroup className='mb-3'>
-        <Form.Control
-          {...inputProps}
-          ref={(node) => {
-            inputRef(node);
-            referenceElementRef(node);
-          }}
-        />
-        <InputGroup.Text id='basic-addon1'>
-          <i className='fas fa-search' />
-        </InputGroup.Text>
-      </InputGroup>
-    ),
-  };
-
   return (
     <div>
       <Header />
-      <Meta
-        description={'Buy School Uniforms Online'}
-        keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online'}
-      />
-      <Container>
-        <h4 className='text-center'>Commonly Searched Schools</h4>
-        <Row>
-          <Col>
-            <Figure>
-              <Image
-                className='schoolLogo'
-                src='uploads/ImageOne.jpg'
-                rounded
-              />
-              <Figure.Caption
-                className='text-center'
-                style={{ color: 'white' }}
-              >
-                Presidium
-              </Figure.Caption>
-            </Figure>
-          </Col>
-          <Col>
-            <Figure>
-              <Image className='schoolLogo' src={Logo2} rounded />
-              <Figure.Caption
-                className='text-center'
-                style={{ color: 'white' }}
-              >
-                Presidium
-              </Figure.Caption>
-            </Figure>
-          </Col>
-          <Col>
-            <Figure>
-              <Image className='schoolLogo' src={Logo3} rounded />
-              <Figure.Caption
-                className='text-center'
-                style={{ color: 'white' }}
-              >
-                Presidium
-              </Figure.Caption>
-            </Figure>
-          </Col>
-          <Col>
-            <Figure>
-              <Image className='schoolLogo' src={Logo4} rounded />
-              <Figure.Caption
-                className='text-center'
-                style={{ color: 'white' }}
-              >
-                Presidium
-              </Figure.Caption>
-            </Figure>
-          </Col>
-          <Col>
-            <Figure>
-              <Image className='schoolLogo' src={Logo5} rounded />
-              <Figure.Caption
-                className='text-center'
-                style={{ color: 'white' }}
-              >
-                Presidium
-              </Figure.Caption>
-            </Figure>
-          </Col>
-          <Col>
-            <Figure>
-              <Image className='schoolLogo' src={Logo6} rounded />
-              <Figure.Caption
-                className='text-center'
-                style={{ color: 'white' }}
-              >
-                Presidium
-              </Figure.Caption>
-            </Figure>
-          </Col>
-          <Col>
-            <Figure>
-              <Image className='schoolLogo' src={Logo7} rounded />
-              <Figure.Caption
-                className='text-center'
-                style={{ color: 'white' }}
-              >
-                Presidium
-              </Figure.Caption>
-            </Figure>
-          </Col>
-          <Col>
-            <Figure>
-              <Image className='schoolLogo' src={Logo4} rounded />
-              <Figure.Caption
-                className='text-center'
-                style={{ color: 'white' }}
-              >
-                Presidium
-              </Figure.Caption>
-            </Figure>
-          </Col>
-          <Col>
-            <Figure>
-              <Image className='schoolLogo' src={Logo5} rounded />
-              <Figure.Caption
-                className='text-center'
-                style={{ color: 'white' }}
-              >
-                Presidium
-              </Figure.Caption>
-            </Figure>
-          </Col>
-        </Row>
-        <div className='mb-5'>
-          {/* <Route
+      <main>
+        <Meta
+          description={'Buy School Uniforms Online'}
+          keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online'}
+        />
+        <Container>
+          <h4 className='text-center'>Commonly Searched Schools</h4>
+          <Row>
+            <Col>
+              <Figure>
+                <Image
+                  className='schoolLogo'
+                  src='uploads/ImageOne.jpg'
+                  rounded
+                />
+                <Figure.Caption
+                  className='text-center'
+                  style={{ color: 'white' }}
+                >
+                  Presidium
+                </Figure.Caption>
+              </Figure>
+            </Col>
+            <Col>
+              <Figure>
+                <Image className='schoolLogo' src={Logo2} rounded />
+                <Figure.Caption
+                  className='text-center'
+                  style={{ color: 'white' }}
+                >
+                  Presidium
+                </Figure.Caption>
+              </Figure>
+            </Col>
+            <Col>
+              <Figure>
+                <Image className='schoolLogo' src={Logo3} rounded />
+                <Figure.Caption
+                  className='text-center'
+                  style={{ color: 'white' }}
+                >
+                  Presidium
+                </Figure.Caption>
+              </Figure>
+            </Col>
+            <Col>
+              <Figure>
+                <Image className='schoolLogo' src={Logo4} rounded />
+                <Figure.Caption
+                  className='text-center'
+                  style={{ color: 'white' }}
+                >
+                  Presidium
+                </Figure.Caption>
+              </Figure>
+            </Col>
+            <Col>
+              <Figure>
+                <Image className='schoolLogo' src={Logo5} rounded />
+                <Figure.Caption
+                  className='text-center'
+                  style={{ color: 'white' }}
+                >
+                  Presidium
+                </Figure.Caption>
+              </Figure>
+            </Col>
+            <Col>
+              <Figure>
+                <Image className='schoolLogo' src={Logo6} rounded />
+                <Figure.Caption
+                  className='text-center'
+                  style={{ color: 'white' }}
+                >
+                  Presidium
+                </Figure.Caption>
+              </Figure>
+            </Col>
+            <Col>
+              <Figure>
+                <Image className='schoolLogo' src={Logo7} rounded />
+                <Figure.Caption
+                  className='text-center'
+                  style={{ color: 'white' }}
+                >
+                  Presidium
+                </Figure.Caption>
+              </Figure>
+            </Col>
+            <Col>
+              <Figure>
+                <Image className='schoolLogo' src={Logo4} rounded />
+                <Figure.Caption
+                  className='text-center'
+                  style={{ color: 'white' }}
+                >
+                  Presidium
+                </Figure.Caption>
+              </Figure>
+            </Col>
+            <Col>
+              <Figure>
+                <Image className='schoolLogo' src={Logo5} rounded />
+                <Figure.Caption
+                  className='text-center'
+                  style={{ color: 'white' }}
+                >
+                  Presidium
+                </Figure.Caption>
+              </Figure>
+            </Col>
+          </Row>
+          <div className='mb-5'>
+            {/* <Route
             render={({ history }) => (
               <SearchBoxAutocomplete
                 placeholder={'Search School'}
@@ -220,21 +199,21 @@ const HomeScreen = ({ history }) => {
             )}
           /> */}
 
-          <AsyncTypeahead
-            
-            filterBy={filterBy}
-            id='async-example'
-            isLoading={isLoading}
-            labelKey={'name'}
-            minLength={3}
-            onChange={(value) => handleChange(value)}
-            onSearch={handleSearch}
-            options={options}
-            placeholder='Enter School Name..'
-          />
-        </div>
-      </Container>
-      <CarouselHomeScreen items={carouselImages} />
+            <AsyncTypeahead
+              filterBy={filterBy}
+              id='async-example'
+              isLoading={isLoading}
+              labelKey={'name'}
+              minLength={3}
+              onChange={(value) => handleChange(value)}
+              onSearch={handleSearch}
+              options={options}
+              placeholder='Enter School Name..'
+            />
+          </div>
+        </Container>
+        <CarouselHomeScreen items={carouselImages} />
+      </main>
       <Footer />
     </div>
   );
