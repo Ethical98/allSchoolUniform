@@ -1,10 +1,9 @@
 import React from 'react';
 import { Breadcrumb } from 'react-bootstrap';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import './css/BreadCrumb.css';
 
 const BreadCrumb = () => {
-  const history = useHistory();
   const location = useLocation();
   const pathArray = location.pathname.split('/');
   pathArray.shift();

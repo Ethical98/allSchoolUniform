@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import jsonwebtoken from 'jsonwebtoken';
-import { Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import {
@@ -223,9 +222,7 @@ const Header = () => {
 
               {!(location.pathname === '/') && (
                 <Nav className='d-none d-sm-block'>
-                  <Route
-                    render={({ history }) => <SearchBox history={history} />}
-                  />
+                  <SearchBox />
                 </Nav>
               )}
               <Row>

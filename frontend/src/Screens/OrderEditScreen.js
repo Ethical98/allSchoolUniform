@@ -39,7 +39,6 @@ import { listSchoolNames, listSchools } from '../actions/schoolActions';
 import { listProducts } from '../actions/productActions';
 import Paginate from '../components/Paginate';
 import DialogBox from '../components/DialogBox';
-import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
 import Meta from '../components/Meta';
@@ -141,7 +140,6 @@ const OrderEditScreen = ({ history, match, location }) => {
   const [isOutForDelivery, setIsOutForDelivery] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
-  const [schools, setSchools] = useState([]);
   const [instance, updateInstance] = usePDF({
     document: (
       <Invoice
@@ -293,16 +291,6 @@ const OrderEditScreen = ({ history, match, location }) => {
     },
   ];
 
-  // useEffect(() => {
-  //   if (!(schoolNames && schoolNames.length > 0)) {
-  //     dispatch(listSchoolNames());
-  //   } else {
-  //     setSchools([
-  //       ...schoolNames.map((x, index) => ({ id: index, name: x.name })),
-  //     ]);
-  //   }
-  // }, [dispatch, schoolNames]);
-
   useEffect(() => {
     if (!userInfo) {
       history.push('/login');
@@ -402,6 +390,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         }
       }
     }
+    // eslint-disable-next-line
   }, [
     order,
     orderId,
@@ -587,11 +576,6 @@ const OrderEditScreen = ({ history, match, location }) => {
     setShowTracking(false);
   };
 
-  const handleOnSelect = (item) => {
-    history.push(`/admin/order/${orderId}/edit`);
-    setSchool(item.name);
-  };
-
   const SaveNewItemsButton = () => (
     <Button className='my-3' variant='primary' onClick={saveNewItemsHandler}>
       Save Changes
@@ -685,14 +669,6 @@ const OrderEditScreen = ({ history, match, location }) => {
         fullscreen={true}
         footer={<SaveNewItemsButton />}
       >
-        {/* <div className='w-50'>
-          <SearchBoxAutocomplete
-            placeholder={'Filter By School'}
-            onClear={() => setSchool('')}
-            items={schools}
-            handleOnSelect={handleOnSelect}
-          />
-        </div> */}
         <div className='mb-5'>
           <AsyncTypeahead
             filterBy={filterBy}

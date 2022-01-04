@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Form, Button, InputGroup } from 'react-bootstrap';
+import { useHistory } from 'react-router-dom';
 import './css/SearchBox.css';
 
-const SearchBox = ({ history }) => {
+const SearchBox = () => {
+  const history = useHistory();
   const [keyword, setKeyword] = useState('');
 
   const submitHandler = (e) => {

@@ -10,7 +10,6 @@ import { logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
 import { listSchoolNames } from '../actions/schoolActions';
 import Paginate from '../components/Paginate';
-import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
@@ -33,24 +32,8 @@ const ProductListScreen = ({ history, match, location }) => {
 
   const [school, setSchool] = useState('');
 
-  const [schools, setSchools] = useState([]);
-
   const schoolNameList = useSelector((state) => state.schoolNameList);
   const { schoolNames } = schoolNameList;
-
-  // useEffect(() => {
-  //   if (!(schoolNames && schoolNames.length > 0)) {
-  //     dispatch(listSchoolNames());
-  //   } else {
-  //     setSchools([
-  //       ...schoolNames.map((x, index) => ({
-  //         id: index,
-  //         name: x.name,
-  //         isActive: x.isActive,
-  //       })),
-  //     ]);
-  //   }
-  // }, [dispatch, schoolNames]);
 
   const columns = [
     {
@@ -120,11 +103,6 @@ const ProductListScreen = ({ history, match, location }) => {
 
   const createProductHandler = () => {
     history.push('/admin/product/create');
-  };
-
-  const handleOnSelect = (item) => {
-    history.push('/admin/productlist/');
-    setSchool(item.name);
   };
 
   useEffect(() => {

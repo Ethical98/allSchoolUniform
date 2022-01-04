@@ -5,10 +5,7 @@ import {
   Row,
   Col,
   Figure,
-  Form,
-  InputGroup,
 } from 'react-bootstrap';
-import { Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Meta from '../components/Meta';
 import './css/HomeScreen.css';
@@ -18,7 +15,6 @@ import Logo4 from '../images/SchoolLogo/AGS.jpg';
 import Logo5 from '../images/SchoolLogo/amity.jpg';
 import Logo6 from '../images/SchoolLogo/presentation.png';
 import Logo7 from '../images/SchoolLogo/gdgoenka.jpeg';
-import SearchBoxAutocomplete from '../components/SearchBoxAutocomplete';
 import { listCarouselImages } from '../actions/homeActions';
 import CarouselHomeScreen from '../components/CarouselHomeScreen';
 import { listSchoolNames } from '../actions/schoolActions';
@@ -42,19 +38,6 @@ const HomeScreen = ({ history }) => {
     dispatch(listCarouselImages());
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   if (!(schoolNames && schoolNames.length > 0)) {
-  //     dispatch(listSchoolNames());
-  //   } else {
-  //     setSchools([
-  //       ...schoolNames.map((x, index) => ({
-  //         id: index,
-  //         name: x.name,
-  //         isActive: x.isActive,
-  //       })),
-  //     ]);
-  //   }
-  // }, [dispatch, schoolNames]);
   useEffect(() => {
     if (schoolNames) {
       setOptions(schoolNames);
@@ -188,16 +171,6 @@ const HomeScreen = ({ history }) => {
             </Col>
           </Row>
           <div className='mb-5'>
-            {/* <Route
-            render={({ history }) => (
-              <SearchBoxAutocomplete
-                placeholder={'Search School'}
-                history={history}
-                items={schools.filter((x) => x.isActive === true)}
-                handleOnSelect={handleOnSelect}
-              />
-            )}
-          /> */}
 
             <AsyncTypeahead
               filterBy={filterBy}

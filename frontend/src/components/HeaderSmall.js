@@ -244,17 +244,19 @@ const HeaderSmall = () => {
             </Row>
           </Container>
         </Navbar>
-        <div
-          className='mb-3'
-          style={{
-            flex: 1,
-            marginTop: '-20px',
-            padding: '8px',
-            background: `#2c4a77 url(${urlimage})`,
-          }}
-        >
-          <SearchBox />
-        </div>
+        {!(location.pathname === '/') && (
+          <div
+            className='mb-3'
+            style={{
+              flex: 1,
+              marginTop: '-20px',
+              padding: '8px',
+              background: `#2c4a77 url(${urlimage})`,
+            }}
+          >
+            <SearchBox />
+          </div>
+        )}
       </div>
     </header>
   );

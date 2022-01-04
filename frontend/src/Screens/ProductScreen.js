@@ -9,7 +9,6 @@ import { logout } from '../actions/userActions';
 import Paginate from '../components/Paginate';
 import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
-import { Link } from 'react-router-dom';
 import Accordion from '../components/Accordion';
 import { Route } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';

@@ -1,9 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
 import ProductScreen from './Screens/ProductScreen';
-import BreadCrumb from './components/BreadCrumb';
 import ProductDescriptionScreen from './Screens/ProductDescriptionScreen';
 import CartScreen from './Screens/CartScreen';
 import LoginScreen from './Screens/LoginScreen';
@@ -23,7 +20,6 @@ import UserEditScreen from './Screens/UserEditScreen';
 import ProductListScreen from './Screens/ProductListScreen';
 import ProductEditScreen from './Screens/ProductEditScreen';
 import ProductCreateScreen from './Screens/ProductCreateScreen';
-import AdminHeader from './components/AdminHeader';
 import OrderListScreen from './Screens/OrderListScreen';
 import OrderEditScreen from './Screens/OrderEditScreen';
 import OrderTrackingScreen from './Screens/OrderTrackingScreen';
@@ -37,7 +33,6 @@ import TypeEditScreen from './Screens/TypeEditScreen';
 import TypeCreateScreen from './Screens/TypeCreateScreen';
 import ClassListScreen from './Screens/ClassListScreen';
 import HomepageEditScreen from './Screens/HomepageEditScreen';
-import SearchBox from './components/SearchBox';
 import NewCustomerByAdminScreen from './Screens/NewCustomerByAdminScreen';
 import PageNotFoundScreen from './Screens/PageNotFoundScreen';
 import AdminDashBoardScreen from './Screens/AdminDashBoardScreen';
@@ -55,30 +50,9 @@ const App = () => {
 
   return (
     <Router>
-      {/* <Route path='/products'>
-        <div
-          className='  d-flex d-sm-none align-items-center search-sm'
-          style={{
-            marginTop: '60px',
-            background: `#2c4a77 url("uploads/seamlessschool-bg.png")`,
-            padding: '2%',
-            marginBottom: '-12vh',
-          }}
-        >
-          <SearchBox />
-        </div>
-      </Route> */}
-
-      {/* <div className='d-flex d-sm-none' style={{ marginTop: '70px' }}>
-       
-      </div> */}
-
-      <Switch>
-        {/* <> */}
-        {/* <Route path='/admin' component={AdminHeader} /> */}
+     
+     <Switch>
         <Route path='/' component={HomeScreen} exact />
-
-        {/* <Container> */}
         <Route path='/orderdetails/:id' component={OrderDetailsScreen} />
         <Route path='/forgotpassword' component={ForgotPasswordScreen} />
         <Route path='/resetpassword' component={ResetPasswordScreen} />
@@ -90,7 +64,6 @@ const App = () => {
         <Route path='/login' component={LoginScreen} />
         <Route path='/register' component={RegisterScreen} />
         <Route path='/profile' component={ProfileScreen} exact />
-        {/* <Route path='/products' component={BreadCrumb} exact /> */}
         <Route
           path='/newcustomerbyadmin'
           component={NewCustomerByAdminScreen}
@@ -108,16 +81,6 @@ const App = () => {
         />
         <Route path='/track/:id' component={OrderTrackingScreen} />
         <Route path='/products' component={ProductScreen} exact />
-        {/* <Route
-              path='/products/schools/:selectedschool'
-              component={ProductScreen}
-              exact
-            /> */}
-        {/* <Route
-              path='/products/:id'
-              component={ProductDescriptionScreen}
-              exact
-            /> */}
         <Route path='/cart/:id?' component={CartScreen} />
         <Route path='/admin/dashboard' component={AdminDashBoardScreen} />
         <Route path='/admin/userlist' component={UserListScreen} />
@@ -146,9 +109,6 @@ const App = () => {
         <Route path='/admin/classlist' component={ClassListScreen} />
         <Route path='/admin/homepage' component={HomepageEditScreen} />
         <Route path='*' component={PageNotFoundScreen} />
-        {/* {<Route pah='bill' component={InvoiceScreen} />} */}
-        {/* </Container> */}
-        {/* </> */}
       </Switch>
     </Router>
   );
