@@ -44,6 +44,7 @@ import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
+import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 
 const OrderEditScreen = ({ history, match, location }) => {
   const dispatch = useDispatch();
@@ -151,6 +152,8 @@ const OrderEditScreen = ({ history, match, location }) => {
       />
     ),
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [options, setOptions] = useState([]);
 
   const orderItemColumns = [
     {
@@ -290,15 +293,15 @@ const OrderEditScreen = ({ history, match, location }) => {
     },
   ];
 
-  useEffect(() => {
-    if (!(schoolNames && schoolNames.length > 0)) {
-      dispatch(listSchoolNames());
-    } else {
-      setSchools([
-        ...schoolNames.map((x, index) => ({ id: index, name: x.name })),
-      ]);
-    }
-  }, [dispatch, schoolNames]);
+  // useEffect(() => {
+  //   if (!(schoolNames && schoolNames.length > 0)) {
+  //     dispatch(listSchoolNames());
+  //   } else {
+  //     setSchools([
+  //       ...schoolNames.map((x, index) => ({ id: index, name: x.name })),
+  //     ]);
+  //   }
+  // }, [dispatch, schoolNames]);
 
   useEffect(() => {
     if (!userInfo) {
@@ -605,6 +608,28 @@ const OrderEditScreen = ({ history, match, location }) => {
     </Button>
   );
 
+  useEffect(() => {
+    if (schoolNames) {
+      setOptions(schoolNames);
+      setIsLoading(false);
+    }
+  }, [schoolNames]);
+
+  const handleChange = (item) => {
+    if (item.length > 0) {
+      history.push(`/admin/order/${orderId}/edit`);
+      setSchool(item[0].name);
+    } else {
+      setSchool('');
+    }
+  };
+
+  const handleSearch = (query) => {
+    setIsLoading(true);
+    dispatch(listSchoolNames(query));
+  };
+  const filterBy = () => true;
+
   return (
     <AdminPageLayout>
       <Meta
@@ -660,12 +685,25 @@ const OrderEditScreen = ({ history, match, location }) => {
         fullscreen={true}
         footer={<SaveNewItemsButton />}
       >
-        <div className='w-50'>
+        {/* <div className='w-50'>
           <SearchBoxAutocomplete
             placeholder={'Filter By School'}
             onClear={() => setSchool('')}
             items={schools}
             handleOnSelect={handleOnSelect}
+          />
+        </div> */}
+        <div className='mb-5'>
+          <AsyncTypeahead
+            filterBy={filterBy}
+            id='async-example'
+            isLoading={isLoading}
+            labelKey={'name'}
+            minLength={3}
+            onChange={(value) => handleChange(value)}
+            onSearch={handleSearch}
+            options={options}
+            placeholder='Enter School Name..'
           />
         </div>
 

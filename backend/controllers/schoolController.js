@@ -8,6 +8,9 @@ const getSchools = asyncHandler(async (req, res) => {
   const pageSize = 10;
   const page = Number(req.query.pageNumber) || 1;
   const schools = await School.find()
+    .sort({
+      name: 'asc',
+    })
     .limit(pageSize)
     .skip(pageSize * (page - 1));
   const count = await School.countDocuments({});

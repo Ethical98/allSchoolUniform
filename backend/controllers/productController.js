@@ -64,12 +64,7 @@ const getProducts = asyncHandler(async (req, res) => {
       }
     : {};
 
-  const unisexCategory = {
-    category: {
-      $regex: 'Unisex',
-      $options: 'i',
-    },
-  };
+
 
   const count = await Product.countDocuments({
     $and: [
