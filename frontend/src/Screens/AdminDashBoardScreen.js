@@ -1,7 +1,7 @@
 import React from 'react';
 import AdminPageLayout from '../components/AdminPageLayout';
 
-const AdminDashBoardScreen = ({ history }) => {
+const AdminDashBoardScreen = () => {
   return (
     <AdminPageLayout>
       <h1>DASHBOARD</h1>
