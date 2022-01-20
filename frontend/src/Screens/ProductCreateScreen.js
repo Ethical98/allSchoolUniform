@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
 import {
   Button,
   Form,
@@ -21,11 +20,21 @@ import { logout } from '../actions/userActions';
 import { createProduct } from '../actions/productActions';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
+import ImageUploader from '../components/ImageUploader';
+import Paginate from '../components/Paginate';
+import DialogBox from '../components/DialogBox';
+import { PRODUCT_IMAGE_UPLOAD_RESET } from '../constants/productConstants';
 
-const ProductCreateScreen = ({ history }) => {
+const ProductCreateScreen = ({ history, location }) => {
   const dispatch = useDispatch();
 
+  const urlSearchParams = new URLSearchParams(location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  const pageNumber = params.page ? params.page : 1;
+
+  const [showImageUploader, setShowImageUploader] = useState(false);
   const [name, setName] = useState('');
+  // const [url, setUrl] = useState('');
 
   const [image, setImage] = useState('');
   const [type, setType] = useState('');
@@ -33,8 +42,8 @@ const ProductCreateScreen = ({ history }) => {
   const [SKU, setSKU] = useState('');
   const [SEOKeywords, setSEOKeywords] = useState(undefined);
   //   const [masterClass, setMasterClass] = useState('');
-  const [standard, setStandard] = useState('');
-  const [schoolName, setSchoolName] = useState(['BBPS']);
+  const [standard, setStandard] = useState([]);
+  const [schoolName, setSchoolName] = useState([]);
   const [description, setDescription] = useState('');
   const [season, setSeason] = useState('');
   const [brand, setBrand] = useState('');
@@ -43,7 +52,7 @@ const ProductCreateScreen = ({ history }) => {
   const [message, setMessage] = useState('');
 
   const [masterSize, setMasterSize] = useState([]);
-  const [uploading, setUploading] = useState(false);
+  // const [uploading, setUploading] = useState(false);
 
   // const [masterType, setMasterType] = useState('');
 
@@ -87,34 +96,34 @@ const ProductCreateScreen = ({ history }) => {
     },
   ];
 
-  const uploadFileHandler = async (e) => {
-    const file = e.target.files[0];
+  // const uploadFileHandler = async (e) => {
+  //   const file = e.target.files[0];
 
-    const formData = new FormData();
-    formData.append('image', file);
-    setUploading(true);
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      };
+  //   const formData = new FormData();
+  //   formData.append('image', file);
+  //   setUploading(true);
+  //   try {
+  //     const config = {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //     };
 
-      const { data } = await axios.post('/api/upload', formData, config);
+  //     const { data } = await axios.post('/api/upload', formData, config);
 
-      setImage(data);
-      setUploading(false);
-    } catch (error) {
-      console.error(error);
-      setUploading(false);
-    }
-  };
+  //     setImage(data);
+  //     setUploading(false);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setUploading(false);
+  //   }
+  // };
 
   const productCreate = useSelector((state) => state.productCreate);
   const { loading, error, success } = productCreate;
 
   const schoolList = useSelector((state) => state.schoolList);
-  const { masterSchools } = schoolList;
+  const { masterSchools, pages, page } = schoolList;
 
   const typeSizesList = useSelector((state) => state.typeSizesList);
   const {
@@ -129,11 +138,15 @@ const ProductCreateScreen = ({ history }) => {
     error: errorMasterClasses,
     masterClasses,
   } = classList;
+
   const typeList = useSelector((state) => state.typeList);
   const { masterTypes } = typeList;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
+  const productImageUpload = useSelector((state) => state.productImageUpload);
+  const { url } = productImageUpload;
 
   useEffect(() => {
     if (!userInfo) {
@@ -167,20 +180,29 @@ const ProductCreateScreen = ({ history }) => {
     if (success) {
       history.push('/admin/productlist');
     }
+
     dispatch(listClasses());
     dispatch(listTypes());
-    dispatch(listSchools());
+    dispatch(listSchools(pageNumber));
 
     if (masterSizes && masterSizes.variants && type) {
       setMasterSize([...masterSizes.variants]);
     }
-  }, [dispatch, masterSizes, type, success, history]);
+  }, [dispatch, masterSizes, type, success, history, pageNumber]);
 
   useEffect(() => {
     if (type) {
       dispatch(listTypeSizes(type));
     }
   }, [type, dispatch]);
+
+  useEffect(() => {
+    if (url) {
+      setShowImageUploader(false);
+      setImage(url);
+      dispatch({ type: PRODUCT_IMAGE_UPLOAD_RESET });
+    }
+  }, [url, dispatch]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -236,6 +258,13 @@ const ProductCreateScreen = ({ history }) => {
       editable: 'never',
     },
   ];
+
+  const closeImageUploaderHandle = () => {
+    setShowImageUploader(false);
+  };
+  const showImageUploaderHandle = () => {
+    setShowImageUploader(true);
+  };
 
   return (
     <AdminPageLayout>
@@ -293,6 +322,7 @@ const ProductCreateScreen = ({ history }) => {
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                   >
+                    <option value=''>Select Category</option>
                     <option value='Boys'>Boys</option>
                     <option value='Girls'>Girls</option>
                     <option value='Unisex'>Unisex</option>
@@ -308,6 +338,7 @@ const ProductCreateScreen = ({ history }) => {
                     value={season}
                     onChange={(e) => setSeason(e.target.value)}
                   >
+                    <option value=''>Select Season</option>
                     <option value='Summer'>Summer</option>
                     <option value='Winter'>Winter</option>
                     <option value='All Season'>All Season</option>
@@ -351,7 +382,7 @@ const ProductCreateScreen = ({ history }) => {
                     onChange={(e) => setImage(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
-                {uploading && <Loader />}
+                {/* {uploading && <Loader />}
                 <Form.Group controlId='formFile' className='mb-3'>
                   <Form.Label>Upload Image</Form.Label>
                   <Form.Control
@@ -359,7 +390,28 @@ const ProductCreateScreen = ({ history }) => {
                     custom
                     onChange={uploadFileHandler}
                   />
-                </Form.Group>
+                </Form.Group> */}
+                {/* {schoolName.length === 0 && (
+                  <Message variant={'warning'}>
+                    Please Select Schools First
+                  </Message>
+                )} */}
+                <Button
+                  // disabled={schoolName.length === 0}
+                  className='col-12 mb-3'
+                  variant='outline-dark'
+                  onClick={showImageUploaderHandle}
+                >
+                  Upload Images
+                </Button>
+                <DialogBox
+                  size={'lg'}
+                  handleClose={closeImageUploaderHandle}
+                  show={showImageUploader}
+                  title={'UPLOAD IMAGES'}
+                >
+                  <ImageUploader product={true} />
+                </DialogBox>
                 <FloatingLabel
                   label='Description'
                   className='mb-3'
@@ -594,12 +646,12 @@ const ProductCreateScreen = ({ history }) => {
                               !selection.tableData.checked
                             ) {
                               const id = selection.tableData.id;
-
                               const dataDelete = [...schoolName];
 
-                              const index = standard.findIndex(
+                              const index = schoolName.findIndex(
                                 (x) => x === masterSchools[id].name
                               );
+
                               dataDelete.splice(index, 1);
                               setSchoolName([...dataDelete]);
                             } else if (selection && selection.tableData) {
@@ -617,6 +669,12 @@ const ProductCreateScreen = ({ history }) => {
                           }}
                         />
                       )}
+                      <Paginate
+                        addProduct={true}
+                        pages={pages}
+                        page={page}
+                        isAdmin={true}
+                      />
                     </Form.Group>
                   </Col>
                 </Row>

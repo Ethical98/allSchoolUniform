@@ -247,9 +247,7 @@ const sendMail = asyncHandler(async (req, res) => {
     };
     const result = await transport.sendMail(mailOptions);
     const result2 = await transport.sendMail(mailOptions2);
-    console.log(result);
-    console.log(result2);
-
+ 
     // const res = await gmail.users.messages.send({
     //   userId: 'devansh.gupta73@yahoo.in',
     //   requestBody: {

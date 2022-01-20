@@ -1,4 +1,5 @@
 import firebase from 'firebase/app';
+import 'firebase/storage';
 import 'firebase/auth';
 
 var firebaseConfig = {
@@ -25,4 +26,7 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
+const imageStorage = firebase.storage();
+
 export default firebase;
+export { imageStorage };

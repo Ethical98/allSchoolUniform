@@ -1,13 +1,15 @@
 import asyncHandler from 'express-async-handler';
 import Product from '../models/ProductModel.js';
-// import Class from '../models/ClassModel.js';
-// import ProductType from '../models/ProductTypesModel.js';
+import sharp from 'sharp';
+import path from 'path';
+import fs from 'fs';
+import paginate from '../utils/pagination.js';
 
 // @desc Fetch all Products
 // @route GET /api/products
 // @access Public
 const getProducts = asyncHandler(async (req, res) => {
-  const pageSize = 10;
+  const pageSize = 12;
   const page = Number(req.query.pageNumber) || 1;
 
   const searchKeyword = req.query.keyword
@@ -64,8 +66,6 @@ const getProducts = asyncHandler(async (req, res) => {
       }
     : {};
 
-
-
   const count = await Product.countDocuments({
     $and: [
       { $or: [{ ...searchKeyword }, { ...schoolKeyword }] },
@@ -112,7 +112,7 @@ const getProducts = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc Fetch Single Products
+// @desc Fetch Single Product
 // @route GET /api/products/:id
 // @access Public
 const getProductById = asyncHandler(async (req, res) => {
@@ -401,6 +401,51 @@ const getTopProducts = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc  Get Product Images
+// @route GET /api/products/images
+// @access Public
+const getProductImages = asyncHandler(async (req, res) => {
+  const __dirname = path.resolve();
+  const imagesPerPage = 12;
+  const currentPage = req.query.page || 1;
+  const imagesFolder = path.join(__dirname, '/uploads/products/');
+
+  const images = [];
+
+  const files = fs.readdirSync(imagesFolder);
+
+  files.sort(
+    (a, b) =>
+      fs.statSync(imagesFolder + b).mtime.getTime() -
+      fs.statSync(imagesFolder + a).mtime.getTime()
+  );
+
+  files.forEach((file) => {
+    images.push({ url: `\\uploads\\products\\${file}`, name: file });
+  });
+
+  const { currentImages, pages } = paginate(currentPage, imagesPerPage, images);
+
+  res.send({ images: currentImages, pages: pages });
+});
+
+// @desc Upload Product Images
+// @route POST /api/products/images
+// @access Public
+const uploadProductImages = asyncHandler(async (req, res) => {
+  if (req.file) {
+    const newFilename = `${
+      req.file.originalname.split('.')[0]
+    }-${Date.now()}${path.extname(req.file.originalname)}`;
+
+    await sharp(req.file.buffer)
+      .resize({ width: 640, height: 640 })
+      .toFile('uploads/products/resized-' + newFilename);
+
+    res.send(`/uploads/products/resized-${newFilename}`);
+  }
+});
+
 export {
   getProducts,
   getProductById,
@@ -411,4 +456,6 @@ export {
   createProduct,
   updateProduct,
   createProductReview,
+  getProductImages,
+  uploadProductImages,
 };

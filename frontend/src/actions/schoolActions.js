@@ -9,6 +9,13 @@ import {
   SCHOOL_DETAILS_FAIL,
   SCHOOL_DETAILS_REQUEST,
   SCHOOL_DETAILS_SUCCESS,
+  SCHOOL_IMAGE_LIST_FAIL,
+  SCHOOL_IMAGE_LIST_REQUEST,
+  SCHOOL_IMAGE_LIST_SUCCESS,
+  SCHOOL_IMAGE_UPLOAD_FAIL,
+  SCHOOL_IMAGE_UPLOAD_PROGRESS,
+  SCHOOL_IMAGE_UPLOAD_REQUEST,
+  SCHOOL_IMAGE_UPLOAD_SUCCESS,
   SCHOOL_LIST_FAIL,
   SCHOOL_LIST_REQUEST,
   SCHOOL_LIST_SUCCESS,
@@ -200,6 +207,73 @@ export const createSchool = (school) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: SCHOOL_CREATE_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const listSchoolImages =
+  (pageNumber = '') =>
+  async (dispatch) => {
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+      dispatch({ type: SCHOOL_IMAGE_LIST_REQUEST });
+      const {
+        data: { images: schoolImages, pages: schoolImagePages },
+      } = await axios.get(`/api/schools/images?page=${pageNumber}`, config);
+
+      dispatch({
+        type: SCHOOL_IMAGE_LIST_SUCCESS,
+        payload: { schoolImages, schoolImagePages },
+      });
+    } catch (error) {
+      dispatch({
+        type: SCHOOL_IMAGE_LIST_FAIL,
+        payload:
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message,
+      });
+    }
+  };
+
+export const uploadSchoolImage = (file) => async (dispatch) => {
+  const baseUrl = '/api/schools/images';
+
+  try {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      onUploadProgress: ({ total, loaded }) => {
+        let percentage = (loaded / total) * 100;
+        dispatch({
+          type: SCHOOL_IMAGE_UPLOAD_PROGRESS,
+          progress: percentage,
+        });
+      },
+    };
+    const formData = new FormData();
+    formData.append('image', file);
+
+    dispatch({ type: SCHOOL_IMAGE_UPLOAD_REQUEST });
+
+    const { data } = await axios.post(baseUrl, formData, config);
+
+    dispatch({
+      type: SCHOOL_IMAGE_UPLOAD_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: SCHOOL_IMAGE_UPLOAD_FAIL,
       payload:
         error.response && error.response.data.message
           ? error.response.data.message

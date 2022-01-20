@@ -10,31 +10,36 @@ import {
 import Loader from '../components/Loader';
 import FormContainer from '../components/FormContainer';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
+// import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import jsonwebtoken from 'jsonwebtoken';
 import { logout } from '../actions/userActions';
 import {
   SCHOOL_DETAILS_RESET,
+  SCHOOL_IMAGE_UPLOAD_RESET,
   SCHOOL_NAME_LIST_RESET,
   SCHOOL_UPDATE_RESET,
 } from '../constants/schoolConstants';
 import { listSchoolDetails, updateSchool } from '../actions/schoolActions';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
+import DialogBox from '../components/DialogBox';
+import ImageUploader from '../components/ImageUploader';
 
 const SchoolEditScreen = ({ match, history }) => {
   const schoolId = match.params.id;
 
   const dispatch = useDispatch();
 
+  const [showImageUploader, setShowImageUploader] = useState(false);
+
   const [contact, setContact] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [name, setName] = useState('');
   const [logo, setLogo] = useState('');
   const [address, setAddress] = useState('');
-  const [uploading, setUploading] = useState(false);
+  // const [uploading, setUploading] = useState(false);
   const [state, setState] = useState('');
   const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
@@ -54,6 +59,9 @@ const SchoolEditScreen = ({ match, history }) => {
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
+  const schoolImageUpload = useSelector((state) => state.schoolImageUpload);
+  const { url } = schoolImageUpload;
 
   useEffect(() => {
     if (!userInfo) {
@@ -108,28 +116,36 @@ const SchoolEditScreen = ({ match, history }) => {
     }
   }, [dispatch, history, successUpdate, school, schoolId]);
 
-  const uploadFileHandler = async (e) => {
-    const file = e.target.files[0];
-
-    const formData = new FormData();
-    formData.append('image', file);
-    setUploading(true);
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      };
-
-      const { data } = await axios.post('/api/upload', formData, config);
-
-      setLogo(data);
-      setUploading(false);
-    } catch (error) {
-      console.error(error);
-      setUploading(false);
+  useEffect(() => {
+    if (url) {
+      setShowImageUploader(false);
+      setLogo(url);
+      dispatch({ type: SCHOOL_IMAGE_UPLOAD_RESET });
     }
-  };
+  }, [url, dispatch]);
+
+  // const uploadFileHandler = async (e) => {
+  //   const file = e.target.files[0];
+
+  //   const formData = new FormData();
+  //   formData.append('image', file);
+  //   setUploading(true);
+  //   try {
+  //     const config = {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //     };
+
+  //     const { data } = await axios.post('/api/upload', formData, config);
+
+  //     setLogo(data);
+  //     setUploading(false);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setUploading(false);
+  //   }
+  // };
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -137,6 +153,14 @@ const SchoolEditScreen = ({ match, history }) => {
     dispatch(
       updateSchool({ _id: schoolId, name, contact, address, isActive, logo })
     );
+  };
+
+  const closeImageUploaderHandle = () => {
+    setShowImageUploader(false);
+  };
+  const showImageUploaderHandle = () => {
+    setLogo('');
+    setShowImageUploader(true);
   };
   return (
     <AdminPageLayout>
@@ -277,11 +301,26 @@ const SchoolEditScreen = ({ match, history }) => {
                   onChange={(e) => setLogo(e.target.value)}
                 ></Form.Control>
               </FloatingLabel>
-              {uploading && <Loader />}
+              {/* {uploading && <Loader />}
               <Form.Group controlId='formFile' className='mb-3'>
                 <Form.Label>Upload Image</Form.Label>
                 <Form.Control type='file' custom onChange={uploadFileHandler} />
-              </Form.Group>
+              </Form.Group> */}
+              <Button
+                className='col-12 mb-3'
+                variant='outline-dark'
+                onClick={showImageUploaderHandle}
+              >
+                Upload Images
+              </Button>
+              <DialogBox
+                size={'lg'}
+                handleClose={closeImageUploaderHandle}
+                show={showImageUploader}
+                title={'UPLOAD IMAGES'}
+              >
+                <ImageUploader setUrl={setLogo} url={logo} school={true} />
+              </DialogBox>
 
               <Form.Group controlId='isActive' className='mb-3'>
                 <Form.Check

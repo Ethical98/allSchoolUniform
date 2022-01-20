@@ -1,5 +1,9 @@
 import asyncHandler from 'express-async-handler';
 import School from '../models/SchoolModel.js';
+import paginate from '../utils/pagination.js';
+import fs from 'fs';
+import sharp from 'sharp';
+import path from 'path';
 
 // @desc Get SchoolList
 // @route GET /api/schools
@@ -154,6 +158,50 @@ const updateSchool = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc  Get School logo Images
+// @route GET /api/schools/images
+// @access Public
+const getSchoolImages = asyncHandler(async (req, res) => {
+  const __dirname = path.resolve();
+  const imagesPerPage = 12;
+  const currentPage = req.query.page || 1;
+  const imagesFolder = path.join(__dirname, '/uploads/schools/');
+
+  const images = [];
+
+  const files = fs.readdirSync(imagesFolder);
+
+  files.sort(
+    (a, b) =>
+      fs.statSync(imagesFolder + b).mtime.getTime() -
+      fs.statSync(imagesFolder + a).mtime.getTime()
+  );
+
+  files.forEach((file) => {
+    images.push({ url: `\\uploads\\schools\\${file}`, name: file });
+  });
+
+  const { currentImages, pages } = paginate(currentPage, imagesPerPage, images);
+
+  res.send({ images: currentImages, pages: pages });
+});
+
+// @desc Upload School Images
+// @route POST /api/schools/images
+// @access Public
+const uploadSchoolImages = asyncHandler(async (req, res) => {
+  if (req.file) {
+    const newFilename = `${
+      req.file.originalname.split('.')[0]
+    }-${Date.now()}${path.extname(req.file.originalname)}`;
+
+    await sharp(req.file.buffer)
+      .resize({ width: 300, height: 300 })
+      .toFile('uploads/schools/resized-' + newFilename);
+
+    res.send(`/uploads/schools/resized-${newFilename}`);
+  }
+});
 export {
   getSchools,
   getSchoolNames,
@@ -161,4 +209,6 @@ export {
   updateSchool,
   getSchoolDetails,
   createSchool,
+  uploadSchoolImages,
+  getSchoolImages,
 };

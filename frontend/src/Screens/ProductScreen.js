@@ -10,7 +10,6 @@ import Paginate from '../components/Paginate';
 import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
 import Accordion from '../components/Accordion';
-import { Route } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import BreadCrumb from '../components/BreadCrumb';
 
@@ -19,9 +18,9 @@ const ProductScreen = ({ history, location, match }) => {
 
   const urlSearchParams = new URLSearchParams(location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
-  const category = params.category ? params.category.split(',').join('|') : '';
-  const season = params.season ? params.season.split(',').join('|') : '';
-  const standard = params.class ? params.class.split(',').join('|') : '';
+  const category = params.category ? params.category : '';
+  const season = params.season ? params.season : '';
+  const standard = params.class ? params.class : '';
   const pageNumber = params.page ? params.page : 1;
   const keyword = params.search ? params.search : '';
 
@@ -35,7 +34,14 @@ const ProductScreen = ({ history, location, match }) => {
 
   useEffect(() => {
     dispatch(
-      listProducts(keyword, pageNumber, category, season, standard, school)
+      listProducts(
+        keyword,
+        pageNumber,
+        category.split(',').join('|'),
+        season.split(',').join('|'),
+        standard.split(',').join('|'),
+        school
+      )
     );
   }, [dispatch, keyword, pageNumber, category, season, standard, school]);
 
@@ -56,6 +62,8 @@ const ProductScreen = ({ history, location, match }) => {
 
   return (
     <PageLayout>
+      <Meta title={'Products - AllschoolUniform'} />
+      <BreadCrumb />
       {/* {keyword && (
         <Link to='/' className='mb-3 btn btn-light'>
           Go Back
@@ -67,19 +75,9 @@ const ProductScreen = ({ history, location, match }) => {
         <Message variant='danger'>{error}</Message>
       ) : (
         <>
-          <BreadCrumb />
-          <Meta title={'Products - AllschoolUniform'} />
           <Row>
-            <Col sm={6} md={3} className='d-none d-sm-block'>
-              <Route
-                render={({ history, location, match }) => (
-                  <Accordion
-                    history={history}
-                    location={location}
-                    match={match}
-                  />
-                )}
-              />
+            <Col sm={6} md={3}>
+              <Accordion />
             </Col>
             <Col sm={6} md={9}>
               <Row>

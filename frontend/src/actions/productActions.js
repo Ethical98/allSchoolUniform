@@ -17,6 +17,13 @@ import {
   PRODUCT_CREATE_REVIEW_FAIL,
   PRODUCT_CREATE_REVIEW_SUCCESS,
   PRODUCT_CREATE_REVIEW_REQUEST,
+  PRODUCT_IMAGE_LIST_FAIL,
+  PRODUCT_IMAGE_LIST_REQUEST,
+  PRODUCT_IMAGE_LIST_SUCCESS,
+  PRODUCT_IMAGE_UPLOAD_FAIL,
+  PRODUCT_IMAGE_UPLOAD_REQUEST,
+  PRODUCT_IMAGE_UPLOAD_SUCCESS,
+  PRODUCT_IMAGE_UPLOAD_PROGRESS,
 } from '../constants/productConstants';
 
 import axios from 'axios';
@@ -37,7 +44,7 @@ export const listProducts =
       const { data } = await axios.get(
         `/api/products?category=${category}&season=${season}&standard=${standard}&keyword=${keyword}&school=${school}&pageNumber=${pageNumber}`
       );
-     
+
       dispatch({
         type: PRODUCT_LIST_SUCCESS,
         payload: data,
@@ -331,3 +338,70 @@ export const createProductReview =
       });
     }
   };
+
+export const listProductImages =
+  (pageNumber = '') =>
+  async (dispatch) => {
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+      dispatch({ type: PRODUCT_IMAGE_LIST_REQUEST });
+      const {
+        data: { images: productImages, pages: productImagePages },
+      } = await axios.get(`/api/products/images?page=${pageNumber}`, config);
+
+      dispatch({
+        type: PRODUCT_IMAGE_LIST_SUCCESS,
+        payload: { productImages, productImagePages },
+      });
+    } catch (error) {
+      dispatch({
+        type: PRODUCT_IMAGE_LIST_FAIL,
+        payload:
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message,
+      });
+    }
+  };
+
+export const uploadProductImage = (file) => async (dispatch) => {
+  const baseUrl = '/api/products/images';
+
+  try {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      onUploadProgress: ({ total, loaded }) => {
+        let percentage = (loaded / total) * 100;
+        dispatch({
+          type: PRODUCT_IMAGE_UPLOAD_PROGRESS,
+          progress: percentage,
+        });
+      },
+    };
+    const formData = new FormData();
+    formData.append('image', file);
+
+    dispatch({ type: PRODUCT_IMAGE_UPLOAD_REQUEST });
+
+    const { data } = await axios.post(baseUrl, formData, config);
+
+    dispatch({
+      type: PRODUCT_IMAGE_UPLOAD_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: PRODUCT_IMAGE_UPLOAD_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};

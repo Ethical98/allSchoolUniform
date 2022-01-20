@@ -3,14 +3,21 @@ import {
   createSchool,
   deleteSchool,
   getSchoolDetails,
+  getSchoolImages,
   getSchoolNames,
   getSchools,
   updateSchool,
+  uploadSchoolImages,
 } from '../controllers/schoolController.js';
+import { protect, isAdmin } from '../Middleware/authMiddleware.js';
+import upload from '../Middleware/uploadMiddleware.js';
 
 const router = express.Router();
-import { protect, isAdmin } from '../Middleware/authMiddleware.js';
 
+router
+  .route('/images')
+  .get(getSchoolImages)
+  .post(upload.single('image'), uploadSchoolImages);
 router
   .route('/')
   .get(protect, isAdmin, getSchools)

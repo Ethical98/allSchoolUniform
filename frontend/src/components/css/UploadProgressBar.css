@@ -1,0 +1,52 @@
+:root {
+  --primary: #efb6b2;
+  --secondary: #4e4e4e;
+  --error: #ff4a4a;
+}
+
+.image-upload-form {
+  margin: 30px auto 10px;
+  text-align: center;
+}
+
+.image-upload-form-group {
+  position: relative;
+  display: block;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--primary);
+  border-radius: 50%;
+  margin: 10px auto;
+  line-height: 30px;
+  color: var(--primary);
+  font-weight: bold;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.image-upload-form-group:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.image-upload-form-group span {
+  position: absolute;
+  left: 7px;
+}
+
+.image-upload-progress-bar {
+  height: 5px;
+  background: var(--primary);
+  margin-top: 20px;
+}
+
+.image-upload-input {
+  height: 0;
+  width: 0;
+  opacity: 0;
+}
+
+.output-image {
+  height: 60px;
+  font-size: 0.8rem;
+}

@@ -1,0 +1,33 @@
+.admin-header {
+  margin-top: -10px;
+}
+.admin-header .nav-link {
+  border: none;
+}
+
+.admin-header-nav-item {
+  display: flex;
+  flex-direction: column;
+  color: lightgray;
+  border: none;
+}
+
+.admin-header-nav-item:hover {
+  color: white;
+  border: none;
+}
+
+.admin-header .nav-link.active {
+  color: white;
+  background: none;
+  border: none;
+  border-bottom: 3px solid #ff6a00;
+  font-weight: 500;
+}
+
+@media (max-width: 575.98px) {
+  .admin-header {
+    margin-top: -20px;
+    padding-top: 1px;
+  }
+}

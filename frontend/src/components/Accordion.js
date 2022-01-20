@@ -2,9 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, ListGroup } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { listClasses } from '../actions/classActions';
+import useWindowDimensions from '../utils/useWindowDimensions';
+import Filter from './Filter';
+import { useLocation, useHistory, useParams } from 'react-router-dom';
 
-const Accordion = ({ history, location, match }) => {
+const Accordion = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const history = useHistory();
+  const { selectedschool } = useParams();
+  window.scrollTo(0, 0);
+
+  const { width } = useWindowDimensions();
 
   const classList = useSelector((state) => state.classList);
   const { masterClasses } = classList;
@@ -12,10 +21,10 @@ const Accordion = ({ history, location, match }) => {
   const urlSearchParams = new URLSearchParams(location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
 
-  const school = match.params.selectedschool;
+  const school = selectedschool;
 
-  const [pageNumber, setPageNumber] = useState(params.pageNumber || 1);
-
+  const [pageNumber, setPageNumber] = useState(params.page);
+  
   useEffect(() => {
     dispatch(listClasses());
   }, [dispatch]);
@@ -123,12 +132,25 @@ const Accordion = ({ history, location, match }) => {
         }
       }
     } else {
-      if (school) {
-        history.push(`/products/schools/${school}`);
+      if (school && pageNumber) {
+        // history.push(`/products/schools/${school}?page=${pageNumber}`);
+        history.replace({
+          pathname: `/products/schools/${school}`,
+          search: `?page=${pageNumber}`,
+        });
+      } else if (school) {
+        history.replace(`/products/schools/${school}`);
+      } else if (keyword && pageNumber) {
+        history.replace({
+          pathname: `/products?`,
+          search: `search=${keyword}&page=${pageNumber}`,
+        });
       } else if (keyword) {
-        history.push(`/products?search=${keyword}`);
+        history.replace(`/products?search=${keyword}`);
+      } else if (pageNumber) {
+        history.replace(`/products?page=${pageNumber}`);
       } else {
-        history.push('/products');
+        history.replace('/products');
       }
     }
   }, [
@@ -181,143 +203,157 @@ const Accordion = ({ history, location, match }) => {
 
   return (
     <div>
-      <Card id='Acc'>
-        <Card.Header className='text-center'>
-          Buy Uniform in 3 Easy Steps
-        </Card.Header>
-        <div>
-          <Form className='m-3'>
-            <Form.Select as='select'>
-              <option value=''>Select State</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-            </Form.Select>
-          </Form>
-          <Form className='m-3'>
-            <Form.Select as='select'>
-              <option value=''>Select City</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-            </Form.Select>
-          </Form>
-          <Form className='m-3'>
-            <Form.Select as='select'>
-              <option value=''>Select School</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-            </Form.Select>
-          </Form>
-        </div>
-        <Card.Header
-          data-bs-toggle='collapse'
-          href='#ProductCategory'
-          role='button'
-          aria-expanded='true'
-          aria-controls='ProductCategory'
-        >
-          Product Category
-          <i className='fas fa-arrow-circle-down float-end'></i>
-          <i className='fas fa-arrow-circle-right float-end'></i>
-        </Card.Header>
-        <div id='ProductCategory' className='collapse show'>
-          <Form className='m-3'>
-            <Form.Check
-              checked={category.includes('Boys')}
-              name='Category'
-              type='checkbox'
-              value='Boys'
-              label='Boys'
-              onChange={(event) =>
-                categoryChange(event.target.value, event.target.checked)
-              }
-            ></Form.Check>
-            <Form.Check
-              checked={category.includes('Girls')}
-              name='Category'
-              type='checkbox'
-              value='Girls'
-              label='Girls'
-              onChange={(event) =>
-                categoryChange(event.target.value, event.target.checked)
-              }
-            ></Form.Check>
-          </Form>
-        </div>
-        <Card.Header
-          data-bs-toggle='collapse'
-          href='#SeasonalClothing'
-          role='button'
-          aria-expanded='true'
-          aria-controls='SeasonalClothing'
-        >
-          Seasonal Clothing
-          <i className='fas fa-arrow-circle-down float-end'></i>
-          <i className='fas fa-arrow-circle-right float-end'></i>
-        </Card.Header>
-        <div id='SeasonalClothing' className='collapse show'>
-          <Form className='m-3'>
-            <Form.Check
-              checked={season.includes('Winter')}
-              name='Seasonal'
-              type='checkbox'
-              value='Winter'
-              label='Winter'
-              onChange={(event) =>
-                seasonChange(event.target.value, event.target.checked)
-              }
-            />
-            <Form.Check
-              checked={season.includes('Summer')}
-              name='Seasonal'
-              type='checkbox'
-              value='Summer'
-              label='Summer'
-              onChange={(event) =>
-                seasonChange(event.target.value, event.target.checked)
-              }
-            />
-          </Form>
-        </div>
-        <Card.Header
-          data-bs-toggle='collapse'
-          href='#Class'
-          role='button'
-          aria-expanded='true'
-          aria-controls='Class'
-        >
-          Class
-          <i className='fas fa-arrow-circle-down float-end'></i>
-          <i className='fas fa-arrow-circle-right float-end'></i>
-        </Card.Header>
-        <div id='Class' className='collapse show'>
-          <ListGroup>
-            <ListGroup.Item style={{ border: 0 }}>
-              {masterClasses &&
-                masterClasses.map(
-                  (x) =>
-                    x.isActive === true && (
-                      <Form.Check
-                        checked={standard.includes(x.class)}
-                        key={x._id}
-                        value={x.class}
-                        type='checkbox'
-                        label={x.class}
-                        onChange={(e) =>
-                          standardChange(x.class, e.target.checked)
-                        }
-                      />
-                    )
-                )}
-            </ListGroup.Item>
-          </ListGroup>
-        </div>
-      </Card>
+      {width < 575.98 ? (
+        <Filter
+          page={pageNumber}
+          setPage={setPageNumber}
+          season={season}
+          category={category}
+          standard={standard}
+          setStandard={setStandard}
+          setCategory={setCategory}
+          setSeason={setSeason}
+          classes={masterClasses}
+        />
+      ) : (
+        <Card id='Acc'>
+          <Card.Header className='text-center'>
+            Buy Uniform in 3 Easy Steps
+          </Card.Header>
+          <div>
+            <Form className='m-3'>
+              <Form.Select as='select'>
+                <option value=''>Select State</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+              </Form.Select>
+            </Form>
+            <Form className='m-3'>
+              <Form.Select as='select'>
+                <option value=''>Select City</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+              </Form.Select>
+            </Form>
+            <Form className='m-3'>
+              <Form.Select as='select'>
+                <option value=''>Select School</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+              </Form.Select>
+            </Form>
+          </div>
+          <Card.Header
+            data-bs-toggle='collapse'
+            href='#ProductCategory'
+            role='button'
+            aria-expanded='true'
+            aria-controls='ProductCategory'
+          >
+            Product Category
+            <i className='fas fa-arrow-circle-down float-end'></i>
+            <i className='fas fa-arrow-circle-right float-end'></i>
+          </Card.Header>
+          <div id='ProductCategory' className='collapse show'>
+            <Form className='m-3'>
+              <Form.Check
+                checked={category.includes('Boys')}
+                name='Category'
+                type='checkbox'
+                value='Boys'
+                label='Boys'
+                onChange={(event) =>
+                  categoryChange(event.target.value, event.target.checked)
+                }
+              ></Form.Check>
+              <Form.Check
+                checked={category.includes('Girls')}
+                name='Category'
+                type='checkbox'
+                value='Girls'
+                label='Girls'
+                onChange={(event) =>
+                  categoryChange(event.target.value, event.target.checked)
+                }
+              ></Form.Check>
+            </Form>
+          </div>
+          <Card.Header
+            data-bs-toggle='collapse'
+            href='#SeasonalClothing'
+            role='button'
+            aria-expanded='true'
+            aria-controls='SeasonalClothing'
+          >
+            Seasonal Clothing
+            <i className='fas fa-arrow-circle-down float-end'></i>
+            <i className='fas fa-arrow-circle-right float-end'></i>
+          </Card.Header>
+          <div id='SeasonalClothing' className='collapse show'>
+            <Form className='m-3'>
+              <Form.Check
+                checked={season.includes('Winter')}
+                name='Seasonal'
+                type='checkbox'
+                value='Winter'
+                label='Winter'
+                onChange={(event) =>
+                  seasonChange(event.target.value, event.target.checked)
+                }
+              />
+              <Form.Check
+                checked={season.includes('Summer')}
+                name='Seasonal'
+                type='checkbox'
+                value='Summer'
+                label='Summer'
+                onChange={(event) =>
+                  seasonChange(event.target.value, event.target.checked)
+                }
+              />
+            </Form>
+          </div>
+          <Card.Header
+            data-bs-toggle='collapse'
+            href='#Class'
+            role='button'
+            aria-expanded='true'
+            aria-controls='Class'
+          >
+            Class
+            <i className='fas fa-arrow-circle-down float-end'></i>
+            <i className='fas fa-arrow-circle-right float-end'></i>
+          </Card.Header>
+          <div id='Class' className='collapse show'>
+            <ListGroup>
+              <ListGroup.Item style={{ border: 0 }}>
+                {masterClasses &&
+                  masterClasses.map(
+                    (x) =>
+                      x.isActive === true && (
+                        <Form.Check
+                          checked={standard.includes(x.class)}
+                          key={x._id}
+                          value={x.class}
+                          type='checkbox'
+                          label={x.class}
+                          onChange={(e) =>
+                            standardChange(x.class, e.target.checked)
+                          }
+                        />
+                      )
+                  )}
+              </ListGroup.Item>
+            </ListGroup>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };

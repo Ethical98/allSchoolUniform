@@ -17,7 +17,7 @@ const addToCart = asyncHandler(async (req, res) => {
    
     if (cart) {
       const existItem = cart.cartItems.find((x) => x._id == addItem._id);
-      console.log(existItem._id);
+ 
 
       if (existItem) {
         cart.cartItems = cart.cartItems.map((x) =>
@@ -91,8 +91,8 @@ const getCart = asyncHandler(async (req, res) => {
 // @access Private
 const mergeCart = asyncHandler(async (req, res) => {
   const { cartItems } = req.body;
-  console.log('Items from body');
-  console.log(cartItems);
+ 
+ 
 
   const cart = await Cart.findOne({ user: req.user._id });
   if (cart) {
@@ -114,8 +114,7 @@ const mergeCart = asyncHandler(async (req, res) => {
             : itemToAdd.product == addedItem.product
         )
     );
-    console.log('filtered Items');
-    console.log(products);
+ 
     cart.cartItems = [...cart.cartItems, ...products];
     const finalCart = await cart.save();
     res.json(finalCart.cartItems);

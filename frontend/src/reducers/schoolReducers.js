@@ -21,6 +21,14 @@ import {
   SCHOOL_UPDATE_FAIL,
   SCHOOL_UPDATE_RESET,
   SCHOOL_NAME_LIST_RESET,
+  SCHOOL_IMAGE_LIST_REQUEST,
+  SCHOOL_IMAGE_LIST_SUCCESS,
+  SCHOOL_IMAGE_LIST_FAIL,
+  SCHOOL_IMAGE_UPLOAD_REQUEST,
+  SCHOOL_IMAGE_UPLOAD_PROGRESS,
+  SCHOOL_IMAGE_UPLOAD_SUCCESS,
+  SCHOOL_IMAGE_UPLOAD_FAIL,
+  SCHOOL_IMAGE_UPLOAD_RESET,
 } from '../constants/schoolConstants';
 
 export const schoolListReducer = (state = { masterSchools: [] }, action) => {
@@ -109,6 +117,47 @@ export const schoolUpdateReducer = (state = { school: {} }, action) => {
       return { loading: false, error: action.payload };
     case SCHOOL_UPDATE_RESET:
       return { school: {} };
+    default:
+      return state;
+  }
+};
+
+export const schoolImageListReducer = (
+  state = { schoolImages: [] },
+  action
+) => {
+  switch (action.type) {
+    case SCHOOL_IMAGE_LIST_REQUEST:
+      return { loading: true };
+    case SCHOOL_IMAGE_LIST_SUCCESS:
+      return {
+        loading: false,
+        schoolImages: action.payload.schoolImages,
+        schoolImagePages: action.payload.schoolImagePages,
+      };
+    case SCHOOL_IMAGE_LIST_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const schoolImageUploadReducer = (state = {}, action) => {
+  switch (action.type) {
+    case SCHOOL_IMAGE_UPLOAD_REQUEST:
+      return { loading: true };
+
+    case SCHOOL_IMAGE_UPLOAD_PROGRESS:
+      return { progress: action.progress };
+    case SCHOOL_IMAGE_UPLOAD_SUCCESS:
+      return {
+        loading: false,
+        url: action.payload,
+      };
+    case SCHOOL_IMAGE_UPLOAD_FAIL:
+      return { loading: false, error: action.payload };
+    case SCHOOL_IMAGE_UPLOAD_RESET:
+      return { url: '' };
     default:
       return state;
   }

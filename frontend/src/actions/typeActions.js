@@ -12,6 +12,13 @@ import {
   TYPE_GET_IMAGES_FAIL,
   TYPE_GET_IMAGES_REQUEST,
   TYPE_GET_IMAGES_SUCCESS,
+  TYPE_IMAGE_LIST_FAIL,
+  TYPE_IMAGE_LIST_REQUEST,
+  TYPE_IMAGE_LIST_SUCCESS,
+  TYPE_IMAGE_UPLOAD_FAIL,
+  TYPE_IMAGE_UPLOAD_PROGRESS,
+  TYPE_IMAGE_UPLOAD_REQUEST,
+  TYPE_IMAGE_UPLOAD_SUCCESS,
   TYPE_LIST_ALL_FAIL,
   TYPE_LIST_ALL_REQUEST,
   TYPE_LIST_ALL_SUCCESS,
@@ -93,7 +100,7 @@ export const getTypeImages = (type) => async (dispatch) => {
     dispatch({ type: TYPE_GET_IMAGES_REQUEST });
 
     const { data } = await axios.get(`/api/types/${type}/images`);
-   
+
     dispatch({
       type: TYPE_GET_IMAGES_SUCCESS,
       payload: data,
@@ -260,6 +267,73 @@ export const listTypeSizes = (type) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: TYPE_SIZES_LIST_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const listTypeImages =
+  (pageNumber = '') =>
+  async (dispatch) => {
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+      dispatch({ type: TYPE_IMAGE_LIST_REQUEST });
+      const {
+        data: { images: typeImages, pages: typeImagePages },
+      } = await axios.get(`/api/types/images?page=${pageNumber}`, config);
+
+      dispatch({
+        type: TYPE_IMAGE_LIST_SUCCESS,
+        payload: { typeImages, typeImagePages },
+      });
+    } catch (error) {
+      dispatch({
+        type: TYPE_IMAGE_LIST_FAIL,
+        payload:
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message,
+      });
+    }
+  };
+
+export const uploadTypeImage = (file) => async (dispatch) => {
+  const baseUrl = '/api/types/images';
+
+  try {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      onUploadProgress: ({ total, loaded }) => {
+        let percentage = (loaded / total) * 100;
+        dispatch({
+          type: TYPE_IMAGE_UPLOAD_PROGRESS,
+          progress: percentage,
+        });
+      },
+    };
+    const formData = new FormData();
+    formData.append('image', file);
+
+    dispatch({ type: TYPE_IMAGE_UPLOAD_REQUEST });
+
+    const { data } = await axios.post(baseUrl, formData, config);
+
+    dispatch({
+      type: TYPE_IMAGE_UPLOAD_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: TYPE_IMAGE_UPLOAD_FAIL,
       payload:
         error.response && error.response.data.message
           ? error.response.data.message

@@ -1,27 +1,89 @@
-import React, { useState } from 'react';
-import { Collapse, Card, Button } from 'react-bootstrap';
-import OffCanvas from './OffCanvas';
+import React, { useRef } from 'react';
+import { Form } from 'react-bootstrap';
+import { Typeahead } from 'react-bootstrap-typeahead';
+import './css/Filter.css';
 
-const Filter = () => {
-  const [open, setOpen] = useState(false);
+const Filter = ({
+  page,
+  setPage,
+  season,
+  category,
+  standard,
+  setStandard,
+  setCategory,
+  setSeason,
+  classes,
+}) => {
+  const ref1 = useRef();
+  const ref2 = useRef();
+  const ref3 = useRef();
+
+  const classList = classes ? classes.map((x) => x.class) : [];
+
+  const productCategories = ['Boys', 'Girls'];
+  const seasons = ['Winter', 'Summer'];
+
+  const seasonChange = (value) => {
+    setPage('');
+    setSeason(value);
+  };
+
+  const categoryChange = (value) => {
+    setPage('');
+    setCategory(value);
+  };
+
+  const standardChange = (value) => {
+    setPage('');
+    setStandard(value);
+  };
 
   return (
-    <div className='d-block d-sm-none' style={{ marginBottom: '-99vh' }}>
-      <Button
-        variant='outline-dark'
-        onClick={() => setOpen(!open)}
-        aria-controls='example-collapse-text'
-        aria-expanded={open}
-      >
-        Filters
-      </Button>
-
-      <Collapse in={open}>
-        <Card>
-          <OffCanvas />
-        </Card>
-      </Collapse>
-    </div>
+    <Form className='filter-form'>
+      <Form.Group className='me-2'>
+        <Typeahead
+          id='category-typeahead'
+          clearButton={true}
+          size='sm'
+          multiple
+          onChange={(value) => categoryChange(value)}
+          options={productCategories}
+          placeholder='Categories'
+          selected={category}
+          ref={ref1}
+          onBlur={() => ref1.current.toggleMenu(() => false)}
+        />
+      </Form.Group>
+      <Form.Group className='me-2'>
+        <Typeahead
+          id='season-typeahead'
+          clearButton={true}
+          size='sm'
+          multiple
+          onChange={(value) => seasonChange(value)}
+          options={seasons}
+          placeholder='Season'
+          selected={season}
+          ref={ref2}
+          onBlur={() => ref2.current.toggleMenu(() => false)}
+        />
+      </Form.Group>
+      <Form.Group>
+        <Typeahead
+          id='standard-typeahead'
+          clearButton={true}
+          size='sm'
+          labelKey='class'
+          multiple
+          onChange={(value) => standardChange(value)}
+          options={classList}
+          placeholder='Classes'
+          selected={standard}
+          ref={ref3}
+          onBlur={() => ref3.current.toggleMenu(() => false)}
+        />
+      </Form.Group>
+    </Form>
   );
 };
 

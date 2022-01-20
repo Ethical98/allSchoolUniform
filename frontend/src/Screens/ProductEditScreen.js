@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -24,15 +23,25 @@ import MaterialTable from 'material-table';
 import { logout } from '../actions/userActions';
 import {
   PRODUCT_DETAILS_RESET,
+  PRODUCT_IMAGE_UPLOAD_RESET,
   PRODUCT_UPDATE_RESET,
 } from '../constants/productConstants';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
+import Paginate from '../components/Paginate';
+import ImageUploader from '../components/ImageUploader';
+import DialogBox from '../components/DialogBox';
 
-const ProductEditScreen = ({ match, history }) => {
+const ProductEditScreen = ({ match, history, location }) => {
   const dispatch = useDispatch();
 
   const productId = match.params.id;
+
+  const urlSearchParams = new URLSearchParams(location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  const pageNumber = params.page ? params.page : 1;
+
+  const [showImageUploader, setShowImageUploader] = useState(false);
 
   const [name, setName] = useState('');
   const [SKU, setSKU] = useState('');
@@ -43,7 +52,7 @@ const ProductEditScreen = ({ match, history }) => {
   const [standard, setStandard] = useState([]);
   const [schoolName, setSchoolName] = useState([]);
   const [description, setDescription] = useState('');
-  const [uploading, setUploading] = useState(false);
+  // const [uploading, setUploading] = useState(false);
   const [season, setSeason] = useState('');
   const [brand, setBrand] = useState('');
   const [category, setCategory] = useState('');
@@ -122,10 +131,18 @@ const ProductEditScreen = ({ match, history }) => {
   const { masterTypes } = typeList;
 
   const schoolList = useSelector((state) => state.schoolList);
-  const { masterSchools } = schoolList;
+  const {
+    loading: masterSchoolsLoading,
+    masterSchools,
+    pages,
+    page,
+  } = schoolList;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
+  const productImageUpload = useSelector((state) => state.productImageUpload);
+  const { url } = productImageUpload;
 
   useEffect(() => {
     if (!userInfo) {
@@ -164,7 +181,6 @@ const ProductEditScreen = ({ match, history }) => {
       if (!product.name || product._id !== productId) {
         dispatch(listProductDetailsById(productId));
         dispatch(listClasses());
-        dispatch(listSchools());
       } else {
         setType(product.type);
         if (product.type !== type) {
@@ -188,6 +204,7 @@ const ProductEditScreen = ({ match, history }) => {
             ...masterSchools.filter((x) => x.isActive === true),
           ]);
         }
+
         if (masterClasses) {
           setMasterClass([...masterClasses.filter((x) => x.isActive === true)]);
         }
@@ -202,11 +219,16 @@ const ProductEditScreen = ({ match, history }) => {
     productId,
     product,
     history,
+    masterSchools,
     masterClasses,
     masterTypes,
-    masterSchools,
     successUpdate,
+    pageNumber,
   ]);
+
+  useEffect(() => {
+    dispatch(listSchools(pageNumber));
+  }, [dispatch, pageNumber]);
 
   useEffect(() => {
     if (masterSizes && masterSizes.variants) {
@@ -218,28 +240,36 @@ const ProductEditScreen = ({ match, history }) => {
     dispatch(listTypes());
   }, [dispatch]);
 
-  const uploadFileHandler = async (e) => {
-    const file = e.target.files[0];
-
-    const formData = new FormData();
-    formData.append('image', file);
-    setUploading(true);
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      };
-
-      const { data } = await axios.post('/api/upload', formData, config);
-
-      setImage(data);
-      setUploading(false);
-    } catch (error) {
-      console.error(error);
-      setUploading(false);
+  useEffect(() => {
+    if (url) {
+      setImage(url);
+      setShowImageUploader(false);
+      dispatch({ type: PRODUCT_IMAGE_UPLOAD_RESET });
     }
-  };
+  }, [url, dispatch]);
+
+  // const uploadFileHandler = async (e) => {
+  //   const file = e.target.files[0];
+
+  //   const formData = new FormData();
+  //   formData.append('image', file);
+  //   setUploading(true);
+  //   try {
+  //     const config = {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //     };
+
+  //     const { data } = await axios.post('/api/upload', formData, config);
+
+  //     setImage(data);
+  //     setUploading(false);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setUploading(false);
+  //   }
+  // };
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -296,6 +326,14 @@ const ProductEditScreen = ({ match, history }) => {
       editable: 'never',
     },
   ];
+
+  const closeImageUploaderHandle = () => {
+    setShowImageUploader(false);
+  };
+  const showImageUploaderHandle = () => {
+    setImage('');
+    setShowImageUploader(true);
+  };
 
   return (
     <AdminPageLayout>
@@ -416,7 +454,7 @@ const ProductEditScreen = ({ match, history }) => {
                     onChange={(e) => setImage(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
-                {uploading && <Loader />}
+                {/* {uploading && <Loader />}
                 <Form.Group controlId='formFile' className='mb-3'>
                   <Form.Label>Upload Image</Form.Label>
                   <Form.Control
@@ -424,7 +462,23 @@ const ProductEditScreen = ({ match, history }) => {
                     custom
                     onChange={uploadFileHandler}
                   />
-                </Form.Group>
+                </Form.Group> */}
+                <Button
+                  disabled={schoolName.length === 0}
+                  className='col-12 mb-3'
+                  variant='outline-dark'
+                  onClick={showImageUploaderHandle}
+                >
+                  Upload Images
+                </Button>
+                <DialogBox
+                  size={'lg'}
+                  handleClose={closeImageUploaderHandle}
+                  show={showImageUploader}
+                  title={'UPLOAD IMAGES'}
+                >
+                  <ImageUploader />
+                </DialogBox>
 
                 <FloatingLabel
                   controlId='description'
@@ -550,7 +604,7 @@ const ProductEditScreen = ({ match, history }) => {
                   )}
                 </Row>
                 <Row className='my-3'>
-                  <Col>
+                  <Col md={4}>
                     {errorMasterClasses ? (
                       <Message variant='warning'>{errorMasterClasses}</Message>
                     ) : (
@@ -618,62 +672,73 @@ const ProductEditScreen = ({ match, history }) => {
                   <Col>
                     <Form.Group className='ml-2' controlId='school'>
                       <Form.Label>Schools</Form.Label>
-                      {masterSchool && (
-                        <MaterialTable
-                          data={masterSchool}
-                          columns={schoolTableColumns}
-                          style={{
-                            padding: '1%',
-                            border: '3px solid grey',
-                            width: '40vw',
-                          }}
-                          components={{
-                            Toolbar: () => null,
-                          }}
-                          options={{
-                            rowStyle: {
-                              color: 'black',
-                            },
+                      {masterSchoolsLoading ? (
+                        <Loader />
+                      ) : (
+                        masterSchool && (
+                          <MaterialTable
+                            data={masterSchool}
+                            columns={schoolTableColumns}
+                            style={{
+                              padding: '1%',
+                              border: '3px solid grey',
+                              width: '40vw',
+                            }}
+                            components={{
+                              Toolbar: () => null,
+                            }}
+                            options={{
+                              rowStyle: {
+                                color: 'black',
+                              },
 
-                            paging: false,
-                            selection: true,
-                            search: false,
-                            selectionProps: (rowData) => ({
-                              checked: schoolName.includes(rowData.name),
+                              paging: false,
+                              selection: true,
+                              search: false,
+                              selectionProps: (rowData) => ({
+                                checked: schoolName.includes(rowData.name),
 
-                              color: 'primary',
-                            }),
-                          }}
-                          onSelectionChange={(data, selection) => {
-                            if (
-                              selection &&
-                              selection.tableData &&
-                              !selection.tableData.checked
-                            ) {
-                              const id = selection.tableData.id;
+                                color: 'primary',
+                              }),
+                            }}
+                            onSelectionChange={(data, selection) => {
+                              if (
+                                selection &&
+                                selection.tableData &&
+                                !selection.tableData.checked
+                              ) {
+                                const id = selection.tableData.id;
 
-                              const dataDelete = [...schoolName];
+                                const dataDelete = [...schoolName];
 
-                              const index = standard.findIndex(
-                                (x) => x === masterSchool[id].name
-                              );
-                              dataDelete.splice(index, 1);
-                              setSchoolName([...dataDelete]);
-                            } else if (selection && selection.tableData) {
-                              const id = selection.tableData.id;
-                              setSchoolName([
-                                ...new Set([
-                                  ...schoolName,
-                                  masterSchool[id].name,
-                                ]),
-                              ]);
-                            } else {
-                              const allSchool = data.map((x) => x.name);
-                              setSchoolName([...allSchool]);
-                            }
-                          }}
-                        />
+                                const index = schoolName.findIndex(
+                                  (x) => x === masterSchool[id].name
+                                );
+                                dataDelete.splice(index, 1);
+                                setSchoolName([...dataDelete]);
+                              } else if (selection && selection.tableData) {
+                                const id = selection.tableData.id;
+                                setSchoolName([
+                                  ...new Set([
+                                    ...schoolName,
+                                    masterSchool[id].name,
+                                  ]),
+                                ]);
+                              } else {
+                                const allSchool = data.map((x) => x.name);
+                                setSchoolName([...allSchool]);
+                              }
+                            }}
+                          />
+                        )
                       )}
+                      <Paginate
+                        editProduct={true}
+                        productId={productId}
+                        pages={pages}
+                        page={page}
+                        isAdmin={true}
+                      />
                     </Form.Group>
                   </Col>
                 </Row>

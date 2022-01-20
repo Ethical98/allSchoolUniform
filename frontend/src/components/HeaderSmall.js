@@ -244,7 +244,7 @@ const HeaderSmall = () => {
             </Row>
           </Container>
         </Navbar>
-        {!(location.pathname === '/') && (
+        {!(location.pathname === '/') && !location.pathname.includes('/admin') && (
           <div
             className='mb-3'
             style={{

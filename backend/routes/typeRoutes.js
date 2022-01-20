@@ -3,16 +3,23 @@ import {
   createType,
   deleteType,
   getProductTypes,
+  getSizeGuideImages,
   getSizes,
   getTypeDetails,
   getTypeImages,
   getTypes,
   updateType,
+  uploadSizeGuideImages,
 } from '../controllers/typeController.js';
+import { protect, isAdmin } from '../Middleware/authMiddleware.js';
+import upload from '../Middleware/uploadMiddleware.js';
 
 const router = express.Router();
-import { protect, isAdmin } from '../Middleware/authMiddleware.js';
 
+router
+  .route('/images')
+  .get(getSizeGuideImages)
+  .post(upload.single('image'), uploadSizeGuideImages);
 router
   .route('/')
   .get(protect, isAdmin, getTypes)

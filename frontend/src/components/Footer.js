@@ -75,7 +75,7 @@ const Footer = () => {
               rounded
               src='/uploads/netbanking.png'
             />
-            <Image className='float-end payment-logo' src='uploads/visa.png' />
+            <Image className='float-end payment-logo' src='/uploads/visa.png' />
             <Image
               className='float-end payment-logo'
               src='/uploads/mastercard.png'

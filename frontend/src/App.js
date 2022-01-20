@@ -50,8 +50,7 @@ const App = () => {
 
   return (
     <Router>
-     
-     <Switch>
+      <Switch>
         <Route path='/' component={HomeScreen} exact />
         <Route path='/orderdetails/:id' component={OrderDetailsScreen} />
         <Route path='/forgotpassword' component={ForgotPasswordScreen} />

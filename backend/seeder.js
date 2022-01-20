@@ -25,36 +25,36 @@ connectDB();
 
 const importData = async () => {
   try {
-    // await Order.deleteMany();
+    await Order.deleteMany();
     await Product.deleteMany();
-    // await User.deleteMany();
-    // await Class.deleteMany();
-    // await Cart.deleteMany();
-    // await ProductType.deleteMany();
-    // await School.deleteMany();
-    // await Homepage.deleteMany();
+    await User.deleteMany();
+    await Class.deleteMany();
+    await Cart.deleteMany();
+    await ProductType.deleteMany();
+    await School.deleteMany();
+    await Homepage.deleteMany();
 
-    // const createdUsers = await User.insertMany(users);
-    // const adminUser = createdUsers[0]._id;
+    const createdUsers = await User.insertMany(users);
+    const adminUser = createdUsers[0]._id;
 
     const sampleProducts = products.map((product) => {
-      return { ...product, user: '61263808c1afa73a18eed2ba' };
+      return { ...product, user: adminUser };
     });
-    // const schoolsList = schools.map((school) => {
-    //   return { ...school, user: adminUser };
-    // });
-    // await School.insertMany(schoolsList);
+    const schoolsList = schools.map((school) => {
+      return { ...school, user: adminUser };
+    });
+    await School.insertMany(schoolsList);
     await Product.insertMany(sampleProducts);
-    // await Class.insertMany(classes);
-    // await ProductType.insertMany(productType);
-    // await Homepage.insertMany(home);
-    // console.log(productType);
-    // console.log(products);
-    // const firstProduct = insertedProducts[0]._id;
-    // const sampleSizes = Size.map((size) => {
-    //   return { ...size, user: adminUser, product: firstProduct };
-    // });
-    // await ShirtSize.insertMany(sampleSizes);
+    await Class.insertMany(classes);
+    await ProductType.insertMany(productType);
+    await Homepage.insertMany(home);
+    console.log(productType);
+    console.log(products);
+    const firstProduct = insertedProducts[0]._id;
+    const sampleSizes = Size.map((size) => {
+      return { ...size, user: adminUser, product: firstProduct };
+    });
+    await ShirtSize.insertMany(sampleSizes);
     console.log('Data Imported!'.green.inverse);
     process.exit();
   } catch (error) {

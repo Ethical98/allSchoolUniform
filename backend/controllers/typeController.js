@@ -1,5 +1,9 @@
 import asyncHandler from 'express-async-handler';
 import ProductType from '../models/ProductTypesModel.js';
+import paginate from '../utils/pagination.js';
+import fs from 'fs';
+import path from 'path';
+import sharp from 'sharp';
 
 // @desc Get product Types
 // @route GET /api/types
@@ -132,6 +136,51 @@ const updateType = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc  Get Product Type Images
+// @route GET /api/types/images
+// @access Public
+const getSizeGuideImages = asyncHandler(async (req, res) => {
+  const __dirname = path.resolve();
+  const imagesPerPage = 12;
+  const currentPage = req.query.page || 1;
+  const imagesFolder = path.join(__dirname, '/uploads/sizeguides/');
+
+  const images = [];
+
+  const files = fs.readdirSync(imagesFolder);
+
+  files.sort(
+    (a, b) =>
+      fs.statSync(imagesFolder + b).mtime.getTime() -
+      fs.statSync(imagesFolder + a).mtime.getTime()
+  );
+
+  files.forEach((file) => {
+    images.push({ url: `\\uploads\\sizeguides\\${file}`, name: file });
+  });
+
+  const { currentImages, pages } = paginate(currentPage, imagesPerPage, images);
+
+  res.send({ images: currentImages, pages: pages });
+});
+
+// @desc Upload Type Images
+// @route POST /api/types/images
+// @access Public
+const uploadSizeGuideImages = asyncHandler(async (req, res) => {
+  if (req.file) {
+    const newFilename = `${
+      req.file.originalname.split('.')[0]
+    }-${Date.now()}${path.extname(req.file.originalname)}`;
+
+    await sharp(req.file.buffer)
+      .resize({ width: 300, height: 300 })
+      .toFile('uploads/sizeguides/resized-' + newFilename);
+
+    res.send(`/uploads/sizeguides/resized-${newFilename}`);
+  }
+});
+
 export {
   getProductTypes,
   getSizes,
@@ -141,4 +190,6 @@ export {
   deleteType,
   getTypeDetails,
   getTypeImages,
+  getSizeGuideImages,
+  uploadSizeGuideImages,
 };

@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
@@ -37,12 +37,20 @@ app.use('/api/pay', payRoutes);
 app.use('/api/types', typeRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/classes', classRoutes);
-app.use('/api/upload', uploadRoutes);
+app.use('/api/uploads', uploadRoutes);
 app.use('/api/home', homeRoutes);
 
 const __dirname = path.resolve();
 
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+app.use(
+  '/uploads/products',
+  express.static(path.join(__dirname, '/uploads/products'))
+);
+app.use(
+  '/uploads/schools',
+  express.static(path.join(__dirname, '/uploads/schools'))
+);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '/frontend/build')));

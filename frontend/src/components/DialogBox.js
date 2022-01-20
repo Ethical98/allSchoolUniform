@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from 'react-bootstrap';
 
 const DialogBox = ({
+  size = '',
   children,
   handleClose,
   show,
@@ -11,6 +12,7 @@ const DialogBox = ({
 }) => {
   return (
     <Modal
+      size={size}
       show={show}
       fullscreen={fullscreen}
       onHide={handleClose}
