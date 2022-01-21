@@ -464,7 +464,6 @@ const ProductEditScreen = ({ match, history, location }) => {
                   />
                 </Form.Group> */}
                 <Button
-                  disabled={schoolName.length === 0}
                   className='col-12 mb-3'
                   variant='outline-dark'
                   onClick={showImageUploaderHandle}
@@ -477,7 +476,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                   show={showImageUploader}
                   title={'UPLOAD IMAGES'}
                 >
-                  <ImageUploader />
+                  <ImageUploader product={true} />
                 </DialogBox>
 
                 <FloatingLabel

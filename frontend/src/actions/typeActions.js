@@ -15,10 +15,12 @@ import {
   TYPE_IMAGE_LIST_FAIL,
   TYPE_IMAGE_LIST_REQUEST,
   TYPE_IMAGE_LIST_SUCCESS,
+  TYPE_IMAGE_ONE_UPLOAD_SUCCESS,
+  TYPE_IMAGE_TWO_UPLOAD_SUCCESS,
+  TYPE_IMAGE_THREE_UPLOAD_SUCCESS,
   TYPE_IMAGE_UPLOAD_FAIL,
   TYPE_IMAGE_UPLOAD_PROGRESS,
   TYPE_IMAGE_UPLOAD_REQUEST,
-  TYPE_IMAGE_UPLOAD_SUCCESS,
   TYPE_LIST_ALL_FAIL,
   TYPE_LIST_ALL_REQUEST,
   TYPE_LIST_ALL_SUCCESS,
@@ -304,40 +306,53 @@ export const listTypeImages =
     }
   };
 
-export const uploadTypeImage = (file) => async (dispatch) => {
-  const baseUrl = '/api/types/images';
+export const uploadTypeImage =
+  (file, imageOne, imageTwo, imageThree) => async (dispatch) => {
+    const baseUrl = '/api/types/images';
 
-  try {
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      onUploadProgress: ({ total, loaded }) => {
-        let percentage = (loaded / total) * 100;
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        onUploadProgress: ({ total, loaded }) => {
+          let percentage = (loaded / total) * 100;
+          dispatch({
+            type: TYPE_IMAGE_UPLOAD_PROGRESS,
+            progress: percentage,
+          });
+        },
+      };
+      const formData = new FormData();
+      formData.append('image', file);
+
+      dispatch({ type: TYPE_IMAGE_UPLOAD_REQUEST });
+
+      const { data } = await axios.post(baseUrl, formData, config);
+
+      if (imageOne) {
         dispatch({
-          type: TYPE_IMAGE_UPLOAD_PROGRESS,
-          progress: percentage,
+          type: TYPE_IMAGE_ONE_UPLOAD_SUCCESS,
+          payload: data,
         });
-      },
-    };
-    const formData = new FormData();
-    formData.append('image', file);
-
-    dispatch({ type: TYPE_IMAGE_UPLOAD_REQUEST });
-
-    const { data } = await axios.post(baseUrl, formData, config);
-
-    dispatch({
-      type: TYPE_IMAGE_UPLOAD_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: TYPE_IMAGE_UPLOAD_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
-    });
-  }
-};
+      } else if (imageTwo) {
+        dispatch({
+          type: TYPE_IMAGE_TWO_UPLOAD_SUCCESS,
+          payload: data,
+        });
+      } else {
+        dispatch({
+          type: TYPE_IMAGE_THREE_UPLOAD_SUCCESS,
+          payload: data,
+        });
+      }
+    } catch (error) {
+      dispatch({
+        type: TYPE_IMAGE_UPLOAD_FAIL,
+        payload:
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message,
+      });
+    }
+  };

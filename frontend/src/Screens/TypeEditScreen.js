@@ -9,24 +9,28 @@ import {
 } from 'react-bootstrap';
 import Loader from '../components/Loader';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import jsonwebtoken from 'jsonwebtoken';
 import { logout } from '../actions/userActions';
 import {
   TYPE_DETAILS_RESET,
+  TYPE_IMAGE_UPLOAD_RESET,
   TYPE_UPDATE_RESET,
 } from '../constants/typeConstants';
 import { listTypeDetails, updateType } from '../actions/typeActions';
 import MaterialTable from 'material-table';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
+import DialogBox from '../components/DialogBox';
+import ImageUploader from '../components/ImageUploader';
 
 const TypeEditScreen = ({ match, history }) => {
   const typeId = match.params.id;
 
   const dispatch = useDispatch();
+
+  const [showImageUploader, setShowImageUploader] = useState(false);
 
   const [typeName, setTypeName] = useState('');
   const [typeImage, setTypeImage] = useState('');
@@ -34,9 +38,9 @@ const TypeEditScreen = ({ match, history }) => {
   const [sizeChart, setSizeChart] = useState('');
   const [variants, setVariants] = useState([]);
   const [isActive, setIsActive] = useState(false);
-  const [uploadingTypeImage, setUploadingTypeImage] = useState(false);
-  const [uploadingSizeGuide, setUploadingSizeGuide] = useState(false);
-  const [uploadingSizeChart, setUploadingSizeChart] = useState(false);
+  const [typeImageOne, setTypeImageOne] = useState(false);
+  const [typeImageTwo, setTypeImageTwo] = useState(false);
+  const [typeImageThree, setTypeImageThree] = useState(false);
 
   const typeDetails = useSelector((state) => state.typeDetails);
   const { loading, error, type } = typeDetails;
@@ -82,6 +86,9 @@ const TypeEditScreen = ({ match, history }) => {
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
+  const typeImageUpload = useSelector((state) => state.typeImageUpload);
+  const { imageOneUrl, imageTwoUrl, imageThreeUrl } = typeImageUpload;
 
   useEffect(() => {
     if (!userInfo) {
@@ -130,73 +137,128 @@ const TypeEditScreen = ({ match, history }) => {
     }
   }, [dispatch, history, successUpdate, type, typeId]);
 
-  const uploadSizeGuideFileHandler = async (e) => {
-    const file = e.target.files[0];
-
-    const formData = new FormData();
-    formData.append('image', file);
-    setUploadingSizeGuide(true);
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      };
-
-      const { data } = await axios.post('/api/upload', formData, config);
-
-      setSizeGuide(data);
-      setUploadingSizeGuide(false);
-    } catch (error) {
-      console.error(error);
-      setUploadingSizeGuide(false);
+  useEffect(() => {
+    if (imageOneUrl) {
+      setTypeImage(imageOneUrl);
+      setShowImageUploader(false);
+      dispatch({ type: TYPE_IMAGE_UPLOAD_RESET });
+    } else if (imageTwoUrl) {
+      setSizeGuide(imageTwoUrl);
+      setShowImageUploader(false);
+      dispatch({ type: TYPE_IMAGE_UPLOAD_RESET });
+    } else if (imageThreeUrl) {
+      setSizeChart(imageThreeUrl);
+      setShowImageUploader(false);
+      dispatch({ type: TYPE_IMAGE_UPLOAD_RESET });
     }
+  }, [imageOneUrl, imageTwoUrl, imageThreeUrl, dispatch]);
+
+  // const uploadSizeGuideFileHandler = async (e) => {
+  //   const file = e.target.files[0];
+
+  //   const formData = new FormData();
+  //   formData.append('image', file);
+  //   setUploadingSizeGuide(true);
+  //   try {
+  //     const config = {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //     };
+
+  //     const { data } = await axios.post('/api/upload', formData, config);
+
+  //     setSizeGuide(data);
+  //     setUploadingSizeGuide(false);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setUploadingSizeGuide(false);
+  //   }
+  // };
+
+  // const uploadSizeChartFileHandler = async (e) => {
+  //   const file = e.target.files[0];
+
+  //   const formData = new FormData();
+  //   formData.append('image', file);
+  //   setUploadingSizeChart(true);
+  //   try {
+  //     const config = {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //     };
+
+  //     const { data } = await axios.post('/api/upload', formData, config);
+
+  //     setSizeChart(data);
+  //     setUploadingSizeChart(false);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setUploadingSizeChart(false);
+  //   }
+  // };
+
+  // const uploadTypeImageFileHandler = async (e) => {
+  //   const file = e.target.files[0];
+
+  //   const formData = new FormData();
+  //   formData.append('image', file);
+  //   setUploadingTypeImage(true);
+  //   try {
+  //     const config = {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //     };
+
+  //     const { data } = await axios.post('/api/upload', formData, config);
+
+  //     setTypeImage(data);
+  //     setUploadingTypeImage(false);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setUploadingTypeImage(false);
+  //   }
+  // };
+
+  const clearImageUrls = () => {
+    setTypeImageOne(false);
+    setTypeImageTwo(false);
+    setTypeImageThree(false);
+    setShowImageUploader(false);
   };
 
-  const uploadSizeChartFileHandler = async (e) => {
-    const file = e.target.files[0];
-
-    const formData = new FormData();
-    formData.append('image', file);
-    setUploadingSizeChart(true);
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      };
-
-      const { data } = await axios.post('/api/upload', formData, config);
-
-      setSizeChart(data);
-      setUploadingSizeChart(false);
-    } catch (error) {
-      console.error(error);
-      setUploadingSizeChart(false);
-    }
+  const closeImageOneUploaderHandle = () => {
+    clearImageUrls();
+  };
+  const showImageOneUploaderHandle = () => {
+    setTypeImageOne(true);
+    setTypeImageTwo(false);
+    setTypeImageThree(false);
+    setShowImageUploader(true);
   };
 
-  const uploadTypeImageFileHandler = async (e) => {
-    const file = e.target.files[0];
+  const closeImageTwoUploaderHandle = () => {
+    clearImageUrls();
+  };
 
-    const formData = new FormData();
-    formData.append('image', file);
-    setUploadingTypeImage(true);
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      };
+  const showImageTwoUploaderHandle = () => {
+    setTypeImageOne(false);
+    setTypeImageTwo(true);
+    setTypeImageThree(false);
+    setShowImageUploader(true);
+  };
 
-      const { data } = await axios.post('/api/upload', formData, config);
+  const showImageThreeUploaderHandle = () => {
+    setTypeImageOne(false);
+    setTypeImageTwo(false);
+    setTypeImageThree(true);
+    setShowImageUploader(true);
+  };
 
-      setTypeImage(data);
-      setUploadingTypeImage(false);
-    } catch (error) {
-      console.error(error);
-      setUploadingTypeImage(false);
-    }
+  const closeImageThreeUploaderHandle = () => {
+    clearImageUrls();
   };
 
   const submitHandler = (e) => {
@@ -259,8 +321,27 @@ const TypeEditScreen = ({ match, history }) => {
                     onChange={(e) => setTypeImage(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
+                <Button
+                  className='col-12 mb-3'
+                  variant='outline-dark'
+                  onClick={showImageOneUploaderHandle}
+                >
+                  Upload Type Image
+                </Button>
+                <DialogBox
+                  size={'lg'}
+                  handleClose={closeImageOneUploaderHandle}
+                  show={showImageUploader}
+                  title={'UPLOAD IMAGES'}
+                >
+                  <ImageUploader
+                    typeImageOne={typeImageOne}
+                    typeImageTwo={typeImageTwo}
+                    typeImageThree={typeImageThree}
+                  />
+                </DialogBox>
 
-                {uploadingTypeImage && <Loader />}
+                {/* {uploadingTypeImage && <Loader />}
                 <Form.Group controlId='formFile' className='mb-3'>
                   <Form.Label>Upload Size Guide</Form.Label>
                   <Form.Control
@@ -268,7 +349,8 @@ const TypeEditScreen = ({ match, history }) => {
                     custom
                     onChange={uploadTypeImageFileHandler}
                   />
-                </Form.Group>
+                </Form.Group> */}
+
                 <FloatingLabel
                   controlId='sizeGuide'
                   label='Size Guide Url'
@@ -282,7 +364,7 @@ const TypeEditScreen = ({ match, history }) => {
                     onChange={(e) => setSizeGuide(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
-                {uploadingSizeGuide && <Loader />}
+                {/* {uploadingSizeGuide && <Loader />}
                 <Form.Group controlId='formFile' className='mb-3'>
                   <Form.Label>Upload Size Guide</Form.Label>
                   <Form.Control
@@ -290,7 +372,27 @@ const TypeEditScreen = ({ match, history }) => {
                     custom
                     onChange={uploadSizeGuideFileHandler}
                   />
-                </Form.Group>
+                </Form.Group> */}
+                <Button
+                  className='col-12 mb-3'
+                  variant='outline-dark'
+                  onClick={showImageTwoUploaderHandle}
+                >
+                  Upload Size Guide
+                </Button>
+                <DialogBox
+                  size={'lg'}
+                  handleClose={closeImageTwoUploaderHandle}
+                  show={showImageUploader}
+                  title={'UPLOAD IMAGES'}
+                >
+                  <ImageUploader
+                    typeImageOne={typeImageOne}
+                    typeImageTwo={typeImageTwo}
+                    typeImageThree={typeImageThree}
+                  />
+                </DialogBox>
+
                 <FloatingLabel
                   controlId='sizeChart'
                   label='Size Chart Url'
@@ -304,7 +406,7 @@ const TypeEditScreen = ({ match, history }) => {
                     onChange={(e) => setSizeChart(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
-                {uploadingSizeChart && <Loader />}
+                {/* {uploadingSizeChart && <Loader />}
                 <Form.Group controlId='formFile' className='mb-3'>
                   <Form.Label>Upload Size Chart</Form.Label>
                   <Form.Control
@@ -312,7 +414,26 @@ const TypeEditScreen = ({ match, history }) => {
                     custom
                     onChange={uploadSizeChartFileHandler}
                   />
-                </Form.Group>
+                </Form.Group> */}
+                <Button
+                  className='col-12 mb-3'
+                  variant='outline-dark'
+                  onClick={showImageThreeUploaderHandle}
+                >
+                  Upload Size Chart
+                </Button>
+                <DialogBox
+                  size={'lg'}
+                  handleClose={closeImageThreeUploaderHandle}
+                  show={showImageUploader}
+                  title={'UPLOAD IMAGES'}
+                >
+                  <ImageUploader
+                    typeImageOne={typeImageOne}
+                    typeImageTwo={typeImageTwo}
+                    typeImageThree={typeImageThree}
+                  />
+                </DialogBox>
                 <Form.Group controlId='isActive' className='mb-3'>
                   <Form.Check
                     className='mb-3'

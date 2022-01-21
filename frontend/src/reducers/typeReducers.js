@@ -16,11 +16,13 @@ import {
   TYPE_IMAGE_LIST_FAIL,
   TYPE_IMAGE_LIST_REQUEST,
   TYPE_IMAGE_LIST_SUCCESS,
+  TYPE_IMAGE_ONE_UPLOAD_SUCCESS,
+  TYPE_IMAGE_THREE_UPLOAD_SUCCESS,
+  TYPE_IMAGE_TWO_UPLOAD_SUCCESS,
   TYPE_IMAGE_UPLOAD_FAIL,
   TYPE_IMAGE_UPLOAD_PROGRESS,
   TYPE_IMAGE_UPLOAD_REQUEST,
   TYPE_IMAGE_UPLOAD_RESET,
-  TYPE_IMAGE_UPLOAD_SUCCESS,
   TYPE_LIST_ALL_FAIL,
   TYPE_LIST_ALL_REQUEST,
   TYPE_LIST_ALL_SUCCESS,
@@ -146,10 +148,7 @@ export const typeImagesReducer = (state = { images: {} }, action) => {
   }
 };
 
-export const typeImageListReducer = (
-  state = { typeImages: [] },
-  action
-) => {
+export const typeImageListReducer = (state = { typeImages: [] }, action) => {
   switch (action.type) {
     case TYPE_IMAGE_LIST_REQUEST:
       return { loading: true };
@@ -173,15 +172,25 @@ export const typeImageUploadReducer = (state = {}, action) => {
 
     case TYPE_IMAGE_UPLOAD_PROGRESS:
       return { progress: action.progress };
-    case TYPE_IMAGE_UPLOAD_SUCCESS:
+    case TYPE_IMAGE_ONE_UPLOAD_SUCCESS:
       return {
         loading: false,
-        url: action.payload,
+        imageOneUrl: action.payload,
+      };
+    case TYPE_IMAGE_TWO_UPLOAD_SUCCESS:
+      return {
+        loading: false,
+        imageTwoUrl: action.payload,
+      };
+    case TYPE_IMAGE_THREE_UPLOAD_SUCCESS:
+      return {
+        loading: false,
+        imageThreeUrl: action.payload,
       };
     case TYPE_IMAGE_UPLOAD_FAIL:
       return { loading: false, error: action.payload };
     case TYPE_IMAGE_UPLOAD_RESET:
-      return { url: '' };
+      return { imageOneUrl: '', imageTwoUrl: '', imageThreeUrl: '' };
     default:
       return state;
   }

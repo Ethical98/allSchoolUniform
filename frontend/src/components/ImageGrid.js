@@ -9,15 +9,19 @@ import Loader from './Loader';
 import Message from './Message';
 import { PRODUCT_IMAGE_UPLOAD_SUCCESS } from '../constants/productConstants';
 import { SCHOOL_IMAGE_UPLOAD_SUCCESS } from '../constants/schoolConstants';
-import { TYPE_IMAGE_UPLOAD_SUCCESS } from '../constants/typeConstants';
+import {
+  TYPE_IMAGE_ONE_UPLOAD_SUCCESS,
+  TYPE_IMAGE_THREE_UPLOAD_SUCCESS,
+  TYPE_IMAGE_TWO_UPLOAD_SUCCESS,
+} from '../constants/typeConstants';
 import { listTypeImages } from '../actions/typeActions';
 
-const ImageGrid = ({ product, school, extra }) => {
+const ImageGrid = ({ typeImageOne, typeImageTwo, typeImageThree }) => {
   const dispatch = useDispatch();
   const [currentProductImagePage, setCurrentProductImagePage] = useState(1);
   const [currentSchoolImagePage, setCurrentSchoolImagePage] = useState(1);
   const [currentTypeImagePage, setCurrentTypeImagePage] = useState(1);
-  const [currentExtraImagePage, setCurrentExtraImagePage] = useState(1);
+  // const [currentExtraImagePage, setCurrentExtraImagePage] = useState(1);
 
   const productImageList = useSelector((state) => state.productImageList);
   const {
@@ -64,16 +68,10 @@ const ImageGrid = ({ product, school, extra }) => {
     dispatch(listTypeImages(currentTypeImagePage));
   }, [currentTypeImagePage, typeImageUrl, dispatch]);
 
-  // const {
-  //   images,
-
-  //   totalUploadImagePages,
-  // } = useDb(url, product, school, extra);
-
   return (
-    <Tabs defaultActiveKey='uploads' className='mb-3'>
-      <Tab eventKey='uploads' title='Uploads'>
-        {/* <div className='img-grid'>
+    <Tabs defaultActiveKey='products' className='mb-3'>
+      {/* <Tab eventKey='uploads' title='Uploads'>
+        <div className='img-grid'>
           {images &&
             images.map((image, index) => (
               <div className='img-wrap' key={index}>
@@ -85,8 +83,8 @@ const ImageGrid = ({ product, school, extra }) => {
           page={currentProductImagePage}
           pages={totalUploadImagePages}
           changePage={setCurrentProductImagePage}
-        /> */}
-      </Tab>
+        />
+      </Tab> */}
       <Tab eventKey='products' title='Products'>
         <div className='img-grid'>
           {productImagesLoading ? (
@@ -169,10 +167,21 @@ const ImageGrid = ({ product, school, extra }) => {
               <div className='img-wrap' key={index}>
                 <Image
                   onClick={() =>
-                    dispatch({
-                      type: TYPE_IMAGE_UPLOAD_SUCCESS,
-                      payload: image.url,
-                    })
+                    typeImageOne
+                      ? dispatch({
+                          type: TYPE_IMAGE_ONE_UPLOAD_SUCCESS,
+                          payload: image.url,
+                        })
+                      : typeImageTwo
+                      ? dispatch({
+                          type: TYPE_IMAGE_TWO_UPLOAD_SUCCESS,
+                          payload: image.url,
+                        })
+                      : typeImageThree &&
+                        dispatch({
+                          type: TYPE_IMAGE_THREE_UPLOAD_SUCCESS,
+                          payload: image.url,
+                        })
                   }
                   className='w-50'
                   src={image.url}

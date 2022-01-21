@@ -8,7 +8,7 @@
 .admin-header-nav-item {
   display: flex;
   flex-direction: column;
-  color: lightgray;
+  color: darkgray;
   border: none;
 }
 

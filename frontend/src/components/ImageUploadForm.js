@@ -3,7 +3,15 @@ import { Form } from 'react-bootstrap';
 import Message from './Message';
 import UploadProgressBar from './UploadProgressBar';
 
-const ImageUploadForm = ({ setUrl, product, school, extra }) => {
+const ImageUploadForm = ({
+  setUrl,
+  product,
+  school,
+  extra,
+  typeImageOne,
+  typeImageTwo,
+  typeImageThree,
+}) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState(null);
 
@@ -54,6 +62,9 @@ const ImageUploadForm = ({ setUrl, product, school, extra }) => {
               product={product}
               school={school}
               extra={extra}
+              typeImageOne={typeImageOne}
+              typeImageTwo={typeImageTwo}
+              typeImageThree={typeImageThree}
             />
           )}
         </div>
