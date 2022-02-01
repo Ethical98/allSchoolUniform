@@ -374,18 +374,12 @@ const Paginate = ({
       {pages > 1 && (
         <Pagination className='float-end my-3'>
           {page > pageNumberLimit && (
-            <LinkContainer
-              key={x + 1}
-              to={href(false, false, false, true, false)}
-            >
+            <LinkContainer to={href(false, false, false, true, false)}>
               <Pagination.First />
             </LinkContainer>
           )}
           {page > pageNumberLimit && (
-            <LinkContainer
-              key={x + 1}
-              to={href(true, false, false, false, false)}
-            >
+            <LinkContainer to={href(true, false, false, false, false)}>
               <Pagination.Prev />
             </LinkContainer>
           )}
@@ -394,10 +388,7 @@ const Paginate = ({
             (x) =>
               x + 1 < maxPageNumberLimit + 1 &&
               x + 1 > minPageNumberLimit && (
-                <LinkContainer
-                  key={x + 1}
-                  to={href(false, false, true, false, false, x)}
-                >
+                <LinkContainer to={href(false, false, true, false, false, x)}>
                   <Pagination.Item active={x + 1 === page}>
                     {x + 1}
                   </Pagination.Item>
@@ -411,10 +402,7 @@ const Paginate = ({
             </LinkContainer>
           )}
           {page < pages && pages > pageNumberLimit && (
-            <LinkContainer
-              key={x + 1}
-              to={href(false, false, false, false, true)}
-            >
+            <LinkContainer to={href(false, false, false, false, true)}>
               <Pagination.Last />
             </LinkContainer>
           )}
