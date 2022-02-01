@@ -397,7 +397,7 @@ const Paginate = ({
           )}
 
           {page < pages && pages > pageNumberLimit && (
-            <LinkContainer key={x + 1} to={href(false, true, false, false)}>
+            <LinkContainer to={href(false, true, false, false)}>
               <Pagination.Next />
             </LinkContainer>
           )}
