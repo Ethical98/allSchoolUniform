@@ -199,11 +199,11 @@ const ProductEditScreen = ({ match, history, location }) => {
         setBrand(product.brand);
         setSKU(product.SKU);
         setSEOKeywords(product.SEOKeywords);
-        if (masterSchools) {
-          setMasterSchool([
-            ...masterSchools.filter((x) => x.isActive === true),
-          ]);
-        }
+        // if (masterSchools) {
+        //   setMasterSchool([
+        //     ...masterSchools.filter((x) => x.isActive === true),
+        //   ]);
+        // }
 
         if (masterClasses) {
           setMasterClass([...masterClasses.filter((x) => x.isActive === true)]);
@@ -219,11 +219,10 @@ const ProductEditScreen = ({ match, history, location }) => {
     productId,
     product,
     history,
-    masterSchools,
+    // masterSchools,
     masterClasses,
     masterTypes,
     successUpdate,
-    pageNumber,
   ]);
 
   useEffect(() => {
@@ -674,9 +673,9 @@ const ProductEditScreen = ({ match, history, location }) => {
                       {masterSchoolsLoading ? (
                         <Loader />
                       ) : (
-                        masterSchool && (
+                        masterSchools && (
                           <MaterialTable
-                            data={masterSchool}
+                            data={masterSchools}
                             columns={schoolTableColumns}
                             style={{
                               padding: '1%',
@@ -706,12 +705,13 @@ const ProductEditScreen = ({ match, history, location }) => {
                                 selection.tableData &&
                                 !selection.tableData.checked
                               ) {
+                                console.log('hello');
                                 const id = selection.tableData.id;
 
                                 const dataDelete = [...schoolName];
 
                                 const index = schoolName.findIndex(
-                                  (x) => x === masterSchool[id].name
+                                  (x) => x === masterSchools[id].name
                                 );
                                 dataDelete.splice(index, 1);
                                 setSchoolName([...dataDelete]);
@@ -720,12 +720,14 @@ const ProductEditScreen = ({ match, history, location }) => {
                                 setSchoolName([
                                   ...new Set([
                                     ...schoolName,
-                                    masterSchool[id].name,
+                                    masterSchools[id].name,
                                   ]),
                                 ]);
                               } else {
                                 const allSchool = data.map((x) => x.name);
-                                setSchoolName([...schoolName, ...allSchool]);
+                                setSchoolName([
+                                  ...new Set([...schoolName, ...allSchool]),
+                                ]);
                               }
                             }}
                           />

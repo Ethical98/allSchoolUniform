@@ -95,7 +95,6 @@ const ProductCreateScreen = ({ history, location }) => {
       field: 'name',
     },
   ];
-  console.log(schoolName);
 
   // const uploadFileHandler = async (e) => {
   //   const file = e.target.files[0];
