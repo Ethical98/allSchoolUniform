@@ -95,6 +95,7 @@ const ProductCreateScreen = ({ history, location }) => {
       field: 'name',
     },
   ];
+  console.log(schoolName);
 
   // const uploadFileHandler = async (e) => {
   //   const file = e.target.files[0];
@@ -664,7 +665,7 @@ const ProductCreateScreen = ({ history, location }) => {
                               ]);
                             } else {
                               const allSchool = data.map((x) => x.name);
-                              setSchoolName([...allSchool]);
+                              setSchoolName([...schoolName, ...allSchool]);
                             }
                           }}
                         />

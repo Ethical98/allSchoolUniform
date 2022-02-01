@@ -54,123 +54,123 @@ router.post('/', upload.single('image'), errorHandler, async (req, res) => {
   }
 });
 
-router.post(
-  '/schools',
-  upload.single('image'),
-  errorHandler,
-  async (req, res) => {
-    if (req.file) {
-      const newFilename = `${
-        req.file.originalname.split('.')[0]
-      }-${Date.now()}${path.extname(req.file.originalname)}`;
+// router.post(
+//   '/schools',
+//   upload.single('image'),
+//   errorHandler,
+//   async (req, res) => {
+//     if (req.file) {
+//       const newFilename = `${
+//         req.file.originalname.split('.')[0]
+//       }-${Date.now()}${path.extname(req.file.originalname)}`;
 
-      await sharp(req.file.buffer)
-        .resize({ width: 640, height: 640 })
-        .toFile('uploads/schools/resized-' + newFilename);
+//       await sharp(req.file.buffer)
+//         .resize({ width: 640, height: 640 })
+//         .toFile('uploads/schools/resized-' + newFilename);
 
-      res.send(`/uploads/schools/resized-${newFilename}`);
-    }
-  }
-);
+//       res.send(`/uploads/schools/resized-${newFilename}`);
+//     }
+//   }
+// );
 
-router.post(
-  '/schools',
-  upload.single('image'),
-  errorHandler,
-  async (req, res) => {
-    if (req.file) {
-      const newFilename = `${
-        req.file.originalname.split('.')[0]
-      }-${Date.now()}${path.extname(req.file.originalname)}`;
+// router.post(
+//   '/schools',
+//   upload.single('image'),
+//   errorHandler,
+//   async (req, res) => {
+//     if (req.file) {
+//       const newFilename = `${
+//         req.file.originalname.split('.')[0]
+//       }-${Date.now()}${path.extname(req.file.originalname)}`;
 
-      await sharp(req.file.buffer)
-        .resize({ width: 640, height: 640 })
-        .toFile('uploads/sizeguides/resized-' + newFilename);
+//       await sharp(req.file.buffer)
+//         .resize({ width: 640, height: 640 })
+//         .toFile('uploads/sizeguides/resized-' + newFilename);
 
-      res.send(`/uploads/sizeguides/resized-${newFilename}`);
-    }
-  }
-);
+//       res.send(`/uploads/sizeguides/resized-${newFilename}`);
+//     }
+//   }
+// );
 
-router.get('/images', (req, res) => {
-  const __dirname = path.resolve();
-  const imagesFolder = path.join(__dirname, '/uploads/');
+// router.get('/images', (req, res) => {
+//   const __dirname = path.resolve();
+//   const imagesFolder = path.join(__dirname, '/uploads/');
 
-  const images = [];
+//   const images = [];
 
-  const dirents = fs.readdirSync(imagesFolder, { withFileTypes: true });
-  const files = dirents
-    .filter((dirent) => dirent.isFile())
-    .map((dirent) => dirent.name);
+//   const dirents = fs.readdirSync(imagesFolder, { withFileTypes: true });
+//   const files = dirents
+//     .filter((dirent) => dirent.isFile())
+//     .map((dirent) => dirent.name);
 
-  files.sort(
-    (a, b) =>
-      fs.statSync(imagesFolder + b).mtime.getTime() -
-      fs.statSync(imagesFolder + a).mtime.getTime()
-  );
+//   files.sort(
+//     (a, b) =>
+//       fs.statSync(imagesFolder + b).mtime.getTime() -
+//       fs.statSync(imagesFolder + a).mtime.getTime()
+//   );
 
-  files.forEach((file) => {
-    images.push({ url: `\\uploads\\${file}`, name: file });
-  });
-  let currentPage = req.query.page || 1;
-  const indexOfLastImage = currentPage * imagesPerPage;
-  const indexOfFirstImage = indexOfLastImage - imagesPerPage;
-  const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
-  const pages = Math.ceil(images.length / imagesPerPage);
+//   files.forEach((file) => {
+//     images.push({ url: `\\uploads\\${file}`, name: file });
+//   });
+//   let currentPage = req.query.page || 1;
+//   const indexOfLastImage = currentPage * imagesPerPage;
+//   const indexOfFirstImage = indexOfLastImage - imagesPerPage;
+//   const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
+//   const pages = Math.ceil(images.length / imagesPerPage);
 
-  res.send({ images: currentImages, pages: pages });
-});
+//   res.send({ images: currentImages, pages: pages });
+// });
 
-router.get('/images/products', (req, res) => {
-  const __dirname = path.resolve();
-  const imagesFolder = path.join(__dirname, '/uploads/products/');
+// router.get('/images/products', (req, res) => {
+//   const __dirname = path.resolve();
+//   const imagesFolder = path.join(__dirname, '/uploads/products/');
 
-  const images = [];
+//   const images = [];
 
-  const files = fs.readdirSync(imagesFolder);
+//   const files = fs.readdirSync(imagesFolder);
 
-  files.sort(
-    (a, b) =>
-      fs.statSync(imagesFolder + b).mtime.getTime() -
-      fs.statSync(imagesFolder + a).mtime.getTime()
-  );
+//   files.sort(
+//     (a, b) =>
+//       fs.statSync(imagesFolder + b).mtime.getTime() -
+//       fs.statSync(imagesFolder + a).mtime.getTime()
+//   );
 
-  files.forEach((file) => {
-    images.push({ url: `\\uploads\\products\\${file}`, name: file });
-  });
+//   files.forEach((file) => {
+//     images.push({ url: `\\uploads\\products\\${file}`, name: file });
+//   });
 
-  const indexOfLastImage = currentPage * imagesPerPage;
-  const indexOfFirstImage = indexOfLastImage - imagesPerPage;
-  const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
-  const pages = Math.ceil(images.length / imagesPerPage);
-  console.log(pages);
+//   const indexOfLastImage = currentPage * imagesPerPage;
+//   const indexOfFirstImage = indexOfLastImage - imagesPerPage;
+//   const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
+//   const pages = Math.ceil(images.length / imagesPerPage);
+//   console.log(pages);
 
-  res.send({ images: currentImages, pages: pages });
-});
+//   res.send({ images: currentImages, pages: pages });
+// });
 
-router.get('/images/schools', (req, res) => {
-  const __dirname = path.resolve();
-  const imagesFolder = path.join(__dirname, '/uploads/schools/');
+// router.get('/images/schools', (req, res) => {
+//   const __dirname = path.resolve();
+//   const imagesFolder = path.join(__dirname, '/uploads/schools/');
 
-  const images = [];
+//   const images = [];
 
-  const files = fs.readdirSync(imagesFolder);
+//   const files = fs.readdirSync(imagesFolder);
 
-  files.sort(
-    (a, b) =>
-      fs.statSync(imagesFolder + b).mtime.getTime() -
-      fs.statSync(imagesFolder + a).mtime.getTime()
-  );
+//   files.sort(
+//     (a, b) =>
+//       fs.statSync(imagesFolder + b).mtime.getTime() -
+//       fs.statSync(imagesFolder + a).mtime.getTime()
+//   );
 
-  files.forEach((file) => {
-    images.push({ url: `\\uploads\\schools\\${file}`, name: file });
-  });
-  const indexOfLastImage = currentPage * imagesPerPage;
-  const indexOfFirstImage = indexOfLastImage - imagesPerPage;
-  const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
-  const pages = Math.ceil(images.length / imagesPerPage);
-  console.log(pages);
+//   files.forEach((file) => {
+//     images.push({ url: `\\uploads\\schools\\${file}`, name: file });
+//   });
+//   const indexOfLastImage = currentPage * imagesPerPage;
+//   const indexOfFirstImage = indexOfLastImage - imagesPerPage;
+//   const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
+//   const pages = Math.ceil(images.length / imagesPerPage);
+//   console.log(pages);
 
-  res.send({ images: currentImages, pages: pages });
-});
+//   res.send({ images: currentImages, pages: pages });
+// });
 export default router;

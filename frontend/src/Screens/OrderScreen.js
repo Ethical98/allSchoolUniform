@@ -32,6 +32,10 @@ const OrderScreen = ({ match, history }) => {
   const orderDetails = useSelector((state) => state.orderDetails);
   const { order, loading, error } = orderDetails;
 
+  const getDiscountedPrice = (price, disc) => {
+    return price - price * (disc / 100);
+  };
+
   useEffect(() => {
     if (!userInfo) {
       history.push('/login');

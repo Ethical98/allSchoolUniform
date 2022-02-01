@@ -75,6 +75,10 @@ const CartScreen = ({ match, location, history }) => {
     dispatch(removeFromCart(id));
   };
 
+  const getDiscountedPrice = (price, disc) => {
+    return price - price * (disc / 100);
+  };
+
   return (
     <PageLayout>
       <Meta
@@ -119,7 +123,9 @@ const CartScreen = ({ match, location, history }) => {
                           </Link>
                         </Col>
                         <Col xs={2}>Size: {item.size}</Col>
-                        <Col xs={2}>₹{item.price}</Col>
+                        <Col xs={2}>
+                          ₹{getDiscountedPrice(item.price, item.disc)}
+                        </Col>
                         <Col xs={2}>
                           {/* {item.qty > 10 && !customQty ? (
                           <InputGroup size='sm'>
@@ -217,7 +223,12 @@ const CartScreen = ({ match, location, history }) => {
                 ₹
                 {cartItems &&
                   cartItems
-                    .reduce((acc, item) => acc + item.qty * item.price, 0)
+                    .reduce(
+                      (acc, item) =>
+                        acc +
+                        item.qty * getDiscountedPrice(item.price, item.disc),
+                      0
+                    )
                     .toFixed(2)}
               </ListGroup.Item>
               <ListGroup.Item>

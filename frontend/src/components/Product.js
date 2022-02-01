@@ -47,7 +47,6 @@ const Product = ({ product }) => {
   };
 
   useEffect(() => {
-  
     setProductPrice(product.size[index].price);
     setCountInStock(product.size[index].countInStock);
     setProductDisc(product.size[index].discount);
@@ -155,7 +154,7 @@ const Product = ({ product }) => {
           <Card.Img
             src={product.image}
             variant='top'
-            style={{ height: '300px' }}
+            style={{ height: '200px', width: '160px' }}
           />
         </Link>
         <Card.Body style={{ padding: '0.2rem' }}>

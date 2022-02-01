@@ -725,7 +725,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                 ]);
                               } else {
                                 const allSchool = data.map((x) => x.name);
-                                setSchoolName([...allSchool]);
+                                setSchoolName([...schoolName, ...allSchool]);
                               }
                             }}
                           />

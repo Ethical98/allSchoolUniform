@@ -37,6 +37,10 @@ const PlaceOrderScreen = ({ history }) => {
   const orderCreate = useSelector((state) => state.orderCreate);
   const { order, success, error } = orderCreate;
 
+  const getDiscountedPrice = (price, disc) => {
+    return price - price * (disc / 100);
+  };
+
   // useEffect(() => {
   //   if (cartItems.length !== 0) {
   //     dispatch(getCartFromDatabase());
@@ -108,7 +112,10 @@ const PlaceOrderScreen = ({ history }) => {
   };
   // Calculate Prices
   cart.itemsPrice = cart.cartItems
-    .reduce((acc, item) => acc + item.price * item.qty, 0)
+    .reduce(
+      (acc, item) => acc + getDiscountedPrice(item.price, item.disc) * item.qty,
+      0
+    )
     .toFixed(2);
 
   cart.shippingPrice = cart.itemsPrice > 1000 ? 0 : 0;
@@ -218,8 +225,12 @@ const PlaceOrderScreen = ({ history }) => {
                             </Col>
                             <Col md={2}>Size: {item.size}</Col>
                             <Col md={4}>
-                              {item.qty} x ₹{item.price} = ₹
-                              {(item.qty * item.price).toFixed(2)}
+                              {item.qty} x ₹
+                              {getDiscountedPrice(item.price, item.disc)} = ₹
+                              {(
+                                item.qty *
+                                getDiscountedPrice(item.price, item.disc)
+                              ).toFixed(2)}
                             </Col>
                           </Row>
                         </ListGroup.Item>
