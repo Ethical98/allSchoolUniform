@@ -150,7 +150,7 @@ const Paginate = ({
               : 1
           }`
         : category.length > 0 && season.length > 0 && school
-        ? `/products?search=${keyword}&season=${season}&category=${category}&school=${school}&page=${
+        ? `/products?season=${season}&category=${category}&school=${school}&page=${
             prev
               ? page - 1
               : next
@@ -162,7 +162,7 @@ const Paginate = ({
               : 1
           }`
         : category.length > 0 && standard.length > 0 && school
-        ? `/products?search=${keyword}&category=${category}&class=${standard}&school=${school}&page=${
+        ? `/products?category=${category}&class=${standard}&school=${school}&page=${
             prev
               ? page - 1
               : next
@@ -174,7 +174,7 @@ const Paginate = ({
               : 1
           }`
         : season.length > 0 && standard.length > 0 && school
-        ? `/products?search=${keyword}&season=${season}&class=${standard}&school=${school}&page=${
+        ? `/products?season=${season}&class=${standard}&school=${school}&page=${
             prev
               ? page - 1
               : next
@@ -186,7 +186,7 @@ const Paginate = ({
               : 1
           }`
         : season.length > 0 && school
-        ? `/products?search=${keyword}&season=${season}&school=${school}&page=${
+        ? `/products?season=${season}&school=${school}&page=${
             prev
               ? page - 1
               : next
@@ -198,7 +198,7 @@ const Paginate = ({
               : 1
           }`
         : category.length > 0 && school
-        ? `/products?search=${keyword}&category=${category}&school=${school}&page=${
+        ? `/products?category=${category}&school=${school}&page=${
             prev
               ? page - 1
               : next
@@ -210,7 +210,7 @@ const Paginate = ({
               : 1
           }`
         : standard.length > 0 && school
-        ? `/products?search=${keyword}&class=${standard}&school=${school}&page=${
+        ? `/products?class=${standard}&school=${school}&page=${
             prev
               ? page - 1
               : next

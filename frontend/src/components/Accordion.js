@@ -21,10 +21,10 @@ const Accordion = () => {
   const urlSearchParams = new URLSearchParams(location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
 
-  const school = selectedschool;
+  const school = selectedschool ? selectedschool : params.school;
 
   const [pageNumber, setPageNumber] = useState(params.page);
-  
+
   useEffect(() => {
     dispatch(listClasses());
   }, [dispatch]);

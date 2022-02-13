@@ -510,7 +510,7 @@ const ProductCreateScreen = ({ history, location }) => {
                               dataDelete.splice(index, 1);
                               setSize([...dataDelete]);
                             } else if (selection && data) {
-                              setSize([...new Set([...size, ...data])]);
+                              setSize([...new Set([...size, selection])]);
                             } else {
                               setSize([...data]);
                             }

@@ -334,6 +334,8 @@ const ProductEditScreen = ({ match, history, location }) => {
     setShowImageUploader(true);
   };
 
+
+
   return (
     <AdminPageLayout>
       <Meta
@@ -571,8 +573,10 @@ const ProductEditScreen = ({ match, history, location }) => {
                               dataDelete.splice(index, 1);
                               setSize([...dataDelete]);
                             } else if (selection && data) {
-                              setSize([...new Set([...size, ...data])]);
+                              
+                              setSize([...new Set([...size, selection])]);
                             } else {
+                            
                               setSize([...data]);
                             }
                           }}
@@ -705,7 +709,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                 selection.tableData &&
                                 !selection.tableData.checked
                               ) {
-                                console.log('hello');
+                              
                                 const id = selection.tableData.id;
 
                                 const dataDelete = [...schoolName];

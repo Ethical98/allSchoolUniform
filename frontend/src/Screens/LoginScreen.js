@@ -99,7 +99,7 @@ const LoginScreenByPhone = ({ history, location }) => {
       if (phoneNumber && password) {
         dispatch(loginByPhone(inputValue, password));
       } else if (email && password) {
-        dispatch(login(inputValue, password));
+        dispatch(login(inputValue.toLowerCase(), password));
       }
     }
     setValidated(true);
@@ -115,7 +115,7 @@ const LoginScreenByPhone = ({ history, location }) => {
     if (phoneNumber) {
       dispatch(getOTP(phoneNumber));
     } else {
-      dispatch(getOtpWithEmail(email));
+      dispatch(getOtpWithEmail(email.toLowerCase()));
     }
   };
   // useEffect(() => {
@@ -136,7 +136,9 @@ const LoginScreenByPhone = ({ history, location }) => {
       <Meta
         title={'Login - Allschooluniform'}
         description={'Buy School Uniforms Online'}
-        keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login'}
+        keyword={
+          'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login'
+        }
       />
       <FormContainer>
         <h1>SIGN IN</h1>

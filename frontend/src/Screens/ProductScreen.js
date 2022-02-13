@@ -14,10 +14,12 @@ import PageLayout from '../components/PageLayout';
 import BreadCrumb from '../components/BreadCrumb';
 
 const ProductScreen = ({ history, location, match }) => {
-  const school = match.params.selectedschool;
-
   const urlSearchParams = new URLSearchParams(location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
+  const school = match.params.selectedschool
+    ? match.params.selectedschool
+    : params.school;
+
   const category = params.category ? params.category : '';
   const season = params.season ? params.season : '';
   const standard = params.class ? params.class : '';
