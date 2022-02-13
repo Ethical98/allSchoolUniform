@@ -217,7 +217,7 @@ const Accordion = () => {
         />
       ) : (
         <Card id='Acc'>
-          <Card.Header className='text-center'>
+          {/* <Card.Header className='text-center'>
             Buy Uniform in 3 Easy Steps
           </Card.Header>
           <div>
@@ -248,7 +248,7 @@ const Accordion = () => {
                 <option>5</option>
               </Form.Select>
             </Form>
-          </div>
+          </div> */}
           <Card.Header
             data-bs-toggle='collapse'
             href='#ProductCategory'
