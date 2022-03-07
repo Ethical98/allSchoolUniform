@@ -30,7 +30,9 @@ const TypeEditScreen = ({ match, history }) => {
 
   const dispatch = useDispatch();
 
-  const [showImageUploader, setShowImageUploader] = useState(false);
+  const [showImageOneUploader, setShowImageOneUploader] = useState(false);
+  const [showImageTwoUploader, setShowImageTwoUploader] = useState(false);
+  const [showImageThreeUploader, setShowImageThreeUploader] = useState(false);
 
   const [typeName, setTypeName] = useState('');
   const [typeImage, setTypeImage] = useState('');
@@ -70,17 +72,17 @@ const TypeEditScreen = ({ match, history }) => {
         ) : (
           <i className='fas fa-times'></i>
         ),
-      editComponent: (props) => (
-        <Form.Group controlId='isActive' className='mb-3'>
-          <Form.Check
-            className='mb-3'
-            type='checkbox'
-            label='Is Active'
-            checked={props.value}
-            onChange={(e) => props.onChange(e.target.checked)}
-          ></Form.Check>
-        </Form.Group>
-      ),
+      // editComponent: (props) => (
+      //   <Form.Group controlId='isActive' className='mb-3'>
+      //     <Form.Check
+      //       className='mb-3'
+      //       type='checkbox'
+      //       label='Is Active'
+      //       checked={props.value}
+      //       onChange={(e) => props.onChange(e.target.checked)}
+      //     ></Form.Check>
+      //   </Form.Group>
+      // ),
     },
   ];
 
@@ -140,15 +142,15 @@ const TypeEditScreen = ({ match, history }) => {
   useEffect(() => {
     if (imageOneUrl) {
       setTypeImage(imageOneUrl);
-      setShowImageUploader(false);
+      setShowImageOneUploader(false);
       dispatch({ type: TYPE_IMAGE_UPLOAD_RESET });
     } else if (imageTwoUrl) {
       setSizeGuide(imageTwoUrl);
-      setShowImageUploader(false);
+      setShowImageTwoUploader(false);
       dispatch({ type: TYPE_IMAGE_UPLOAD_RESET });
     } else if (imageThreeUrl) {
       setSizeChart(imageThreeUrl);
-      setShowImageUploader(false);
+      setShowImageThreeUploader(false);
       dispatch({ type: TYPE_IMAGE_UPLOAD_RESET });
     }
   }, [imageOneUrl, imageTwoUrl, imageThreeUrl, dispatch]);
@@ -226,7 +228,9 @@ const TypeEditScreen = ({ match, history }) => {
     setTypeImageOne(false);
     setTypeImageTwo(false);
     setTypeImageThree(false);
-    setShowImageUploader(false);
+    setShowImageOneUploader(false);
+    setShowImageTwoUploader(false);
+    setShowImageThreeUploader(false);
   };
 
   const closeImageOneUploaderHandle = () => {
@@ -236,7 +240,9 @@ const TypeEditScreen = ({ match, history }) => {
     setTypeImageOne(true);
     setTypeImageTwo(false);
     setTypeImageThree(false);
-    setShowImageUploader(true);
+    setShowImageOneUploader(true);
+    // setShowImageTwoUploader(false);
+    // setShowImageThreeUploader(false);
   };
 
   const closeImageTwoUploaderHandle = () => {
@@ -247,14 +253,14 @@ const TypeEditScreen = ({ match, history }) => {
     setTypeImageOne(false);
     setTypeImageTwo(true);
     setTypeImageThree(false);
-    setShowImageUploader(true);
+    setShowImageTwoUploader(true);
   };
 
   const showImageThreeUploaderHandle = () => {
     setTypeImageOne(false);
     setTypeImageTwo(false);
     setTypeImageThree(true);
-    setShowImageUploader(true);
+    setShowImageThreeUploader(true);
   };
 
   const closeImageThreeUploaderHandle = () => {
@@ -276,6 +282,8 @@ const TypeEditScreen = ({ match, history }) => {
       })
     );
   };
+
+  console.log(typeImageOne, typeImageTwo, typeImageThree);
   return (
     <AdminPageLayout>
       <Meta
@@ -331,7 +339,7 @@ const TypeEditScreen = ({ match, history }) => {
                 <DialogBox
                   size={'lg'}
                   handleClose={closeImageOneUploaderHandle}
-                  show={showImageUploader}
+                  show={showImageOneUploader}
                   title={'UPLOAD IMAGES'}
                 >
                   <ImageUploader
@@ -383,7 +391,7 @@ const TypeEditScreen = ({ match, history }) => {
                 <DialogBox
                   size={'lg'}
                   handleClose={closeImageTwoUploaderHandle}
-                  show={showImageUploader}
+                  show={showImageTwoUploader}
                   title={'UPLOAD IMAGES'}
                 >
                   <ImageUploader
@@ -425,7 +433,7 @@ const TypeEditScreen = ({ match, history }) => {
                 <DialogBox
                   size={'lg'}
                   handleClose={closeImageThreeUploaderHandle}
-                  show={showImageUploader}
+                  show={showImageThreeUploader}
                   title={'UPLOAD IMAGES'}
                 >
                   <ImageUploader
@@ -462,17 +470,17 @@ const TypeEditScreen = ({ match, history }) => {
                           resolve();
                         }, 1000);
                       }),
-                    onRowUpdate: (newData, oldData) =>
-                      new Promise((resolve, reject) => {
-                        setTimeout(() => {
-                          const dataUpdate = [...variants];
-                          const index = oldData.tableData.id;
-                          dataUpdate[index] = newData;
-                          setVariants([...dataUpdate]);
+                    // onRowUpdate: (newData, oldData) =>
+                    //   new Promise((resolve, reject) => {
+                    //     setTimeout(() => {
+                    //       const dataUpdate = [...variants];
+                    //       const index = oldData.tableData.id;
+                    //       dataUpdate[index] = newData;
+                    //       setVariants([...dataUpdate]);
 
-                          resolve();
-                        }, 1000);
-                      }),
+                    //       resolve();
+                    //     }, 1000);
+                    //   }),
                     onRowDelete: (oldData) =>
                       new Promise((resolve, reject) => {
                         setTimeout(() => {

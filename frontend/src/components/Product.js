@@ -154,7 +154,7 @@ const Product = ({ product }) => {
           <Card.Img
             src={product.image}
             variant='top'
-            style={{ height: '200px', width: '160px' }}
+            style={{ height: '200px', width: '160px', objectFit: 'contain' }}
           />
         </Link>
         <Card.Body style={{ padding: '0.2rem' }}>
