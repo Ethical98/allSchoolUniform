@@ -32,28 +32,14 @@ const PlaceOrderScreen = ({ history }) => {
   } = orderPay;
 
   const cart = useSelector((state) => state.cart);
-  const { cartItems, cartId } = cart;
+  const { cartItems } = cart;
 
   const orderCreate = useSelector((state) => state.orderCreate);
   const { order, success, error } = orderCreate;
 
-  const orderUpdate = useSelector((state) => state.orderUpdate);
-  const {
-    updatedOrder,
-    success: updateSuccess,
-    error: updateError,
-  } = orderCreate;
-
   const getDiscountedPrice = (price, disc) => {
     return price - price * (disc / 100);
   };
-
-  // useEffect(() => {
-  //   if (cartItems.length !== 0) {
-  //     dispatch(getCartFromDatabase());
-  //   }
-  //   // eslint-disable-next-line
-  // }, [dispatch, cartItems.length]);
 
   if (userInfo && userInfo.token) {
     jsonwebtoken.verify(
@@ -75,7 +61,6 @@ const PlaceOrderScreen = ({ history }) => {
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = 'https://checkout-static.citruspay.com/bolt/run/bolt.min.js';
-    //script.src="https://sboxcheckout-static.citruspay.com/bolt/run/bolt.min.js"
     script.id = 'bolt';
     script.async = true;
     script.onLoad = () => {
@@ -86,12 +71,6 @@ const PlaceOrderScreen = ({ history }) => {
   useEffect(() => {
     if (cart.paymentMethod !== 'COD') {
       addPayUMoneyScript();
-
-      // if (!window.bolt) {
-      //   addPayUMoneyScript();
-      // } else {
-      //   setScriptReady(true);
-      // }
     }
   }, [dispatch, cart.paymentMethod]);
 

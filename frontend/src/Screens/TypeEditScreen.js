@@ -283,7 +283,6 @@ const TypeEditScreen = ({ match, history }) => {
     );
   };
 
-  console.log(typeImageOne, typeImageTwo, typeImageThree);
   return (
     <AdminPageLayout>
       <Meta
