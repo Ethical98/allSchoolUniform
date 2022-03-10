@@ -65,25 +65,28 @@ export const orderDetailsReducer = (
       return { loading: false, order: action.payload };
     case ORDER_DETAILS_FAIL:
       return { loading: false, error: action.payload };
-    
 
     default:
       return state;
   }
 };
 
-export const orderPayReducer = (state = { response: {} }, action) => {
+export const orderPayReducer = (
+  state = { response: { order: {} } },
+  action
+) => {
   switch (action.type) {
     case ORDER_PAY_REQUEST:
-      return { loading: true, pd: action.payload };
+      return { ...state, loading: true, pd: action.payload };
     case ORDER_PAY_SUCCESS:
       return {
+        ...state,
         loading: false,
         success: true,
         response: action.payload,
       };
     case ORDER_PAY_FAIL:
-      return { loading: false, error: action.payload };
+      return { ...state, loading: false, error: action.payload };
     case ORDER_PAY_RESET:
       return {};
     default:

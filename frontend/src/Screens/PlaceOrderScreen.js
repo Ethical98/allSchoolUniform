@@ -37,6 +37,13 @@ const PlaceOrderScreen = ({ history }) => {
   const orderCreate = useSelector((state) => state.orderCreate);
   const { order, success, error } = orderCreate;
 
+  const orderUpdate = useSelector((state) => state.orderUpdate);
+  const {
+    updatedOrder,
+    success: updateSuccess,
+    error: updateError,
+  } = orderCreate;
+
   const getDiscountedPrice = (price, disc) => {
     return price - price * (disc / 100);
   };
@@ -90,22 +97,19 @@ const PlaceOrderScreen = ({ history }) => {
 
   useEffect(() => {
     if (cart.paymentMethod !== 'COD') {
-      if (cartId) {
-        if (errorPay === 'Overlay closed by consumer') {
-          setMessage('Payment Canceled Please try again!!');
-        }
-        if (successPay) {
-          dispatch(updateOrder(order._id, paymentResponse));
-          history.push(`/order/${order._id}`);
-        }
+      if (errorPay === 'Overlay closed by consumer') {
+        setMessage('Payment Canceled Please try again!!');
+      }
+      if (successPay && order) {
+        dispatch(updateOrder(order._id, paymentResponse));
+        history.push(`/order/${order._id}`);
       }
     } else {
       if (success) {
         history.push(`/order/${order._id}`);
       }
     }
-    // eslint-disable-next-line
-  }, [dispatch, errorPay, history, success, successPay]);
+  }, [dispatch, errorPay, history, success, successPay, order]);
 
   const addDecimals = (num) => {
     return (Math.round(num * 100) / 100).toFixed(2);
@@ -125,23 +129,6 @@ const PlaceOrderScreen = ({ history }) => {
     Number(cart.shippingPrice) +
     Number(cart.taxPrice)
   ).toFixed(2);
-
-  useEffect(() => {
-    if (successPay) {
-      dispatch(
-        createOrder({
-          orderItems: cart.cartItems,
-          shippingAddress: cart.shippingAddress,
-          paymentMethod: cart.paymentMethod,
-          itemsPrice: cart.itemsPrice,
-          shippingPrice: cart.shippingPrice,
-          taxPrice: cart.taxPrice,
-          totalPrice: cart.totalPrice,
-        })
-      );
-    }
-    // eslint-disable-next-line
-  }, [successPay, dispatch]);
 
   const placeOrderHandler = () => {
     setMessage('');
@@ -168,6 +155,23 @@ const PlaceOrderScreen = ({ history }) => {
       );
     }
   };
+
+  useEffect(() => {
+    if (successPay) {
+      dispatch(
+        createOrder({
+          orderItems: cart.cartItems,
+          shippingAddress: cart.shippingAddress,
+          paymentMethod: cart.paymentMethod,
+          itemsPrice: cart.itemsPrice,
+          shippingPrice: cart.shippingPrice,
+          taxPrice: cart.taxPrice,
+          totalPrice: cart.totalPrice,
+        })
+      );
+    }
+    // eslint-disable-next-line
+  }, [successPay, dispatch]);
 
   return (
     <PageLayout>

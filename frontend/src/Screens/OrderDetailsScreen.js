@@ -23,17 +23,17 @@ const OrderDetails = ({ match, history }) => {
   const orderDetails = useSelector((state) => state.orderDetails);
   const { order, loading, error } = orderDetails;
 
-  const [instance, updateInstance] = usePDF({
-    document: order ? (
-      <Invoice
-        name={order.user ? order.user.name : ''}
-        email={order.user ? order.user.email : ''}
-        order={order && order}
-      />
-    ) : (
-      <div>Bill</div>
-    ),
-  });
+  // const [instance, updateInstance] = usePDF({
+  //   document: order ? (
+  //     <Invoice
+  //       name={order.user ? order.user.name : ''}
+  //       email={order.user ? order.user.email : ''}
+  //       order={order && order}
+  //     />
+  //   ) : (
+  //     <div>Bill</div>
+  //   ),
+  // });
 
   useEffect(() => {
     if (!userInfo) {
@@ -60,17 +60,17 @@ const OrderDetails = ({ match, history }) => {
     if (!order || order._id !== orderId) {
       dispatch(getOrderDetails(orderId));
     } else {
-      updateInstance({
-        document: (
-          <Invoice
-            name={order.user.name}
-            email={order.user.email}
-            order={order && order}
-          />
-        ),
-      });
+      // updateInstance({
+      //   document: (
+      //     <Invoice
+      //       name={order.user.name}
+      //       email={order.user.email}
+      //       order={order && order}
+      //     />
+      //   ),
+      // });
     }
-  }, [dispatch, orderId, order, updateInstance]);
+  }, [dispatch, orderId, order]);
 
   useEffect(() => {
     if (!userInfo) {
@@ -259,11 +259,11 @@ const OrderDetails = ({ match, history }) => {
             isAdmin={false}
           />
         </PDFViewer> */}
-        {order.tracking.isDelivered && (
+        {/* {order.tracking.isDelivered && (
           <a href={instance.url} download={`${order.orderId}.pdf`}>
             Download Invoice
           </a>
-        )}
+        )} */}
       </Row>
     </PageLayout>
   );

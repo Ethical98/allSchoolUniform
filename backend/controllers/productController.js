@@ -441,9 +441,11 @@ const uploadProductImages = asyncHandler(async (req, res) => {
     // await sharp(req.file.buffer)
     //   .resize({ width: 640, height: 640 })
     //   .toFile('uploads/products/resized-' + newFilename);
-    await sharp(req.file.buffer).toFile(
-      'uploads/products/resized-' + newFilename
-    );
+    await sharp(req.file.buffer)
+      .resize({
+        fit: sharp.fit.contain,
+      })
+      .toFile('uploads/products/resized-' + newFilename);
 
     res.send(`/uploads/products/resized-${newFilename}`);
   }

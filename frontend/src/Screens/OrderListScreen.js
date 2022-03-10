@@ -155,7 +155,7 @@ const OrderListScreen = ({ history, location }) => {
                 ),
                 tooltip: 'Details',
                 onClick: (event, rowData) =>
-                  history.push(`/orderdetails/${rowData._id}/`),
+                  history.push(`/orderdetails/${rowData._id}`),
               },
             ]}
           />
