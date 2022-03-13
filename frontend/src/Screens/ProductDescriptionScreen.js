@@ -93,6 +93,7 @@ const ProductDescriptionScreen = ({ history }) => {
   }, [product, index]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (userInfo && userInfo.token) {
       jsonwebtoken.verify(
         userInfo.token,
