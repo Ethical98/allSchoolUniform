@@ -334,7 +334,9 @@ const ProductEditScreen = ({ match, history, location }) => {
     setShowImageUploader(true);
   };
 
-
+  const nameValidationHandler = (value) => {
+    setName(value.replace(/[^\w\s]/gi, ''));
+  };
 
   return (
     <AdminPageLayout>
@@ -376,7 +378,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                     type='name'
                     placeholder='Enter Name'
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => nameValidationHandler(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
                 <FloatingLabel
@@ -573,10 +575,8 @@ const ProductEditScreen = ({ match, history, location }) => {
                               dataDelete.splice(index, 1);
                               setSize([...dataDelete]);
                             } else if (selection && data) {
-                              
                               setSize([...new Set([...size, selection])]);
                             } else {
-                            
                               setSize([...data]);
                             }
                           }}
@@ -709,7 +709,6 @@ const ProductEditScreen = ({ match, history, location }) => {
                                 selection.tableData &&
                                 !selection.tableData.checked
                               ) {
-                              
                                 const id = selection.tableData.id;
 
                                 const dataDelete = [...schoolName];
