@@ -177,7 +177,7 @@ const HomeScreen = ({ history }) => {
               id='async-example'
               isLoading={isLoading}
               labelKey={'name'}
-              minLength={3}
+              minLength={2}
               onChange={(value) => handleChange(value)}
               onSearch={handleSearch}
               options={options}

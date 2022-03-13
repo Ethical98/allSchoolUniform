@@ -136,20 +136,23 @@ const Accordion = () => {
         // history.push(`/products/schools/${school}?page=${pageNumber}`);
         history.replace({
           pathname: `/products/schools/${school}`,
-          search: `?page=${pageNumber}`,
+          search: `page=${pageNumber}`,
         });
       } else if (school) {
         history.replace(`/products/schools/${school}`);
-      } else if (keyword && pageNumber) {
-        history.replace({
-          pathname: `/products?`,
-          search: `search=${keyword}&page=${pageNumber}`,
-        });
-      } else if (keyword) {
-        history.replace(`/products?search=${keyword}`);
-      } else if (pageNumber) {
+      }
+      // else if (keyword) {
+      //   history.replace(`/products?search=${keyword}`);
+      //   setPageNumber('');
+      // } else if (keyword && pageNumber) {
+      //   history.replace({
+      //     pathname: `/products`,
+      //     search: `search=${keyword}&page=${pageNumber}`,
+      //   });
+      // }
+      else if (pageNumber && !keyword) {
         history.replace(`/products?page=${pageNumber}`);
-      } else {
+      } else if (!keyword) {
         history.replace('/products');
       }
     }
