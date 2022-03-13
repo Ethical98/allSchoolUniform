@@ -168,19 +168,25 @@ const Product = ({ product }) => {
           </Link>
 
           <Card.Text className='text-center' as='h6'>
-            ₹{' '}
-            <span
-              style={{
-                textDecorationLine: 'line-through',
-                textDecorationStyle: 'solid',
-                color: 'red',
-              }}
-            >
-              {productPrice}
-            </span>
-            <span className='mx-1'>
-              {productPrice - productPrice * (productDisc / 100)}
-            </span>
+            ₹
+            {productDisc > 0 ? (
+              <span>
+                <span
+                  style={{
+                    textDecorationLine: 'line-through',
+                    textDecorationStyle: 'solid',
+                    color: 'red',
+                  }}
+                >
+                  {productPrice}
+                </span>
+                <span className='mx-1'>
+                  {productPrice - productPrice * (productDisc / 100)}
+                </span>
+              </span>
+            ) : (
+              <span>{productPrice}</span>
+            )}
           </Card.Text>
 
           <Card className='sizeCard' bg='white' style={{ padding: '2%' }}>

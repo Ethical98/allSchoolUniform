@@ -11,7 +11,6 @@ const Accordion = () => {
   const location = useLocation();
   const history = useHistory();
   const { selectedschool } = useParams();
-  window.scrollTo(0, 0);
 
   const { width } = useWindowDimensions();
 
@@ -43,6 +42,7 @@ const Accordion = () => {
   const keyword = params.search ? params.search : '';
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (category.length > 0 && season.length > 0 && standard.length > 0) {
       if (!pageNumber) {
         if (school) {

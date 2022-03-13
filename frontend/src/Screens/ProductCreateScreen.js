@@ -265,7 +265,9 @@ const ProductCreateScreen = ({ history, location }) => {
   const showImageUploaderHandle = () => {
     setShowImageUploader(true);
   };
-
+  const nameValidationHandler = (value) => {
+    setName(value.replace(/[^\w\s]/gi, ''));
+  };
   return (
     <AdminPageLayout>
       <Meta
@@ -304,13 +306,16 @@ const ProductCreateScreen = ({ history, location }) => {
                     onChange={(e) => setSKU(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
+                <span style={{ fontSize: '12px' }}>
+                  Special Character not allowed for name
+                </span>
                 <FloatingLabel className='mb-3' label='Name' controlId='name'>
                   <Form.Control
                     required
                     type='name'
                     placeholder='Enter Name'
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => nameValidationHandler(e.target.value)}
                   ></Form.Control>
                 </FloatingLabel>
                 <FloatingLabel
