@@ -40,7 +40,7 @@ const cartSchema = new mongoose.Schema(
           type: Number,
         },
         size: {
-          type: Number,
+          type: String,
           required: true,
         },
         index: {
