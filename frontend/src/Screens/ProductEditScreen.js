@@ -150,8 +150,6 @@ const ProductEditScreen = ({ match, history, location }) => {
     }
   }, [history, userInfo]);
 
-  console.log(size);
-
   useEffect(() => {
     if (userInfo && userInfo.token) {
       jsonwebtoken.verify(
