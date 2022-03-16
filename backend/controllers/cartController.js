@@ -14,14 +14,15 @@ const addToCart = asyncHandler(async (req, res) => {
     const cart = await Cart.findOne({
       user: req.user._id,
     });
-   
+
     if (cart) {
-      const existItem = cart.cartItems.find((x) => x._id == addItem._id);
- 
+      const existItem = cart.cartItems.find(
+        (x) => x._id == addItem._id && x.name == addItem.name
+      );
 
       if (existItem) {
         cart.cartItems = cart.cartItems.map((x) =>
-          x._id == existItem._id ? addItem : x
+          x._id == existItem._id && x.name === existItem.name ? addItem : x
         );
 
         const items = await cart.save();
@@ -48,7 +49,8 @@ const addToCart = asyncHandler(async (req, res) => {
 // @route DELETE /api/cart/remove/:id
 // @access Private
 const cartItemRemove = asyncHandler(async (req, res) => {
-  const id = req.params.id;
+  const id = req.query.id;
+  const name = req.query.name;
 
   if (!id) {
     res.status(400);
@@ -58,7 +60,7 @@ const cartItemRemove = asyncHandler(async (req, res) => {
 
     await Cart.updateOne(
       { user: req.user._id },
-      { $pull: { cartItems: { _id: id } } }
+      { $pull: { cartItems: { _id: id, name: name } } }
     );
 
     // cart.cartItems = cart.cartItems.filter((x) => x.id != id);
@@ -91,8 +93,6 @@ const getCart = asyncHandler(async (req, res) => {
 // @access Private
 const mergeCart = asyncHandler(async (req, res) => {
   const { cartItems } = req.body;
- 
- 
 
   const cart = await Cart.findOne({ user: req.user._id });
   if (cart) {
@@ -114,7 +114,7 @@ const mergeCart = asyncHandler(async (req, res) => {
             : itemToAdd.product == addedItem.product
         )
     );
- 
+
     cart.cartItems = [...cart.cartItems, ...products];
     const finalCart = await cart.save();
     res.json(finalCart.cartItems);

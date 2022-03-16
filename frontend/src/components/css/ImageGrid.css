@@ -10,15 +10,18 @@
   height: 0;
   padding: 50% 0;
   position: relative;
-  opacity: 0.8;
+  object-fit: contain;
 }
 
 .img-wrap img {
-  min-width: 100%;
-  min-height: 100%;
-  max-width: 120%;
+  object-fit: contain;
+  width: 100%;
+  /* min-height: 100%; */
 
   position: absolute;
   top: 0;
   left: 0;
+}
+.img-wrap p {
+  font-size: 8px;
 }

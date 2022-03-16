@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Tabs, Tab } from 'react-bootstrap';
 import './css/ImageGrid.css';
-import PaginationTry from './PaginationTry';
+import ImageUploadPagination from './ImageUploadPagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { listProductImages } from '../actions/productActions';
 import { listSchoolImages } from '../actions/schoolActions';
@@ -112,7 +112,7 @@ const ImageGrid = ({ typeImageOne, typeImageTwo, typeImageThree }) => {
         </div>
         <div>
           {productImagePages > 1 && (
-            <PaginationTry
+            <ImageUploadPagination
               page={currentProductImagePage}
               pages={productImagePages}
               changePage={setCurrentProductImagePage}
@@ -147,7 +147,7 @@ const ImageGrid = ({ typeImageOne, typeImageTwo, typeImageThree }) => {
         </div>
         <div>
           {schoolImagePages > 1 && (
-            <PaginationTry
+            <ImageUploadPagination
               page={currentSchoolImagePage}
               pages={schoolImagePages}
               changePage={setCurrentSchoolImagePage}
@@ -192,7 +192,7 @@ const ImageGrid = ({ typeImageOne, typeImageTwo, typeImageThree }) => {
           )}
           <div>
             {typeImagePages > 1 && (
-              <PaginationTry
+              <ImageUploadPagination
                 page={currentTypeImagePage}
                 pages={typeImagePages}
                 changePage={setCurrentTypeImagePage}

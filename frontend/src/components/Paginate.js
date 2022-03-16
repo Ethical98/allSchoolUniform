@@ -20,9 +20,6 @@ const Paginate = ({
   users = false,
   schools = false,
   school = '',
-  schoolImages,
-  productImages,
-  uploadImages,
 }) => {
   const [pageNumberLimit, setPageNumberLimit] = useState(5);
   const [maxPageNumberLimit, setMaxPageNumberLimit] = useState(5);
@@ -385,10 +382,13 @@ const Paginate = ({
           )}
 
           {[...Array(pages).keys()].map(
-            (x) =>
+            (x, index) =>
               x + 1 < maxPageNumberLimit + 1 &&
               x + 1 > minPageNumberLimit && (
-                <LinkContainer to={href(false, false, true, false, false, x)}>
+                <LinkContainer
+                  key={index}
+                  to={href(false, false, true, false, false, x)}
+                >
                   <Pagination.Item active={x + 1 === page}>
                     {x + 1}
                   </Pagination.Item>

@@ -26,6 +26,7 @@ import {
 import {
   ORDER_CONFIRM_RESET,
   ORDER_DELIVER_RESET,
+  ORDER_DETAILS_RESET,
   ORDER_OUT_FOR_DELIVERY_RESET,
   ORDER_PROCESSING_RESET,
   ORDER_UPDATE_RESET,
@@ -315,6 +316,7 @@ const OrderEditScreen = ({ history, match, location }) => {
   useEffect(() => {
     if (success) {
       dispatch({ type: ORDER_UPDATE_RESET });
+      dispatch({ type: ORDER_DETAILS_RESET });
 
       history.push('/admin/orderlist');
     } else {
@@ -404,6 +406,12 @@ const OrderEditScreen = ({ history, match, location }) => {
     name,
     email,
   ]);
+
+  // useEffect(() => {
+  //   if (order && order.modified) {
+  //     dispatch(getOrderDetails(orderId));
+  //   }
+  // }, [order, dispatch, orderId]);
 
   useEffect(() => {
     if (userInfo && !userInfo.isAdmin) {

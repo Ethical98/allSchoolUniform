@@ -140,7 +140,7 @@ const ProductListScreen = ({ history, match, location }) => {
         <Col className='float-end'>
           <div>
             <AsyncTypeahead
-              clearButton={true} 
+              clearButton={true}
               filterBy={filterBy}
               id='async-example'
               isLoading={isLoading}

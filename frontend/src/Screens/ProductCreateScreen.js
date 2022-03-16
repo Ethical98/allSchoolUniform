@@ -48,7 +48,7 @@ const ProductCreateScreen = ({ history, location }) => {
   const [season, setSeason] = useState('');
   const [brand, setBrand] = useState('');
   const [category, setCategory] = useState('');
-  const [size, setSize] = useState('');
+  const [size, setSize] = useState([]);
   const [message, setMessage] = useState('');
 
   const [masterSize, setMasterSize] = useState([]);
@@ -176,6 +176,31 @@ const ProductCreateScreen = ({ history, location }) => {
     }
   }, [dispatch, history, userInfo]);
 
+  const removeIdHandler = (sizeArray) => {
+    const newSizeArray = sizeArray.map(
+      ({
+        price,
+        countInStock,
+        openingQty,
+        tax,
+        discount,
+        size,
+        alertOnQty,
+        isActive,
+      }) => ({
+        isActive,
+        price,
+        countInStock,
+        openingQty,
+        tax,
+        discount,
+        size,
+        alertOnQty,
+      })
+    );
+    return newSizeArray;
+  };
+
   useEffect(() => {
     if (success) {
       history.push('/admin/productlist');
@@ -186,7 +211,7 @@ const ProductCreateScreen = ({ history, location }) => {
     dispatch(listSchools(pageNumber));
 
     if (masterSizes && masterSizes.variants && type) {
-      setMasterSize([...masterSizes.variants]);
+      setMasterSize([...removeIdHandler(masterSizes.variants)]);
     }
   }, [dispatch, masterSizes, type, success, history, pageNumber]);
 
@@ -227,7 +252,7 @@ const ProductCreateScreen = ({ history, location }) => {
   };
 
   useEffect(() => {
-    if (masterSize && size) {
+    if (masterSize && size && size.length > 0) {
       masterSize.forEach((x) => {
         x.price = size.some((y) => y.size === x.size)
           ? size[size.findIndex((y) => y.size === x.size)].price
@@ -268,6 +293,7 @@ const ProductCreateScreen = ({ history, location }) => {
   const nameValidationHandler = (value) => {
     setName(value.replace(/[^\w\s]/gi, ''));
   };
+
   return (
     <AdminPageLayout>
       <Meta
@@ -474,7 +500,7 @@ const ProductCreateScreen = ({ history, location }) => {
                             border: '3px solid grey',
                           }}
                           title='Size Variants'
-                          data={masterSize}
+                          data={masterSize.filter((x) => x.isActive === true)}
                           columns={sizeTableColumns}
                           options={{
                             rowStyle: {
@@ -490,6 +516,7 @@ const ProductCreateScreen = ({ history, location }) => {
                             selectionProps: (rowData) => ({
                               checked:
                                 size &&
+                                size.length > 0 &&
                                 size.some((x) => x.size === rowData.size)
                                   ? true
                                   : false,
@@ -512,6 +539,7 @@ const ProductCreateScreen = ({ history, location }) => {
                               const index = size.findIndex(
                                 (x) => x.size === masterSize[id].size
                               );
+
                               dataDelete.splice(index, 1);
                               setSize([...dataDelete]);
                             } else if (selection && data) {

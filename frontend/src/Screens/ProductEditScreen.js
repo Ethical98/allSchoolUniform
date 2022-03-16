@@ -150,6 +150,8 @@ const ProductEditScreen = ({ match, history, location }) => {
     }
   }, [history, userInfo]);
 
+  console.log(size);
+
   useEffect(() => {
     if (userInfo && userInfo.token) {
       jsonwebtoken.verify(
@@ -164,6 +166,31 @@ const ProductEditScreen = ({ match, history, location }) => {
       );
     }
   }, [dispatch, userInfo, history]);
+
+  const removeIdHandler = (sizeArray) => {
+    const newSizeArray = sizeArray.map(
+      ({
+        price,
+        countInStock,
+        openingQty,
+        tax,
+        discount,
+        size,
+        alertOnQty,
+        isActive,
+      }) => ({
+        price,
+        countInStock,
+        openingQty,
+        tax,
+        discount,
+        size,
+        alertOnQty,
+        isActive,
+      })
+    );
+    return newSizeArray;
+  };
 
   useEffect(() => {
     if (userInfo && !userInfo.isAdmin) {
@@ -231,7 +258,7 @@ const ProductEditScreen = ({ match, history, location }) => {
 
   useEffect(() => {
     if (masterSizes && masterSizes.variants) {
-      setMasterSize([...masterSizes.variants]);
+      setMasterSize([...removeIdHandler(masterSizes.variants)]);
     }
   }, [masterSizes, dispatch, product.type]);
 

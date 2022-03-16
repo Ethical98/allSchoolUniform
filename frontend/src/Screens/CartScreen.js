@@ -71,8 +71,8 @@ const CartScreen = ({ match, location, history }) => {
     }
   };
 
-  const removeFromCartHandler = (id) => {
-    dispatch(removeFromCart(id));
+  const removeFromCartHandler = (id, name) => {
+    dispatch(removeFromCart(id, name));
   };
 
   const getDiscountedPrice = (price, disc) => {
@@ -127,21 +127,6 @@ const CartScreen = ({ match, location, history }) => {
                           ₹{getDiscountedPrice(item.price, item.disc)}
                         </Col>
                         <Col xs={2}>
-                          {/* {item.qty > 10 && !customQty ? (
-                          <InputGroup size='sm'>
-                            <Form.Control
-                              value={item.qty}
-                              onChange={(e) => setChangedQty(e.target.value)}
-                            />
-                            <InputGroup.Text
-                              onClick={() =>
-                                handleCustomQty(item.product, item.qty)
-                              }
-                            >
-                              <i className='fas fa-edit' />
-                            </InputGroup.Text>
-                          </InputGroup>
-                        ) : !(customId === item.product) ? ( */}
                           <FloatingLabel label='QTY'>
                             <Form.Select
                               value={item.qty}
@@ -161,44 +146,15 @@ const CartScreen = ({ match, location, history }) => {
                                 </option>
                               ))}
                             </Form.Select>
-                            {/* <span
-                              style={{ fontSize: '0.7rem' }}
-                              onClick={() =>
-                                handleCustomQty(item.product, item.qty)
-                              }
-                            >
-                              Custom Qty?
-                            </span> */}
                           </FloatingLabel>
-                          {/* ) : (
-                        <InputGroup size='sm'>
-                          <Form.Control
-                            value={changedQty || item.qty}
-                            onChange={(e) => setChangedQty(e.target.value)}
-                          />
-                          <InputGroup.Text
-                            onClick={() =>
-                              changedQty &&
-                              dispatch(
-                                addToCart(
-                                  item.product,
-                                  item.index,
-                                  Number(changedQty)
-                                )
-                              )
-                            }
-                          >
-                            <i className='fas fa-check' />
-                          </InputGroup.Text>
-                          <p onClick={() => setCustomId('')}>Cancel?</p>
-                        </InputGroup>
-                        )} */}
                         </Col>
                         <Col xs={2}>
                           <Button
                             type='button'
                             variant='light'
-                            onClick={() => removeFromCartHandler(item._id)}
+                            onClick={() =>
+                              removeFromCartHandler(item._id, item.name)
+                            }
                           >
                             <i className='fas fa-trash'></i>
                           </Button>
