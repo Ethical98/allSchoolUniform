@@ -48,6 +48,7 @@ export const addToCart = (id, index, qty) => async (dispatch, getState) => {
         qty,
         index,
       };
+      console.log(addItem);
 
       dispatch({
         type: CART_ADD_ITEM,

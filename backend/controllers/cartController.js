@@ -50,7 +50,6 @@ const addToCart = asyncHandler(async (req, res) => {
 // @access Private
 const cartItemRemove = asyncHandler(async (req, res) => {
   const id = req.query.id;
-  const name = req.query.name;
 
   if (!id) {
     res.status(400);
@@ -60,7 +59,7 @@ const cartItemRemove = asyncHandler(async (req, res) => {
 
     await Cart.updateOne(
       { user: req.user._id },
-      { $pull: { cartItems: { _id: id, name: name } } }
+      { $pull: { cartItems: { _id: id } } }
     );
 
     // cart.cartItems = cart.cartItems.filter((x) => x.id != id);

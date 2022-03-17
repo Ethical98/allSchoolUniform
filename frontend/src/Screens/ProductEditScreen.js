@@ -58,7 +58,6 @@ const ProductEditScreen = ({ match, history, location }) => {
   const [category, setCategory] = useState('');
   const [size, setSize] = useState([]);
   const [message, setMessage] = useState('');
-  const [masterSchool, setMasterSchool] = useState([]);
   const [isActive, setIsActive] = useState(false);
 
   const [masterSize, setMasterSize] = useState([]);
@@ -306,7 +305,7 @@ const ProductEditScreen = ({ match, history, location }) => {
         category,
         brand,
         image,
-        size,
+        size: size.sort((a, b) => a.size - b.size),
         type,
         schoolName,
         description,
@@ -317,6 +316,9 @@ const ProductEditScreen = ({ match, history, location }) => {
       })
     );
   };
+  console.log(size);
+
+  //console.log(size.sort((a, b) => a.size - b.size));
 
   useEffect(() => {
     if (masterSize && size) {

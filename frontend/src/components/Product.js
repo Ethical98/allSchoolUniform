@@ -45,8 +45,10 @@ const Product = ({ product }) => {
   const handleChange = (val) => {
     setIndex(product.size.findIndex((x) => x.size === val));
   };
+  console.log(product.size);
 
   useEffect(() => {
+    console.log(index);
     setProductPrice(product.size[index].price);
     setCountInStock(product.size[index].countInStock);
     setProductDisc(product.size[index].discount);
