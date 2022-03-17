@@ -239,7 +239,9 @@ const ProductCreateScreen = ({ history, location }) => {
         type,
         brand,
         season,
-        size: size.sort((a, b) => a.size - b.size),
+        size: size.sort((a, b) =>
+          a.size > b.size ? 1 : b.size > a.size ? -1 : 0
+        ),
         category,
         image,
         standard,

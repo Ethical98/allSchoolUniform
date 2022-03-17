@@ -305,7 +305,9 @@ const ProductEditScreen = ({ match, history, location }) => {
         category,
         brand,
         image,
-        size: size.sort((a, b) => a.size - b.size),
+        size: size.sort((a, b) =>
+          a.size > b.size ? 1 : b.size > a.size ? -1 : 0
+        ),
         type,
         schoolName,
         description,
@@ -316,9 +318,6 @@ const ProductEditScreen = ({ match, history, location }) => {
       })
     );
   };
- 
-
- 
 
   useEffect(() => {
     if (masterSize && size) {

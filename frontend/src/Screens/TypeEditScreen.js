@@ -277,7 +277,9 @@ const TypeEditScreen = ({ match, history }) => {
         typeImage,
         sizeGuide,
         sizeChart,
-        variants: variants.sort((a, b) => a.size - b.size),
+        variants: variants.sort((a, b) =>
+          a.size > b.size ? 1 : b.size > a.size ? -1 : 0
+        ),
         isActive,
       })
     );
