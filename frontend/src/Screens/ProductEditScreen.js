@@ -316,9 +316,9 @@ const ProductEditScreen = ({ match, history, location }) => {
       })
     );
   };
-  console.log(size);
+ 
 
-  //console.log(size.sort((a, b) => a.size - b.size));
+ 
 
   useEffect(() => {
     if (masterSize && size) {

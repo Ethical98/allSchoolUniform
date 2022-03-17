@@ -48,7 +48,7 @@ export const addToCart = (id, index, qty) => async (dispatch, getState) => {
         qty,
         index,
       };
-      console.log(addItem);
+     
 
       dispatch({
         type: CART_ADD_ITEM,
@@ -91,12 +91,11 @@ export const addToCart = (id, index, qty) => async (dispatch, getState) => {
 };
 
 export const removeFromCart = (id, name) => async (dispatch, getState) => {
-  console.log(name);
   try {
     const {
       userLogin: { userInfo },
     } = getState();
-    console.log(name);
+  
     if (userInfo) {
       const config = {
         headers: {
@@ -104,18 +103,16 @@ export const removeFromCart = (id, name) => async (dispatch, getState) => {
           Authorization: `Bearer ${userInfo.token}`,
         },
       };
-      console.log(id, name);
+
       await axios.delete(`/api/cart/remove?id=${id}&name=${name}`, config);
       dispatch({
         type: CART_REMOVE_ITEM,
         payload: id,
-        name: name,
       });
     } else {
       dispatch({
         type: CART_REMOVE_ITEM,
         payload: id,
-        name: name,
       });
     }
   } catch (error) {

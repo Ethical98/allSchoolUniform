@@ -16,13 +16,11 @@ const addToCart = asyncHandler(async (req, res) => {
     });
 
     if (cart) {
-      const existItem = cart.cartItems.find(
-        (x) => x._id == addItem._id && x.name == addItem.name
-      );
+      const existItem = cart.cartItems.find((x) => x._id == addItem._id);
 
       if (existItem) {
         cart.cartItems = cart.cartItems.map((x) =>
-          x._id == existItem._id && x.name === existItem.name ? addItem : x
+          x._id == existItem._id ? addItem : x
         );
 
         const items = await cart.save();
