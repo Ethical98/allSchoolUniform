@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  clearResetPasswordRequest,
-  resetPassword,
-} from '../actions/userActions';
+import { clearResetPasswordRequest, resetPassword } from '../actions/userActions';
 import { Link } from 'react-router-dom';
 import { Card, Button, Form, FloatingLabel, InputGroup } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
@@ -13,109 +10,103 @@ import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
 
 const ResetPasswordScreen = ({ history }) => {
-  const dispatch = useDispatch();
-  const [message, setMessage] = useState();
-  const [password, setPassword] = useState();
-  const [confirmPassword, setConfirmPassword] = useState();
+    const dispatch = useDispatch();
+    const [message, setMessage] = useState();
+    const [password, setPassword] = useState();
+    const [confirmPassword, setConfirmPassword] = useState();
 
-  const userPasswordReset = useSelector((state) => state.userPasswordReset);
-  const { email } = userPasswordReset;
+    const userPasswordReset = useSelector(state => state.userPasswordReset);
+    const { email } = userPasswordReset;
 
-  const userUpdateProfile = useSelector((state) => state.userUpdateProfile);
-  const { loading, success: passwordUpdated, error } = userUpdateProfile;
+    const userUpdateProfile = useSelector(state => state.userUpdateProfile);
+    const { loading, success: passwordUpdated, error } = userUpdateProfile;
 
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
+    const userLogin = useSelector(state => state.userLogin);
+    const { userInfo } = userLogin;
 
-  if (!email) {
-    history.push('/login');
-  }
-
-  const submitHandler = (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setMessage('Passwords do not match');
-    } else {
-      dispatch(resetPassword(password, email));
+    if (!email) {
+        history.push('/login');
     }
-  };
-  useEffect(() => {
-    if (passwordUpdated) {
-      if (userInfo) {
-        history.push('/');
-        dispatch(clearResetPasswordRequest());
-      }
-    }
-  }, [passwordUpdated, history, userInfo, dispatch]);
-  return (
-    <PageLayout>
-      <Meta
-        title={'Reset Password - AllSchoolUniform'}
-        description={'Enter New Password to reset'}
-      />
-      <FormContainer>
-        {loading ? (
-          <Loader />
-        ) : error ? (
-          <Message variant='danger'>{error}</Message>
-        ) : (
-          message && <Message variant='danger'>{message}</Message>
-        )}
 
-        <Card>
-          <Card.Header>
-            Reset Password for <span className='text-warning'>{email}</span>
-          </Card.Header>
+    const submitHandler = e => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            setMessage('Passwords do not match');
+        } else {
+            dispatch(resetPassword(password, email));
+        }
+    };
+    useEffect(() => {
+        if (passwordUpdated) {
+            if (userInfo) {
+                history.push('/');
+                dispatch(clearResetPasswordRequest());
+            }
+        }
+    }, [passwordUpdated, history, userInfo, dispatch]);
+    return (
+        <PageLayout>
+            <Meta title={'Reset Password - AllSchoolUniform'} description={'Enter New Password to reset'} />
+            <FormContainer>
+                {loading ? (
+                    <Loader />
+                ) : error ? (
+                    <Message variant="danger">{error}</Message>
+                ) : (
+                    message && <Message variant="danger">{message}</Message>
+                )}
 
-          <Card.Body>
-            <Form onSubmit={submitHandler}>
-              <InputGroup className='mb-3'>
-                <InputGroup.Text>
-                  <i className='fas fa-lock'></i>
-                </InputGroup.Text>
+                <Card>
+                    <Card.Header>
+                        Reset Password for <span className="text-warning">{email}</span>
+                    </Card.Header>
 
-                <FloatingLabel label='New Password' style={{ width: '90%' }}>
-                  <Form.Control
-                    required
-                    placeholder='New Password'
-                    type='password'
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  ></Form.Control>
-                </FloatingLabel>
-              </InputGroup>
-              <InputGroup className='mb-3'>
-                <InputGroup.Text>
-                  <i className='fas fa-lock'></i>
-                </InputGroup.Text>
+                    <Card.Body>
+                        <Form onSubmit={submitHandler}>
+                            <InputGroup className="mb-3">
+                                <InputGroup.Text>
+                                    <i className="fas fa-lock"></i>
+                                </InputGroup.Text>
 
-                <FloatingLabel
-                  label='Confirm Password'
-                  style={{ width: '90%' }}
-                >
-                  <Form.Control
-                    required
-                    placeholder='Confirm Password'
-                    type='password'
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  ></Form.Control>
-                </FloatingLabel>
-              </InputGroup>
-              <Button type='submit' variant='success' className='col-12'>
-                Reset Password
-              </Button>
-            </Form>
-          </Card.Body>
-          <Card.Footer className='text-center'>
-            <Link to='/login'>
-              <span className='btn btn-outline-dark'>Back To Login</span>
-            </Link>
-          </Card.Footer>
-        </Card>
-      </FormContainer>
-    </PageLayout>
-  );
+                                <FloatingLabel label="New Password" style={{ width: '90%' }}>
+                                    <Form.Control
+                                        required
+                                        placeholder="New Password"
+                                        type="password"
+                                        value={password}
+                                        onChange={e => setPassword(e.target.value)}
+                                    ></Form.Control>
+                                </FloatingLabel>
+                            </InputGroup>
+                            <InputGroup className="mb-3">
+                                <InputGroup.Text>
+                                    <i className="fas fa-lock"></i>
+                                </InputGroup.Text>
+
+                                <FloatingLabel label="Confirm Password" style={{ width: '90%' }}>
+                                    <Form.Control
+                                        required
+                                        placeholder="Confirm Password"
+                                        type="password"
+                                        value={confirmPassword}
+                                        onChange={e => setConfirmPassword(e.target.value)}
+                                    ></Form.Control>
+                                </FloatingLabel>
+                            </InputGroup>
+                            <Button type="submit" variant="success" className="col-12">
+                                Reset Password
+                            </Button>
+                        </Form>
+                    </Card.Body>
+                    <Card.Footer className="text-center">
+                        <Link to="/login">
+                            <span className="btn btn-outline-dark">Back To Login</span>
+                        </Link>
+                    </Card.Footer>
+                </Card>
+            </FormContainer>
+        </PageLayout>
+    );
 };
 
 export default ResetPasswordScreen;

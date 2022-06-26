@@ -37,6 +37,10 @@ h2 {
   display: none;
 }
 
+.aboutus-container {
+  display: flex;
+}
+
 body {
   padding-top: 80px;
   font-family: 'Lato', sans-serif;

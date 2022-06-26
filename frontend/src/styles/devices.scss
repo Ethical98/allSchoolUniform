@@ -1,0 +1,94 @@
+@include for-phone {
+    main {
+        .body-wrapper {
+            .stats-section {
+                .item {
+                    margin-bottom: 10px;
+                }
+            }
+            .join-us-section {
+                .features {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                }
+                .feature {
+                    padding: 20px 10px;
+                }
+            }
+        }
+    }
+}
+@include from-tablet {
+    main {
+        .body-wrapper {
+            .banner-section {
+                .search-wrapper {
+                    .look-icon {
+                        display: block;
+                        position: absolute;
+                        left: -140px;
+                        bottom: 15px;
+                    }
+                }
+            }
+            .stats-section {
+                display: flex;
+                justify-content: space-between;
+                margin: 50px;
+
+                .item {
+                    h5 {
+                        font-size: 24px;
+                    }
+                    h1 {
+                        font-size: 60px;
+                    }
+                }
+            }
+
+            .join-us-section {
+                p {
+                    font-size: 24px;
+                }
+                .features {
+                    display: flex;
+                    justify-content: space-around;
+                }
+                .feature {
+                    width: 25%;
+                    padding: 10px;
+                }
+                .feature:not(:last-child) {
+                    margin-right: 10px;
+                }
+            }
+
+            .folks-talk-section {
+                display: flex;
+                flex-direction: column;
+                p {
+                    font-size: 25px;
+                }
+                .reviews {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    margin: 35px auto;
+                }
+            }
+        }
+    }
+}
+@include for-desktop {
+    main {
+        .body-wrapper {
+            .stats-section {
+                justify-content: space-around;
+                margin: 50px 100px;
+            }
+            .banner-section {
+                height: 845px;
+            }
+        }
+    }
+}

@@ -14,100 +14,94 @@ import PageLayout from '../components/PageLayout';
 import BreadCrumb from '../components/BreadCrumb';
 
 const ProductScreen = ({ history, location, match }) => {
-  const urlSearchParams = new URLSearchParams(location.search);
-  const params = Object.fromEntries(urlSearchParams.entries());
-  const school = match.params.selectedschool
-    ? match.params.selectedschool
-    : params.school;
+    const urlSearchParams = new URLSearchParams(location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    const school = match.params.selectedschool ? match.params.selectedschool : params.school;
 
-  const category = params.category ? params.category : '';
-  const season = params.season ? params.season : '';
-  const standard = params.class ? params.class : '';
-  const pageNumber = params.page ? params.page : 1;
-  const keyword = params.search ? params.search : '';
+    const category = params.category ? params.category : '';
+    const season = params.season ? params.season : '';
+    const standard = params.class ? params.class : '';
+    const pageNumber = params.page ? params.page : 1;
+    const keyword = params.search ? params.search : '';
 
-  const productList = useSelector((state) => state.productList);
-  const { loading, error, products, pages, page } = productList;
+    const productList = useSelector(state => state.productList);
+    const { loading, error, products, pages, page } = productList;
 
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
+    const userLogin = useSelector(state => state.userLogin);
+    const { userInfo } = userLogin;
 
-  const dispatch = useDispatch();
+    const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(
-      listProducts(
-        keyword,
-        pageNumber,
-        category.split(',').join('|'),
-        season.split(',').join('|'),
-        standard.split(',').join('|'),
-        school
-      )
-    );
-  }, [dispatch, keyword, pageNumber, category, season, standard, school]);
+    useEffect(() => {
+        dispatch(
+            listProducts(
+                keyword,
+                pageNumber,
+                category.split(',').join('|'),
+                season.split(',').join('|'),
+                standard.split(',').join('|'),
+                school
+            )
+        );
+    }, [dispatch, keyword, pageNumber, category, season, standard, school]);
 
-  useEffect(() => {
-    if (userInfo && userInfo.token) {
-      jsonwebtoken.verify(
-        userInfo.token,
-        process.env.REACT_APP_JWT_SECRET,
-        (err, decoded) => {
-          if (err) {
-            dispatch(logout());
-            history.push('/login');
-          }
+    useEffect(() => {
+        if (userInfo && userInfo.token) {
+            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
+                if (err) {
+                    dispatch(logout());
+                    history.push('/login');
+                }
+            });
         }
-      );
-    }
-  }, [dispatch, userInfo, history]);
+    }, [dispatch, userInfo, history]);
 
-  return (
-    <PageLayout>
-      <Meta title={'Products - AllschoolUniform'} />
-      <BreadCrumb />
-      {/* {keyword && (
+    return (
+        <PageLayout>
+            <Meta title={'Products - AllschoolUniform'} />
+            <BreadCrumb />
+            {/* {keyword && (
         <Link to='/' className='mb-3 btn btn-light'>
           Go Back
         </Link>
       )} */}
-      {loading ? (
-        <Loader />
-      ) : error ? (
-        <Message variant='danger'>{error}</Message>
-      ) : (
-        <>
-          <Row>
-            <Col sm={6} md={3}>
-              <Accordion />
-            </Col>
-            <Col sm={6} md={9}>
-              <Row>
-                {products.map(
-                  (product, index) =>
-                    product.isActive === true && (
-                      <Col sm={12} md={6} lg={4} xl={4} key={index}>
-                        <Product product={product} />
-                      </Col>
-                    )
-                )}
-              </Row>
-            </Col>
-          </Row>
-          <Paginate
-            pages={pages}
-            page={page}
-            keyword={keyword ? keyword : ''}
-            category={category ? category : ''}
-            season={season ? season : ''}
-            standard={standard ? standard : ''}
-            school={school ? school : ''}
-            products={true}
-          />
-        </>
-      )}
-    </PageLayout>
-  );
+            {loading ? (
+                <Loader />
+            ) : error ? (
+                <Message variant="danger">{error}</Message>
+            ) : (
+                <>
+                    <Row>
+                        <Col sm={6} md={3}>
+                            <Accordion />
+                        </Col>
+                        <Col sm={6} md={9}>
+                            <Row>
+                                {products.map(
+                                    (product, index) =>
+                                        product.isActive === true && (
+                                            <Col sm={12} md={6} lg={4} xl={4} key={index}>
+                                                <Product product={product} />
+                                            </Col>
+                                        )
+                                )}
+                            </Row>
+                        </Col>
+                    </Row>
+                    <Paginate
+                        pages={pages}
+                        page={page}
+                        keyword={keyword ? keyword : ''}
+                        category={category ? category : ''}
+                        season={season ? season : ''}
+                        standard={standard ? standard : ''}
+                        school={school ? school : ''}
+                        products
+                    />
+                </>
+            )}
+        </PageLayout>
+    );
 };
 
 export default ProductScreen;

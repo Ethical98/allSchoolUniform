@@ -1,0 +1,77 @@
+@mixin for-small-phone {
+    @media (max-width: 320px) {
+        @content;
+    }
+}
+
+@mixin for-mid-phone {
+    @media (max-width: 360px) {
+        @content;
+    }
+}
+
+@mixin for-phone {
+    @media (max-width: 767px) {
+        @content;
+    }
+}
+
+@mixin for-tablet {
+    @media (min-width: 768px) and (max-width: 1024px) {
+        @content;
+    }
+}
+
+@mixin for-tablet-mini-desktop {
+    @media (min-width: 768px) and (max-width: 1200px) {
+        @content;
+    }
+}
+
+@mixin for-phone-tablet {
+    @media (max-width: 1024px) {
+        @content;
+    }
+}
+
+@mixin from-tablet {
+    @media (min-width: 768px) {
+        @content;
+    }
+}
+
+@mixin for-desktop {
+    @media (min-width: 1025px) {
+        @content;
+    }
+}
+
+@mixin for-large-desktop {
+    @media (min-width: 1490px) {
+        @content;
+    }
+}
+
+@mixin for-mini-large-desktop {
+    @media (min-width: 1300px) {
+        @content;
+    }
+}
+
+@mixin for-x-large-desktop {
+    @media (min-width: 1600px) {
+        @content;
+    }
+}
+
+@mixin box-shadow($horiz: 2px, $vert: 2px, $blur: 0, $spread: 0, $color: #000000, $type: outset) {
+    @if $type == 'outset' {
+        -webkit-box-shadow: $horiz $vert $blur $spread $color;
+        -moz-box-shadow: $horiz $vert $blur $spread $color;
+        box-shadow: $horiz $vert $blur $spread $color;
+    } @else {
+        -webkit-box-shadow: $type $horiz $vert $blur $spread $color;
+        -moz-box-shadow: $type $horiz $vert $blur $spread $color;
+        box-shadow: $type $horiz $vert $blur $spread $color;
+    }
+}

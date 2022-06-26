@@ -5,16 +5,16 @@ import Footer from './Footer';
 import Header from './Header';
 
 const AdminPageLayout = ({ children }) => {
-  return (
-    <>
-      <Header />
-      <AdminHeader />
-      <main>
-        <Container>{children}</Container>
-      </main>
-      <Footer />
-    </>
-  );
+    return (
+        <>
+            <Header />
+            <AdminHeader />
+            <main>
+                <Container>{children}</Container>
+            </main>
+            <Footer />
+        </>
+    );
 };
 
 export default AdminPageLayout;

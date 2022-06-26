@@ -1,0 +1,194 @@
+@import '../../node_modules/bootstrap/scss/bootstrap.scss';
+@import './mixins.scss';
+@import './mixins.scss';
+@import './devices.scss';
+
+main {
+    min-height: 150vh;
+
+    .body-wrapper {
+        .banner-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .banner-image {
+                height: 100%;
+                width: 100%;
+            }
+
+            .search-wrapper {
+                position: absolute;
+                padding-top: 10%;
+                width: 50%;
+                input {
+                    box-shadow: rgba(136, 165, 191, 0.48) 6px 2px 16px 0px, rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
+                }
+                .look-icon {
+                    display: none;
+                }
+            }
+        }
+
+        .stats-section {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            .item {
+                text-align: center;
+
+                h5 {
+                    font-size: 20px;
+                }
+                h1 {
+                    font-size: 24px;
+                    padding: 5px 0 0;
+                }
+            }
+
+            .item:nth-child(1) {
+                color: #2c4a77;
+            }
+            .item:nth-child(2) {
+                color: #fe5200;
+            }
+            .item:nth-child(3) {
+                color: #469829;
+            }
+        }
+
+        .join-us-section {
+            text-align: center;
+            color: #424242;
+            margin: 0 20px;
+
+            p {
+                font-size: 18px;
+            }
+
+            .feature {
+                color: #333333;
+                box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+                border-radius: 10px;
+                padding: 20px 0px;
+                margin: 10px 0;
+                h4 {
+                    font-size: 18px;
+                    margin: 10px 0;
+                    font-weight: bold;
+                }
+                p {
+                    font-size: 14px;
+                }
+            }
+        }
+
+        .folks-talk-section {
+            background-color: #469829;
+            color: white;
+            padding: 30px 0;
+
+            p {
+                text-align: center;
+            }
+
+            .reviews {
+                padding: 0 20px;
+
+                .review {
+                    p {
+                        text-align: left;
+                        font-size: 14px;
+                    }
+                    h4 {
+                        font-size: 18px;
+                        font-weight: 600;
+                    }
+                }
+            }
+        }
+
+        .contact-us-section {
+            margin: 20px 0;
+            text-align: center;
+            padding: 0 40px;
+            h3 {
+                font-size: 18px;
+            }
+            p {
+                font-size: 14px;
+            }
+            .social-media-icons {
+                font-size: 70px;
+                display: flex;
+                justify-content: center;
+
+                .fa-brands {
+                    margin-right: 5px;
+                    color: #fb560a;
+                    transition: all 0.5s ease;
+                    p {
+                        padding: 0;
+                        opacity: 0;
+                        font-size: 12px;
+                        transition: all 0.5s ease;
+                        color: gray;
+                    }
+                }
+                .fa-brands:hover {
+                    color: gray;
+                    p {
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.rating {
+    margin-top: 0.2rem;
+}
+.rating span {
+    margin: 0.1rem;
+}
+
+h1 {
+    font-size: 1.8rem;
+    padding: 1rem 0;
+}
+.search-sm {
+    border-bottom: 2px solid #ff6a00;
+    color: #93c0e0;
+    padding: 2px;
+    height: 50px;
+}
+h2 {
+    font-size: 1.4rem;
+    padding: 0.5rem, 0;
+}
+
+.card-header {
+    background-color: darkslategrey;
+    color: white;
+}
+
+.card-header[aria-expanded='true'] .fa-arrow-circle-right {
+    display: none;
+}
+.card-header[aria-expanded='false'] .fa-arrow-circle-down {
+    display: none;
+}
+
+.aboutus-container {
+    display: flex;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    a {
+        text-decoration: none;
+    }
+}
+
+@import './devices.scss';
