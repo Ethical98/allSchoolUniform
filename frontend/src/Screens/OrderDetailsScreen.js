@@ -17,10 +17,10 @@ const OrderDetails = ({ match, history }) => {
 
     const dispatch = useDispatch();
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
-    const orderDetails = useSelector(state => state.orderDetails);
+    const orderDetails = useSelector((state) => state.orderDetails);
     const { order, loading, error } = orderDetails;
 
     const [instance, updateInstance] = usePDF({
@@ -60,6 +60,7 @@ const OrderDetails = ({ match, history }) => {
                 document: <Invoice name={order.user.name} email={order.user.email} order={order && order} />
             });
         }
+        // eslint-disable-next-line
     }, [dispatch, orderId, order]);
 
     useEffect(() => {
@@ -149,39 +150,39 @@ const OrderDetails = ({ match, history }) => {
                                 <ListGroup variant="flush">
                                     {!order.modified
                                         ? order.orderItems.map((item, index) => (
-                                            <ListGroup.Item key={index}>
-                                                <Row>
-                                                    <Col md={2} lg={1}>
-                                                        <Image src={item.image} alt={item.name} fluid rounded />
-                                                    </Col>
-                                                    <Col>
-                                                        <Link to={`/products/${item.product}`}>{item.name}</Link>
-                                                    </Col>
-                                                    <Col md={2}>Size: {item.size}</Col>
-                                                    <Col md={4}>
-                                                        {item.qty} x ₹{item.price} = ₹
-                                                        {(item.qty * item.price).toFixed(2)}
-                                                    </Col>
-                                                </Row>
-                                            </ListGroup.Item>
-                                        ))
+                                              <ListGroup.Item key={index}>
+                                                  <Row>
+                                                      <Col md={2} lg={1}>
+                                                          <Image src={item.image} alt={item.name} fluid rounded />
+                                                      </Col>
+                                                      <Col>
+                                                          <Link to={`/products/${item.product}`}>{item.name}</Link>
+                                                      </Col>
+                                                      <Col md={2}>Size: {item.size}</Col>
+                                                      <Col md={4}>
+                                                          {item.qty} x ₹{item.price} = ₹
+                                                          {(item.qty * item.price).toFixed(2)}
+                                                      </Col>
+                                                  </Row>
+                                              </ListGroup.Item>
+                                          ))
                                         : order.modifiedItems.map((item, index) => (
-                                            <ListGroup.Item key={index}>
-                                                <Row>
-                                                    <Col md={2} lg={1}>
-                                                        <Image src={item.image} alt={item.name} fluid rounded />
-                                                    </Col>
-                                                    <Col>
-                                                        <Link to={`/products/${item.product}`}>{item.name}</Link>
-                                                    </Col>
-                                                    <Col md={2}>Size: {item.size}</Col>
-                                                    <Col md={4}>
-                                                        {item.qty} x ₹{item.price} = ₹
-                                                        {(item.qty * item.price).toFixed(2)}
-                                                    </Col>
-                                                </Row>
-                                            </ListGroup.Item>
-                                        ))}
+                                              <ListGroup.Item key={index}>
+                                                  <Row>
+                                                      <Col md={2} lg={1}>
+                                                          <Image src={item.image} alt={item.name} fluid rounded />
+                                                      </Col>
+                                                      <Col>
+                                                          <Link to={`/products/${item.product}`}>{item.name}</Link>
+                                                      </Col>
+                                                      <Col md={2}>Size: {item.size}</Col>
+                                                      <Col md={4}>
+                                                          {item.qty} x ₹{item.price} = ₹
+                                                          {(item.qty * item.price).toFixed(2)}
+                                                      </Col>
+                                                  </Row>
+                                              </ListGroup.Item>
+                                          ))}
                                 </ListGroup>
                             )}
                         </ListGroup.Item>

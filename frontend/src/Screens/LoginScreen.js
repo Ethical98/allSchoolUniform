@@ -10,9 +10,10 @@ import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
+import { isEmpty } from 'lodash';
 
 const LoginScreenByPhone = ({ history, location }) => {
-    const phoneInfo = useSelector(state => state.userOtpVerification);
+    const phoneInfo = useSelector((state) => state.userOtpVerification);
     const { phone } = phoneInfo;
 
     const dispatch = useDispatch();
@@ -28,14 +29,16 @@ const LoginScreenByPhone = ({ history, location }) => {
     const [email, setEmail] = useState('');
     const [otpErrorMessage, setOtpErrorMessage] = useState('');
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { loading, userInfo, error } = userLogin;
 
-    const cart = useSelector(state => state.cart);
+    const cart = useSelector((state) => state.cart);
     const { cartSuccess } = cart;
 
-    const userOtpVerification = useSelector(state => state.userOtpVerification);
+    const userOtpVerification = useSelector((state) => state.userOtpVerification);
     const { loading: otpLoading, error: otpError, sent } = userOtpVerification;
+
+    console.log(otpError);
 
     const redirect = location.search ? location.search.split('=')[1] : '/';
 
@@ -50,7 +53,7 @@ const LoginScreenByPhone = ({ history, location }) => {
         }
     }, [userInfo, dispatch, redirect, history, cartSuccess]);
 
-    const onSubmitHandlerFormOne = e => {
+    const onSubmitHandlerFormOne = (e) => {
         const form = e.currentTarget;
 
         if (form.checkValidity() === false) {
@@ -81,7 +84,7 @@ const LoginScreenByPhone = ({ history, location }) => {
         setValidated(true);
     };
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         const form = e.currentTarget;
         e.preventDefault();
         if (form.checkValidity() === false) {
@@ -120,7 +123,7 @@ const LoginScreenByPhone = ({ history, location }) => {
     // }, [continueClicked]);
 
     useEffect(() => {
-        if (otpError === 'auth/invalid-phone-number') {
+        if (!isEmpty(otpError)) {
             setOtpErrorMessage('Enter Valid Email/Number');
         }
     }, [otpError]);
@@ -139,7 +142,7 @@ const LoginScreenByPhone = ({ history, location }) => {
                 ) : sent ? (
                     <Message variant="success">OTP SENT</Message>
                 ) : otpError ? (
-                    <Message variant="danger">{otpError}</Message>
+                    <Message variant="danger">{otpErrorMessage}</Message>
                 ) : error ? (
                     <Message variant="danger">{error}</Message>
                 ) : (
@@ -153,7 +156,7 @@ const LoginScreenByPhone = ({ history, location }) => {
                                     value={inputValue}
                                     required
                                     placeholder="Enter Email or Mobile"
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         setInputValue(e.target.value);
                                     }}
                                 ></Form.Control>
@@ -201,7 +204,7 @@ const LoginScreenByPhone = ({ history, location }) => {
                                     required
                                     type="password"
                                     placeholder="Password"
-                                    onChange={e => setPassword(e.target.value)}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 ></Form.Control>
                                 <Form.Control.Feedback type="invalid">{passwordMessage}</Form.Control.Feedback>
                                 <Form.Text as={Link} to="/forgotpassword" style={{ textDecoration: 'none' }}>

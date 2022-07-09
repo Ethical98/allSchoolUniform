@@ -13,11 +13,12 @@ const LoginScreenOtp = ({ history }) => {
     const [OTP, setOTP] = useState('');
     const dispatch = useDispatch();
 
-    const phoneInfo = useSelector(state => state.userOtpVerification);
+    const phoneInfo = useSelector((state) => state.userOtpVerification);
     const { phone, loading, verified, error, sent } = phoneInfo;
     const phoneNumber = phone;
 
-    const userLogin = useSelector(state => state.userLogin);
+    
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo, error: userError, loading: userLoading } = userLogin;
 
     useEffect(() => {
@@ -46,7 +47,7 @@ const LoginScreenOtp = ({ history }) => {
         // ConfigureCaptcha('resend-otp');
         dispatch(getOTP(phone));
     };
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         e.preventDefault();
 
         dispatch(submitOTP(OTP));
@@ -98,7 +99,7 @@ const LoginScreenOtp = ({ history }) => {
                                     <Form.Control
                                         value={OTP}
                                         placeholder="Enter OTP"
-                                        onChange={e => setOTP(e.target.value)}
+                                        onChange={(e) => setOTP(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                             </Form.Group>

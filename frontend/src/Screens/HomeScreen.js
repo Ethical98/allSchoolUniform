@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Container, Row, Col, Figure, InputGroup } from 'react-bootstrap';
+import { Image, InputGroup } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import Meta from '../components/Meta';
 import './css/HomeScreen.css';
-import Logo2 from '../images/SchoolLogo/Bbps.png';
-import Logo3 from '../images/SchoolLogo/aadharshilla.jpg';
-import Logo4 from '../images/SchoolLogo/AGS.jpg';
-import Logo5 from '../images/SchoolLogo/amity.jpg';
-import Logo6 from '../images/SchoolLogo/presentation.png';
-import Logo7 from '../images/SchoolLogo/gdgoenka.jpeg';
 import { listCarouselImages } from '../actions/homeActions';
-import CarouselHomeScreen from '../components/CarouselHomeScreen';
 import { listSchoolNames } from '../actions/schoolActions';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -23,8 +16,6 @@ const HomeScreen = ({ history }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [options, setOptions] = useState([]);
 
-    const carouselImageList = useSelector((state) => state.carouselImageList);
-    const { carouselImages } = carouselImageList;
 
     const schoolNameList = useSelector((state) => state.schoolNameList);
     const { schoolNames } = schoolNameList;
