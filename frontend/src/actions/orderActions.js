@@ -28,14 +28,20 @@ import {
     ORDER_PROCESSING_FAIL,
     ORDER_CONFIRM_REQUEST,
     ORDER_CONFIRM_SUCCESS,
-    ORDER_CONFIRM_FAIL
+    ORDER_CONFIRM_FAIL,
+    ORDER_UPDATE_BILLTYPE_REQUEST,
+    ORDER_UPDATE_BILLTYPE_SUCCESS,
+    ORDER_UPDATE_BILLTYPE_FAIL,
+    ORDER_UPDATE_INVOICE_NUMBER_REQUEST,
+    ORDER_UPDATE_INVOICE_NUMBER_SUCCESS,
+    ORDER_UPDATE_INVOICE_NUMBER_FAIL
 } from '../constants/orderConstants';
 import axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-export const createOrder = order => async (dispatch, getState) => {
+export const createOrder = (order) => async (dispatch, getState) => {
     try {
         dispatch({
             type: ORDER_CREATE_REQUEST
@@ -65,7 +71,7 @@ export const createOrder = order => async (dispatch, getState) => {
     }
 };
 
-export const getOrderDetails = id => async (dispatch, getState) => {
+export const getOrderDetails = (id) => async (dispatch, getState) => {
     try {
         dispatch({
             type: ORDER_DETAILS_REQUEST
@@ -144,7 +150,7 @@ export const payOrderPayU = (totalPrice, name, email, mobile) => async (dispatch
             pd,
 
             {
-                responseHandler: async response => {
+                responseHandler: async (response) => {
                     dispatch(paymentStatus(response.response));
                 },
                 catchException(response) {
@@ -163,7 +169,7 @@ export const payOrderPayU = (totalPrice, name, email, mobile) => async (dispatch
     }
 };
 
-const paymentStatus = response => async (dispatch, getState) => {
+const paymentStatus = (response) => async (dispatch, getState) => {
     try {
         const {
             userLogin: { userInfo }
@@ -219,7 +225,7 @@ export const updateOrder = (orderId, paymentResult) => async (dispatch, getState
     }
 };
 
-export const editOrder = order => async (dispatch, getState) => {
+export const editOrder = (order) => async (dispatch, getState) => {
     try {
         dispatch({
             type: ORDER_UPDATE_REQUEST
@@ -310,36 +316,36 @@ export const listMyOrders = () => async (dispatch, getState) => {
 
 export const listOrders =
     (pageNumber = '') =>
-        async (dispatch, getState) => {
-            try {
-                dispatch({
-                    type: ORDER_LIST_REQUEST
-                });
+    async (dispatch, getState) => {
+        try {
+            dispatch({
+                type: ORDER_LIST_REQUEST
+            });
 
-                const {
-                    userLogin: { userInfo }
-                } = getState();
+            const {
+                userLogin: { userInfo }
+            } = getState();
 
-                const config = {
-                    headers: {
-                        Authorization: `Bearer ${userInfo.token}`
-                    }
-                };
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
 
-                const { data } = await axios.get(`/api/orders?pageNumber=${pageNumber}`, config);
-                dispatch({
-                    type: ORDER_LIST_SUCCESS,
-                    payload: data
-                });
-            } catch (error) {
-                dispatch({
-                    type: ORDER_LIST_FAIL,
-                    payload: error.response && error.response.data.message ? error.response.data.message : error.message
-                });
-            }
-        };
+            const { data } = await axios.get(`/api/orders?pageNumber=${pageNumber}`, config);
+            dispatch({
+                type: ORDER_LIST_SUCCESS,
+                payload: data
+            });
+        } catch (error) {
+            dispatch({
+                type: ORDER_LIST_FAIL,
+                payload: error.response && error.response.data.message ? error.response.data.message : error.message
+            });
+        }
+    };
 
-export const trackOrder = id => async dispatch => {
+export const trackOrder = (id) => async (dispatch) => {
     try {
         dispatch({
             type: ORDER_DETAILS_REQUEST
@@ -357,7 +363,7 @@ export const trackOrder = id => async dispatch => {
     }
 };
 
-export const deliverOrder = order => async (dispatch, getState) => {
+export const deliverOrder = (order) => async (dispatch, getState) => {
     try {
         dispatch({
             type: ORDER_DELIVER_REQUEST
@@ -387,7 +393,7 @@ export const deliverOrder = order => async (dispatch, getState) => {
     }
 };
 
-export const outForDeliveryOrder = order => async (dispatch, getState) => {
+export const outForDeliveryOrder = (order) => async (dispatch, getState) => {
     try {
         dispatch({
             type: ORDER_OUT_FOR_DELIVERY_REQUEST
@@ -417,7 +423,7 @@ export const outForDeliveryOrder = order => async (dispatch, getState) => {
     }
 };
 
-export const processOrder = order => async (dispatch, getState) => {
+export const processOrder = (order) => async (dispatch, getState) => {
     try {
         dispatch({
             type: ORDER_PROCESSING_REQUEST
@@ -447,7 +453,7 @@ export const processOrder = order => async (dispatch, getState) => {
     }
 };
 
-export const confirmOrder = order => async (dispatch, getState) => {
+export const confirmOrder = (order) => async (dispatch, getState) => {
     try {
         dispatch({
             type: ORDER_CONFIRM_REQUEST
@@ -472,6 +478,68 @@ export const confirmOrder = order => async (dispatch, getState) => {
     } catch (error) {
         dispatch({
             type: ORDER_CONFIRM_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message
+        });
+    }
+};
+
+export const updateOrderBillType = (order, billType) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_UPDATE_BILLTYPE_REQUEST
+        });
+
+        const {
+            userLogin: { userInfo }
+        } = getState();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        };
+
+        const { data } = await axios.put(`/api/orders/${order._id}/billType`, { billType }, config);
+
+        dispatch({
+            type: ORDER_UPDATE_BILLTYPE_SUCCESS,
+            payload: data
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDER_UPDATE_BILLTYPE_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message
+        });
+    }
+};
+
+export const incrementAndUpdateInvoiceNumber = (order, modified) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_UPDATE_INVOICE_NUMBER_REQUEST
+        });
+
+        const {
+            userLogin: { userInfo }
+        } = getState();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        };
+
+        const { data } = await axios.put(`/api/orders/${order._id}/incrementinvoicenumber`, { modified }, config);
+
+        dispatch({
+            type: ORDER_UPDATE_INVOICE_NUMBER_SUCCESS,
+            payload: data
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDER_UPDATE_INVOICE_NUMBER_FAIL,
             payload: error.response && error.response.data.message ? error.response.data.message : error.message
         });
     }

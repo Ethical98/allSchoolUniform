@@ -37,7 +37,15 @@ import {
     ORDER_PROCESSING_FAIL,
     ORDER_PROCESSING_SUCCESS,
     ORDER_PROCESSING_REQUEST,
-    ORDER_DETAILS_RESET
+    ORDER_DETAILS_RESET,
+    ORDER_UPDATE_BILLTYPE_SUCCESS,
+    ORDER_UPDATE_BILLTYPE_REQUEST,
+    ORDER_UPDATE_BILLTYPE_FAIL,
+    ORDER_UPDATE_BILLTYPE_RESET,
+    ORDER_UPDATE_INVOICE_NUMBER_REQUEST,
+    ORDER_UPDATE_INVOICE_NUMBER_SUCCESS,
+    ORDER_UPDATE_INVOICE_NUMBER_FAIL,
+    ORDER_UPDATE_INVOICE_NUMBER_RESET
 } from '../constants/orderConstants';
 
 export const orderCreateReducer = (state = {}, action) => {
@@ -199,6 +207,36 @@ export const orderDeliverReducer = (state = {}, action) => {
         case ORDER_DELIVER_FAIL:
             return { loading: false, error: action.payload };
         case ORDER_DELIVER_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+export const orderUpdateBillTypeReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_UPDATE_BILLTYPE_REQUEST:
+            return { loading: true };
+        case ORDER_UPDATE_BILLTYPE_SUCCESS:
+            return { loading: false, success: true };
+        case ORDER_UPDATE_BILLTYPE_FAIL:
+            return { loading: false, error: action.payload };
+        case ORDER_UPDATE_BILLTYPE_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+export const orderUpdateInvoiceNumberReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_UPDATE_INVOICE_NUMBER_REQUEST:
+            return { loading: true };
+        case ORDER_UPDATE_INVOICE_NUMBER_SUCCESS:
+            return { loading: false, success: true, order: action.payload };
+        case ORDER_UPDATE_INVOICE_NUMBER_FAIL:
+            return { loading: false, error: action.payload };
+        case ORDER_UPDATE_INVOICE_NUMBER_RESET:
             return {};
         default:
             return state;

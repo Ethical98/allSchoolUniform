@@ -9,11 +9,10 @@ const styles = StyleSheet.create({
     }
 });
 
-const InvoiceTitle = ({ title, orderId }) => (
+const InvoiceTitle = ({ title, orderId, invoiceNumber }) => (
     <View style={styles.titleContainer}>
-        <Text>{title}</Text>
+        <Text>Invoice No. {invoiceNumber}</Text>
         <Text>Order #{orderId}</Text>
     </View>
 );
-
 export default InvoiceTitle;

@@ -7,7 +7,14 @@ const CounterSchema = mongoose.Schema({
   suffix: { type: String, default: '' },
 });
 
+const InvoiceNoSchema = mongoose.Schema({
+  _id: { type: String, required: true },
+  number: { type: Number, default: 0 },
+});
+
 const Counter = mongoose.model('Counter', CounterSchema);
+const InvoiceNumber = mongoose.model('InvoiceNumber', InvoiceNoSchema);
+export { InvoiceNumber };
 
 const orderSchema = mongoose.Schema(
   {
@@ -43,7 +50,7 @@ const orderSchema = mongoose.Schema(
         qty: { type: Number, required: true },
         image: { type: String, required: true },
         price: { type: Number, required: true },
-        size: { type: Number, required: true },
+        size: { type: String, required: true },
         product: {
           type: mongoose.Schema.Types.ObjectId,
           required: true,
@@ -103,7 +110,13 @@ const orderSchema = mongoose.Schema(
     paidAt: {
       type: Date,
     },
-
+    billType: {
+      type: String,
+      default: 'CGST',
+    },
+    invoiceNumber: {
+      type: String,
+    },
     tracking: {
       isConfirmed: {
         type: Boolean,

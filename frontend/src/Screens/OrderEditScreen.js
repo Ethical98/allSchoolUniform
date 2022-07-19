@@ -10,7 +10,9 @@ import {
     deliverOrder,
     outForDeliveryOrder,
     processOrder,
-    confirmOrder
+    confirmOrder,
+    updateOrderBillType,
+    incrementAndUpdateInvoiceNumber
 } from '../actions/orderActions';
 import {
     ORDER_CONFIRM_RESET,
@@ -18,6 +20,8 @@ import {
     ORDER_DETAILS_RESET,
     ORDER_OUT_FOR_DELIVERY_RESET,
     ORDER_PROCESSING_RESET,
+    ORDER_UPDATE_BILLTYPE_RESET,
+    ORDER_UPDATE_INVOICE_NUMBER_RESET,
     ORDER_UPDATE_RESET
 } from '../constants/orderConstants';
 import { logout } from '../actions/userActions';
@@ -26,7 +30,6 @@ import MaterialTable from 'material-table';
 import { LinkContainer } from 'react-router-bootstrap';
 import { listProductDetailsById, listProducts } from '../actions/productActions';
 import { listSchoolNames, listSchools } from '../actions/schoolActions';
-
 import Paginate from '../components/Paginate';
 import DialogBox from '../components/DialogBox';
 import Invoice from '../components/Invoice/Invoice';
@@ -43,38 +46,44 @@ const OrderEditScreen = ({ history, match, location }) => {
 
     const pageNumber = params.page ? params.page : 1;
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
-    const orderDetails = useSelector(state => state.orderDetails);
+    const orderDetails = useSelector((state) => state.orderDetails);
     const { order, loading, error } = orderDetails;
 
-    const productDetails = useSelector(state => state.productDetails);
+    const productDetails = useSelector((state) => state.productDetails);
     const { product } = productDetails;
 
-    const orderUpdate = useSelector(state => state.orderUpdate);
+    const orderUpdate = useSelector((state) => state.orderUpdate);
     const { loading: loadingUpdate, error: errorUpdate, success } = orderUpdate;
 
-    const orderDeliver = useSelector(state => state.orderDeliver);
+    const orderDeliver = useSelector((state) => state.orderDeliver);
     const { loading: loadingDeliver, error: errorDeliver, success: successDeliver } = orderDeliver;
 
-    const orderProcessing = useSelector(state => state.orderProcessing);
+    const orderProcessing = useSelector((state) => state.orderProcessing);
     const { loading: loadingProcessing, error: errorProcessing, success: successProcessing } = orderProcessing;
 
-    const orderOutForDelivery = useSelector(state => state.orderOutForDelivery);
+    const orderOutForDelivery = useSelector((state) => state.orderOutForDelivery);
     const {
         loading: loadingOutForDelivery,
         error: errorOutForDelivery,
         success: successOutForDelivery
     } = orderOutForDelivery;
 
-    const orderConfirm = useSelector(state => state.orderConfirm);
+    const orderConfirm = useSelector((state) => state.orderConfirm);
     const { loading: loadingConfirm, error: errorConfirm, success: successConfirm } = orderConfirm;
 
-    const productList = useSelector(state => state.productList);
+    const orderUpdateBillType = useSelector((state) => state.orderUpdateBillType);
+    const { success: successUpdateBillType } = orderUpdateBillType;
+
+    const orderUpdateInvoiceNumber = useSelector((state) => state.orderUpdateInvoiceNumber);
+    const { success: successUpdateInvoiceNumber } = orderUpdateInvoiceNumber;
+
+    const productList = useSelector((state) => state.productList);
     const { loading: loadingProducts, error: errorProducts, products, pages, page } = productList;
 
-    const schoolNameList = useSelector(state => state.schoolNameList);
+    const schoolNameList = useSelector((state) => state.schoolNameList);
     const { schoolNames } = schoolNameList;
 
     const [phone, setPhone] = useState('');
@@ -112,17 +121,28 @@ const OrderEditScreen = ({ history, match, location }) => {
     const [isOutForDelivery, setIsOutForDelivery] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderNumber, setOrderNumber] = useState('');
+    const [billType, setBillType] = useState('');
     const [instance, updateInstance] = usePDF({
-        document: <Invoice name={name} email={email} order={order && order} isAdmin />
+        document: (
+            <Invoice
+                name={name}
+                email={email}
+                order={order && order}
+                isAdmin
+                billType={billType}
+                invoiceNumber={order && order.invoiceNumber}
+            />
+        )
     });
     const [isLoading, setIsLoading] = useState(false);
     const [options, setOptions] = useState([]);
+    const [discountPrice, setDiscountPrice] = useState(0);
 
     const orderItemColumns = [
         {
             title: 'Image',
             field: 'image',
-            render: item => <Image src={item.image} alt={item.name} style={{ width: '5vw' }} fluid rounded />
+            render: (item) => <Image src={item.image} alt={item.name} style={{ width: '5vw' }} fluid rounded />
         },
         {
             title: 'Name',
@@ -144,7 +164,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         {
             title: 'Price',
             field: 'price',
-            render: item => `₹ ${item.price}`
+            render: (item) => `₹ ${item.price}`
         }
     ];
 
@@ -168,24 +188,24 @@ const OrderEditScreen = ({ history, match, location }) => {
         {
             title: 'Image',
             field: 'image',
-            render: item => <Image src={item.image} alt={item.name} style={{ width: '5vw' }} fluid rounded />
+            render: (item) => <Image src={item.image} alt={item.name} style={{ width: '5vw' }} fluid rounded />
         },
         {
             title: 'Size',
             field: 'size',
             width: 120,
             minWidth: 120,
-            render: item => (
+            render: (item) => (
                 <Form.Select
                     size="sm"
-                    onChange={e => newSizeHandler(e.target.value, item._id, item.size, item.name, item.image)}
+                    onChange={(e) => newSizeHandler(e.target.value, item._id, item.size, item.name, item.image)}
                 >
                     <option>Select</option>
                     {item.size
                         .sort((a, b) => {
                             return a.size - b.size;
                         })
-                        .map(x => (
+                        .map((x) => (
                             <option value={x.size} key={x.size}>
                                 {x.size}
                             </option>
@@ -198,25 +218,25 @@ const OrderEditScreen = ({ history, match, location }) => {
             field: 'tableData.id',
             width: 120,
             minWidth: 120,
-            render: item => (
-                <Form.Select size="sm" onChange={e => newQtyHandler(e.target.value, item._id)}>
+            render: (item) => (
+                <Form.Select size="sm" onChange={(e) => newQtyHandler(e.target.value, item._id)}>
                     <option>Select</option>
 
                     {[
                         ...Array(
                             item.size[countInStockIndex] && item._id === productId
                                 ? products[item.tableData.id].size[countInStockIndex].countInStock
-                                : newProducts.some(x => x.product === item._id)
-                                    ? products[item.tableData.id].size[
-                                        products[item.tableData.id].size.findIndex(
-                                            y =>
-                                                y.size ===
-                                              newProducts[newProducts.findIndex(x => x.product === item._id)].size
-                                        )
-                                    ].countInStock
-                                    : products[item.tableData.id].size[0].countInStock
+                                : newProducts.some((x) => x.product === item._id)
+                                ? products[item.tableData.id].size[
+                                      products[item.tableData.id].size.findIndex(
+                                          (y) =>
+                                              y.size ===
+                                              newProducts[newProducts.findIndex((x) => x.product === item._id)].size
+                                      )
+                                  ].countInStock
+                                : products[item.tableData.id].size[0].countInStock
                         ).keys()
-                    ].map(x => (
+                    ].map((x) => (
                         <option key={x + 1} value={x + 1}>
                             {x + 1}
                         </option>
@@ -247,8 +267,6 @@ const OrderEditScreen = ({ history, match, location }) => {
         if (success) {
             dispatch({ type: ORDER_UPDATE_RESET });
             dispatch({ type: ORDER_DETAILS_RESET });
-
-            history.push('/admin/orderlist');
         } else {
             if (
                 !order ||
@@ -256,12 +274,16 @@ const OrderEditScreen = ({ history, match, location }) => {
                 successConfirm ||
                 successProcessing ||
                 successOutForDelivery ||
-                successDeliver
+                successDeliver ||
+                successUpdateBillType ||
+                successUpdateInvoiceNumber
             ) {
                 dispatch({ type: ORDER_DELIVER_RESET });
                 dispatch({ type: ORDER_CONFIRM_RESET });
                 dispatch({ type: ORDER_PROCESSING_RESET });
                 dispatch({ type: ORDER_OUT_FOR_DELIVERY_RESET });
+                dispatch({ type: ORDER_UPDATE_BILLTYPE_RESET });
+                dispatch({ type: ORDER_UPDATE_INVOICE_NUMBER_RESET });
                 dispatch(getOrderDetails(orderId));
                 dispatch(listProducts());
                 dispatch(listSchools());
@@ -282,6 +304,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                 setIsOutForDelivery(order.tracking.isOutForDelivery);
                 setIsConfirmed(order.tracking.isConfirmed);
                 setOrderNumber(order.orderId);
+                setBillType(order.billType);
 
                 updateInstance({
                     document: (
@@ -291,6 +314,8 @@ const OrderEditScreen = ({ history, match, location }) => {
                             order={order && order}
                             total={order.totalPrice}
                             isAdmin
+                            billType={billType}
+                            invoiceNumber={order.invoiceNumber}
                         />
                     )
                 });
@@ -298,18 +323,24 @@ const OrderEditScreen = ({ history, match, location }) => {
                 if (order.modifiedItems.length > 0) {
                     setModifiedOrderItems([...order.modifiedItems]);
                     setItemsPrice(
+                        Number(order.modifiedItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2))
+                    );
+                    setDiscountPrice(
                         Number(
                             order.modifiedItems
-                                .reduce((acc, item) => acc + item.price * item.qty + Number(item.tax), 0)
+                                .reduce((acc, item) => acc + item.qty * ((item.disc / 100) * item.price), 0)
                                 .toFixed(2)
                         )
                     );
                 } else {
-                    setModifiedOrderItems([...order.orderItems.map(a => ({ ...a }))]);
+                    setModifiedOrderItems([...order.orderItems.map((a) => ({ ...a }))]);
                     setItemsPrice(
+                        Number(order.orderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2))
+                    );
+                    setDiscountPrice(
                         Number(
                             order.orderItems
-                                .reduce((acc, item) => acc + item.price * item.qty + Number(item.tax), 0)
+                                .reduce((acc, item) => acc + item.qty * ((item.disc / 100) * item.price), 0)
                                 .toFixed(2)
                         )
                     );
@@ -328,7 +359,10 @@ const OrderEditScreen = ({ history, match, location }) => {
         successOutForDelivery,
         successProcessing,
         name,
-        email
+        email,
+        billType,
+        successUpdateBillType,
+        successUpdateInvoiceNumber
     ]);
 
     // UseEffect(() => {
@@ -353,32 +387,35 @@ const OrderEditScreen = ({ history, match, location }) => {
 
     useEffect(() => {
         if (productSizes.length > 0 && editIndex === 0 && size) {
-            setCountInStock(productSizes[productSizes.findIndex(x => x.size === size.toString())].countInStock);
+            setCountInStock(productSizes[productSizes.findIndex((x) => x.size === size.toString())].countInStock);
         } else if (productSizes.length > 0 && size) {
             setCountInStock(productSizes[editIndex].countInStock);
         } // eslint-disable-next-line
     }, [productSizes, size, editIndex]);
 
     useEffect(() => {
-        setItemsPrice(
+        setItemsPrice(Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)));
+        setDiscountPrice(
             Number(
-                modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty + Number(item.tax), 0).toFixed(2)
+                modifiedOrderItems
+                    .reduce((acc, item) => acc + item.qty * ((item.disc / 100) * item.price), 0)
+                    .toFixed(2)
             )
         );
     }, [modifiedOrderItems]);
 
     useEffect(() => {
         if (order) {
-            setTotalPrice(Number(itemsPrice + order.shippingPrice, order.taxPrice));
+            setTotalPrice(Number(itemsPrice - discountPrice));
         }
-    }, [order, itemsPrice]);
+    }, [order, itemsPrice, discountPrice]);
 
     const newSizeHandler = (newSizeValue, pId, sizes, name, image) => {
         setNewSize(newSizeValue);
-        const i = sizes.findIndex(x => x.size === newSizeValue.toString());
+        const i = sizes.findIndex((x) => x.size === newSizeValue.toString());
 
-        if (newProducts.some(x => x.product === pId)) {
-            const sameIndex = newProducts.findIndex(x => x.product === pId);
+        if (newProducts.some((x) => x.product === pId)) {
+            const sameIndex = newProducts.findIndex((x) => x.product === pId);
             newProducts[sameIndex].size = newSizeValue;
         } else {
             setNewProducts([
@@ -396,20 +433,20 @@ const OrderEditScreen = ({ history, match, location }) => {
             ]);
         }
 
-        setCountInStockIndex(sizes.findIndex(x => x.size === newSizeValue.toString()));
+        setCountInStockIndex(sizes.findIndex((x) => x.size === newSizeValue.toString()));
 
         setProductId(pId);
     };
 
     const newQtyHandler = (newQtyValue, pId) => {
         setNewQty(newQtyValue);
-        const newIndex = newProducts.findIndex(x => x.product === pId);
+        const newIndex = newProducts.findIndex((x) => x.product === pId);
         newProducts[newIndex].qty = Number(newQtyValue);
 
         setProductId(pId);
     };
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         e.preventDefault();
         window.scrollTo(0, 0);
         dispatch(
@@ -438,9 +475,12 @@ const OrderEditScreen = ({ history, match, location }) => {
             setQty(1);
         }
 
-        setItemsPrice(
+        setItemsPrice(Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)));
+        setDiscountPrice(
             Number(
-                modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty + Number(item.tax), 0).toFixed(2)
+                modifiedOrderItems
+                    .reduce((acc, item) => acc + item.qty * ((item.disc / 100) * item.price), 0)
+                    .toFixed(2)
             )
         );
         setCountInStock(1);
@@ -452,13 +492,12 @@ const OrderEditScreen = ({ history, match, location }) => {
         setIndex(currIndex);
         setQty(qtyValue);
         dispatch(listProductDetailsById(id));
-
         setShowEditModal(true);
     };
 
-    const sizeChangeHandle = e => {
+    const sizeChangeHandle = (e) => {
         setSize(e.target.value);
-        setEditIndex(productSizes.findIndex(x => x.size === e.target.value));
+        setEditIndex(productSizes.findIndex((x) => x.size === e.target.value));
     };
 
     const closeNewProductModalHandle = () => {
@@ -511,7 +550,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         }
     }, [schoolNames]);
 
-    const handleChange = item => {
+    const handleChange = (item) => {
         if (item.length > 0) {
             history.push(`/admin/order/${orderId}/edit`);
             setSchool(item[0].name);
@@ -520,7 +559,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         }
     };
 
-    const handleSearch = query => {
+    const handleSearch = (query) => {
         setIsLoading(true);
         dispatch(listSchoolNames(query));
     };
@@ -542,12 +581,12 @@ const OrderEditScreen = ({ history, match, location }) => {
                 <Row>
                     <Col md={6}>
                         <FloatingLabel label="Size" controlId="size">
-                            <Form.Select value={size} onChange={e => sizeChangeHandle(e)}>
+                            <Form.Select value={size} onChange={(e) => sizeChangeHandle(e)}>
                                 {productSizes
                                     .sort((a, b) => {
                                         return a.size - b.size;
                                     })
-                                    .map(x => (
+                                    .map((x) => (
                                         <option value={x.size} key={x.size}>
                                             {x.size}
                                         </option>
@@ -557,8 +596,8 @@ const OrderEditScreen = ({ history, match, location }) => {
                     </Col>
                     <Col md="6">
                         <FloatingLabel label="Qty" controlId="qty">
-                            <Form.Select value={qty} onChange={e => setQty(Number(e.target.value))}>
-                                {[...Array(countInStock).keys()].map(x => (
+                            <Form.Select value={qty} onChange={(e) => setQty(Number(e.target.value))}>
+                                {[...Array(countInStock).keys()].map((x) => (
                                     <option key={x + 1} value={x + 1}>
                                         {x + 1}
                                     </option>
@@ -583,7 +622,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                         isLoading={isLoading}
                         labelKey={'name'}
                         minLength={3}
-                        onChange={value => handleChange(value)}
+                        onChange={(value) => handleChange(value)}
                         onSearch={handleSearch}
                         options={options}
                         placeholder="Enter School Name.."
@@ -600,7 +639,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                         <MaterialTable
                             style={{ padding: '1%' }}
                             title="Products"
-                            data={products.filter(x => x.isActive === true)}
+                            data={products.filter((x) => x.isActive === true)}
                             columns={newProductColumns}
                             options={{
                                 rowStyle: {
@@ -612,8 +651,8 @@ const OrderEditScreen = ({ history, match, location }) => {
                                 selection: true,
                                 showTextRowsSelected: false,
                                 showSelectAllCheckbox: false,
-                                selectionProps: rowData => ({
-                                    checked: newItemsToAdd && newItemsToAdd.some(x => x.product === rowData._id),
+                                selectionProps: (rowData) => ({
+                                    checked: newItemsToAdd && newItemsToAdd.some((x) => x.product === rowData._id),
                                     color: 'primary'
                                 })
                             }}
@@ -624,8 +663,8 @@ const OrderEditScreen = ({ history, match, location }) => {
                                     setMessage('Please Select Qty');
                                 } else {
                                     setNewItemsToAdd([
-                                        ...newProducts.filter(addedItem =>
-                                            data.some(itemToAdd => addedItem.product === itemToAdd._id)
+                                        ...newProducts.filter((addedItem) =>
+                                            data.some((itemToAdd) => addedItem.product === itemToAdd._id)
                                         )
                                     ]);
 
@@ -660,7 +699,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="switch"
                                         id="custom-switch"
                                         label="Mark As Confirmed"
-                                        onChange={e => dispatch(confirmOrder(order))}
+                                        onChange={(e) => dispatch(confirmOrder(order))}
                                     />
                                 </Col>
                                 <Col xs={6}>
@@ -670,7 +709,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="switch"
                                         id="custom-switch"
                                         label="Mark As Processing"
-                                        onChange={e => dispatch(processOrder(order))}
+                                        onChange={(e) => dispatch(processOrder(order))}
                                     />
                                 </Col>
                                 <Col xs={6}>
@@ -680,7 +719,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="switch"
                                         id="custom-switch"
                                         label="Mark As Out For Delivery"
-                                        onChange={e => dispatch(outForDeliveryOrder(order))}
+                                        onChange={(e) => dispatch(outForDeliveryOrder(order))}
                                     />
                                 </Col>
                                 <Col xs={6}>
@@ -690,7 +729,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="switch"
                                         id="custom-switch"
                                         label="Mark As Delivered"
-                                        onChange={e => dispatch(deliverOrder(order))}
+                                        onChange={(e) => dispatch(deliverOrder(order))}
                                     />
                                 </Col>{' '}
                             </Row>
@@ -726,7 +765,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="email"
                                         placeholder="Email"
                                         value={email}
-                                        onChange={e => setEmail(e.target.value)}
+                                        onChange={(e) => setEmail(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
 
@@ -738,7 +777,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="name"
                                         placeholder="Enter Name"
                                         value={name}
-                                        onChange={e => setName(e.target.value)}
+                                        onChange={(e) => setName(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <FloatingLabel className="mb-3" controlId="phone" label="Mobile">
@@ -749,7 +788,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="phone"
                                         placeholder="Enter Mobile "
                                         value={phone}
-                                        onChange={e => setPhone(e.target.value)}
+                                        onChange={(e) => setPhone(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <LinkContainer to={`/admin/user/${order.user._id}/edit`}>
@@ -764,7 +803,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="text"
                                         placeholder="Enter Address"
                                         value={address}
-                                        onChange={e => setAddress(e.target.value)}
+                                        onChange={(e) => setAddress(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <FloatingLabel className="mb-3" label="City" controlId="city">
@@ -773,7 +812,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="text"
                                         placeholder="City"
                                         value={city}
-                                        onChange={e => setCity(e.target.value)}
+                                        onChange={(e) => setCity(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <FloatingLabel className="mb-3" label="Postal Code" controlId="postalCode">
@@ -782,7 +821,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="text"
                                         placeholder="Postal Code"
                                         value={postalCode}
-                                        onChange={e => setPostalCode(e.target.value)}
+                                        onChange={(e) => setPostalCode(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
 
@@ -792,7 +831,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         type="text"
                                         placeholder="Country"
                                         value={country}
-                                        onChange={e => setCountry(e.target.value)}
+                                        onChange={(e) => setCountry(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <FloatingLabel className="mb-3" label="Payment Method" controlId="paymentMethod">
@@ -802,7 +841,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         readOnly
                                         placeholder="Payment Method"
                                         value={paymentMethod}
-                                        onChange={e => setPaymentMethod(e.target.value)}
+                                        onChange={(e) => setPaymentMethod(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <Row>
@@ -842,10 +881,12 @@ const OrderEditScreen = ({ history, match, location }) => {
                                                 className="float-end"
                                                 variant="outline-info"
                                                 onClick={() => setModify(true)}
+                                                disabled={order.invoiceNumber}
                                             >
                                                 MODIFY ITEMS
                                             </Button>
                                         )}
+                                        {order.invoiceNumber && <span>Modification not available</span>}
                                     </Col>
                                 </Row>
                                 <Form.Group controlId="orderItems" className="mb-3">
@@ -877,13 +918,14 @@ const OrderEditScreen = ({ history, match, location }) => {
                                 </Form.Group>
 
                                 <Form.Group controlId="mofifiedOrderItems" className="mb-3">
-                                    {modify && modifiedOrderItems.length > 0 && (
+                                    {modify && modifiedOrderItems.length > 0 && !order.invoiceNumber && (
                                         <Row>
                                             <Col>
                                                 <Button
                                                     variant="outline-info"
                                                     className="my-3 float-end "
                                                     onClick={showNewProductModalHandle}
+                                                    disabled={order.modified}
                                                 >
                                                     <i className="fas fa-plus" /> ADD PRODUCT
                                                 </Button>
@@ -903,7 +945,8 @@ const OrderEditScreen = ({ history, match, location }) => {
                                                 paging: false
                                             }}
                                             editable={{
-                                                onRowDelete: oldData =>
+                                                isDeleteHidden: () => order.invoiceNumber,
+                                                onRowDelete: (oldData) =>
                                                     new Promise((resolve, reject) => {
                                                         setTimeout(() => {
                                                             const dataDelete = [...modifiedOrderItems];
@@ -926,7 +969,8 @@ const OrderEditScreen = ({ history, match, location }) => {
                                                             rowData.tableData.id,
                                                             rowData.qty
                                                         );
-                                                    }
+                                                    },
+                                                    hidden: order.invoiceNumber
                                                 }
                                             ]}
                                         />
@@ -947,14 +991,14 @@ const OrderEditScreen = ({ history, match, location }) => {
                                                 </ListGroup.Item>
                                                 <ListGroup.Item>
                                                     <Row>
-                                                        <Col>Shipping</Col>
-                                                        <Col>₹ {order.shippingPrice}</Col>
+                                                        <Col>Discount</Col>
+                                                        <Col>- ₹ {discountPrice}</Col>
                                                     </Row>
                                                 </ListGroup.Item>
                                                 <ListGroup.Item>
                                                     <Row>
-                                                        <Col>Tax</Col>
-                                                        <Col>₹ {order.taxPrice}</Col>
+                                                        <Col>Shipping</Col>
+                                                        <Col>₹ {order.shippingPrice}</Col>
                                                     </Row>
                                                 </ListGroup.Item>
                                                 <ListGroup.Item>
@@ -963,8 +1007,69 @@ const OrderEditScreen = ({ history, match, location }) => {
                                                         <Col>₹ {totalPrice}</Col>
                                                     </Row>
                                                 </ListGroup.Item>
+                                                <ListGroup.Item>
+                                                    {!order.invoiceNumber ? (
+                                                        <Form.Group controlId="billType" className="mb-3">
+                                                            <label>Invoice Type</label>
+                                                            <Form.Check
+                                                                className="mb-3"
+                                                                type="checkbox"
+                                                                label="CGST"
+                                                                checked={billType === 'CGST'}
+                                                                onChange={(e) => {
+                                                                    setBillType('CGST');
+                                                                    dispatch(updateOrderBillType(order, 'CGST'));
+                                                                }}
+                                                            ></Form.Check>
+                                                            <Form.Check
+                                                                className="mb-3"
+                                                                type="checkbox"
+                                                                label="IGST"
+                                                                checked={billType === 'IGST'}
+                                                                onChange={(e) => {
+                                                                    setBillType('IGST');
+                                                                    dispatch(updateOrderBillType(order, 'IGST'));
+                                                                }}
+                                                            ></Form.Check>
+                                                        </Form.Group>
+                                                    ) : (
+                                                        <>
+                                                            <Row>
+                                                                <Col>
+                                                                    <label>Bill Type:</label>
+                                                                </Col>
+                                                                <Col>{billType}</Col>
+                                                            </Row>
+                                                            <Row>
+                                                                <Col>
+                                                                    <label>Invoice No.</label>
+                                                                </Col>
+                                                                <Col>{order.invoiceNumber}</Col>
+                                                            </Row>
+                                                        </>
+                                                    )}
+                                                </ListGroup.Item>
                                             </ListGroup>
-                                            {order && (
+                                            {!order.invoiceNumber && (
+                                                <Button
+                                                    variant="dark"
+                                                    onClick={() => {
+                                                        dispatch(incrementAndUpdateInvoiceNumber(order));
+                                                        dispatch(
+                                                            editOrder({
+                                                                orderId,
+                                                                shippingAddress: { postalCode, address, city, country },
+                                                                modifiedOrderItems,
+                                                                itemsPrice,
+                                                                totalPrice
+                                                            })
+                                                        );
+                                                    }}
+                                                >
+                                                    Generate Invoice
+                                                </Button>
+                                            )}
+                                            {order && order.invoiceNumber && (
                                                 <a href={instance.url} download={`${orderNumber}.pdf`}>
                                                     <Button variant="dark" className="col-12">
                                                         Download Invoice
@@ -977,13 +1082,15 @@ const OrderEditScreen = ({ history, match, location }) => {
                             </Col>
                         </Row>
 
-                        <Row className="justify-content-md-center">
-                            <Col md={5} className="text-center">
-                                <Button variant="dark" type="submit" className="col-12">
-                                    UPDATE
-                                </Button>
-                            </Col>
-                        </Row>
+                        {!order.invoiceNumber && (
+                            <Row className="justify-content-md-center">
+                                <Col md={5} className="text-center">
+                                    <Button variant="dark" type="submit" className="col-12">
+                                        UPDATE
+                                    </Button>
+                                </Col>
+                            </Row>
+                        )}
                     </Form>
                 )}
             </Container>

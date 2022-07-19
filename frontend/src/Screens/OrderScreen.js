@@ -17,18 +17,14 @@ const OrderScreen = ({ match, history }) => {
 
     const dispatch = useDispatch();
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
-    const orderPay = useSelector(state => state.orderPay);
+    const orderPay = useSelector((state) => state.orderPay);
     const { success: successPay } = orderPay;
 
-    const orderDetails = useSelector(state => state.orderDetails);
+    const orderDetails = useSelector((state) => state.orderDetails);
     const { order, loading, error } = orderDetails;
-
-    const getDiscountedPrice = (price, disc) => {
-        return price - price * (disc / 100);
-    };
 
     useEffect(() => {
         if (!userInfo) {
@@ -67,6 +63,7 @@ const OrderScreen = ({ match, history }) => {
     if (!loading && order.orderItems) {
         // Calculate Prices
         order.itemsPrice = order.orderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2);
+        order.discountPrice = order.orderItems.reduce((acc, item) => acc + (item.disc * item.price) / 100, 0);
     }
 
     return loading ? (
@@ -187,16 +184,17 @@ const OrderScreen = ({ match, history }) => {
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 <Row>
-                                    <Col>Shipping</Col>
-                                    <Col>₹ {order.shippingPrice}</Col>
+                                    <Col>Discount</Col>
+                                    <Col>-₹ {order.discountPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 <Row>
-                                    <Col>Tax</Col>
-                                    <Col>₹ {order.taxPrice}</Col>
+                                    <Col>Shipping</Col>
+                                    <Col>₹ {order.shippingPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
+
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Total</Col>

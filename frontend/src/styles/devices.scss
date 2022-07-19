@@ -1,6 +1,12 @@
 @include for-phone {
     main {
         .body-wrapper {
+            .banner-section {
+                .search-wrapper {
+                    padding-top: 30%;
+                    width: 80%;
+                }
+            }
             .stats-section {
                 .item {
                     margin-bottom: 10px;

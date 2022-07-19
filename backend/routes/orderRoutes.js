@@ -7,7 +7,9 @@ import {
   getOrderById,
   getOrderByOrderId,
   getOrders,
+  incrementInvoiceNumber,
   sendMail,
+  updateOrderBillType,
   updateOrderToConfirmed,
   updateOrderToDelivered,
   updateOrderToOutForDelivery,
@@ -31,5 +33,9 @@ router.route('/:id/processing').put(protect, isAdmin, updateOrderToProcessing);
 router
   .route('/:id/outfordelivery')
   .put(protect, isAdmin, updateOrderToOutForDelivery);
+router.route('/:id/billType').put(protect, isAdmin, updateOrderBillType);
+router
+  .route('/:id/incrementinvoicenumber')
+  .put(protect, isAdmin, incrementInvoiceNumber);
 
 export default router;

@@ -38,7 +38,6 @@ const LoginScreenByPhone = ({ history, location }) => {
     const userOtpVerification = useSelector((state) => state.userOtpVerification);
     const { loading: otpLoading, error: otpError, sent } = userOtpVerification;
 
-    console.log(otpError);
 
     const redirect = location.search ? location.search.split('=')[1] : '/';
 

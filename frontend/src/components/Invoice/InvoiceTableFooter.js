@@ -64,9 +64,9 @@ const styles = StyleSheet.create({
     }
 });
 
-const InvoiceTableFooter = ({ items, dateCreated }) => {
+const InvoiceTableFooter = ({ items, dateCreated, billType }) => {
     const total = items
-        .map(item => item.qty * item.price)
+        .map((item) => item.qty * (item.price - (item.disc / 100) * item.price))
         .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
     return (
         <>
@@ -83,13 +83,26 @@ const InvoiceTableFooter = ({ items, dateCreated }) => {
                 <Text style={styles.total}>{Number.parseFloat(total).toFixed(2)}</Text>
             </View>
 
-            <Text style={styles.gst}>Inclusive of IGST 60 on ₹{Number.parseFloat(total).toFixed(2)}</Text>
+            {billType === 'IGST' && (
+                <Text style={styles.gst}>
+                    Inclusive of {billType} Rs {Number.parseFloat((5 / 100) * total).toFixed(2)} on Rs{' '}
+                    {Number.parseFloat(total / 1.05).toFixed(2)}
+                </Text>
+            )}
+
+            {billType === 'CGST' && (
+                <Text style={styles.gst}>
+                    Inclusive of {billType} Rs {Number.parseFloat((2.5 / 100) * total).toFixed(2)} and SGST Rs
+                    {Number.parseFloat((2.5 / 100) * total).toFixed(2)} On Rs{' '}
+                    {Number.parseFloat(total / 1.05).toFixed(2)}
+                </Text>
+            )}
 
             <Text style={styles.delivery}>Delivered BY Self</Text>
 
             <View style={styles.row}>
                 <Text style={styles.orderDate}>Date of Order:{dateCreated}</Text>
-                <Text style={styles.deliveryDate}>Delivered On:</Text>
+                <Text style={styles.deliveryDate}>Dispatched On:</Text>
             </View>
             <Text style={styles.termsAndCond}>
                 Terms & Cond. As on website : www.allschooluniform.com Ccare 011-45091585-00 , help@allschooluniform.com

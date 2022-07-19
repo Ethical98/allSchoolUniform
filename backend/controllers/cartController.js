@@ -55,14 +55,16 @@ const cartItemRemove = asyncHandler(async (req, res) => {
   } else {
     const cart = await Cart.findOne({ user: req.user._id });
 
-    await Cart.updateOne(
-      { user: req.user._id },
-      { $pull: { cartItems: { _id: id } } }
-    );
+    // await Cart.updateOne(
+    //   { user: req.user._id },
+    //   { $pull: { cartItems: { _id: id } } }
+    // );
 
-    // cart.cartItems = cart.cartItems.filter((x) => x.id != id);
+
+    cart.cartItems = cart.cartItems.filter((x) => x.id != id);
 
     if (cart.cartItems.length == 0) {
+      console.log('hello');
       await Cart.deleteOne({ user: req.user._id });
       // res.json({ cartItems: [] });
       res.json({ Message: 'Cart Cleared' });

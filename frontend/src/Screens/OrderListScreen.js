@@ -11,16 +11,17 @@ import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
 
+
 const OrderListScreen = ({ history, location }) => {
     const urlSearchParams = new URLSearchParams(location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
     const pageNumber = params.page ? params.page : 1;
     const dispatch = useDispatch();
 
-    const orderList = useSelector(state => state.orderList);
+    const orderList = useSelector((state) => state.orderList);
     const { loading, orders, error, pages, page } = orderList;
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
     const columns = [
@@ -28,7 +29,7 @@ const OrderListScreen = ({ history, location }) => {
             title: '#',
             field: 'tableData.id',
 
-            render: rowData => rowData.tableData.id + 1,
+            render: (rowData) => rowData.tableData.id + 1,
             searchable: true
         },
         {
@@ -38,7 +39,7 @@ const OrderListScreen = ({ history, location }) => {
         {
             title: 'User',
             field: 'user',
-            render: item => item.user.name
+            render: (item) => item.user.name
         },
         {
             title: 'Mobile',
@@ -47,18 +48,18 @@ const OrderListScreen = ({ history, location }) => {
         {
             title: 'Date',
             field: 'createdAt',
-            render: item => item.createdAt.substring(0, 10)
+            render: (item) => item.createdAt.substring(0, 10)
         },
         {
             title: 'Total',
             field: 'totalPrice',
-            render: item => `₹ ${item.totalPrice}`
+            render: (item) => `₹ ${item.totalPrice}`
         },
         {
             title: 'Paid',
             field: 'isPaid',
 
-            render: item =>
+            render: (item) =>
                 item.isPaid ? item.paidAt.substring(0, 10) : <i className="fas fa-times" style={{ color: 'red' }}></i>
         },
         {
@@ -68,7 +69,7 @@ const OrderListScreen = ({ history, location }) => {
         {
             title: 'Delivered',
 
-            render: item =>
+            render: (item) =>
                 item.tracking.isDelivered ? (
                     item.tracking.deliveredAt.substring(0, 10)
                 ) : (

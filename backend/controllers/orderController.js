@@ -1,8 +1,9 @@
 import asyncHandler from 'express-async-handler';
-import Order from '../models/OrderModel.js';
+import Order, { InvoiceNumber } from '../models/OrderModel.js';
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
+import _ from 'lodash';
 dotenv.config();
 
 // @desc Create new order
@@ -196,8 +197,9 @@ const updateOrderTopaid = asyncHandler(async (req, res) => {
 // @route GET /api/orders/myorders
 // @access Private
 const getMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id });
-
+  const orders = await Order.find({ user: req.user._id }).sort({
+    createdAt: -1,
+  });
   if (orders.length > 0) {
     res.json(orders);
   } else {
@@ -247,7 +249,7 @@ const sendMail = asyncHandler(async (req, res) => {
     };
     const result = await transport.sendMail(mailOptions);
     const result2 = await transport.sendMail(mailOptions2);
- 
+
     // const res = await gmail.users.messages.send({
     //   userId: 'devansh.gupta73@yahoo.in',
     //   requestBody: {
@@ -274,6 +276,7 @@ const getOrders = asyncHandler(async (req, res) => {
   const count = await Order.countDocuments({});
   const orders = await Order.find({})
     .populate('user', 'id name')
+    .sort({ createdAt: -1 })
     .limit(pageSize)
     .skip(pageSize * (page - 1));
 
@@ -420,6 +423,47 @@ const updateOrderToConfirmed = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Update order BillType
+// @route POST /api/orders/:id/billType
+// @access Private/Admin
+const updateOrderBillType = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  const billType = req.body.billType;
+
+  if (order) {
+    order.billType = billType;
+    const updatedOrder = await order.save();
+
+    res.json(updatedOrder);
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
+// @desc Update order BillType
+// @route GET /api/orders/:id/incrementInvoiceNumber
+// @access Private/Admin
+const incrementInvoiceNumber = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const order = await Order.findById(orderId);
+  if (order) {
+    const invoice = await InvoiceNumber.findByIdAndUpdate(
+      { _id: 'invoiceNumber' },
+      { $inc: { number: 1 } },
+      { new: true, upsert: true }
+    );
+    console.log(invoice.number);
+    order.invoiceNumber = invoice.number;
+    const updatedOrder = await order.save();
+    return res.json(updatedOrder);
+
+  } else {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+});
+
 export {
   getOrders,
   addOrderItems,
@@ -433,4 +477,6 @@ export {
   updateOrderToOutForDelivery,
   updateOrderToDelivered,
   updateOrderToProcessing,
+  updateOrderBillType,
+  incrementInvoiceNumber,
 };

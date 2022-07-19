@@ -11,6 +11,7 @@ import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
+import { isEmpty } from 'lodash';
 
 const OrderDetails = ({ match, history }) => {
     const orderId = match.params.id;
@@ -29,9 +30,11 @@ const OrderDetails = ({ match, history }) => {
                 name={order.user ? order.user.name : ''}
                 email={order.user ? order.user.email : ''}
                 order={order && order}
+                billType={order && order.billType}
+                invoiceNumber={order && order.invoiceNumber}
             />
         ) : (
-            <div>Bill</div>
+            <div>Invoice</div>
         )
     });
 
@@ -70,9 +73,21 @@ const OrderDetails = ({ match, history }) => {
         }
     }, [userInfo, dispatch, history]);
 
-    if (!loading && order.orderItems) {
+    if (!loading) {
         // Calculate Prices
-        order.itemsPrice = order.orderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2);
+        if (!isEmpty(order.modifiedItems)) {
+            order.itemsPrice = order.modifiedItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2);
+            order.discountPrice = order.modifiedItems.reduce(
+                (acc, item) => acc + item.qty * ((item.disc / 100) * item.price),
+                0
+            );
+        } else {
+            order.itemsPrice = order.orderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2);
+            order.discountPrice = order.orderItems.reduce(
+                (acc, item) => acc + item.qty * ((item.disc / 100) * item.price),
+                0
+            );
+        }
     }
 
     return loading ? (
@@ -202,14 +217,14 @@ const OrderDetails = ({ match, history }) => {
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 <Row>
-                                    <Col>Shipping</Col>
-                                    <Col>₹ {order.shippingPrice}</Col>
+                                    <Col>Discount</Col>
+                                    <Col>- ₹ {order.discountPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 <Row>
-                                    <Col>Tax</Col>
-                                    <Col>₹ {order.taxPrice}</Col>
+                                    <Col>Shipping</Col>
+                                    <Col>₹ {order.shippingPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
                             <ListGroup.Item>

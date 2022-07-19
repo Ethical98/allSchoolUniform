@@ -33,7 +33,9 @@ import {
     orderDeliverReducer,
     orderOutForDeliveryReducer,
     orderProcessingReducer,
-    orderConfirmReducer
+    orderConfirmReducer,
+    orderUpdateBillTypeReducer,
+    orderUpdateInvoiceNumberReducer
 } from './reducers/orderReducers';
 import { decryptData } from './utils/Crypto';
 import {
@@ -127,6 +129,8 @@ const reducer = combineReducers({
     orderOutForDelivery: orderOutForDeliveryReducer,
     orderProcessing: orderProcessingReducer,
     orderConfirm: orderConfirmReducer,
+    orderUpdateBillType: orderUpdateBillTypeReducer,
+    orderUpdateInvoiceNumber: orderUpdateInvoiceNumberReducer,
     carouselImageList: carouselImageListReducer,
     carouselImageUpdate: carouselImageUpdateReducer,
     carouselImageDelete: carouselImageDeleteReducer,

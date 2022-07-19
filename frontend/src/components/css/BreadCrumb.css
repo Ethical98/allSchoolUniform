@@ -1,21 +1,24 @@
 .navigationCrumb {
-  border: 2px solid black;
-  border-radius: 8px;
-  padding: 5px 0 0 3px;
-  font-size: medium;
-  height: 40px;
+    border: 2px solid black;
+    border-radius: 8px;
+    padding: 5px 0 0 3px;
+    font-size: medium;
+}
+
+.navigationCrumb ol {
+    margin: 0 0 5px 0;
 }
 .navigationCrumb:hover {
-  border: 2px solid black;
+    border: 2px solid black;
 }
 
 .navigationCrumb a {
-  color: black;
-  text-decoration: none;
+    color: black;
+    text-decoration: none;
 }
 
 @media (max-width: 576px) {
-  .navigationCrumb {
-    font-size: small;
-  }
+    .navigationCrumb {
+        font-size: 12px;
+    }
 }

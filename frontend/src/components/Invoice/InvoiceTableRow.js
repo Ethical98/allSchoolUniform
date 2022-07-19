@@ -9,7 +9,8 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         alignItems: 'center',
         height: 24,
-        fontStyle: 'bold'
+        fontStyle: 'bold',
+        fontSize: '8px'
     },
     sno: {
         width: '36px',
@@ -22,7 +23,10 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         borderRightColor: borderColor,
         borderRightWidth: 1,
-        paddingLeft: 8
+        paddingLeft: 8,
+        wordBreak: 'breakAll',
+        wordWrap: 'breakWord',
+        fontSize: '8px'
     },
     size: {
         width: '43px',
@@ -76,8 +80,8 @@ const InvoiceTableRow = ({ items }) => {
             <Text style={styles.qty}>{item.qty}</Text>
             <Text style={styles.price}>{item.price}</Text>
             <Text style={styles.disc}>{item.disc ? item.disc : 0}</Text>
-            <Text style={styles.netPrice}>{item.price - 0}</Text>
-            <Text style={styles.total}>{(item.qty * item.price).toFixed(2)}</Text>
+            <Text style={styles.netPrice}>{item.price - (item.disc / 100) * item.price}</Text>
+            <Text style={styles.total}>{(item.qty * (item.price - (item.disc / 100) * item.price)).toFixed(2)}</Text>
         </View>
     ));
     return <Fragment>{rows}</Fragment>;

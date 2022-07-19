@@ -23,19 +23,19 @@ const styles = StyleSheet.create({
     }
 });
 
-const Invoice = ({ order, name, email, isAdmin = false, total }) => {
+const Invoice = ({ order, name, email, isAdmin = false, billType, invoiceNumber }) => {
     return (
         <Document>
             {order && (
                 <Page size="A4" orientation="potrait" style={styles.page}>
                     <Image style={styles.logo} src="/uploads/asu-top-logo.png" />
-                    <InvoiceTitle title="Invoice" orderId={order.orderId} />
+                    <InvoiceTitle orderId={order.orderId} invoiceNumber={invoiceNumber} />
                     <AddressDetails order={order} name={name} email={email} isAdmin={false} />
-                    <InvoiceNo order={order} total={total} />
-
+                    <InvoiceNo order={order} />
                     <InvoiceItemsTable
                         items={order.modified ? order.modifiedItems : order.orderItems}
                         dateCreated={order.createdAt && order.createdAt.substring(0, 10)}
+                        billType={billType}
                     />
                     <InvoiceThankYouMsg />
                 </Page>
@@ -43,13 +43,13 @@ const Invoice = ({ order, name, email, isAdmin = false, total }) => {
             {order && isAdmin && (
                 <Page size="A4" orientation="potrait" style={styles.page}>
                     <Image style={styles.logo} src="/uploads/asu-top-logo.png" />
-                    <InvoiceTitle title="Invoice" orderId={order.orderId} />
+                    <InvoiceTitle orderId={order.orderId} invoiceNumber={invoiceNumber} />
                     <AddressDetails order={order} name={name} email={email} isAdmin />
-                    <InvoiceNo order={order} total={total} />
-
+                    <InvoiceNo order={order} />
                     <InvoiceItemsTable
                         items={order.modified ? order.modifiedItems : order.orderItems}
                         dateCreated={order.createdAt && order.createdAt.substring(0, 10)}
+                        billType={billType}
                     />
                     <InvoiceThankYouMsg />
                 </Page>
