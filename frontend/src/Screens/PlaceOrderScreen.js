@@ -17,16 +17,16 @@ const PlaceOrderScreen = ({ history }) => {
 
     const [scriptReady, setScriptReady] = useState(false);
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
-    const orderPay = useSelector(state => state.orderPay);
+    const orderPay = useSelector((state) => state.orderPay);
     const { success: successPay, error: errorPay, response: paymentResponse } = orderPay;
 
-    const cart = useSelector(state => state.cart);
+    const cart = useSelector((state) => state.cart);
     const { cartItems } = cart;
 
-    const orderCreate = useSelector(state => state.orderCreate);
+    const orderCreate = useSelector((state) => state.orderCreate);
     const { order, success, error } = orderCreate;
 
     const getDiscountedPrice = (price, disc) => {
@@ -78,7 +78,7 @@ const PlaceOrderScreen = ({ history }) => {
         }
     }, [dispatch, errorPay, history, success, successPay, order]);
 
-    const addDecimals = num => {
+    const addDecimals = (num) => {
         return (Math.round(num * 100) / 100).toFixed(2);
     };
     // Calculate Prices
@@ -86,7 +86,7 @@ const PlaceOrderScreen = ({ history }) => {
         .reduce((acc, item) => acc + getDiscountedPrice(item.price, item.disc) * item.qty, 0)
         .toFixed(2);
 
-    cart.shippingPrice = cart.itemsPrice > 1000 ? 0 : 0;
+    cart.shippingPrice = cart.itemsPrice > 599 ? 0 : 100;
     cart.taxPrice = addDecimals(Number((0 * cart.itemsPrice).toFixed(2)));
     cart.totalPrice = (Number(cart.itemsPrice) + Number(cart.shippingPrice) + Number(cart.taxPrice)).toFixed(2);
 
@@ -207,6 +207,8 @@ const PlaceOrderScreen = ({ history }) => {
                                 <Row>
                                     <Col>Shipping</Col>
                                     <Col>₹ {cart.shippingPrice}</Col>
+                                    <p style={{ margin: 0, color: 'red' }}>Free Shipping on Orders above ₹ 599</p>
+                                    <p style={{ margin: 0, color: 'red' }}>Add Items worth ₹ {599-cart.itemsPrice} for <strong>FREE Delivery</strong></p>
                                 </Row>
                             </ListGroup.Item>
                             <ListGroup.Item>

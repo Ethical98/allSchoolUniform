@@ -14,14 +14,12 @@ const styles = StyleSheet.create({
 
 const InvoiceNo = ({ order }) => {
     const items = order.modified ? order.modifiedItems : order.orderItems;
-    const total = items
-        .map((item) => item.qty * (item.price - (item.disc / 100) * item.price))
-        .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
     return (
         <View style={styles.invoiceHeaderContainer}>
             <View>
                 <Text>Payment Method: {order.paymentMethod}</Text>
-                <Text>Total Amount:{total}</Text>
+                <Text>Total Amount:{order.totalPrice}</Text>
             </View>
             <View style={styles.invoiceDate}>
                 <Text>Order Date:</Text>

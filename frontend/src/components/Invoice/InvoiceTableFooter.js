@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     }
 });
 
-const InvoiceTableFooter = ({ items, dateCreated, billType }) => {
+const InvoiceTableFooter = ({ items, dateCreated, billType, shippingPrice }) => {
     const total = items
         .map((item) => item.qty * (item.price - (item.disc / 100) * item.price))
         .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
@@ -75,12 +75,12 @@ const InvoiceTableFooter = ({ items, dateCreated, billType }) => {
                 <Text style={styles.total}>{Number.parseFloat(total).toFixed(2)}</Text>
             </View>
             <View style={styles.row}>
-                <Text style={styles.description}>Less Payment</Text>
-                <Text style={styles.total}>0</Text>
+                <Text style={styles.description}>Shipping</Text>
+                <Text style={styles.total}>{shippingPrice}</Text>
             </View>
             <View style={styles.row}>
                 <Text style={styles.description}>TOTAL</Text>
-                <Text style={styles.total}>{Number.parseFloat(total).toFixed(2)}</Text>
+                <Text style={styles.total}>{Number.parseFloat(total + shippingPrice).toFixed(2)}</Text>
             </View>
 
             {billType === 'IGST' && (

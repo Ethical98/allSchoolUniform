@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     }
 });
 
-const InvoiceItemsTable = ({ items, dateCreated, billType }) => (
+const InvoiceItemsTable = ({ items, dateCreated, billType ,shippingPrice}) => (
     <>
         <View style={styles.tableHeading}>
             <Text>ORDER SUMMARY</Text>
@@ -32,7 +32,7 @@ const InvoiceItemsTable = ({ items, dateCreated, billType }) => (
             <InvoiceTableHeader />
             <InvoiceTableRow items={items ? items : []} />
             <InvoiceTableBlankSpace rowsCount={items ? tableRowsCount - items.length : tableRowsCount} />
-            <InvoiceTableFooter items={items ? items : []} dateCreated={dateCreated} billType={billType} />
+            <InvoiceTableFooter items={items ? items : []} dateCreated={dateCreated} billType={billType} shippingPrice={shippingPrice} />
         </View>
     </>
 );

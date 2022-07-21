@@ -128,6 +128,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                 name={name}
                 email={email}
                 order={order && order}
+                shippingPrice={order && order.shippingPrice}
                 isAdmin
                 billType={billType}
                 invoiceNumber={order && order.invoiceNumber}
@@ -313,6 +314,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                             email={email}
                             order={order && order}
                             total={order.totalPrice}
+                            shippingPrice={order && order.shippingPrice}
                             isAdmin
                             billType={billType}
                             invoiceNumber={order.invoiceNumber}
@@ -407,7 +409,7 @@ const OrderEditScreen = ({ history, match, location }) => {
 
     useEffect(() => {
         if (order) {
-            setTotalPrice(Number(itemsPrice - discountPrice));
+            setTotalPrice(Number(itemsPrice - discountPrice + order.shippingPrice));
         }
     }, [order, itemsPrice, discountPrice]);
 

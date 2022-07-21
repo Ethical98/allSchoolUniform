@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     }
 });
 
-const Invoice = ({ order, name, email, isAdmin = false, billType, invoiceNumber }) => {
+const Invoice = ({ order, name, email, isAdmin = false, billType, invoiceNumber, shippingPrice }) => {
     return (
         <Document>
             {order && (
@@ -36,6 +36,7 @@ const Invoice = ({ order, name, email, isAdmin = false, billType, invoiceNumber 
                         items={order.modified ? order.modifiedItems : order.orderItems}
                         dateCreated={order.createdAt && order.createdAt.substring(0, 10)}
                         billType={billType}
+                        shippingPrice={shippingPrice}
                     />
                     <InvoiceThankYouMsg />
                 </Page>
@@ -50,6 +51,7 @@ const Invoice = ({ order, name, email, isAdmin = false, billType, invoiceNumber 
                         items={order.modified ? order.modifiedItems : order.orderItems}
                         dateCreated={order.createdAt && order.createdAt.substring(0, 10)}
                         billType={billType}
+                        shippingPrice={shippingPrice}
                     />
                     <InvoiceThankYouMsg />
                 </Page>
