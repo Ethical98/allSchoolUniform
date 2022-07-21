@@ -102,7 +102,7 @@ const InvoiceTableFooter = ({ items, dateCreated, billType }) => {
 
             <View style={styles.row}>
                 <Text style={styles.orderDate}>Date of Order:{dateCreated}</Text>
-                <Text style={styles.deliveryDate}>Dispatched On:</Text>
+                <Text style={styles.deliveryDate}>Dispatched </Text>
             </View>
             <Text style={styles.termsAndCond}>
                 Terms & Cond. As on website : www.allschooluniform.com Ccare 011-45091585-00 , help@allschooluniform.com

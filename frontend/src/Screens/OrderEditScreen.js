@@ -328,7 +328,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                     setDiscountPrice(
                         Number(
                             order.modifiedItems
-                                .reduce((acc, item) => acc + item.qty * ((item.disc / 100) * item.price), 0)
+                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
                                 .toFixed(2)
                         )
                     );
@@ -340,7 +340,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                     setDiscountPrice(
                         Number(
                             order.orderItems
-                                .reduce((acc, item) => acc + item.qty * ((item.disc / 100) * item.price), 0)
+                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
                                 .toFixed(2)
                         )
                     );
@@ -398,10 +398,11 @@ const OrderEditScreen = ({ history, match, location }) => {
         setDiscountPrice(
             Number(
                 modifiedOrderItems
-                    .reduce((acc, item) => acc + item.qty * ((item.disc / 100) * item.price), 0)
+                    .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
                     .toFixed(2)
             )
         );
+        console.log(modifiedOrderItems);
     }, [modifiedOrderItems]);
 
     useEffect(() => {
@@ -428,6 +429,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                     image,
                     size: newSizeValue,
                     tax: sizes[i].tax,
+                    disc: sizes[i].discount,
                     qty: 1
                 }
             ]);
@@ -476,10 +478,11 @@ const OrderEditScreen = ({ history, match, location }) => {
         }
 
         setItemsPrice(Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)));
+        console.log(modifiedOrderItems);
         setDiscountPrice(
             Number(
                 modifiedOrderItems
-                    .reduce((acc, item) => acc + item.qty * ((item.disc / 100) * item.price), 0)
+                    .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
                     .toFixed(2)
             )
         );
@@ -564,7 +567,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         dispatch(listSchoolNames(query));
     };
     const filterBy = () => true;
-
+    console.log(products);
     return (
         <AdminPageLayout>
             <Meta
@@ -667,6 +670,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                             data.some((itemToAdd) => addedItem.product === itemToAdd._id)
                                         )
                                     ]);
+                                    console.log(newProducts);
 
                                     setMessage('');
                                 }
@@ -925,7 +929,6 @@ const OrderEditScreen = ({ history, match, location }) => {
                                                     variant="outline-info"
                                                     className="my-3 float-end "
                                                     onClick={showNewProductModalHandle}
-                                                    disabled={order.modified}
                                                 >
                                                     <i className="fas fa-plus" /> ADD PRODUCT
                                                 </Button>
