@@ -60,9 +60,9 @@ const cartItemRemove = asyncHandler(async (req, res) => {
     //   { $pull: { cartItems: { _id: id } } }
     // );
 
-
     cart.cartItems = cart.cartItems.filter((x) => x.id != id);
-
+    await cart.save();
+    console.log(cart.cartItems);
     if (cart.cartItems.length == 0) {
       console.log('hello');
       await Cart.deleteOne({ user: req.user._id });
