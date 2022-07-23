@@ -24,15 +24,15 @@ const ProductListScreen = ({ history, match, location }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [options, setOptions] = useState([]);
 
-    const productList = useSelector(state => state.productList);
+    const productList = useSelector((state) => state.productList);
     const { loading, products, error, pages, page } = productList;
 
-    const productDelete = useSelector(state => state.productDelete);
+    const productDelete = useSelector((state) => state.productDelete);
     const { success: successDelete, error: errorDelete } = productDelete;
 
     const [school, setSchool] = useState('');
 
-    const schoolNameList = useSelector(state => state.schoolNameList);
+    const schoolNameList = useSelector((state) => state.schoolNameList);
     const { schoolNames } = schoolNameList;
 
     const columns = [
@@ -55,11 +55,11 @@ const ProductListScreen = ({ history, match, location }) => {
         {
             title: 'Image',
             field: 'image',
-            render: item => <Image src={item.image} alt={item.name} style={{ width: '5vw' }} fluid rounded />
+            render: (item) => <Image src={item.image} alt={item.name} style={{ width: '5vw' }} fluid rounded />
         }
     ];
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
     useEffect(() => {
@@ -100,7 +100,7 @@ const ProductListScreen = ({ history, match, location }) => {
         }
     }, [schoolNames]);
 
-    const handleChange = item => {
+    const handleChange = (item) => {
         if (item.length > 0) {
             history.push('/admin/productlist/');
             setSchool(item[0].name);
@@ -109,7 +109,7 @@ const ProductListScreen = ({ history, match, location }) => {
         }
     };
 
-    const handleSearch = query => {
+    const handleSearch = (query) => {
         setIsLoading(true);
         dispatch(listSchoolNames(query));
     };
@@ -131,7 +131,7 @@ const ProductListScreen = ({ history, match, location }) => {
                             isLoading={isLoading}
                             labelKey={'name'}
                             minLength={3}
-                            onChange={value => handleChange(value)}
+                            onChange={(value) => handleChange(value)}
                             onSearch={handleSearch}
                             options={options}
                             placeholder="Enter School Name.."
@@ -165,7 +165,7 @@ const ProductListScreen = ({ history, match, location }) => {
                             paging: false
                         }}
                         editable={{
-                            onRowDelete: oldData =>
+                            onRowDelete: (oldData) =>
                                 new Promise((resolve, reject) => {
                                     setTimeout(() => {
                                         dispatch(deleteProduct(oldData._id));
@@ -177,7 +177,7 @@ const ProductListScreen = ({ history, match, location }) => {
                             {
                                 icon: 'edit',
                                 tooltip: 'Edit',
-                                onClick: (event, rowData) => history.push(`/admin/product/${rowData._id}/edit`)
+                                onClick: (event, rowData) => window.open(`/admin/product/${rowData._id}/edit`, '_blank')
                             }
                         ]}
                     />

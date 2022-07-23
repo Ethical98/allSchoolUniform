@@ -9,13 +9,13 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import useMedia from '../utils/useMedia';
+import { sortBy } from 'lodash';
 
 const HomeScreen = ({ history }) => {
     const dispatch = useDispatch();
 
     const [isLoading, setIsLoading] = useState(false);
     const [options, setOptions] = useState([]);
-
 
     const schoolNameList = useSelector((state) => state.schoolNameList);
     const { schoolNames } = schoolNameList;
@@ -26,7 +26,7 @@ const HomeScreen = ({ history }) => {
 
     useEffect(() => {
         if (schoolNames) {
-            setOptions(schoolNames);
+            setOptions(sortBy(schoolNames, (item) => item.name));
             setIsLoading(false);
         }
     }, [schoolNames]);

@@ -207,8 +207,14 @@ const PlaceOrderScreen = ({ history }) => {
                                 <Row>
                                     <Col>Shipping</Col>
                                     <Col>₹ {cart.shippingPrice}</Col>
-                                    <p style={{ margin: 0, color: 'red' }}>Free Shipping on Orders above ₹ 599</p>
-                                    <p style={{ margin: 0, color: 'red' }}>Add Items worth ₹ {599-cart.itemsPrice} for <strong>FREE Delivery</strong></p>
+                                    {cart.itemsPrice < 599 && (
+                                        <p style={{ margin: 0, color: 'red' }}>Free Shipping on Orders above ₹ 599</p>
+                                    )}
+                                    {cart.itemsPrice < 599 && (
+                                        <p style={{ margin: 0, color: 'red' }}>
+                                            Add Items worth ₹ {599 - cart.itemsPrice} for <strong>FREE Delivery</strong>
+                                        </p>
+                                    )}
                                 </Row>
                             </ListGroup.Item>
                             <ListGroup.Item>
