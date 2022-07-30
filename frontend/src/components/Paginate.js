@@ -47,109 +47,109 @@ const Paginate = ({
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
                 : category.length > 0 && season.length > 0 && keyword
-                    ? `/products?search=${keyword}&season=${season}&category=${category}}&page=${
+                ? `/products?search=${keyword}&season=${season}&category=${category}}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                    : category.length > 0 && standard.length > 0 && keyword
-                        ? `/products?search=${keyword}&category=${category}&class=${standard}&page=${
+                : category.length > 0 && standard.length > 0 && keyword
+                ? `/products?search=${keyword}&category=${category}&class=${standard}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                        : season.length > 0 && standard.length > 0 && keyword
-                            ? `/products?search=${keyword}&season=${season}&class=${standard}&page=${
+                : season.length > 0 && standard.length > 0 && keyword
+                ? `/products?search=${keyword}&season=${season}&class=${standard}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                            : season.length > 0 && keyword
-                                ? `/products?search=${keyword}&season=${season}&page=${
+                : season.length > 0 && keyword
+                ? `/products?search=${keyword}&season=${season}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                : category.length > 0 && keyword
-                                    ? `/products?search=${keyword}&category=${category}&page=${
+                : category.length > 0 && keyword
+                ? `/products?search=${keyword}&category=${category}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                    : standard.length > 0 && keyword
-                                        ? `/products?search=${keyword}&class=${standard}&page=${
+                : standard.length > 0 && keyword
+                ? `/products?search=${keyword}&class=${standard}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                        : keyword && category.length > 0 && season.length > 0 && standard.length > 0 && school
-                                            ? `/products?season=${season}&category=${category}&class=${standard}&school=${school}&page=${
+                : keyword && category.length > 0 && season.length > 0 && standard.length > 0 && school
+                ? `/products?season=${season}&category=${category}&class=${standard}&school=${school}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                            : category.length > 0 && season.length > 0 && school
-                                                ? `/products?season=${season}&category=${category}&school=${school}&page=${
+                : category.length > 0 && season.length > 0 && school
+                ? `/products?season=${season}&category=${category}&school=${school}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                : category.length > 0 && standard.length > 0 && school
-                                                    ? `/products?category=${category}&class=${standard}&school=${school}&page=${
+                : category.length > 0 && standard.length > 0 && school
+                ? `/products?category=${category}&class=${standard}&school=${school}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                    : season.length > 0 && standard.length > 0 && school
-                                                        ? `/products?season=${season}&class=${standard}&school=${school}&page=${
+                : season.length > 0 && standard.length > 0 && school
+                ? `/products?season=${season}&class=${standard}&school=${school}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                        : season.length > 0 && school
-                                                            ? `/products?season=${season}&school=${school}&page=${
+                : season.length > 0 && school
+                ? `/products?season=${season}&school=${school}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                            : category.length > 0 && school
-                                                                ? `/products?category=${category}&school=${school}&page=${
+                : category.length > 0 && school
+                ? `/products?category=${category}&school=${school}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                : standard.length > 0 && school
-                                                                    ? `/products?class=${standard}&school=${school}&page=${
+                : standard.length > 0 && school
+                ? `/products?class=${standard}&school=${school}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                    : keyword
-                                                                        ? `/products?search=${keyword}&page=${
+                : keyword
+                ? `/products?search=${keyword}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                        : school
-                                                                            ? `/products/schools/${school}?page=${
+                : school
+                ? `/products/schools/${school}?page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                            : category.length > 0 && season.length > 0 && standard.length > 0
-                                                                                ? `/products?season=${season}&category=${category}&class=${standard}&page=${
+                : category.length > 0 && season.length > 0 && standard.length > 0
+                ? `/products?season=${season}&category=${category}&class=${standard}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                                : category.length > 0 && season.length > 0
-                                                                                    ? `/products?season=${season}&category=${category}&page=${
+                : category.length > 0 && season.length > 0
+                ? `/products?season=${season}&category=${category}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                                    : category.length > 0 && standard.length > 0
-                                                                                        ? `/products?category=${category}&class=${standard}&page=${
+                : category.length > 0 && standard.length > 0
+                ? `/products?category=${category}&class=${standard}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                                        : season.length > 0 && standard.length > 0
-                                                                                            ? `/products?season=${season}&class=${standard}&page=${
+                : season.length > 0 && standard.length > 0
+                ? `/products?season=${season}&class=${standard}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                                            : season.length > 0
-                                                                                                ? `/products?season=${season}&page=${
+                : season.length > 0
+                ? `/products?season=${season}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                                                : category.length > 0
-                                                                                                    ? `/products?category=${category}&page=${
+                : category.length > 0
+                ? `/products?category=${category}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                                                    : standard.length > 0
-                                                                                                        ? `/products?class=${standard}&page=${
+                : standard.length > 0
+                ? `/products?class=${standard}&page=${
                       prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
                   }`
-                                                                                                        : `/products?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
+                : `/products?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
             : isAdmin && products
-                ? `/admin/productlist?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
-                : isAdmin && schools
-                    ? `/admin/schoollist?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
-                    : isAdmin && orders
-                        ? `/admin/orderlist?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
-                        : isAdmin && users
-                            ? `/admin/userlist?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
-                            : addProduct && isAdmin
-                                ? `/admin/product/create?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
-                                : editProduct && isAdmin
-                                    ? `/admin/product/${productId}/edit?page=${
+            ? `/admin/productlist?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
+            : isAdmin && schools
+            ? `/admin/schoollist?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
+            : isAdmin && orders
+            ? `/admin/orderlist?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
+            : isAdmin && users
+            ? `/admin/userlist?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
+            : addProduct && isAdmin
+            ? `/admin/product/create?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
+            : editProduct && isAdmin
+            ? `/admin/product/${productId}/edit?page=${
                   prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
               }`
-                                    : `/admin/order/${orderId}/edit?page=${
+            : `/admin/order/${orderId}/edit?page=${
                   prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
               }`;
     };
@@ -157,7 +157,7 @@ const Paginate = ({
     return (
         <>
             {pages > 1 && (
-                <Pagination className="float-end my-3">
+                <Pagination className="float-end my-5">
                     {page > pageNumberLimit && (
                         <LinkContainer to={href(false, false, false, true, false)}>
                             <Pagination.First />

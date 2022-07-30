@@ -10,7 +10,7 @@ const Footer = () => {
     };
     return (
         <footer
-            className="mt-5 p-4"
+            className="p-4"
             style={{
                 background: `#2c4a77 url("/uploads/seamlessschool-bg.png")`,
                 borderTop: '2px solid #ff6a00',
