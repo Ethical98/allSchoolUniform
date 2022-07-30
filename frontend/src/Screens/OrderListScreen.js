@@ -11,7 +11,6 @@ import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
 
-
 const OrderListScreen = ({ history, location }) => {
     const urlSearchParams = new URLSearchParams(location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
@@ -67,13 +66,31 @@ const OrderListScreen = ({ history, location }) => {
             field: 'paymentMethod'
         },
         {
-            title: 'Delivered',
+            title: 'Status',
 
             render: (item) =>
-                item.tracking.isDelivered ? (
-                    item.tracking.deliveredAt.substring(0, 10)
+                item.tracking.isCanceled ? (
+                    <p style={{ color: 'red' }}>
+                        <strong>Canceled: {item.tracking.canceledAt.substring(0, 10)}</strong>
+                    </p>
+                ) : item.tracking.isDelivered ? (
+                    <p style={{ color: 'darkGreen' }}>
+                        <strong>Delivered: {item.tracking.deliveredAt.substring(0, 10)}</strong>
+                    </p>
+                ) : item.tracking.isOutForDelivery ? (
+                    <p style={{ color: 'yellow' }}>
+                        <strong>`Out For Delivery: {item.tracking.outForDeliveryAt.substring(0, 10)}`</strong>
+                    </p>
+                ) : item.tracking.isProcessing ? (
+                    <p style={{ color: 'purple' }}>
+                        <strong>Processed: {item.tracking.processedAt.substring(0, 10)}</strong>
+                    </p>
+                ) : item.tracking.isConfirmed ? (
+                    <p style={{ color: 'blue' }}>
+                        <strong>Confirmed: {item.tracking.confirmedAt.substring(0, 10)}</strong>
+                    </p>
                 ) : (
-                    <i className="fas fa-times" style={{ color: 'red' }}></i>
+                    'Recieved'
                 )
         }
     ];

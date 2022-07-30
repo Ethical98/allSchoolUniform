@@ -10,6 +10,7 @@ import {
   incrementInvoiceNumber,
   sendMail,
   updateOrderBillType,
+  updateOrderToCanceled,
   updateOrderToConfirmed,
   updateOrderToDelivered,
   updateOrderToOutForDelivery,
@@ -33,6 +34,7 @@ router.route('/:id/processing').put(protect, isAdmin, updateOrderToProcessing);
 router
   .route('/:id/outfordelivery')
   .put(protect, isAdmin, updateOrderToOutForDelivery);
+router.route('/:id/cancel').put(protect, isAdmin, updateOrderToCanceled);
 router.route('/:id/billType').put(protect, isAdmin, updateOrderBillType);
 router
   .route('/:id/incrementinvoicenumber')

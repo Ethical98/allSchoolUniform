@@ -45,7 +45,11 @@ import {
     ORDER_UPDATE_INVOICE_NUMBER_REQUEST,
     ORDER_UPDATE_INVOICE_NUMBER_SUCCESS,
     ORDER_UPDATE_INVOICE_NUMBER_FAIL,
-    ORDER_UPDATE_INVOICE_NUMBER_RESET
+    ORDER_UPDATE_INVOICE_NUMBER_RESET,
+    ORDER_CANCEL_REQUEST,
+    ORDER_CANCEL_SUCCESS,
+    ORDER_CANCEL_FAIL,
+    ORDER_CANCEL_RESET
 } from '../constants/orderConstants';
 
 export const orderCreateReducer = (state = {}, action) => {
@@ -207,6 +211,21 @@ export const orderDeliverReducer = (state = {}, action) => {
         case ORDER_DELIVER_FAIL:
             return { loading: false, error: action.payload };
         case ORDER_DELIVER_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+export const orderCancelReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_CANCEL_REQUEST:
+            return { loading: true };
+        case ORDER_CANCEL_SUCCESS:
+            return { loading: false, success: true };
+        case ORDER_CANCEL_FAIL:
+            return { loading: false, error: action.payload };
+        case ORDER_CANCEL_RESET:
             return {};
         default:
             return state;

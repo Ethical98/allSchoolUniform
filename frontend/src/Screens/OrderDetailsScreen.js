@@ -159,6 +159,11 @@ const OrderDetails = ({ match, history }) => {
                         <ListGroup.Item>
                             <h2 className="mt-2">ORDER ITEMS</h2>
                             {order.modified && <Message variant="info">Order Has Been Modified!!</Message>}
+                            {order.tracking.isCanceled && (
+                                <Message variant="danger">
+                                    Order has been Canceled {order.tracking.canceledAt.substring(0, 10)}
+                                </Message>
+                            )}
                             {order.orderItems.length === 0 ? (
                                 <Message>Order Is Empty</Message>
                             ) : (

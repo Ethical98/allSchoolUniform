@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     }
 });
 
-const BillTo = ({ shippingAddress, name, email, isAdmin }) => (
+const BillTo = ({ shippingAddress, name, email, isAdmin ,phone}) => (
     <View>
         <Text style={styles.billTo}>{isAdmin ? 'Buyer' : 'Bill To:'}</Text>
         <Text>{name}</Text>
@@ -17,6 +17,7 @@ const BillTo = ({ shippingAddress, name, email, isAdmin }) => (
         <Text>{shippingAddress.postalCode}</Text>
         <Text>{shippingAddress.country}</Text>
         <Text>{email}</Text>
+        <Text>{phone}</Text>
     </View>
 );
 

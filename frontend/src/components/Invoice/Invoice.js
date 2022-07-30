@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         fontFamily: 'Helvetica',
         fontSize: 11,
-        paddingTop: 30,
+        paddingTop: 20,
         paddingLeft: 60,
         paddingRight: 60,
         lineHeight: 1.5,
@@ -23,14 +23,14 @@ const styles = StyleSheet.create({
     }
 });
 
-const Invoice = ({ order, name, email, isAdmin = false, billType, invoiceNumber, shippingPrice }) => {
+const Invoice = ({ order, name, email, phone, isAdmin = false, billType, invoiceNumber, shippingPrice }) => {
     return (
         <Document>
             {order && (
                 <Page size="A4" orientation="potrait" style={styles.page}>
                     <Image style={styles.logo} src="/uploads/asu-top-logo.png" />
                     <InvoiceTitle orderId={order.orderId} invoiceNumber={invoiceNumber} />
-                    <AddressDetails order={order} name={name} email={email} isAdmin={false} />
+                    <AddressDetails order={order} name={name} email={email} phone={phone} isAdmin={false} />
                     <InvoiceNo order={order} />
                     <InvoiceItemsTable
                         items={order.modified ? order.modifiedItems : order.orderItems}
@@ -45,7 +45,7 @@ const Invoice = ({ order, name, email, isAdmin = false, billType, invoiceNumber,
                 <Page size="A4" orientation="potrait" style={styles.page}>
                     <Image style={styles.logo} src="/uploads/asu-top-logo.png" />
                     <InvoiceTitle orderId={order.orderId} invoiceNumber={invoiceNumber} />
-                    <AddressDetails order={order} name={name} email={email} isAdmin />
+                    <AddressDetails order={order} name={name} email={email} phone={phone} isAdmin />
                     <InvoiceNo order={order} />
                     <InvoiceItemsTable
                         items={order.modified ? order.modifiedItems : order.orderItems}

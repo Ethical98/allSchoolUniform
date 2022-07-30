@@ -423,6 +423,25 @@ const updateOrderToConfirmed = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Update order to Confirmed
+// @route GET /api/orders/:id/cancel
+// @access Private/Admin
+const updateOrderToCanceled = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    order.tracking.isCanceled = true;
+    order.tracking.canceledAt = Date.now();
+
+    const updatedOrder = await order.save();
+
+    res.json(updatedOrder);
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
 // @desc Update order BillType
 // @route POST /api/orders/:id/billType
 // @access Private/Admin
@@ -477,6 +496,7 @@ export {
   updateOrderToOutForDelivery,
   updateOrderToDelivered,
   updateOrderToProcessing,
+  updateOrderToCanceled,
   updateOrderBillType,
   incrementInvoiceNumber,
 };

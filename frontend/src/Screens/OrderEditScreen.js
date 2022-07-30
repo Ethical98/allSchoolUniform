@@ -12,9 +12,11 @@ import {
     processOrder,
     confirmOrder,
     updateOrderBillType,
-    incrementAndUpdateInvoiceNumber
+    incrementAndUpdateInvoiceNumber,
+    cancelOrder
 } from '../actions/orderActions';
 import {
+    ORDER_CANCEL_RESET,
     ORDER_CONFIRM_RESET,
     ORDER_DELIVER_RESET,
     ORDER_DETAILS_RESET,
@@ -74,6 +76,9 @@ const OrderEditScreen = ({ history, match, location }) => {
     const orderConfirm = useSelector((state) => state.orderConfirm);
     const { loading: loadingConfirm, error: errorConfirm, success: successConfirm } = orderConfirm;
 
+    const orderCancel = useSelector((state) => state.orderCancel);
+    const { loading: loadingCancel, error: errorCancel, success: successCancel } = orderCancel;
+
     const orderUpdateBillType = useSelector((state) => state.orderUpdateBillType);
     const { success: successUpdateBillType } = orderUpdateBillType;
 
@@ -119,6 +124,7 @@ const OrderEditScreen = ({ history, match, location }) => {
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [isDelivered, setIsDelivered] = useState(false);
     const [isOutForDelivery, setIsOutForDelivery] = useState(false);
+    const [isCanceled, setIsCanceled] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderNumber, setOrderNumber] = useState('');
     const [billType, setBillType] = useState('');
@@ -127,6 +133,7 @@ const OrderEditScreen = ({ history, match, location }) => {
             <Invoice
                 name={name}
                 email={email}
+                phone={phone}
                 order={order && order}
                 shippingPrice={order && order.shippingPrice}
                 isAdmin
@@ -277,12 +284,14 @@ const OrderEditScreen = ({ history, match, location }) => {
                 successOutForDelivery ||
                 successDeliver ||
                 successUpdateBillType ||
-                successUpdateInvoiceNumber
+                successUpdateInvoiceNumber ||
+                successCancel
             ) {
                 dispatch({ type: ORDER_DELIVER_RESET });
                 dispatch({ type: ORDER_CONFIRM_RESET });
                 dispatch({ type: ORDER_PROCESSING_RESET });
                 dispatch({ type: ORDER_OUT_FOR_DELIVERY_RESET });
+                dispatch({ type: ORDER_CANCEL_RESET });
                 dispatch({ type: ORDER_UPDATE_BILLTYPE_RESET });
                 dispatch({ type: ORDER_UPDATE_INVOICE_NUMBER_RESET });
                 dispatch(getOrderDetails(orderId));
@@ -304,6 +313,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                 setIsDelivered(order.tracking.isDelivered);
                 setIsOutForDelivery(order.tracking.isOutForDelivery);
                 setIsConfirmed(order.tracking.isConfirmed);
+                setIsCanceled(order.tracking.isCanceled);
                 setOrderNumber(order.orderId);
                 setBillType(order.billType);
 
@@ -312,6 +322,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                         <Invoice
                             name={name}
                             email={email}
+                            phone={phone}
                             order={order && order}
                             total={order.totalPrice}
                             shippingPrice={order && order.shippingPrice}
@@ -335,7 +346,6 @@ const OrderEditScreen = ({ history, match, location }) => {
                         )
                     );
                 } else {
-                    setModifiedOrderItems([...order.orderItems.map((a) => ({ ...a }))]);
                     setItemsPrice(
                         Number(order.orderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2))
                     );
@@ -360,6 +370,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         successDeliver,
         successOutForDelivery,
         successProcessing,
+        successCancel,
         name,
         email,
         billType,
@@ -480,7 +491,6 @@ const OrderEditScreen = ({ history, match, location }) => {
         }
 
         setItemsPrice(Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)));
-        console.log(modifiedOrderItems);
         setDiscountPrice(
             Number(
                 modifiedOrderItems
@@ -512,7 +522,6 @@ const OrderEditScreen = ({ history, match, location }) => {
     const showNewProductModalHandle = () => {
         setShowNewProductModal(true);
         history.push(`/admin/order/${orderId}/edit`);
-
         setSchool('');
         dispatch(listProducts('', pageNumber, '', '', '', school));
     };
@@ -697,48 +706,66 @@ const OrderEditScreen = ({ history, match, location }) => {
                         {loadingDeliver || loadingConfirm || loadingOutForDelivery || loadingProcessing ? (
                             <Loader />
                         ) : (
-                            <Row>
-                                <Col xs={6}>
+                            <>
+                                <Row>
+                                    <Col xs={6}>
+                                        <Form.Check
+                                            disabled={isConfirmed}
+                                            checked={isConfirmed}
+                                            type="switch"
+                                            id="custom-switch"
+                                            label="Mark As Confirmed"
+                                            onChange={(e) => dispatch(confirmOrder(order))}
+                                        />
+                                    </Col>
+                                    <Col xs={6}>
+                                        <Form.Check
+                                            disabled={isProcessing}
+                                            checked={isProcessing}
+                                            type="switch"
+                                            id="custom-switch"
+                                            label="Mark As Processing"
+                                            onChange={(e) => dispatch(processOrder(order))}
+                                        />
+                                    </Col>
+                                    <Col xs={6}>
+                                        <Form.Check
+                                            disabled={isOutForDelivery}
+                                            checked={isOutForDelivery}
+                                            type="switch"
+                                            id="custom-switch"
+                                            label="Mark As Out For Delivery"
+                                            onChange={(e) => dispatch(outForDeliveryOrder(order))}
+                                        />
+                                    </Col>
+                                    <Col xs={6}>
+                                        <Form.Check
+                                            disabled={isDelivered}
+                                            checked={isDelivered}
+                                            type="switch"
+                                            id="custom-switch"
+                                            label="Mark As Delivered"
+                                            onChange={(e) => {
+                                                dispatch(deliverOrder(order));
+                                                closeTrackingHandle();
+                                            }}
+                                        />
+                                    </Col>{' '}
+                                </Row>
+                                <Row>
                                     <Form.Check
-                                        disabled={isConfirmed}
-                                        checked={isConfirmed}
+                                        disabled={isCanceled || isDelivered || isOutForDelivery}
+                                        checked={isCanceled}
                                         type="switch"
                                         id="custom-switch"
-                                        label="Mark As Confirmed"
-                                        onChange={(e) => dispatch(confirmOrder(order))}
+                                        label="Cancel Order"
+                                        onChange={(e) => {
+                                            dispatch(cancelOrder(order));
+                                            closeTrackingHandle();
+                                        }}
                                     />
-                                </Col>
-                                <Col xs={6}>
-                                    <Form.Check
-                                        disabled={isProcessing}
-                                        checked={isProcessing}
-                                        type="switch"
-                                        id="custom-switch"
-                                        label="Mark As Processing"
-                                        onChange={(e) => dispatch(processOrder(order))}
-                                    />
-                                </Col>
-                                <Col xs={6}>
-                                    <Form.Check
-                                        disabled={isOutForDelivery}
-                                        checked={isOutForDelivery}
-                                        type="switch"
-                                        id="custom-switch"
-                                        label="Mark As Out For Delivery"
-                                        onChange={(e) => dispatch(outForDeliveryOrder(order))}
-                                    />
-                                </Col>
-                                <Col xs={6}>
-                                    <Form.Check
-                                        disabled={isDelivered}
-                                        checked={isDelivered}
-                                        type="switch"
-                                        id="custom-switch"
-                                        label="Mark As Delivered"
-                                        onChange={(e) => dispatch(deliverOrder(order))}
-                                    />
-                                </Col>{' '}
-                            </Row>
+                                </Row>
+                            </>
                         )}
                     </Form>
                 </Row>
@@ -886,7 +913,10 @@ const OrderEditScreen = ({ history, match, location }) => {
                                             <Button
                                                 className="float-end"
                                                 variant="outline-info"
-                                                onClick={() => setModify(true)}
+                                                onClick={() => {
+                                                    setModifiedOrderItems([...order.orderItems.map((a) => ({ ...a }))]);
+                                                    setModify(true);
+                                                }}
                                                 disabled={order.invoiceNumber}
                                             >
                                                 MODIFY ITEMS

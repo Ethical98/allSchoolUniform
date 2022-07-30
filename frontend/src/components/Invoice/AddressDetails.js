@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     }
 });
 
-const AddressDetails = ({ order, name, email, isAdmin }) => {
+const AddressDetails = ({ order, name, email, phone, isAdmin }) => {
     return (
         <>
             {isAdmin ? (
@@ -23,6 +23,7 @@ const AddressDetails = ({ order, name, email, isAdmin }) => {
                         shippingAddress={order.shippingAddress ? order.shippingAddress : {}}
                         name={name ? name : ''}
                         email={email}
+                        phone={phone}
                         isAdmin
                     />
                 </View>
@@ -32,6 +33,7 @@ const AddressDetails = ({ order, name, email, isAdmin }) => {
                         shippingAddress={order.shippingAddress ? order.shippingAddress : {}}
                         name={name ? name : ''}
                         email={email}
+                        phone={phone}
                         isAdmin={isAdmin}
                     />
                     <CorpOff isAdmin={false} />

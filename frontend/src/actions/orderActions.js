@@ -34,7 +34,10 @@ import {
     ORDER_UPDATE_BILLTYPE_FAIL,
     ORDER_UPDATE_INVOICE_NUMBER_REQUEST,
     ORDER_UPDATE_INVOICE_NUMBER_SUCCESS,
-    ORDER_UPDATE_INVOICE_NUMBER_FAIL
+    ORDER_UPDATE_INVOICE_NUMBER_FAIL,
+    ORDER_CANCEL_SUCCESS,
+    ORDER_CANCEL_FAIL,
+    ORDER_CANCEL_REQUEST
 } from '../constants/orderConstants';
 import axios from 'axios';
 import dotenv from 'dotenv';
@@ -478,6 +481,36 @@ export const confirmOrder = (order) => async (dispatch, getState) => {
     } catch (error) {
         dispatch({
             type: ORDER_CONFIRM_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message
+        });
+    }
+};
+
+export const cancelOrder = (order) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_CANCEL_REQUEST
+        });
+
+        const {
+            userLogin: { userInfo }
+        } = getState();
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        };
+
+        const { data } = await axios.put(`/api/orders/${order._id}/cancel`, {}, config);
+
+        dispatch({
+            type: ORDER_CANCEL_SUCCESS,
+            payload: data
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDER_CANCEL_FAIL,
             payload: error.response && error.response.data.message ? error.response.data.message : error.message
         });
     }
