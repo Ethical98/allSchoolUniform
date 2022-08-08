@@ -54,7 +54,7 @@ const HomeScreen = ({ history }) => {
             <main>
                 <Meta
                     description={'Buy School Uniforms Online'}
-                    keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online'}
+                    keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,GD Goenka Public School,GD,schools,school,presidium,bal bharati public school,dps,kendriya vidyalya,dav,all,smart,air force,uniforms,public'}
                 />
                 <div className="body-wrapper">
                     <div className="banner-section">
