@@ -1,14 +1,16 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 
-const Meta = ({ title, description, keywords }) => {
+const Meta = ({ title, description, keywords, canonical }) => {
     return (
         <div>
             <Helmet>
                 <title>{title}</title>
-
+                <meta name="title" content={title} />
                 <meta name="description" content={description} />
-                <meta name="keyword" content={keywords} />
+                <meta name="keywords" content={keywords} />
+                <meta name="robots" content={'index,follow'} />
+                <link rel="canonical" href={canonical} />
             </Helmet>
         </div>
     );
@@ -17,7 +19,8 @@ const Meta = ({ title, description, keywords }) => {
 Meta.defaultProps = {
     title: 'Welcome To AllSchoolUniform',
     description: 'Buy School Uniforms Online',
-    keywords: 'uniform,school,buy,cheap,Asu'
+    keywords: 'uniform,school,buy,cheap,Asu',
+    canonical: 'https://allschooluniform.com'
 };
 
 export default Meta;
