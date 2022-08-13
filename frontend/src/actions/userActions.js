@@ -49,7 +49,7 @@ dotenv.config();
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;
 
-export const login = (email, password) => async dispatch => {
+export const login = (email, password) => async (dispatch) => {
     try {
         dispatch({
             type: USER_LOGIN_REQUEST
@@ -77,7 +77,7 @@ export const login = (email, password) => async dispatch => {
     }
 };
 
-export const loginByPhone = (phone, password) => async dispatch => {
+export const loginByPhone = (phone, password) => async (dispatch) => {
     try {
         dispatch({
             type: USER_LOGIN_REQUEST
@@ -120,7 +120,7 @@ export const logout = () => (dispatch, getState) => {
     dispatch({ type: USER_LIST_RESET });
 };
 
-export const register = (name, email, phone, password) => async dispatch => {
+export const register = (name, email, phone, password) => async (dispatch) => {
     try {
         dispatch({
             type: USER_REGISTER_REQUEST
@@ -132,8 +132,8 @@ export const register = (name, email, phone, password) => async dispatch => {
             }
         };
 
-        const { data } = await axios.post('/api/users/', { name, email, phone, password }, config);
         await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const { data } = await axios.post('/api/users/', { name, email, phone, password }, config);
 
         dispatch({
             type: USER_REGISTER_SUCCESS,
@@ -147,6 +147,7 @@ export const register = (name, email, phone, password) => async dispatch => {
 
         localStorage.setItem('userInfo', encryptData(JSON.stringify(data), salt));
     } catch (error) {
+        console.log('error');
         dispatch({
             type: USER_REGISTER_FAIL,
             payload: error.response && error.response.data.message ? error.response.data.message : error.message
@@ -154,7 +155,7 @@ export const register = (name, email, phone, password) => async dispatch => {
     }
 };
 
-export const getOtpWithEmail = email => async dispatch => {
+export const getOtpWithEmail = (email) => async (dispatch) => {
     try {
         dispatch({
             type: USER_OTP_REQUEST
@@ -187,7 +188,7 @@ export const getOtpWithEmail = email => async dispatch => {
     }
 };
 
-export const getUserDetails = id => async (dispatch, getState) => {
+export const getUserDetails = (id) => async (dispatch, getState) => {
     try {
         dispatch({
             type: USER_DETAILS_REQUEST
@@ -217,7 +218,7 @@ export const getUserDetails = id => async (dispatch, getState) => {
     }
 };
 
-export const updateUserProfile = user => async (dispatch, getState) => {
+export const updateUserProfile = (user) => async (dispatch, getState) => {
     try {
         dispatch({
             type: USER_UPDATE_PROFILE_REQUEST
@@ -247,7 +248,7 @@ export const updateUserProfile = user => async (dispatch, getState) => {
     }
 };
 
-export const loginByOTP = phone => async dispatch => {
+export const loginByOTP = (phone) => async (dispatch) => {
     try {
         dispatch({
             type: USER_LOGIN_REQUEST
@@ -275,15 +276,15 @@ export const loginByOTP = phone => async dispatch => {
     }
 };
 
-export const configureCaptcha = id => {
+export const configureCaptcha = (id) => {
     window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(id, {
         size: 'invisible',
-        callback: response => {},
+        callback: (response) => {},
         defaultCountry: 'IN'
     });
 };
 
-export const getOTP = phone => async dispatch => {
+export const getOTP = (phone) => async (dispatch) => {
     try {
         let phoneNumber;
         dispatch({
@@ -323,7 +324,7 @@ export const getOTP = phone => async dispatch => {
     }
 };
 
-export const submitOTP = otp => async dispatch => {
+export const submitOTP = (otp) => async (dispatch) => {
     const code = otp;
 
     try {
@@ -346,7 +347,7 @@ export const submitOTP = otp => async dispatch => {
     }
 };
 
-export const resetOtp = () => dispatch => {
+export const resetOtp = () => (dispatch) => {
     dispatch({
         type: USER_OTP_RESET
     });
@@ -355,14 +356,14 @@ export const resetOtp = () => dispatch => {
     // });
 };
 
-export const cancelOtpRequest = phone => dispatch => {
+export const cancelOtpRequest = (phone) => (dispatch) => {
     dispatch({
         type: USER_OTP_CANCEL,
         payload: phone
     });
 };
 
-export const forgotPassword = email => async dispatch => {
+export const forgotPassword = (email) => async (dispatch) => {
     try {
         dispatch({ type: USER_PASSWORD_RESET_REQUEST });
 
@@ -385,7 +386,7 @@ export const forgotPassword = email => async dispatch => {
     }
 };
 
-export const resetPassword = (password, email) => async dispatch => {
+export const resetPassword = (password, email) => async (dispatch) => {
     try {
         dispatch({
             type: USER_UPDATE_PROFILE_REQUEST
@@ -417,44 +418,44 @@ export const resetPassword = (password, email) => async dispatch => {
     }
 };
 
-export const clearResetPasswordRequest = () => async dispatch => {
+export const clearResetPasswordRequest = () => async (dispatch) => {
     dispatch({ type: USER_PASSWORD_RESET_CLEAR });
     localStorage.removeItem('RE');
 };
 
 export const listUsers =
     (pageNumber = '') =>
-        async (dispatch, getState) => {
-            try {
-                dispatch({
-                    type: USER_LIST_REQUEST
-                });
+    async (dispatch, getState) => {
+        try {
+            dispatch({
+                type: USER_LIST_REQUEST
+            });
 
-                const {
-                    userLogin: { userInfo }
-                } = getState();
+            const {
+                userLogin: { userInfo }
+            } = getState();
 
-                const config = {
-                    headers: {
-                        Authorization: `Bearer ${userInfo.token}`
-                    }
-                };
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
 
-                const { data } = await axios.get(`/api/users?pageNumber=${pageNumber}`, config);
+            const { data } = await axios.get(`/api/users?pageNumber=${pageNumber}`, config);
 
-                dispatch({
-                    type: USER_LIST_SUCCESS,
-                    payload: data
-                });
-            } catch (error) {
-                dispatch({
-                    type: USER_LIST_FAIL,
-                    payload: error.response && error.response.data.message ? error.response.data.message : error.message
-                });
-            }
-        };
+            dispatch({
+                type: USER_LIST_SUCCESS,
+                payload: data
+            });
+        } catch (error) {
+            dispatch({
+                type: USER_LIST_FAIL,
+                payload: error.response && error.response.data.message ? error.response.data.message : error.message
+            });
+        }
+    };
 
-export const deleteUser = id => async (dispatch, getState) => {
+export const deleteUser = (id) => async (dispatch, getState) => {
     try {
         dispatch({
             type: USER_DELETE_REQUEST
@@ -483,7 +484,7 @@ export const deleteUser = id => async (dispatch, getState) => {
     }
 };
 
-export const updateUser = user => async (dispatch, getState) => {
+export const updateUser = (user) => async (dispatch, getState) => {
     try {
         dispatch({
             type: USER_UPDATE_REQUEST

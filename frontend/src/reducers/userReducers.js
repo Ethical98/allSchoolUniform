@@ -79,7 +79,6 @@ export const userOtpVerificationReducer = (state = { phone: '' }, action) => {
             return { ...state, loading: true, verfied: false, phone: action.payload };
         case USER_OTP_SENT:
             return {
-                ...state,
                 loading: false,
                 verified: false,
                 sent: true,

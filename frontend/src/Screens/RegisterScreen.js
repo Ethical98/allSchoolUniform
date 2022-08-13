@@ -26,13 +26,14 @@ const RegisterScreen = ({ history, location }) => {
     const [message, setMessage] = useState(null);
     const [mobileVerified, setMobileVerified] = useState(false);
     const [otpMessage, setOtpMessage] = useState(null);
+    const [otpLengthError, setOtpLengthError] = useState('');
 
-    const userRegister = useSelector(state => state.userRegister);
+    const userRegister = useSelector((state) => state.userRegister);
     const { loading, error, userInfo } = userRegister;
 
-    const userOtpVerification = useSelector(state => state.userOtpVerification);
+    const userOtpVerification = useSelector((state) => state.userOtpVerification);
     const { error: otpError, verified, sent, loading: otpLoading } = userOtpVerification;
-    const cart = useSelector(state => state.cart);
+    const cart = useSelector((state) => state.cart);
     const { cartSuccess } = cart;
 
     const redirect = location.search ? location.search.split('=')[1] : '/';
@@ -52,7 +53,7 @@ const RegisterScreen = ({ history, location }) => {
         }
     }, [history, userInfo, redirect, cartSuccess, dispatch, phone]);
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         e.preventDefault();
         setOtpMessage('');
         setMessage('');
@@ -73,8 +74,8 @@ const RegisterScreen = ({ history, location }) => {
         }
     };
 
-    const handleOtpChange = otp => {
-        setOtp(otp);
+    const handleOtpChange = (e) => {
+        setOtp(e.target.value);
     };
 
     useEffect(() => {
@@ -87,6 +88,9 @@ const RegisterScreen = ({ history, location }) => {
         }
         if (otpError && otpError.code === 'auth/missing-verification-code') {
             setOtpMessage('Please Enter OTP');
+        }
+        if (otpError && otpError.code) {
+            setOtpMessage('Something went wrong... Please Try again Later!!');
         }
     }, [dispatch, sent, otpError]);
 
@@ -112,11 +116,15 @@ const RegisterScreen = ({ history, location }) => {
     }, [verified, phone, otpError, dispatch]);
 
     const onSubmitOTP = () => {
-        setShow(false);
-        setMessage('');
-        setOtp('');
+        if (otp.length === 6) {
+            setShow(false);
+            setMessage('');
+            setOtp('');
 
-        dispatch(submitOTP(otp));
+            dispatch(submitOTP(otp));
+        } else {
+            setOtpLengthError('Please Enter Correct OTP');
+        }
     };
 
     return (
@@ -134,6 +142,7 @@ const RegisterScreen = ({ history, location }) => {
                     )
                 )}
                 {error && <Message variant="danger">{error}</Message>}
+                {otpMessage && <Message variant="danger">{otpMessage}</Message>}
                 <Form onSubmit={submitHandler}>
                     <InputGroup className="mb-3">
                         <InputGroup.Text id="email" style={{ width: '2.5rem' }}>
@@ -144,7 +153,7 @@ const RegisterScreen = ({ history, location }) => {
                             type="email"
                             placeholder="Email"
                             value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            onChange={(e) => setEmail(e.target.value)}
                         ></Form.Control>
                     </InputGroup>
 
@@ -157,7 +166,7 @@ const RegisterScreen = ({ history, location }) => {
                             type="name"
                             placeholder="Name"
                             value={name}
-                            onChange={e => setName(e.target.value)}
+                            onChange={(e) => setName(e.target.value)}
                         ></Form.Control>
                     </InputGroup>
 
@@ -171,7 +180,7 @@ const RegisterScreen = ({ history, location }) => {
                             type="phone"
                             placeholder="Phone"
                             value={phone}
-                            onChange={e => setPhone(e.target.value)}
+                            onChange={(e) => setPhone(e.target.value)}
                         ></Form.Control>
 
                         {!mobileVerified ? (
@@ -185,7 +194,15 @@ const RegisterScreen = ({ history, location }) => {
                         )}
                     </InputGroup>
 
-                    <Modal show={show} onHide={() => setShow(false)} backdrop="static" keyboard={false}>
+                    <Modal
+                        show={show}
+                        onHide={() => {
+                            setShow(false);
+                            dispatch(resetOtp());
+                        }}
+                        backdrop="static"
+                        keyboard={false}
+                    >
                         <Modal.Header closeButton>
                             <Modal.Title>Submit OTP</Modal.Title>
                         </Modal.Header>
@@ -196,12 +213,8 @@ const RegisterScreen = ({ history, location }) => {
                             <Loader />
                         ) : (
                             <Modal.Body className="text-center">
-                                <OtpInput
-                                    value={otp}
-                                    onChange={handleOtpChange}
-                                    numInputs={6}
-                                    inputStyle="inputStyle"
-                                />
+                                <Form.Control value={otp} onChange={handleOtpChange}></Form.Control>
+                                <Form.Control.Feedback>{otpLengthError}</Form.Control.Feedback>
                             </Modal.Body>
                         )}
                         <Modal.Footer>
@@ -223,7 +236,7 @@ const RegisterScreen = ({ history, location }) => {
                             type="password"
                             placeholder="Password"
                             value={password}
-                            onChange={e => setPassword(e.target.value)}
+                            onChange={(e) => setPassword(e.target.value)}
                         ></Form.Control>
                     </InputGroup>
                     <InputGroup controlId="confirmPassword" className="mb-3">
@@ -235,11 +248,11 @@ const RegisterScreen = ({ history, location }) => {
                             type="password"
                             placeholder="Confirm Password"
                             value={confirmPassword}
-                            onChange={e => setConfirmPassword(e.target.value)}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                         ></Form.Control>
                     </InputGroup>
 
-                    <Button type="submit" variant="info" className="col-12">
+                    <Button type="submit" variant="info" className="col-12" disabled={!mobileVerified}>
                         REGISTER
                     </Button>
                 </Form>

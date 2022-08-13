@@ -24,10 +24,10 @@ const ProductScreen = ({ history, location, match }) => {
     const pageNumber = params.page ? params.page : 1;
     const keyword = params.search ? params.search : '';
 
-    const productList = useSelector(state => state.productList);
+    const productList = useSelector((state) => state.productList);
     const { loading, error, products, pages, page } = productList;
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
     const dispatch = useDispatch();
@@ -58,7 +58,12 @@ const ProductScreen = ({ history, location, match }) => {
 
     return (
         <PageLayout>
-            <Meta title={'Products - AllschoolUniform'} />
+            <Meta
+                title={`${school} Products - AllschoolUniform`}
+                description={`${school} Uniform Available at discounted rates`}
+                keywords={`${school},${keyword},${season},${category}`}
+                canonical={window.location.href}
+            />
             <BreadCrumb />
             {/* {keyword && (
         <Link to='/' className='mb-3 btn btn-light'>
