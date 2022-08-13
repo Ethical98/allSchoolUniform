@@ -415,7 +415,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                     .toFixed(2)
             )
         );
-        console.log(modifiedOrderItems);
+      
     }, [modifiedOrderItems]);
 
     useEffect(() => {
@@ -578,7 +578,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         dispatch(listSchoolNames(query));
     };
     const filterBy = () => true;
-    console.log(products);
+
     return (
         <AdminPageLayout>
             <Meta
@@ -681,7 +681,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                             data.some((itemToAdd) => addedItem.product === itemToAdd._id)
                                         )
                                     ]);
-                                    console.log(newProducts);
+                          
 
                                     setMessage('');
                                 }
