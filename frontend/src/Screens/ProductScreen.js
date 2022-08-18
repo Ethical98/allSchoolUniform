@@ -12,6 +12,7 @@ import Meta from '../components/Meta';
 import Accordion from '../components/Accordion';
 import PageLayout from '../components/PageLayout';
 import BreadCrumb from '../components/BreadCrumb';
+import { split, startCase } from 'lodash';
 
 const ProductScreen = ({ history, location, match }) => {
     const urlSearchParams = new URLSearchParams(location.search);
@@ -31,6 +32,7 @@ const ProductScreen = ({ history, location, match }) => {
     const { userInfo } = userLogin;
 
     const dispatch = useDispatch();
+    const formattedSchool = startCase(split(school, '-'));
 
     useEffect(() => {
         dispatch(
@@ -40,7 +42,7 @@ const ProductScreen = ({ history, location, match }) => {
                 category.split(',').join('|'),
                 season.split(',').join('|'),
                 standard.split(',').join('|'),
-                school
+                formattedSchool
             )
         );
     }, [dispatch, keyword, pageNumber, category, season, standard, school]);

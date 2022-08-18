@@ -9,7 +9,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import useMedia from '../utils/useMedia';
-import { sortBy } from 'lodash';
+import {  join, lowerCase, sortBy, split } from 'lodash';
 
 const HomeScreen = ({ history }) => {
     const dispatch = useDispatch();
@@ -32,7 +32,9 @@ const HomeScreen = ({ history }) => {
     }, [schoolNames]);
 
     const handleChange = (item) => {
-        history.push(`/products/schools/${item[0].name}`);
+        const school = join(split(lowerCase(item[0].name), ' '), '-');
+
+        history.push(`/products/schools/${school}`);
     };
 
     const handleSearch = (query) => {
@@ -54,7 +56,9 @@ const HomeScreen = ({ history }) => {
             <main>
                 <Meta
                     description={'Buy School Uniforms Online'}
-                    keywords={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,GD Goenka Public School,GD,schools,school,presidium,bal bharati public school,dps,kendriya vidyalya,dav,all,smart,air force,uniforms,public'}
+                    keywords={
+                        'cheap,sell,buy,allschooluniform,new,buyback,unform,online,GD Goenka Public School,GD,schools,school,presidium,bal bharati public school,dps,kendriya vidyalya,dav,all,smart,air force,uniforms,public'
+                    }
                 />
                 <div className="body-wrapper">
                     <div className="banner-section">

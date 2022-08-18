@@ -5,6 +5,7 @@ import fs from 'fs';
 import sharp from 'sharp';
 import path from 'path';
 
+
 // @desc Get SchoolList
 // @route GET /api/schools
 // @access Private/Admin

@@ -37,6 +37,7 @@ import NewCustomerByAdminScreen from './Screens/NewCustomerByAdminScreen';
 import PageNotFoundScreen from './Screens/PageNotFoundScreen';
 import AdminDashBoardScreen from './Screens/AdminDashBoardScreen';
 import AboutUs from './Screens/AboutUs';
+import Policies from './Screens/Policies';
 
 const App = () => {
     const dispatch = useDispatch();
@@ -64,6 +65,7 @@ const App = () => {
                 <Route path="/login" component={LoginScreen} />
                 <Route path="/register" component={RegisterScreen} />
                 <Route path="/aboutus" component={AboutUs} />
+                <Route path="/policies-and-help-guide" component={Policies} />
                 <Route path="/profile" component={ProfileScreen} exact />
                 <Route path="/newcustomerbyadmin" component={NewCustomerByAdminScreen} exact />
                 <Route path="/products/schools/:selectedschool" exact component={ProductScreen} />

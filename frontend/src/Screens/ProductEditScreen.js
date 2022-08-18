@@ -89,27 +89,27 @@ const ProductEditScreen = ({ match, history, location }) => {
         }
     ];
 
-    const productDetails = useSelector(state => state.productDetails);
+    const productDetails = useSelector((state) => state.productDetails);
     const { loading, error, product } = productDetails;
 
-    const productUpdate = useSelector(state => state.productUpdate);
+    const productUpdate = useSelector((state) => state.productUpdate);
     const { loading: loadingUpdate, error: errorUpdate, success: successUpdate } = productUpdate;
 
-    const typeSizesList = useSelector(state => state.typeSizesList);
+    const typeSizesList = useSelector((state) => state.typeSizesList);
     const { loading: loadingMasterSizes, error: errorMasterSizes, masterSizes } = typeSizesList;
 
-    const classList = useSelector(state => state.classList);
+    const classList = useSelector((state) => state.classList);
     const { loading: loadingMasterClasses, error: errorMasterClasses, masterClasses } = classList;
-    const typeList = useSelector(state => state.typeList);
+    const typeList = useSelector((state) => state.typeList);
     const { masterTypes } = typeList;
 
-    const schoolList = useSelector(state => state.schoolList);
+    const schoolList = useSelector((state) => state.schoolList);
     const { loading: masterSchoolsLoading, masterSchools, pages, page } = schoolList;
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
-    const productImageUpload = useSelector(state => state.productImageUpload);
+    const productImageUpload = useSelector((state) => state.productImageUpload);
     const { url } = productImageUpload;
 
     useEffect(() => {
@@ -129,7 +129,7 @@ const ProductEditScreen = ({ match, history, location }) => {
         }
     }, [dispatch, userInfo, history]);
 
-    const removeIdHandler = sizeArray => {
+    const removeIdHandler = (sizeArray) => {
         const newSizeArray = sizeArray.map(
             ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive }) => ({
                 price,
@@ -186,10 +186,10 @@ const ProductEditScreen = ({ match, history, location }) => {
                 // }
 
                 if (masterClasses) {
-                    setMasterClass([...masterClasses.filter(x => x.isActive === true)]);
+                    setMasterClass([...masterClasses.filter((x) => x.isActive === true)]);
                 }
                 if (masterTypes) {
-                    setMasterType([...masterTypes.filter(x => x.isActive === true)]);
+                    setMasterType([...masterTypes.filter((x) => x.isActive === true)]);
                 }
             }
         }
@@ -250,7 +250,7 @@ const ProductEditScreen = ({ match, history, location }) => {
     //   }
     // };
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         e.preventDefault();
         window.scrollTo(0, 0);
         dispatch(
@@ -275,23 +275,23 @@ const ProductEditScreen = ({ match, history, location }) => {
 
     useEffect(() => {
         if (masterSize && size) {
-            masterSize.forEach(x => {
-                x.price = size.some(y => y.size === x.size)
-                    ? size[size.findIndex(y => y.size === x.size)].price
+            masterSize.forEach((x) => {
+                x.price = size.some((y) => y.size === x.size)
+                    ? size[size.findIndex((y) => y.size === x.size)].price
                     : 0;
-                x.countInStock = size.some(y => y.size === x.size)
-                    ? size[size.findIndex(y => y.size === x.size)].countInStock
+                x.countInStock = size.some((y) => y.size === x.size)
+                    ? size[size.findIndex((y) => y.size === x.size)].countInStock
                     : 0;
-                x.alertOnQty = size.some(y => y.size === x.size)
-                    ? size[size.findIndex(y => y.size === x.size)].alertOnQty
+                x.alertOnQty = size.some((y) => y.size === x.size)
+                    ? size[size.findIndex((y) => y.size === x.size)].alertOnQty
                     : 0;
-                x.discount = size.some(y => y.size === x.size)
-                    ? size[size.findIndex(y => y.size === x.size)].discount
+                x.discount = size.some((y) => y.size === x.size)
+                    ? size[size.findIndex((y) => y.size === x.size)].discount
                     : 0;
-                x.openingQty = size.some(y => y.size === x.size)
-                    ? size[size.findIndex(y => y.size === x.size)].openingQty
+                x.openingQty = size.some((y) => y.size === x.size)
+                    ? size[size.findIndex((y) => y.size === x.size)].openingQty
                     : 0;
-                x.tax = size.some(y => y.size === x.size) ? size[size.findIndex(y => y.size === x.size)].tax : 0;
+                x.tax = size.some((y) => y.size === x.size) ? size[size.findIndex((y) => y.size === x.size)].tax : 0;
             });
         }
     }, [masterSize, size]);
@@ -312,7 +312,7 @@ const ProductEditScreen = ({ match, history, location }) => {
         setShowImageUploader(true);
     };
 
-    const nameValidationHandler = value => {
+    const nameValidationHandler = (value) => {
         setName(value.replace(/[^\w\s]/gi, ''));
     };
 
@@ -344,7 +344,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         type="text"
                                         placeholder="Enter SKU"
                                         value={SKU}
-                                        onChange={e => setSKU(e.target.value)}
+                                        onChange={(e) => setSKU(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <FloatingLabel controlId="name" label="Name" className="mb-3">
@@ -353,18 +353,18 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         type="name"
                                         placeholder="Enter Name"
                                         value={name}
-                                        onChange={e => nameValidationHandler(e.target.value)}
+                                        onChange={(e) => nameValidationHandler(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <FloatingLabel label="Category" className="mb-3" controlId="category">
-                                    <Form.Select value={category} onChange={e => setCategory(e.target.value)}>
+                                    <Form.Select value={category} onChange={(e) => setCategory(e.target.value)}>
                                         <option value="Boys">Boys</option>
                                         <option value="Girls">Girls</option>
                                         <option value="Unisex">Unisex</option>
                                     </Form.Select>
                                 </FloatingLabel>
                                 <FloatingLabel className="mb-3" label="Season" controlId="season">
-                                    <Form.Select required value={season} onChange={e => setSeason(e.target.value)}>
+                                    <Form.Select required value={season} onChange={(e) => setSeason(e.target.value)}>
                                         <option value="Summer">Summer</option>
                                         <option value="Winter">Winter</option>
                                         <option value="All Season">All Season</option>
@@ -377,7 +377,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         type="text"
                                         placeholder="Brand "
                                         value={brand}
-                                        onChange={e => setBrand(e.target.value)}
+                                        onChange={(e) => setBrand(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
 
@@ -388,11 +388,11 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         type="text"
                                         placeholder="Select Type "
                                         value={type}
-                                        onChange={e => setType(e.target.value)}
+                                        onChange={(e) => setType(e.target.value)}
                                     >
                                         <option value="">Select</option>
                                         {masterType &&
-                                            masterType.map(x => (
+                                            masterType.map((x) => (
                                                 <option key={x.type} value={x.type}>
                                                     {x.type}
                                                 </option>
@@ -406,7 +406,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         type="text"
                                         placeholder="Enter Image url "
                                         value={image}
-                                        onChange={e => setImage(e.target.value)}
+                                        onChange={(e) => setImage(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 {/* {uploading && <Loader />}
@@ -442,7 +442,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         type="text"
                                         placeholder="Description"
                                         value={description}
-                                        onChange={e => setDescription(e.target.value)}
+                                        onChange={(e) => setDescription(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <FloatingLabel controlId="seoKeywords" label="SEO Keywords" className="mb-3">
@@ -453,7 +453,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         type="text"
                                         placeholder="SEO Keywords"
                                         value={SEOKeywords}
-                                        onChange={e => setSEOKeywords(e.target.value)}
+                                        onChange={(e) => setSEOKeywords(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <Form.Group controlId="isActive" className="mb-3">
@@ -462,7 +462,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         type="checkbox"
                                         label="Is Active"
                                         checked={isActive}
-                                        onChange={e => setIsActive(e.target.checked)}
+                                        onChange={(e) => setIsActive(e.target.checked)}
                                     ></Form.Check>
                                 </Form.Group>
                             </Col>
@@ -480,7 +480,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                         border: '3px solid grey'
                                                     }}
                                                     title="Size Variants"
-                                                    data={masterSize.filter(x => x.isActive === true)}
+                                                    data={masterSize.filter((x) => x.isActive === true)}
                                                     columns={sizeTableColumns}
                                                     options={{
                                                         rowStyle: {
@@ -493,8 +493,8 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                         paging: false,
 
                                                         selection: true,
-                                                        selectionProps: rowData => ({
-                                                            checked: size && size.some(x => x.size === rowData.size),
+                                                        selectionProps: (rowData) => ({
+                                                            checked: size && size.some((x) => x.size === rowData.size),
                                                             color: 'primary'
                                                         }),
 
@@ -512,7 +512,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                             const dataDelete = [...size];
 
                                                             const index = size.findIndex(
-                                                                x => x.size === masterSize[id].size
+                                                                (x) => x.size === masterSize[id].size
                                                             );
                                                             dataDelete.splice(index, 1);
                                                             setSize([...dataDelete]);
@@ -529,7 +529,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                                     setMessage('');
                                                                     const dataUpdate = [...size];
                                                                     const index = size.findIndex(
-                                                                        x => x.size === oldData.size
+                                                                        (x) => x.size === oldData.size
                                                                     );
                                                                     if (index !== -1) {
                                                                         dataUpdate[index] = newData;
@@ -574,7 +574,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                             paging: false,
                                                             selection: true,
                                                             search: false,
-                                                            selectionProps: rowData => ({
+                                                            selectionProps: (rowData) => ({
                                                                 checked: standard.includes(rowData.class),
 
                                                                 color: 'primary'
@@ -591,7 +591,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                                 const dataDelete = [...standard];
 
                                                                 const index = standard.findIndex(
-                                                                    x => x === masterClass[id].class
+                                                                    (x) => x === masterClass[id].class
                                                                 );
                                                                 dataDelete.splice(index, 1);
                                                                 setStandard([...dataDelete]);
@@ -601,7 +601,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                                     ...new Set([...standard, masterClass[id].class])
                                                                 ]);
                                                             } else {
-                                                                const allClass = data.map(x => x.class);
+                                                                const allClass = data.map((x) => x.class);
                                                                 setStandard([...allClass]);
                                                             }
                                                         }}
@@ -636,7 +636,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                             paging: false,
                                                             selection: true,
                                                             search: false,
-                                                            selectionProps: rowData => ({
+                                                            selectionProps: (rowData) => ({
                                                                 checked: schoolName.includes(rowData.name),
 
                                                                 color: 'primary'
@@ -653,7 +653,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                                 const dataDelete = [...schoolName];
 
                                                                 const index = schoolName.findIndex(
-                                                                    x => x === masterSchools[id].name
+                                                                    (x) => x === masterSchools[id].name
                                                                 );
                                                                 dataDelete.splice(index, 1);
                                                                 setSchoolName([...dataDelete]);
@@ -663,7 +663,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                                                                     ...new Set([...schoolName, masterSchools[id].name])
                                                                 ]);
                                                             } else {
-                                                                const allSchool = data.map(x => x.name);
+                                                                const allSchool = data.map((x) => x.name);
                                                                 setSchoolName([
                                                                     ...new Set([...schoolName, ...allSchool])
                                                                 ]);

@@ -30,6 +30,7 @@ import { PRODUCT_CREATE_REVIEW_RESET } from '../constants/productConstants';
 import PageLayout from '../components/PageLayout';
 
 import BreadCrumb from '../components/BreadCrumb';
+import { startCase } from 'lodash';
 
 const useStyles = makeStyles({
     root: {
@@ -107,7 +108,7 @@ const ProductDescriptionScreen = ({ history }) => {
             setComment('');
             dispatch({ type: PRODUCT_CREATE_REVIEW_RESET });
         }
-        dispatch(listProductDetails(id));
+        dispatch(listProductDetails(startCase(id)));
     }, [dispatch, id, successProductReview]);
 
     const addToCartHandler = () => {

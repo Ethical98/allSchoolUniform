@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Container, Row, Col, Image } from 'react-bootstrap';
 import './css/Footer.css';
 
@@ -22,7 +23,9 @@ const Footer = () => {
                     <Col sm>
                         <ul>
                             <h6>Know Us</h6>
-                            <li style={liStyle}>About Us</li>
+                            <Link to={'/aboutus'}>
+                                <li style={liStyle}>About Us</li>
+                            </Link>
                             <li style={liStyle}>Contact Us</li>
                             <li style={liStyle}>Merchant Partners</li>
                             <li style={liStyle}>Privacy Policy</li>
@@ -51,9 +54,9 @@ const Footer = () => {
                     <Col sm>
                         <ul>
                             <h6>Support</h6>
-                            <li> Net Banking</li>
+                            <li>Net Banking</li>
                             <li>Credit/Debit Cards</li>
-                            <li> Cash Cards</li>
+                            <li>Cash Cards</li>
                             <li>Cheque/Demand Draft</li>
                         </ul>
                     </Col>

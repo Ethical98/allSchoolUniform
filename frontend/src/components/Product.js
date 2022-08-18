@@ -8,6 +8,7 @@ import './css/Product.css';
 import { getTypeImages } from '../actions/typeActions';
 import Loader from './Loader';
 import DialogBox from './DialogBox';
+import { join, lowerCase, split } from 'lodash';
 
 const Product = ({ product }) => {
     const [index, setIndex] = useState(0);
@@ -15,7 +16,7 @@ const Product = ({ product }) => {
     const [countInStock, setCountInStock] = useState(product.size[0].countInStock);
     const [productDisc, setProductDisc] = useState(product.size[0].discount);
 
-    const typeImages = useSelector(state => state.typeImages);
+    const typeImages = useSelector((state) => state.typeImages);
     const { loading, images } = typeImages;
 
     const dispatch = useDispatch();
@@ -26,13 +27,13 @@ const Product = ({ product }) => {
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
-    const handleShow = type => {
+    const handleShow = (type) => {
         dispatch(getTypeImages(type));
         setShow(true);
     };
 
-    const handleChange = val => {
-        setIndex(product.size.findIndex(x => x.size === val));
+    const handleChange = (val) => {
+        setIndex(product.size.findIndex((x) => x.size === val));
     };
 
     useEffect(() => {
@@ -121,7 +122,7 @@ const Product = ({ product }) => {
       </Modal> */}
 
             <Card className="my-3  rounded text-center" bg="white">
-                <Link to={`/products/${product.name}`}>
+                <Link to={`/products/${join(split(lowerCase(product.name), ' '), '-')}`}>
                     <Card.Img
                         src={product.image}
                         variant="top"
@@ -129,7 +130,10 @@ const Product = ({ product }) => {
                     />
                 </Link>
                 <Card.Body style={{ padding: '0.2rem' }}>
-                    <Link to={`/products/${product.name}`} style={{ textDecoration: 'none' }}>
+                    <Link
+                        to={`/products/${join(split(lowerCase(product.name), ' '), '-')}`}
+                        style={{ textDecoration: 'none' }}
+                    >
                         <Card.Title as="h6">
                             <strong>{product.name}</strong>
                         </Card.Title>
@@ -162,7 +166,7 @@ const Product = ({ product }) => {
                             <Col xs>
                                 <Form.Select
                                     size="sm"
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         handleChange(e.target.value);
                                     }}
                                 >
@@ -170,7 +174,7 @@ const Product = ({ product }) => {
                                         .sort((a, b) => {
                                             return a.size - b.size;
                                         })
-                                        .map(x => (
+                                        .map((x) => (
                                             <option key={x._id} value={x.size}>
                                                 {x.size}
                                             </option>
@@ -179,8 +183,8 @@ const Product = ({ product }) => {
                             </Col>
                             {countInStock > 0 && (
                                 <Col xs>
-                                    <Form.Select size="sm" onChange={e => setQty(Number(e.target.value))}>
-                                        {[...Array(countInStock).keys()].map(x => (
+                                    <Form.Select size="sm" onChange={(e) => setQty(Number(e.target.value))}>
+                                        {[...Array(countInStock).keys()].map((x) => (
                                             <option key={x + 1} value={x + 1}>
                                                 {x + 1}
                                             </option>

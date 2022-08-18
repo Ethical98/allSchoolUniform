@@ -472,11 +472,9 @@ const incrementInvoiceNumber = asyncHandler(async (req, res) => {
       { $inc: { number: 1 } },
       { new: true, upsert: true }
     );
-    console.log(invoice.number);
     order.invoiceNumber = invoice.number;
     const updatedOrder = await order.save();
     return res.json(updatedOrder);
-
   } else {
     res.status(404);
     throw new Error('Order not found');
@@ -498,5 +496,5 @@ export {
   updateOrderToProcessing,
   updateOrderToCanceled,
   updateOrderBillType,
-  incrementInvoiceNumber,
+  incrementInvoiceNumber
 };

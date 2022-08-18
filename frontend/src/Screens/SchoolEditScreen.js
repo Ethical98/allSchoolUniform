@@ -19,6 +19,7 @@ import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
 import DialogBox from '../components/DialogBox';
 import ImageUploader from '../components/ImageUploader';
+import { replace } from 'lodash';
 
 const SchoolEditScreen = ({ match, history }) => {
     const schoolId = match.params.id;
@@ -40,16 +41,16 @@ const SchoolEditScreen = ({ match, history }) => {
     const [website, setWebsite] = useState('');
     const [description, setDescription] = useState('');
 
-    const schoolDetails = useSelector(state => state.schoolDetails);
+    const schoolDetails = useSelector((state) => state.schoolDetails);
     const { loading, error, school } = schoolDetails;
 
-    const schoolUpdate = useSelector(state => state.schoolUpdate);
+    const schoolUpdate = useSelector((state) => state.schoolUpdate);
     const { loading: loadingUpdate, error: errorUpdate, success: successUpdate } = schoolUpdate;
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
-    const schoolImageUpload = useSelector(state => state.schoolImageUpload);
+    const schoolImageUpload = useSelector((state) => state.schoolImageUpload);
     const { url } = schoolImageUpload;
 
     useEffect(() => {
@@ -132,7 +133,7 @@ const SchoolEditScreen = ({ match, history }) => {
     //   }
     // };
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         e.preventDefault();
         window.scrollTo(0, 0);
         dispatch(updateSchool({ _id: schoolId, name, contact, address, isActive, logo }));
@@ -145,6 +146,7 @@ const SchoolEditScreen = ({ match, history }) => {
         setLogo('');
         setShowImageUploader(true);
     };
+    console.log(name);
     return (
         <AdminPageLayout>
             <Meta title={'Edit School - AllSchoolUniform'} description={'Edit School Page'} />
@@ -169,7 +171,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="name"
                                     placeholder="Name"
                                     value={name}
-                                    onChange={e => setName(e.target.value)}
+                                    onChange={(e) => setName(replace(e.target.value, /-|\s+/g, ' '))}
                                 ></Form.Control>
                             </FloatingLabel>
 
@@ -180,7 +182,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="phone"
                                     placeholder="Contact"
                                     value={contact}
-                                    onChange={e => setContact(e.target.value)}
+                                    onChange={(e) => setContact(e.target.value)}
                                 ></Form.Control>
                             </FloatingLabel>
                             <FloatingLabel className="mb-3" label="Email" controlId="email">
@@ -190,7 +192,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="email"
                                     placeholder="Email"
                                     value={email}
-                                    onChange={e => setEmail(e.target.value)}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 ></Form.Control>
                             </FloatingLabel>
                             <FloatingLabel className="mb-3" label="Website" controlId="website">
@@ -200,7 +202,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="text"
                                     placeholder="Website"
                                     value={website}
-                                    onChange={e => setWebsite(e.target.value)}
+                                    onChange={(e) => setWebsite(e.target.value)}
                                 ></Form.Control>
                             </FloatingLabel>
                             <FloatingLabel controlId="description" label="Description" className="mb-3">
@@ -210,7 +212,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="text"
                                     placeholder="Description"
                                     value={description}
-                                    onChange={e => setDescription(e.target.value)}
+                                    onChange={(e) => setDescription(e.target.value)}
                                 ></Form.Control>
                             </FloatingLabel>
                             <FloatingLabel controlId="address" label="Address" className="mb-3">
@@ -221,7 +223,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="text"
                                     placeholder="Address"
                                     value={address}
-                                    onChange={e => setAddress(e.target.value)}
+                                    onChange={(e) => setAddress(e.target.value)}
                                 ></Form.Control>
                             </FloatingLabel>
                             <FloatingLabel className="mb-3" label="State" controlId="state">
@@ -230,7 +232,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="text"
                                     placeholder="State"
                                     value={state}
-                                    onChange={e => setState(e.target.value)}
+                                    onChange={(e) => setState(e.target.value)}
                                 ></Form.Control>
                             </FloatingLabel>
                             <FloatingLabel className="mb-3" label="City" controlId="city">
@@ -239,7 +241,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="text"
                                     placeholder="City"
                                     value={city}
-                                    onChange={e => setCity(e.target.value)}
+                                    onChange={(e) => setCity(e.target.value)}
                                 ></Form.Control>
                             </FloatingLabel>
                             <FloatingLabel className="mb-3" label="Country" controlId="country">
@@ -248,7 +250,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="text"
                                     placeholder="Country"
                                     value={country}
-                                    onChange={e => setCountry(e.target.value)}
+                                    onChange={(e) => setCountry(e.target.value)}
                                 ></Form.Control>
                             </FloatingLabel>
 
@@ -258,7 +260,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="text"
                                     placeholder="Enter Image url "
                                     value={logo}
-                                    onChange={e => setLogo(e.target.value)}
+                                    onChange={(e) => setLogo(e.target.value)}
                                 ></Form.Control>
                             </FloatingLabel>
                             {/* {uploading && <Loader />}
@@ -284,7 +286,7 @@ const SchoolEditScreen = ({ match, history }) => {
                                     type="checkbox"
                                     label="Is Active"
                                     checked={isActive}
-                                    onChange={e => setIsActive(e.target.checked)}
+                                    onChange={(e) => setIsActive(e.target.checked)}
                                 ></Form.Check>
                             </Form.Group>
 

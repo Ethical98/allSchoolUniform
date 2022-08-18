@@ -24,6 +24,12 @@
             }
         }
     }
+
+    .aboutus-container {
+        img {
+            width: 100%;
+        }
+    }
 }
 @include from-tablet {
     main {
@@ -82,6 +88,19 @@
                     margin: 35px auto;
                 }
             }
+        }
+    }
+    .aboutus-container {
+        display: flex;
+    }
+    .policies-container {
+        display: flex;
+
+        .policies-index {
+            width: unset;
+        }
+        .policies-content {
+            width: 70%;
         }
     }
 }

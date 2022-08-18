@@ -2,7 +2,7 @@
 @import './devices.scss';
 
 main {
-    min-height: 150vh;
+    min-height: 100vh;
 
     .body-wrapper {
         .banner-section {
@@ -143,6 +143,43 @@ main {
         }
     }
 }
+.aboutus-container {
+    h2 {
+        font-weight: 600;
+    }
+}
+.policies-container {
+    .policies-index {
+        width: 100%;
+        border-radius: 5px;
+        .header {
+            display: flex;
+            align-items: center;
+            background: #44525f;
+            padding: 8px;
+            color: white;
+            border-radius: 5px 5px 0 0;
+            border-bottom: 5px solid #58adcc;
+
+            h1 {
+                padding: 0;
+                margin: 0;
+                font-size: 18px;
+            }
+        }
+        ul {
+            padding-left: 0;
+            list-style: none;
+            font-size: 14px;
+
+            li {
+                padding: 8px;
+                background: #f1f1f3;
+                text-decoration: none;
+            }
+        }
+    }
+}
 
 .rating {
     margin-top: 0.2rem;
@@ -151,19 +188,11 @@ main {
     margin: 0.1rem;
 }
 
-h1 {
-    font-size: 1.8rem;
-    padding: 1rem 0;
-}
 .search-sm {
     border-bottom: 2px solid #ff6a00;
     color: #93c0e0;
     padding: 2px;
     height: 50px;
-}
-h2 {
-    font-size: 1.4rem;
-    padding: 0.5rem, 0;
 }
 
 .card-header {
@@ -178,12 +207,16 @@ h2 {
     display: none;
 }
 
-.aboutus-container {
-    display: flex;
-}
-
-footer{
+footer {
     margin-top: 100px;
+    .container {
+        a {
+            color: unset;
+        }
+        li:hover {
+            color: #fb560a;
+        }
+    }
 }
 
 body {

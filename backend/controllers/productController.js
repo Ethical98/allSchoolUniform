@@ -130,7 +130,12 @@ const getProductById = asyncHandler(async (req, res) => {
 // @route GET /api/products/:name
 // @access Public
 const getProductByName = asyncHandler(async (req, res) => {
-  const product = await Product.findOne({ name: req.params.name });
+  const product = await Product.findOne({
+    name: {
+      $regex: req.params.name,
+      $options: 'i',
+    },
+  });
 
   if (product) {
     res.json(product);
@@ -160,6 +165,7 @@ const getItemPrice = asyncHandler(async (req, res) => {
 const filterProducts = asyncHandler(async (req, res) => {
   const { category, season, standard } = req.body;
   const classes = standard ? standard.join('|') : '';
+
   const keyword1 = category
     ? {
         category: {
