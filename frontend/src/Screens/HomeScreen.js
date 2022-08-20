@@ -76,6 +76,7 @@ const HomeScreen = ({ history }) => {
                                     options={options}
                                     placeholder={'Search School Name...'}
                                     size={mediaType === 'DESKTOP' ? 'lg' : 'sm'}
+                                    autoFocus
                                 />
                             </InputGroup>
                         </div>

@@ -177,7 +177,8 @@ const ProductListScreen = ({ history, match, location }) => {
                             {
                                 icon: 'edit',
                                 tooltip: 'Edit',
-                                onClick: (event, rowData) => window.open(`/admin/product/${rowData._id}/edit`, '_blank')
+                                onClick: (event, rowData) =>
+                                    window.open(`/admin/product/${rowData._id}/edit`, '_blank')
                             }
                         ]}
                     />

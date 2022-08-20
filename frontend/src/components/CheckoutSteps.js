@@ -47,12 +47,12 @@ const CheckoutSteps = ({ step1, step2, step3, step4 }) => {
                     {step3 ? (
                         <Link to="/payment">
                             <li id="step3" className="active">
-                                <i className="fas fa-rupee-sign step3-icon"></i>
+                                <i class="fa-solid fa-credit-card step3-icon"></i>
                             </li>
                         </Link>
                     ) : (
                         <li id="step3">
-                            <i className="fas fa-rupee-sign step3-icon"></i>
+                            <i className="fa-solid fa-credit-card step3-icon"></i>
                         </li>
                     )}
                     {step4 ? (

@@ -14,10 +14,10 @@ import PageLayout from '../components/PageLayout';
 const ShippingScreen = ({ history }) => {
     const dispatch = useDispatch();
 
-    const cart = useSelector(state => state.cart);
+    const cart = useSelector((state) => state.cart);
     const { cartItems, savedAddress, loading, error } = cart;
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
     const [newAddress, setNewAddress] = useState(false);
@@ -25,6 +25,7 @@ const ShippingScreen = ({ history }) => {
     const [city, setCity] = useState('');
     const [postalCode, setPostalCode] = useState('');
     const [country, setCountry] = useState('');
+    const [state, setState] = useState('');
 
     useEffect(() => {
         if (!userInfo) {
@@ -53,15 +54,15 @@ const ShippingScreen = ({ history }) => {
         dispatch(getSavedAddress());
     }, [dispatch]);
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         e.preventDefault();
-        dispatch(saveShippingAddress({ address, city, postalCode, country }));
+        dispatch(saveShippingAddress({ address, city, postalCode, state, country }));
         history.push('/payment');
     };
-    const shippingAddressSave = e => {
+    const shippingAddressSave = (e) => {
         e.preventDefault();
-        dispatch(saveShippingAddress({ address, city, postalCode, country }));
-        dispatch(saveShippingAddressDatabase({ address, city, postalCode, country }));
+        dispatch(saveShippingAddress({ address, city, postalCode, state, country }));
+        dispatch(saveShippingAddressDatabase({ address, city, postalCode, state, country }));
         history.push('/payment');
     };
 
@@ -87,7 +88,17 @@ const ShippingScreen = ({ history }) => {
                                 type="text"
                                 placeholder="Enter Address"
                                 value={address}
-                                onChange={e => setAddress(e.target.value)}
+                                onChange={(e) => setAddress(e.target.value)}
+                            ></Form.Control>
+                        </FloatingLabel>
+
+                        <FloatingLabel className="mb-3" label="Postal Code" controlId="postalCode">
+                            <Form.Control
+                                required
+                                type="text"
+                                placeholder="Postal Code"
+                                value={postalCode}
+                                onChange={(e) => setPostalCode(e.target.value)}
                             ></Form.Control>
                         </FloatingLabel>
                         <FloatingLabel className="mb-3" label="City" controlId="city">
@@ -96,16 +107,16 @@ const ShippingScreen = ({ history }) => {
                                 type="text"
                                 placeholder="City"
                                 value={city}
-                                onChange={e => setCity(e.target.value)}
+                                onChange={(e) => setCity(e.target.value)}
                             ></Form.Control>
                         </FloatingLabel>
-                        <FloatingLabel className="mb-3" label="Postal Code" controlId="postalCode">
+                        <FloatingLabel className="mb-3" label="State" controlId="state">
                             <Form.Control
                                 required
                                 type="text"
-                                placeholder="Postal Code"
-                                value={postalCode}
-                                onChange={e => setPostalCode(e.target.value)}
+                                placeholder="State"
+                                value={state}
+                                onChange={(e) => setState(e.target.value)}
                             ></Form.Control>
                         </FloatingLabel>
                         <FloatingLabel className="mb-3" label="Country" controlId="country">
@@ -114,7 +125,7 @@ const ShippingScreen = ({ history }) => {
                                 type="text"
                                 placeholder="Country"
                                 value={country}
-                                onChange={e => setCountry(e.target.value)}
+                                onChange={(e) => setCountry(e.target.value)}
                             ></Form.Control>
                         </FloatingLabel>
                         <Button className="col-12" type="submit" variant="outline-dark">
@@ -127,9 +138,8 @@ const ShippingScreen = ({ history }) => {
                             <Form.Group>
                                 <ListGroup>
                                     {savedAddress &&
-                                        savedAddress.map(x => {
-                                            const label =
-                                                x.address + ' ' + x.city + ' ' + x.postalCode + ' ' + x.country;
+                                        savedAddress.map((x) => {
+                                            const label = `${x.address} ${x.city} ${x.postalCode} ${x.state} ${x.country}`;
                                             return (
                                                 <ListGroup.Item key={x._id}>
                                                     <Form.Check
@@ -141,6 +151,7 @@ const ShippingScreen = ({ history }) => {
                                                         onChange={() => {
                                                             setAddress(x.address);
                                                             setCity(x.city);
+                                                            setState(x.state);
                                                             setPostalCode(x.postalCode);
                                                             setCountry(x.country);
                                                         }}
@@ -167,7 +178,17 @@ const ShippingScreen = ({ history }) => {
                                 type="text"
                                 placeholder="Enter Address"
                                 value={address}
-                                onChange={e => setAddress(e.target.value)}
+                                onChange={(e) => setAddress(e.target.value)}
+                            ></Form.Control>
+                        </FloatingLabel>
+
+                        <FloatingLabel className="mb-3" label="Postal Code" controlId="postalCode">
+                            <Form.Control
+                                required
+                                type="text"
+                                placeholder="Postal Code"
+                                value={postalCode}
+                                onChange={(e) => setPostalCode(e.target.value)}
                             ></Form.Control>
                         </FloatingLabel>
                         <FloatingLabel className="mb-3" label="City" controlId="city">
@@ -176,16 +197,16 @@ const ShippingScreen = ({ history }) => {
                                 type="text"
                                 placeholder="City"
                                 value={city}
-                                onChange={e => setCity(e.target.value)}
+                                onChange={(e) => setCity(e.target.value)}
                             ></Form.Control>
                         </FloatingLabel>
-                        <FloatingLabel className="mb-3" label="Postal Code" controlId="postalCode">
+                        <FloatingLabel className="mb-3" label="State" controlId="state">
                             <Form.Control
                                 required
                                 type="text"
-                                placeholder="Postal Code"
-                                value={postalCode}
-                                onChange={e => setPostalCode(e.target.value)}
+                                placeholder="State"
+                                value={state}
+                                onChange={(e) => setState(e.target.value)}
                             ></Form.Control>
                         </FloatingLabel>
                         <FloatingLabel className="mb-3" label="Country" controlId="country">
@@ -194,7 +215,7 @@ const ShippingScreen = ({ history }) => {
                                 type="text"
                                 placeholder="Country"
                                 value={country}
-                                onChange={e => setCountry(e.target.value)}
+                                onChange={(e) => setCountry(e.target.value)}
                             ></Form.Control>
                         </FloatingLabel>
                         <Button className="col-12" type="submit" variant="outline-dark">

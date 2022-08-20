@@ -129,6 +129,7 @@ const OrderEditScreen = ({ history, match, location }) => {
     const [orderNumber, setOrderNumber] = useState('');
     const [billType, setBillType] = useState('');
     const [shippingPrice, setShippingPrice] = useState(0);
+    const [state, setState] = useState('');
     const [instance, updateInstance] = usePDF({
         document: (
             <Invoice
@@ -306,6 +307,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                 setAddress(order.shippingAddress.address);
                 setCity(order.shippingAddress.city);
                 setCountry(order.shippingAddress.country);
+                setState(order.shippingAddress.state);
                 setPostalCode(order.shippingAddress.postalCode);
                 setPaymentMethod(order.paymentMethod);
                 setTotalPrice(order.totalPrice);
@@ -380,12 +382,6 @@ const OrderEditScreen = ({ history, match, location }) => {
         successUpdateInvoiceNumber
     ]);
 
-    // UseEffect(() => {
-    //   If (order && order.modified) {
-    //     Dispatch(getOrderDetails(orderId));
-    //   }
-    // }, [order, dispatch, orderId]);
-
     useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
             dispatch(logout());
@@ -455,7 +451,6 @@ const OrderEditScreen = ({ history, match, location }) => {
         }
 
         setCountInStockIndex(sizes.findIndex((x) => x.size === newSizeValue.toString()));
-
         setProductId(pId);
     };
 
@@ -857,6 +852,15 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         onChange={(e) => setCity(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
+                                <FloatingLabel className="mb-3" label="State" controlId="state">
+                                    <Form.Control
+                                        required
+                                        type="text"
+                                        placeholder="State"
+                                        value={state}
+                                        onChange={(e) => setState(e.target.value)}
+                                    ></Form.Control>
+                                </FloatingLabel>
                                 <FloatingLabel className="mb-3" label="Postal Code" controlId="postalCode">
                                     <Form.Control
                                         required
@@ -891,7 +895,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         <InputGroup>
                                             <InputGroup.Text>Paid</InputGroup.Text>
                                             <InputGroup.Text>
-                                                {' '}
+                                               
                                                 {order.isPaid ? (
                                                     <i className="fas fa-check" style={{ color: 'green' }}></i>
                                                 ) : (
@@ -904,7 +908,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         <InputGroup>
                                             <InputGroup.Text>Delivered</InputGroup.Text>
                                             <InputGroup.Text>
-                                                {' '}
+                                              
                                                 {order.tracking.isDeliverd ? (
                                                     <i className="fas fa-check" style={{ color: 'green' }}></i>
                                                 ) : (

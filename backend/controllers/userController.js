@@ -175,12 +175,12 @@ const getUserPhone = asyncHandler(async (req, res) => {
 
 // @desc Save User saved Addresses
 // @route POST /api/users/shippingAddress
-// @access public
+// @access private
 const saveUserShippingAddress = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   const { data } = req.body;
   if (user) {
-    user.savedAddress = [...user.savedAddress, data];
+    user.savedAddress.push(data);
     await user.save();
     res.json('Address Saved');
   } else {
@@ -191,7 +191,7 @@ const saveUserShippingAddress = asyncHandler(async (req, res) => {
 
 // @desc Get User saved Addresses
 // @route GET /api/users/shippingAddress
-// @access public
+// @access private
 const getShipppingAddress = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
@@ -201,6 +201,7 @@ const getShipppingAddress = asyncHandler(async (req, res) => {
     throw new Error('User Not Found');
   }
 });
+
 
 // @desc Check if email address is registered
 // @route POST /api/users/forgotPassword

@@ -62,6 +62,10 @@ const OrderListScreen = ({ history, location }) => {
                 item.isPaid ? item.paidAt.substring(0, 10) : <i className="fas fa-times" style={{ color: 'red' }}></i>
         },
         {
+            title: 'Location',
+            render: (item) => item.shippingAddress.city
+        },
+        {
             title: 'Payment Method',
             field: 'paymentMethod'
         },
@@ -152,14 +156,10 @@ const OrderListScreen = ({ history, location }) => {
                             {
                                 icon: 'edit',
                                 tooltip: 'Edit',
-                                onClick: (event, rowData) => history.push(`/admin/order/${rowData._id}/edit`)
+                                onClick: (event, rowData) => window.open(`/admin/order/${rowData._id}/edit`, '_blank')
                             },
                             {
-                                icon: () => (
-                                    <Button size="sm" variant="outline-dark">
-                                        Details
-                                    </Button>
-                                ),
+                                icon: () => <i class="fa-solid fa-circle-info"></i>,
                                 tooltip: 'Details',
                                 onClick: (event, rowData) => history.push(`/orderdetails/${rowData._id}`)
                             }

@@ -16,9 +16,6 @@ import home from './Data/homepage.js';
 import Homepage from './models/HomepageModel.js';
 import connectDB from './config/db.js';
 
-// import { ShirtSize } from './models/SizeModel.js';
-// import Size from './data/Sizes.js';
-
 dotenv.config();
 
 connectDB();

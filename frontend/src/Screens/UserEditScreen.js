@@ -22,19 +22,20 @@ const UserEditScreen = ({ history, match }) => {
     const [savedAddress, setSavedAddress] = useState('');
     const [addressEdit, setAddressEdit] = useState(false);
     const [editIndex, setEditIndex] = useState(0);
+    const [state, setState] = useState('');
     const [address, setAddress] = useState('');
     const [postalCode, setPostalCode] = useState('');
     const [city, setCity] = useState('');
     const [country, setCountry] = useState('');
     const [message, setMessage] = useState('');
 
-    const userDetails = useSelector(state => state.userDetails);
+    const userDetails = useSelector((state) => state.userDetails);
     const { loading, error, user } = userDetails;
 
-    const userUpdate = useSelector(state => state.userUpdate);
+    const userUpdate = useSelector((state) => state.userUpdate);
     const { loading: loadingUpdate, error: errorUpdate, successUpdate } = userUpdate;
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
     useEffect(() => {
@@ -78,7 +79,8 @@ const UserEditScreen = ({ history, match }) => {
         }
     }, [user, userId, dispatch, successUpdate, history]);
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
+        console.log('helo');
         e.preventDefault();
         window.scrollTo(0, 0);
         dispatch(updateUser({ _id: userId, name, email, phone, isAdmin, savedAddress }));
@@ -90,15 +92,17 @@ const UserEditScreen = ({ history, match }) => {
         setAddress(savedAddress[index].address);
         setCity(savedAddress[index].city);
         setPostalCode(savedAddress[index].postalCode);
+        setState(savedAddress[index].state);
         setCountry(savedAddress[index].country);
     };
 
-    const saveAddress = index => {
-        if (address && city && postalCode && country) {
+    const saveAddress = (index) => {
+        if (address && city && postalCode && country && state) {
             savedAddress[index].address = address;
             savedAddress[index].city = city;
             savedAddress[index].postalCode = postalCode;
             savedAddress[index].country = country;
+            saveAddress[index].state = state;
             setMessage('');
             setAddressEdit(false);
         } else {
@@ -106,7 +110,7 @@ const UserEditScreen = ({ history, match }) => {
         }
     };
 
-    const deleteAddress = index => {
+    const deleteAddress = (index) => {
         const newSavedAddress = [...savedAddress];
         newSavedAddress.splice(index, 1);
         setSavedAddress(newSavedAddress);
@@ -138,7 +142,7 @@ const UserEditScreen = ({ history, match }) => {
                                         type="email"
                                         placeholder="Email"
                                         value={email}
-                                        onChange={e => setEmail(e.target.value)}
+                                        onChange={(e) => setEmail(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
 
@@ -149,7 +153,7 @@ const UserEditScreen = ({ history, match }) => {
                                         type="name"
                                         placeholder="Name"
                                         value={name}
-                                        onChange={e => setName(e.target.value)}
+                                        onChange={(e) => setName(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <FloatingLabel className="mb-3" controlId="phone" label="Mobile">
@@ -159,7 +163,7 @@ const UserEditScreen = ({ history, match }) => {
                                         type="phone"
                                         placeholder="Mobile "
                                         value={phone}
-                                        onChange={e => setPhone(e.target.value)}
+                                        onChange={(e) => setPhone(e.target.value)}
                                     ></Form.Control>
                                 </FloatingLabel>
                                 <Form.Group controlId="isAdmin" className="mb-3">
@@ -168,7 +172,7 @@ const UserEditScreen = ({ history, match }) => {
                                         type="checkbox"
                                         label="Is Admin"
                                         checked={isAdmin}
-                                        onChange={e => setIsAdmin(e.target.checked)}
+                                        onChange={(e) => setIsAdmin(e.target.checked)}
                                     ></Form.Check>
                                 </Form.Group>
                             </Col>
@@ -182,6 +186,7 @@ const UserEditScreen = ({ history, match }) => {
                                                     <th className="col-sm-1">S.No.</th>
                                                     <th className="col-sm-3">ADDRESS</th>
                                                     <th className="col-sm-2">CITY</th>
+                                                    <th className="col-sm-2">STATE</th>
                                                     <th className="col-sm-2">POSTAL CODE</th>
                                                     <th className="col-sm-2">COUNTRY</th>
                                                     <th></th>
@@ -194,6 +199,7 @@ const UserEditScreen = ({ history, match }) => {
                                                             <td className="align-middle">{index + 1}</td>
                                                             <td className="align-middle">{x.address}</td>
                                                             <td className="align-middle">{x.city}</td>
+                                                            <td className="align-middle">{x.state}</td>
                                                             <td className="align-middle">{x.postalCode}</td>
                                                             <td className="align-middle">{x.country}</td>
                                                             <td>
@@ -224,7 +230,7 @@ const UserEditScreen = ({ history, match }) => {
                                                                         type="text"
                                                                         placeholder="Enter Address"
                                                                         value={address}
-                                                                        onChange={e => setAddress(e.target.value)}
+                                                                        onChange={(e) => setAddress(e.target.value)}
                                                                     />
                                                                 </Form>
                                                             </td>
@@ -235,7 +241,7 @@ const UserEditScreen = ({ history, match }) => {
                                                                         type="text"
                                                                         placeholder="Enter City"
                                                                         value={city}
-                                                                        onChange={e => setCity(e.target.value)}
+                                                                        onChange={(e) => setCity(e.target.value)}
                                                                     />
                                                                 </Form>
                                                             </td>
@@ -246,7 +252,18 @@ const UserEditScreen = ({ history, match }) => {
                                                                         type="text"
                                                                         placeholder="Enter Postal Code"
                                                                         value={postalCode}
-                                                                        onChange={e => setPostalCode(e.target.value)}
+                                                                        onChange={(e) => setPostalCode(e.target.value)}
+                                                                    />
+                                                                </Form>
+                                                            </td>
+                                                            <td>
+                                                                <Form>
+                                                                    <Form.Control
+                                                                        required
+                                                                        type="text"
+                                                                        placeholder="Enter State"
+                                                                        value={state}
+                                                                        onChange={(e) => setState(e.target.value)}
                                                                     />
                                                                 </Form>
                                                             </td>
@@ -257,7 +274,7 @@ const UserEditScreen = ({ history, match }) => {
                                                                         type="text"
                                                                         placeholder="Enter Country"
                                                                         value={country}
-                                                                        onChange={e => setCountry(e.target.value)}
+                                                                        onChange={(e) => setCountry(e.target.value)}
                                                                     />
                                                                 </Form>
                                                             </td>

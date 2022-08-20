@@ -50,10 +50,6 @@ const productSchema = mongoose.Schema(
       required: true,
       default: false,
     },
-    // gender: {
-    //   type: String,
-    //   required: true,
-    // },
     image: {
       type: String,
       required: true,
@@ -62,18 +58,6 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    // supplier: {
-    //   type: String,
-    //   required: true,
-    // },
-    // brandLogo: {
-    //   type: String,
-    //   required: true,
-    // },
-    // displayOrder: {
-    //   type: Number,
-    //   required: true,
-    // },
     category: {
       type: String,
       required: true,
@@ -86,10 +70,6 @@ const productSchema = mongoose.Schema(
       type: String,
     },
     class: [{ type: String, required: true }],
-    // productCode: {
-    //   type: String,
-    //   required: true,
-    // },
     reviews: [reviewSchema],
     schoolName: [{ type: String, required: true }],
     size: [sizeSchema],
@@ -103,16 +83,6 @@ const productSchema = mongoose.Schema(
       required: true,
       default: 0,
     },
-    // seoDescription: {
-    //   type: String,
-    // },
-    // seoKeywords: {
-    //   type: String,
-    // },
-    // mafatLalProduct: {
-    //   type: Boolean,
-    //   default: false,
-    // },
   },
   { timestamps: true }
 );

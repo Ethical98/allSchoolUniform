@@ -20,6 +20,7 @@ const BillTo = ({ shippingAddress, name, email, isAdmin, phone }) => (
         <Text>{name}</Text>
         <Text style={!isAdmin && styles.address}>{shippingAddress.address}</Text>
         <Text>{shippingAddress.city}</Text>
+        <Text>{shippingAddress.state}</Text>
         <Text>{shippingAddress.postalCode}</Text>
         <Text>{shippingAddress.country}</Text>
         <Text>{email}</Text>

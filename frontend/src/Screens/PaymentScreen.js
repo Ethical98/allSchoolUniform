@@ -10,11 +10,12 @@ import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
 
 const PaymentScreen = ({ history }) => {
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
-    const cart = useSelector(state => state.cart);
+    const cart = useSelector((state) => state.cart);
     const { shippingAddress, cartItems } = cart;
+
 
     const [paymentMethod, setPaymentMethod] = useState('');
 
@@ -49,7 +50,7 @@ const PaymentScreen = ({ history }) => {
         }
     }, [history, cartItems]);
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         e.preventDefault();
         dispatch(savePaymentMethod(paymentMethod));
         history.push('/placeorder');
@@ -78,7 +79,7 @@ const PaymentScreen = ({ history }) => {
                                     id="COD"
                                     name="paymentMethod"
                                     value="COD"
-                                    onChange={e => setPaymentMethod(e.target.value)}
+                                    onChange={(e) => setPaymentMethod(e.target.value)}
                                 ></Form.Check>
                             </ListGroup.Item>
                             <ListGroup.Item>
@@ -89,7 +90,7 @@ const PaymentScreen = ({ history }) => {
                                     id="PayU"
                                     name="paymentMethod"
                                     value="PayU"
-                                    onChange={e => setPaymentMethod(e.target.value)}
+                                    onChange={(e) => setPaymentMethod(e.target.value)}
                                 ></Form.Check>
                             </ListGroup.Item>
                         </ListGroup>

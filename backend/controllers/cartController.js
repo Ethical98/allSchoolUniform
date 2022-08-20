@@ -28,6 +28,8 @@ const addToCart = asyncHandler(async (req, res) => {
         res.json(items.cartItems);
       } else {
         cart.cartItems = [...cart.cartItems, addItem];
+        cart.username = req.user.name;
+        cart.contact = req.user.phone;
         const items = await cart.save();
         res.json(items.cartItems);
       }
@@ -35,7 +37,10 @@ const addToCart = asyncHandler(async (req, res) => {
       const cart = new Cart({
         cartItems: addItem,
         user: req.user._id,
+        username: req.user.name,
+        contact: req.user.phone,
       });
+
       await cart.save();
       res.json({ Message: 'ITEM ADDED' });
       // res.json(cart.cartItems);
@@ -55,21 +60,14 @@ const cartItemRemove = asyncHandler(async (req, res) => {
   } else {
     const cart = await Cart.findOne({ user: req.user._id });
 
-    // await Cart.updateOne(
-    //   { user: req.user._id },
-    //   { $pull: { cartItems: { _id: id } } }
-    // );
-
     cart.cartItems = cart.cartItems.filter((x) => x.id != id);
     await cart.save();
-   
+
     if (cart.cartItems.length == 0) {
-  
       await Cart.deleteOne({ user: req.user._id });
-      // res.json({ cartItems: [] });
+
       res.json({ Message: 'Cart Cleared' });
     } else {
-      // res.json(cart.cartItems);
       res.json({ Message: 'Item Deleted' });
     }
   }
@@ -115,6 +113,8 @@ const mergeCart = asyncHandler(async (req, res) => {
     );
 
     cart.cartItems = [...cart.cartItems, ...products];
+    cart.username = req.user.name;
+    cart.contact = req.user.phone;
     const finalCart = await cart.save();
     res.json(finalCart.cartItems);
   } else {
