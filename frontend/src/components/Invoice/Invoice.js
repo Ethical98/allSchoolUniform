@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         fontFamily: 'Helvetica',
         fontSize: 11,
-        paddingTop: 20,
+        paddingTop: 10,
         paddingLeft: 60,
         paddingRight: 60,
         lineHeight: 1.5,

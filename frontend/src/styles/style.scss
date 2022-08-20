@@ -142,6 +142,27 @@ main {
             }
         }
     }
+
+    .product-card {
+        position: relative;
+        .disc-badge {
+            position: absolute;
+            right: -1px;
+            border-top-right-radius: 0;
+            border-top-left-radius: 0;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 100%;
+            background: #fb560a;
+            color: white;
+            font-size: 12px;
+            height: 40px;
+            width: 40px;
+            font-weight: 600;
+            padding-left: 6px;
+            padding-top: 8px;
+            top:-1px;
+        }
+    }
 }
 .aboutus-container {
     h2 {

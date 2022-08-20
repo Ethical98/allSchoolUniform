@@ -5,12 +5,15 @@ const styles = StyleSheet.create({
     corpOff: {
         paddingBottom: 3,
         fontFamily: 'Helvetica-Oblique'
+    },
+    view: {
+        maxWidth: '50%'
     }
 });
 
 const CorpOff = ({ isAdmin }) => {
     return (
-        <View>
+        <View style={styles.view}>
             <Text style={styles.corpOff}>{isAdmin ? 'Seller' : 'Corp. Off.'}</Text>
             <Text>Active Mindz</Text>
             <Text>Ananth Road,Udyog Vihar</Text>

@@ -11,15 +11,14 @@ const styles = StyleSheet.create({
     tableContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-
         borderWidth: 1,
         borderColor: 'black'
     },
     tableHeading: {
-        marginTop: '20px',
+        marginTop: '5px',
         fontWeight: 900,
         marginBottom: 0,
-        fontSize: 25
+        fontSize: 20
     }
 });
 

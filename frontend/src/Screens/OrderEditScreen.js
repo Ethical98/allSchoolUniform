@@ -128,6 +128,7 @@ const OrderEditScreen = ({ history, match, location }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderNumber, setOrderNumber] = useState('');
     const [billType, setBillType] = useState('');
+    const [shippingPrice, setShippingPrice] = useState(0);
     const [instance, updateInstance] = usePDF({
         document: (
             <Invoice
@@ -135,7 +136,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                 email={email}
                 phone={phone}
                 order={order && order}
-                shippingPrice={order && order.shippingPrice}
+                shippingPrice={order && shippingPrice}
                 isAdmin
                 billType={billType}
                 invoiceNumber={order && order.invoiceNumber}
@@ -316,6 +317,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                 setIsCanceled(order.tracking.isCanceled);
                 setOrderNumber(order.orderId);
                 setBillType(order.billType);
+                setShippingPrice(order.shippingPrice);
 
                 updateInstance({
                     document: (
@@ -407,20 +409,24 @@ const OrderEditScreen = ({ history, match, location }) => {
     }, [productSizes, size, editIndex]);
 
     useEffect(() => {
-        setItemsPrice(Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)));
-        setDiscountPrice(
-            Number(
-                modifiedOrderItems
-                    .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
-                    .toFixed(2)
-            )
+        const price = Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2));
+        const discount = Number(
+            modifiedOrderItems
+                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                .toFixed(2)
         );
-      
+        setItemsPrice(price);
+        console.log(price);
+
+        setDiscountPrice(discount);
+        if (price > Number(599)) {
+            setShippingPrice(0);
+        }
     }, [modifiedOrderItems]);
 
     useEffect(() => {
         if (order) {
-            setTotalPrice(Number(itemsPrice - discountPrice + order.shippingPrice));
+            setTotalPrice(Number(itemsPrice - discountPrice + shippingPrice));
         }
     }, [order, itemsPrice, discountPrice]);
 
@@ -489,15 +495,19 @@ const OrderEditScreen = ({ history, match, location }) => {
 
             setQty(1);
         }
-
-        setItemsPrice(Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)));
-        setDiscountPrice(
-            Number(
-                modifiedOrderItems
-                    .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
-                    .toFixed(2)
-            )
+        setModifiedOrderItems(modifiedOrderItems);
+        const price = Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2));
+        const discount = Number(
+            modifiedOrderItems
+                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                .toFixed(2)
         );
+
+        setItemsPrice(price);
+        setDiscountPrice(discount);
+        if (price > 599) {
+            setShippingPrice(0);
+        }
         setCountInStock(1);
         setShowEditModal(false);
     };
@@ -681,7 +691,6 @@ const OrderEditScreen = ({ history, match, location }) => {
                                             data.some((itemToAdd) => addedItem.product === itemToAdd._id)
                                         )
                                     ]);
-                          
 
                                     setMessage('');
                                 }
@@ -1033,7 +1042,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                                 <ListGroup.Item>
                                                     <Row>
                                                         <Col>Shipping</Col>
-                                                        <Col>₹ {order.shippingPrice}</Col>
+                                                        <Col>{shippingPrice}</Col>
                                                     </Row>
                                                 </ListGroup.Item>
                                                 <ListGroup.Item>
@@ -1090,15 +1099,22 @@ const OrderEditScreen = ({ history, match, location }) => {
                                                     variant="dark"
                                                     onClick={() => {
                                                         dispatch(incrementAndUpdateInvoiceNumber(order));
-                                                        dispatch(
-                                                            editOrder({
-                                                                orderId,
-                                                                shippingAddress: { postalCode, address, city, country },
-                                                                modifiedOrderItems,
-                                                                itemsPrice,
-                                                                totalPrice
-                                                            })
-                                                        );
+                                                        if (modify) {
+                                                            dispatch(
+                                                                editOrder({
+                                                                    orderId,
+                                                                    shippingAddress: {
+                                                                        postalCode,
+                                                                        address,
+                                                                        city,
+                                                                        country
+                                                                    },
+                                                                    modifiedOrderItems,
+                                                                    itemsPrice,
+                                                                    totalPrice
+                                                                })
+                                                            );
+                                                        }
                                                     }}
                                                 >
                                                     Generate Invoice

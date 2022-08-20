@@ -71,57 +71,8 @@ const Product = ({ product }) => {
                     </Tabs>
                 )}
             </DialogBox>
-            {/* <Modal
-        show={show}
-        onHide={handleClose}
-        backdrop='static'
-        keyboard={false}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Size Guide</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {loading ? (
-            <Loader />
-          ) : (
-            <Tabs
-              defaultActiveKey='image'
-              id='uncontrolled-tab-example'
-              className='mb-3'
-            >
-              <Tab eventKey='image' title='Image'>
-                <Image
-                  src={images.image}
-                  style={{ width: '20vw' }}
-                  alt='image'
-                />
-              </Tab>
-              <Tab eventKey='sizeGuide' title='Size Guide'>
-                <Image
-                  src={images.sizeGuide}
-                  style={{ width: '20vw' }}
-                  alt='Size Guide'
-                />
-              </Tab>
-              <Tab
-                eventKey='sizeChart'
-                title='Size Chart'
-                style={{ width: '20vw' }}
-                alt='Size Chart'
-              >
-                <Image src={images.sizeChart} />
-              </Tab>
-            </Tabs>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant='secondary' onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal> */}
-
-            <Card className="my-3  rounded text-center" bg="white">
+            <Card className="my-3  rounded text-center product-card" bg="white">
+                {productDisc !== 0 && <div className='disc-badge'>-{productDisc}%</div>}
                 <Link to={`/products/${join(split(lowerCase(product.name), ' '), '-')}`}>
                     <Card.Img
                         src={product.image}

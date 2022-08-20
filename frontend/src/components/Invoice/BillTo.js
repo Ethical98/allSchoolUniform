@@ -5,14 +5,20 @@ const styles = StyleSheet.create({
     billTo: {
         paddingBottom: 3,
         fontFamily: 'Helvetica-Oblique'
+    },
+    address: {
+        wordWrap: 'break-word'
+    },
+    view: {
+        maxWidth: '50%'
     }
 });
 
-const BillTo = ({ shippingAddress, name, email, isAdmin ,phone}) => (
-    <View>
+const BillTo = ({ shippingAddress, name, email, isAdmin, phone }) => (
+    <View style={styles.view}>
         <Text style={styles.billTo}>{isAdmin ? 'Buyer' : 'Bill To:'}</Text>
         <Text>{name}</Text>
-        <Text>{shippingAddress.address}</Text>
+        <Text style={!isAdmin && styles.address}>{shippingAddress.address}</Text>
         <Text>{shippingAddress.city}</Text>
         <Text>{shippingAddress.postalCode}</Text>
         <Text>{shippingAddress.country}</Text>

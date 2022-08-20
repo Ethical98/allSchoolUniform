@@ -12,7 +12,7 @@ import Meta from '../components/Meta';
 import Accordion from '../components/Accordion';
 import PageLayout from '../components/PageLayout';
 import BreadCrumb from '../components/BreadCrumb';
-import { split, startCase } from 'lodash';
+import { split, startCase, upperCase } from 'lodash';
 
 const ProductScreen = ({ history, location, match }) => {
     const urlSearchParams = new URLSearchParams(location.search);
@@ -61,17 +61,17 @@ const ProductScreen = ({ history, location, match }) => {
     return (
         <PageLayout>
             <Meta
-                title={`${school} Products - AllschoolUniform`}
-                description={`${school} Uniform Available at discounted rates`}
-                keywords={`${school},${keyword},${season},${category}`}
+                title={`${formattedSchool} Uniform - AllschoolUniform`}
+                description={`${formattedSchool} Uniform Available at discounted rates`}
+                keywords={`${formattedSchool},${keyword},${season},${category}`}
                 canonical={window.location.href}
             />
+
             <BreadCrumb />
-            {/* {keyword && (
-        <Link to='/' className='mb-3 btn btn-light'>
-          Go Back
-        </Link>
-      )} */}
+            <h6>
+                <strong> {upperCase(`${formattedSchool} uniform`)}</strong>
+            </h6>
+            <h6 className="text-danger">{upperCase('exclusive discount available on uniform')}</h6>
             {loading ? (
                 <Loader />
             ) : error ? (
@@ -95,6 +95,9 @@ const ProductScreen = ({ history, location, match }) => {
                             </Row>
                         </Col>
                     </Row>
+                    <h6 className="text-center text-lg-end">
+                        <strong>{upperCase(`${formattedSchool} uniform`)}</strong>
+                    </h6>
                     <Paginate
                         pages={pages}
                         page={page}
