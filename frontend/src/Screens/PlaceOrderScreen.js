@@ -15,8 +15,6 @@ const PlaceOrderScreen = ({ history }) => {
 
     const [message, setMessage] = useState('');
 
-    const [scriptReady, setScriptReady] = useState(false);
-
     const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
@@ -51,9 +49,6 @@ const PlaceOrderScreen = ({ history }) => {
         script.src = 'https://checkout-static.citruspay.com/bolt/run/bolt.min.js';
         script.id = 'bolt';
         script.async = true;
-        script.onLoad = () => {
-            setScriptReady(true);
-        };
         document.body.appendChild(script);
     };
     useEffect(() => {

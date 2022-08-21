@@ -45,7 +45,7 @@ const ProductScreen = ({ history, location, match }) => {
                 formattedSchool
             )
         );
-    }, [dispatch, keyword, pageNumber, category, season, standard, school]);
+    }, [dispatch, keyword, pageNumber, category, season, standard, formattedSchool]);
 
     useEffect(() => {
         if (userInfo && userInfo.token) {

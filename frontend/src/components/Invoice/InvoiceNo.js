@@ -13,7 +13,6 @@ const styles = StyleSheet.create({
 });
 
 const InvoiceNo = ({ order }) => {
-    const items = order.modified ? order.modifiedItems : order.orderItems;
 
     return (
         <View style={styles.invoiceHeaderContainer}>

@@ -77,7 +77,7 @@ const OrderEditScreen = ({ history, match, location }) => {
     const { loading: loadingConfirm, error: errorConfirm, success: successConfirm } = orderConfirm;
 
     const orderCancel = useSelector((state) => state.orderCancel);
-    const { loading: loadingCancel, error: errorCancel, success: successCancel } = orderCancel;
+    const { success: successCancel } = orderCancel;
 
     const orderUpdateBillType = useSelector((state) => state.orderUpdateBillType);
     const { success: successUpdateBillType } = orderUpdateBillType;
@@ -424,6 +424,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         if (order) {
             setTotalPrice(Number(itemsPrice - discountPrice + shippingPrice));
         }
+        // eslint-disable-next-line
     }, [order, itemsPrice, discountPrice]);
 
     const newSizeHandler = (newSizeValue, pId, sizes, name, image) => {
@@ -895,7 +896,6 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         <InputGroup>
                                             <InputGroup.Text>Paid</InputGroup.Text>
                                             <InputGroup.Text>
-                                               
                                                 {order.isPaid ? (
                                                     <i className="fas fa-check" style={{ color: 'green' }}></i>
                                                 ) : (
@@ -908,7 +908,6 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         <InputGroup>
                                             <InputGroup.Text>Delivered</InputGroup.Text>
                                             <InputGroup.Text>
-                                              
                                                 {order.tracking.isDeliverd ? (
                                                     <i className="fas fa-check" style={{ color: 'green' }}></i>
                                                 ) : (

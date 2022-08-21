@@ -7,7 +7,6 @@ import Message from '../components/Message';
 import { register, submitOTP, getOTP, configureCaptcha, resetOtp } from '../actions/userActions';
 import Loader from '../components/Loader';
 import { mergeCartWithDatabase } from '../actions/cartActions';
-import OtpInput from 'react-otp-input';
 import validator from 'validator';
 import './css/RegisterScreen.css';
 import Meta from '../components/Meta';
