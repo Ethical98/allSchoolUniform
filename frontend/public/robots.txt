@@ -1,3 +1,13 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Disallow: /payment/*
+Disallow: /shipping/*
+Disallow: /admin/*
+Disallow: /cart
+Disallow: /api/*
+
+User-agent: Googlebot
+Allow: /
+Allow: /uploads/*
+Allow: /products/*
+Allow: /schools/*
