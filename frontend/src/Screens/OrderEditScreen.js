@@ -100,7 +100,7 @@ const OrderEditScreen = ({ history, match, location }) => {
     const [city, setCity] = useState('');
     const [country, setCountry] = useState('');
     const [message, setMessage] = useState('');
-    const [modifiedOrderItems, setModifiedOrderItems] = useState([{}]);
+    const [modifiedOrderItems, setModifiedOrderItems] = useState([]);
     const [size, setSize] = useState('');
     const [index, setIndex] = useState('');
     const [orderItems, setOrderItems] = useState([]);
@@ -469,7 +469,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         dispatch(
             editOrder({
                 orderId,
-                shippingAddress: { postalCode, address, city, country },
+                shippingAddress: { postalCode, address, city, country, state },
                 modifiedOrderItems,
                 itemsPrice,
                 totalPrice
