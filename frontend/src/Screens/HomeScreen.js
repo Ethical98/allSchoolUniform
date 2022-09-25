@@ -9,7 +9,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import useMedia from '../utils/useMedia';
-import {  join, lowerCase, sortBy, split } from 'lodash';
+import { join, lowerCase, sortBy, split } from 'lodash';
+import { Link } from 'react-router-dom';
 
 const HomeScreen = ({ history }) => {
     const dispatch = useDispatch();
@@ -80,8 +81,56 @@ const HomeScreen = ({ history }) => {
                                 />
                             </InputGroup>
                         </div>
+
                         <Image className="banner-image" src="/uploads/Banner.jpg" alt={'banner-img'} fluid />
                     </div>
+                    <div className="common-schools">
+                        <h2>
+                            <strong>TOP SEARCHED SCHOOLS</strong>
+                        </h2>
+                        <div className="school-logos">
+                            <Link to="/products/schools/gd-goenka-global-school-gurgaon">
+                                <div className="school">
+                                    <img src="/uploads/gdgoenka-1641539196217.jpeg" alt="Gd Goenka School" />
+                                    <p>GD Goenka Public School</p>
+                                </div>
+                            </Link>
+                            <Link to="/products/schools/presidium-school-gurugram-sec-57">
+                                <div className="school">
+                                    <img src="/uploads/presidium logo-1641284443993.jpg" alt="Presidium School" />
+                                    <p>Presidium School</p>
+                                </div>
+                            </Link>
+                            <Link to="/products/schools/bal-bharati-public-school-grh-marg">
+                                <div className="school">
+                                    <img
+                                        src="/uploads/schools/resized-bal bharati public school-1645708028041.jpg"
+                                        alt="Bal Bharati Public School"
+                                    />
+                                    <p>Bal Bharati Public School</p>
+                                </div>
+                            </Link>
+                            <Link to="/products/schools/amity-international-school-gurugram-43">
+                                <div className="school">
+                                    <img
+                                        src="/uploads/schools/resized-ais-1644305944455.jpg"
+                                        alt="Amity International School"
+                                    />
+                                    <p>Amity International School</p>
+                                </div>
+                            </Link>
+                            <Link to="/products/schools/delhi-public-school-dwarka">
+                                <div className="school">
+                                    <img
+                                        src="/uploads/schools/resized-dps-1645690244407.jpg"
+                                        alt="Delhi Public School"
+                                    />
+                                    <p>Delhi Public School</p>
+                                </div>
+                            </Link>
+                        </div>
+                    </div>
+                    <hr />
                     <div className="stats-section">
                         <div className="item">
                             <h5>Schools</h5>

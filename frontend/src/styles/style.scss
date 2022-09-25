@@ -9,6 +9,7 @@ main {
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-bottom: 30px;
 
             .banner-image {
                 height: 100%;
@@ -28,6 +29,42 @@ main {
             }
         }
 
+        .common-schools {
+            text-align: center;
+            margin-bottom: 50px;
+            a {
+                color: #000;
+                text-decoration: none;
+            }
+            h2 {
+                color: #fe5200;
+            }
+            .school-logos {
+                margin-top: 20px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+
+                .school {
+                    border-radius: 50%;
+                    padding: 10px;
+                    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+                    text-align: center;
+                    width: 120px;
+                    height: 120px;
+                    margin-right: 10px;
+
+                    img {
+                        width: 40px;
+                        height: 40px;
+                    }
+                    p {
+                        font-size: 12px;
+                        margin: 0;
+                    }
+                }
+            }
+        }
         .stats-section {
             display: flex;
             justify-content: space-around;
@@ -160,7 +197,7 @@ main {
             font-weight: 600;
             padding-left: 6px;
             padding-top: 8px;
-            top:-1px;
+            top: -1px;
         }
     }
 }
