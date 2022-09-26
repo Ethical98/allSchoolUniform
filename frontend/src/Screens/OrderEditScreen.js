@@ -1110,6 +1110,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                                                                         postalCode,
                                                                         address,
                                                                         city,
+                                                                        state,
                                                                         country
                                                                     },
                                                                     modifiedOrderItems,
