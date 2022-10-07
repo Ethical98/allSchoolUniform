@@ -22,18 +22,26 @@ const styles = StyleSheet.create({
     }
 });
 
-const InvoiceItemsTable = ({ items, dateCreated, billType ,shippingPrice}) => (
-    <>
-        <View style={styles.tableHeading}>
-            <Text>ORDER SUMMARY</Text>
-        </View>
-        <View style={styles.tableContainer}>
-            <InvoiceTableHeader />
-            <InvoiceTableRow items={items ? items : []} />
-            <InvoiceTableBlankSpace rowsCount={items ? tableRowsCount - items.length : tableRowsCount} />
-            <InvoiceTableFooter items={items ? items : []} dateCreated={dateCreated} billType={billType} shippingPrice={shippingPrice} />
-        </View>
-    </>
-);
+const InvoiceItemsTable = ({ items, dateCreated, billType, shippingPrice }) => {
+    const rowsCount = items ? (items.length > 10 ? 0 : tableRowsCount - items.length) : tableRowsCount;
+    return (
+        <>
+            <View style={styles.tableHeading}>
+                <Text>ORDER SUMMARY</Text>
+            </View>
+            <View style={styles.tableContainer}>
+                <InvoiceTableHeader />
+                <InvoiceTableRow items={items ? items : []} />
+                <InvoiceTableBlankSpace rowsCount={rowsCount} />
+                <InvoiceTableFooter
+                    items={items ? items : []}
+                    dateCreated={dateCreated}
+                    billType={billType}
+                    shippingPrice={shippingPrice}
+                />
+            </View>
+        </>
+    );
+};
 
 export default InvoiceItemsTable;
