@@ -132,8 +132,8 @@ export const register = (name, email, phone, password) => async (dispatch) => {
             }
         };
 
-        await firebase.auth().createUserWithEmailAndPassword(email, password);
         const { data } = await axios.post('/api/users/', { name, email, phone, password }, config);
+        data._id && (await firebase.auth().createUserWithEmailAndPassword(email, password));
 
         dispatch({
             type: USER_REGISTER_SUCCESS,
