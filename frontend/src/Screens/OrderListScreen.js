@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { CSVLink } from 'react-csv';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -9,6 +10,7 @@ import MaterialTable from 'material-table';
 import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
+import { join, map } from 'lodash';
 
 const OrderListScreen = ({ history, location }) => {
     const urlSearchParams = new URLSearchParams(location.search);
@@ -124,6 +126,45 @@ const OrderListScreen = ({ history, location }) => {
         }
     }, [dispatch, history, userInfo, pageNumber]);
 
+    const csvData = map(orders, (order) => ({
+        orderId: order.orderId,
+        status: order.tracking.isCanceled
+            ? `Canceled: ${order.tracking.canceledAt.substring(0, 10)}`
+            : order.tracking.isDelivered
+            ? `Delivered: ${order.tracking.deliveredAt.substring(0, 10)}`
+            : order.tracking.isOutForDelivery
+            ? `Out For Delivery: ${order.tracking.outForDeliveryAt.substring(0, 10)}`
+            : order.tracking.isProcessing
+            ? `Processed: ${order.tracking.processedAt.substring(0, 10)}`
+            : order.tracking.isConfirmed
+            ? `Confirmed: ${order.tracking.confirmedAt.substring(0, 10)}`
+            : 'Recieved',
+        name: order.user.name,
+        phone: order.phone,
+        createdAt: order.createdAt.substring(0, 10),
+        totalPrice: order.totalPrice,
+        isPaid: order.isPaid ? 'YES' : 'NO',
+        location: order.shippingAddress.city,
+        paymentMethod: order.paymentMethod,
+        orderItems: join(
+            map(order.orderItems, (item, index) => index + 1 + '.' + ' ' + item.name + ' ' + 'Size: ' + item.size),
+            ' '
+        )
+    }));
+
+    const headers = [
+        { label: 'Order Id', key: 'orderId' },
+        { label: 'Status', key: 'status' },
+        { label: 'Name', key: 'name' },
+        { label: 'Phone', key: 'phone' },
+        { label: 'Data', key: 'createdAt' },
+        { label: 'Total', key: 'totalPrice' },
+        { label: 'Paid', key: 'isPaid' },
+        { label: 'Location', key: 'location' },
+        { label: 'Payment Method', key: 'paymentMethod' },
+        { label: 'Order Items', key: 'orderItems' }
+    ];
+    const currentDate = new Date();
     return (
         <AdminPageLayout>
             <Meta
@@ -132,6 +173,14 @@ const OrderListScreen = ({ history, location }) => {
                 keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details,orders'}
             />
             <h1>ORDERS</h1>
+            <CSVLink
+                data={csvData}
+                headers={headers}
+                filename={`${currentDate.getDate()}-${currentDate.getMonth()}-${currentDate.getFullYear()}-${currentDate.getTime()}-Orders`}
+                className="btn btn-primary"
+            >
+                Export to CSV
+            </CSVLink>
             {loading ? (
                 <Loader />
             ) : error ? (
@@ -148,7 +197,6 @@ const OrderListScreen = ({ history, location }) => {
                                 color: 'black'
                             },
                             paging: false,
-
                             actionsColumnIndex: -1
                         }}
                         actions={[

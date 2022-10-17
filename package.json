@@ -44,6 +44,7 @@
     "multer": "^1.4.2",
     "nodemailer": "^6.6.3",
     "prettier": "^2.7.1",
+    "react-csv": "^2.2.2",
     "secure-web-storage": "^1.0.2",
     "sharp": "^0.29.3"
   },
