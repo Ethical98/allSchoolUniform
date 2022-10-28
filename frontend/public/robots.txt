@@ -5,6 +5,8 @@ Disallow: /shipping/*
 Disallow: /admin/*
 Disallow: /cart
 Disallow: /api/*
+Disallow: /all-school-listing?Page=3
+Disallow: /all-school-listing?*
 
 User-agent: Googlebot
 Allow: /
