@@ -11,7 +11,8 @@ import {
     CART_GET_SHIPPING_ADDRESS,
     CART_FAIL_SHIPPING_ADDRESS,
     CART_REQUEST_SHIPPING_ADDRESS,
-    CART_ITEMS_RESET
+    CART_ITEMS_RESET,
+    CART_REQUEST_FROM_DATABASE
 } from '../constants/cartConstants';
 
 export const cartReducer = (
@@ -25,12 +26,18 @@ export const cartReducer = (
     action
 ) => {
     switch (action.type) {
+        case CART_REQUEST_FROM_DATABASE:
+            return {
+                ...state,
+                loading: true
+            };
         case CART_GET_FROM_DATABASE:
             return {
                 ...state,
                 cartItems: action.payload,
                 cartSuccess: true,
-                cartId: action.cartId
+                cartId: action.cartId,
+                loading: false
             };
         case CART_ADD_ITEM:
             const item = action.payload;

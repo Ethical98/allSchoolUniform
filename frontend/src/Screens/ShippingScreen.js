@@ -15,7 +15,7 @@ const ShippingScreen = ({ history }) => {
     const dispatch = useDispatch();
 
     const cart = useSelector((state) => state.cart);
-    const { cartItems, savedAddress, loading, error } = cart;
+    const { cartItems, savedAddress, loading, error, cartSuccess } = cart;
 
     const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
@@ -44,11 +44,12 @@ const ShippingScreen = ({ history }) => {
         }
     }, [dispatch, userInfo, history]);
 
-    useEffect(() => {
-        if (cartItems.length === 0) {
-            history.push('/products');
-        }
-    }, [history, cartItems]);
+    // useEffect(() => {
+    //     if (!loading && cartSuccess && cartItems.length === 0) {
+    //         history.push('/cart');
+    //     }
+    //     // eslint-disable-next-line
+    // }, [cartItems, cartSuccess, loading]);
 
     useEffect(() => {
         dispatch(getSavedAddress());

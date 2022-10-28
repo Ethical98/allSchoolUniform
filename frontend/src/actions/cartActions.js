@@ -11,7 +11,8 @@ import {
     CART_RESET_SUCCESS,
     CART_GET_SHIPPING_ADDRESS,
     CART_REQUEST_SHIPPING_ADDRESS,
-    CART_FAIL_SHIPPING_ADDRESS
+    CART_FAIL_SHIPPING_ADDRESS,
+    CART_REQUEST_FROM_DATABASE
 } from '../constants/cartConstants';
 import { encryptData } from '../utils/Crypto';
 import dotenv from 'dotenv';
@@ -155,6 +156,7 @@ export const mergeCartWithDatabase = () => async (dispatch, getState) => {
 };
 
 export const getCartFromDatabase = () => async (dispatch, getState) => {
+    dispatch({ type: CART_REQUEST_FROM_DATABASE });
     const {
         userLogin: { userInfo }
     } = getState();
@@ -209,7 +211,7 @@ export const getSavedAddress = () => async (dispatch, getState) => {
     }
 };
 
-export const saveShippingAddressDatabase = data => async (dispatch, getState) => {
+export const saveShippingAddressDatabase = (data) => async (dispatch, getState) => {
     try {
         const {
             userLogin: { userInfo }
@@ -234,7 +236,7 @@ export const saveShippingAddressDatabase = data => async (dispatch, getState) =>
     }
 };
 
-export const saveShippingAddress = data => dispatch => {
+export const saveShippingAddress = (data) => (dispatch) => {
     dispatch({
         type: CART_SAVE_SHIPPING_ADDRESS,
         payload: data
@@ -244,7 +246,7 @@ export const saveShippingAddress = data => dispatch => {
     localStorage.setItem('shippingAddress', encryptData(JSON.stringify(data), salt));
 };
 
-export const savePaymentMethod = data => dispatch => {
+export const savePaymentMethod = (data) => (dispatch) => {
     dispatch({
         type: CART_SAVE_PAYMENT_METHOD,
         payload: data

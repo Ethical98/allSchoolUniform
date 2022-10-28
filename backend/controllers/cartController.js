@@ -122,6 +122,8 @@ const mergeCart = asyncHandler(async (req, res) => {
       cartItems,
       user: req.user._id,
     });
+    cart.username = req.user.name;
+    cart.contact = req.user.phone;
     const addedCart = await cart.save();
     res.json(addedCart.cartItems);
   }
