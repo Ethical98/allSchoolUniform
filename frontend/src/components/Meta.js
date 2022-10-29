@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 
-const Meta = ({ title, description, keywords, canonical }) => {
+const Meta = ({ title, description, keywords, canonical, seo = 'INDEX,FOLLOW' }) => {
     return (
         <div>
             <Helmet>
@@ -9,7 +9,7 @@ const Meta = ({ title, description, keywords, canonical }) => {
                 <meta name="title" content={title} />
                 <meta name="description" content={description} />
                 <meta name="keywords" content={keywords} />
-                <meta name="robots" content={'index,follow'} />
+                <meta name="robots" content={seo} />
                 <link rel="canonical" href={canonical} />
             </Helmet>
         </div>

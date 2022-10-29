@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import Order, { InvoiceNumber } from '../models/OrderModel.js';
+import User from '../models/UserModel.js';
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
@@ -27,6 +28,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     const order = new Order({
       orderItems,
       user: req.user._id,
+      name: req.user.name,
       phone: req.user.phone,
       shippingAddress,
       paymentMethod,
@@ -272,13 +274,59 @@ const sendMail = asyncHandler(async (req, res) => {
 // @access Private?Admin
 const getOrders = asyncHandler(async (req, res) => {
   const pageSize = 25;
+
+  const { keyword } = req.query;
+  let search = '';
+
+  const regExp = /[a-zA-Z]/g;
+  if (regExp.test(keyword)) {
+    search = keyword;
+  } else {
+    search = parseInt(keyword, 10);
+  }
+
+  const searchKeyword =
+    search && typeof search !== 'number'
+      ? {
+          name: {
+            $regex: search,
+            $options: 'i',
+          },
+        }
+      : {};
+  const searchKeywordTwo =
+    search && typeof search !== 'number'
+      ? {
+          orderId: {
+            $regex: search,
+            $options: 'i',
+          },
+        }
+      : {};
+  const searchKeywordThree =
+    search && typeof search === 'number'
+      ? {
+          phone: { $in: [search] },
+        }
+      : {};
   const page = Number(req.query.pageNumber) || 1;
-  const count = await Order.countDocuments({});
-  const orders = await Order.find({})
+
+  const orders = await Order.find({
+    $and: [
+      { $or: [{ ...searchKeyword }, { ...searchKeywordTwo }] },
+      { ...searchKeywordThree },
+    ],
+  })
     .populate('user', 'id name')
     .sort({ createdAt: -1 })
     .limit(pageSize)
     .skip(pageSize * (page - 1));
+  const count = await Order.countDocuments({
+    $and: [
+      { $or: [{ ...searchKeyword }, { ...searchKeywordTwo }] },
+      { ...searchKeywordThree },
+    ],
+  });
 
   if (orders.length > 0) {
     res.json({ orders, page, pages: Math.ceil(count / pageSize) });
@@ -297,6 +345,8 @@ const editOrderById = asyncHandler(async (req, res) => {
 
   const order = await Order.findById(req.params.id);
   if (order) {
+    const user = await User.findById(order.user);
+    order.name = user.name;
     order.shippingAddress = shippingAddress || order.shippingAddress;
 
     order.totalPrice = totalPrice || order.totalPrice;

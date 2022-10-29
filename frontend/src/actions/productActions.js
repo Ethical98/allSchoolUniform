@@ -29,28 +29,28 @@ import {
 import axios from 'axios';
 
 export const listProducts =
-    (keyword = '', pageNumber = '', category = '', season = '', standard = '', school = '') =>
-        async dispatch => {
-            try {
-                dispatch({ type: PRODUCT_LIST_REQUEST });
+    (keyword = '', pageNumber = '', category = '', season = 'Winter', standard = '', school = '') =>
+    async (dispatch) => {
+        try {
+            dispatch({ type: PRODUCT_LIST_REQUEST });
 
-                const { data } = await axios.get(
-                `/api/products?category=${category}&season=${season}&standard=${standard}&keyword=${keyword}&school=${school}&pageNumber=${pageNumber}`
-                );
+            const { data } = await axios.get(
+                `/api/products?category=${category}&season=${'Winter'}&standard=${standard}&keyword=${keyword}&school=${school}&pageNumber=${pageNumber}`
+            );
 
-                dispatch({
-                    type: PRODUCT_LIST_SUCCESS,
-                    payload: data
-                });
-            } catch (error) {
-                dispatch({
-                    type: PRODUCT_LIST_FAIL,
-                    payload: error.response && error.response.data.message ? error.response.data.message : error.message
-                });
-            }
-        };
+            dispatch({
+                type: PRODUCT_LIST_SUCCESS,
+                payload: data
+            });
+        } catch (error) {
+            dispatch({
+                type: PRODUCT_LIST_FAIL,
+                payload: error.response && error.response.data.message ? error.response.data.message : error.message
+            });
+        }
+    };
 
-export const listProductDetails = name => async dispatch => {
+export const listProductDetails = (name) => async (dispatch) => {
     try {
         dispatch({ type: PRODUCT_DETAILS_REQUEST });
 
@@ -68,7 +68,7 @@ export const listProductDetails = name => async dispatch => {
     }
 };
 
-export const listProductDetailsById = id => async dispatch => {
+export const listProductDetailsById = (id) => async (dispatch) => {
     try {
         dispatch({ type: PRODUCT_DETAILS_REQUEST });
 
@@ -86,7 +86,7 @@ export const listProductDetailsById = id => async dispatch => {
     }
 };
 
-export const filterProducts = (category, season, standard) => async dispatch => {
+export const filterProducts = (category, season, standard) => async (dispatch) => {
     try {
         dispatch({ type: PRODUCT_LIST_REQUEST });
 
@@ -157,7 +157,7 @@ export const filterProducts = (category, season, standard) => async dispatch => 
     }
 };
 
-export const deleteProduct = id => async (dispatch, getState) => {
+export const deleteProduct = (id) => async (dispatch, getState) => {
     try {
         dispatch({
             type: PRODUCT_DELETE_REQUEST
@@ -185,7 +185,7 @@ export const deleteProduct = id => async (dispatch, getState) => {
     }
 };
 
-export const createProduct = product => async (dispatch, getState) => {
+export const createProduct = (product) => async (dispatch, getState) => {
     try {
         dispatch({
             type: PRODUCT_CREATE_REQUEST
@@ -215,7 +215,7 @@ export const createProduct = product => async (dispatch, getState) => {
     }
 };
 
-export const updateProduct = product => async (dispatch, getState) => {
+export const updateProduct = (product) => async (dispatch, getState) => {
     try {
         dispatch({
             type: PRODUCT_UPDATE_REQUEST
@@ -276,31 +276,31 @@ export const createProductReview = (productId, review) => async (dispatch, getSt
 
 export const listProductImages =
     (pageNumber = '') =>
-        async dispatch => {
-            try {
-                const config = {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
-                dispatch({ type: PRODUCT_IMAGE_LIST_REQUEST });
-                const {
-                    data: { images: productImages, pages: productImagePages }
-                } = await axios.get(`/api/products/images?page=${pageNumber}`, config);
+    async (dispatch) => {
+        try {
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            dispatch({ type: PRODUCT_IMAGE_LIST_REQUEST });
+            const {
+                data: { images: productImages, pages: productImagePages }
+            } = await axios.get(`/api/products/images?page=${pageNumber}`, config);
 
-                dispatch({
-                    type: PRODUCT_IMAGE_LIST_SUCCESS,
-                    payload: { productImages, productImagePages }
-                });
-            } catch (error) {
-                dispatch({
-                    type: PRODUCT_IMAGE_LIST_FAIL,
-                    payload: error.response && error.response.data.message ? error.response.data.message : error.message
-                });
-            }
-        };
+            dispatch({
+                type: PRODUCT_IMAGE_LIST_SUCCESS,
+                payload: { productImages, productImagePages }
+            });
+        } catch (error) {
+            dispatch({
+                type: PRODUCT_IMAGE_LIST_FAIL,
+                payload: error.response && error.response.data.message ? error.response.data.message : error.message
+            });
+        }
+    };
 
-export const uploadProductImage = file => async dispatch => {
+export const uploadProductImage = (file) => async (dispatch) => {
     const baseUrl = '/api/products/images';
 
     try {

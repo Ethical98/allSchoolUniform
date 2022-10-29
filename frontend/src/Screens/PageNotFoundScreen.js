@@ -13,6 +13,7 @@ const PageNotFoundScreen = () => {
                 keyword={
                     'pagenotfound,404,cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details'
                 }
+                seo="NOINDEX,NOFOLLOW"
             />
             <h1 className="not-found-heading">404</h1>
             <p className="not-found-content">We're sorry but the page you requested could not found.</p>

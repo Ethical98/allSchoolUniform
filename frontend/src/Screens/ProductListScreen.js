@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Row, Col, Image } from 'react-bootstrap';
+import { Button, Row, Col, Image, Form } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -114,7 +114,7 @@ const ProductListScreen = ({ history, match, location }) => {
         dispatch(listSchoolNames(query));
     };
     const filterBy = () => true;
-
+    const [newt, setNewt] = useState('');
     return (
         <AdminPageLayout>
             <Meta title={'Product List - AllSchoolUniform'} description={'List Product'} />
@@ -144,7 +144,7 @@ const ProductListScreen = ({ history, match, location }) => {
                     </Button>
                 </Col>
             </Row>
-
+            <Form.Control onChange={(e) => setNewt(e.target.value)}></Form.Control>
             {errorDelete && <Message varaint="danger">{errorDelete}</Message>}
             {loading ? (
                 <Loader />
@@ -177,8 +177,7 @@ const ProductListScreen = ({ history, match, location }) => {
                             {
                                 icon: 'edit',
                                 tooltip: 'Edit',
-                                onClick: (event, rowData) =>
-                                    window.open(`/admin/product/${rowData._id}/edit`, '_blank')
+                                onClick: (event, rowData) => window.open(`/admin/product/${rowData._id}/edit`, '_blank')
                             }
                         ]}
                     />

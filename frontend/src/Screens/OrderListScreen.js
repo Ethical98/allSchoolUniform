@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CSVLink } from 'react-csv';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
@@ -11,8 +11,10 @@ import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
 import { join, map } from 'lodash';
+import { Button, Form, InputGroup } from 'react-bootstrap';
 
 const OrderListScreen = ({ history, location }) => {
+    const [keyword, setKeyword] = useState('');
     const urlSearchParams = new URLSearchParams(location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
     const pageNumber = params.page ? params.page : 1;
@@ -124,7 +126,7 @@ const OrderListScreen = ({ history, location }) => {
             dispatch(logout());
             history.push('/login');
         }
-    }, [dispatch, history, userInfo, pageNumber]);
+    }, [dispatch, userInfo, pageNumber]);
 
     const csvData = map(orders, (order) => ({
         orderId: order.orderId,
@@ -165,6 +167,42 @@ const OrderListScreen = ({ history, location }) => {
         { label: 'Order Items', key: 'orderItems' }
     ];
     const currentDate = new Date();
+
+    const Table = useMemo(
+        () => (
+            <MaterialTable
+                title="Orders"
+                columns={columns}
+                data={orders}
+                options={{
+                    rowStyle: {
+                        color: 'black'
+                    },
+                    paging: false,
+                    search: false,
+                    actionsColumnIndex: -1
+                }}
+                actions={[
+                    {
+                        icon: 'edit',
+                        tooltip: 'Edit',
+                        onClick: (event, rowData) => window.open(`/admin/order/${rowData._id}/edit`, '_blank')
+                    },
+                    {
+                        icon: () => <i class="fa-solid fa-circle-info"></i>,
+                        tooltip: 'Details',
+                        onClick: (event, rowData) => history.push(`/orderdetails/${rowData._id}`)
+                    }
+                ]}
+            />
+        ),
+        [orders]
+    );
+
+    const searchOrders = (search) => {
+        setKeyword(search);
+    };
+
     return (
         <AdminPageLayout>
             <Meta
@@ -173,45 +211,33 @@ const OrderListScreen = ({ history, location }) => {
                 keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details,orders'}
             />
             <h1>ORDERS</h1>
-            <CSVLink
-                data={csvData}
-                headers={headers}
-                filename={`${currentDate.getDate()}-${currentDate.getMonth()}-${currentDate.getFullYear()}-${currentDate.getTime()}-Orders`}
-                className="btn btn-primary"
-            >
-                Export to CSV
-            </CSVLink>
+            <div className="d-flex justify-content-between mb-3">
+                <CSVLink
+                    data={csvData}
+                    headers={headers}
+                    filename={`${currentDate.getDate()}-${currentDate.getMonth()}-${currentDate.getFullYear()}-${currentDate.getTime()}-Orders`}
+                    className="btn btn-primary"
+                >
+                    Export to CSV
+                </CSVLink>
+                <InputGroup className="w-25">
+                    <Form.Control
+                        required
+                        value={keyword}
+                        onChange={(e) => searchOrders(e.target.value)}
+                        placeholder="Search Orders"
+                    />
+                    <Button onClick={() => dispatch(listOrders(1, keyword))}>Search</Button>
+                </InputGroup>
+            </div>
+
             {loading ? (
                 <Loader />
             ) : error ? (
                 <Message variant="danger">{error}</Message>
             ) : (
                 <>
-                    <MaterialTable
-                        title="Orders"
-                        columns={columns}
-                        data={orders && orders}
-                        options={{
-                            search: true,
-                            rowStyle: {
-                                color: 'black'
-                            },
-                            paging: false,
-                            actionsColumnIndex: -1
-                        }}
-                        actions={[
-                            {
-                                icon: 'edit',
-                                tooltip: 'Edit',
-                                onClick: (event, rowData) => window.open(`/admin/order/${rowData._id}/edit`, '_blank')
-                            },
-                            {
-                                icon: () => <i class="fa-solid fa-circle-info"></i>,
-                                tooltip: 'Details',
-                                onClick: (event, rowData) => history.push(`/orderdetails/${rowData._id}`)
-                            }
-                        ]}
-                    />
+                    {Table}
                     <Paginate pages={pages} page={page} isAdmin orders />
                 </>
             )}
