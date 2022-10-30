@@ -71,6 +71,7 @@ const PlaceOrderScreen = ({ history }) => {
                 history.push(`/order/${order._id}`);
             }
         }
+        // eslint-disable-next-line
     }, [dispatch, errorPay, history, success, successPay, order]);
 
     const addDecimals = (num) => {

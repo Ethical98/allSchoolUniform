@@ -126,6 +126,7 @@ const OrderListScreen = ({ history, location }) => {
             dispatch(logout());
             history.push('/login');
         }
+        // eslint-disable-next-line
     }, [dispatch, userInfo, pageNumber]);
 
     const csvData = map(orders, (order) => ({
@@ -148,10 +149,7 @@ const OrderListScreen = ({ history, location }) => {
         isPaid: order.isPaid ? 'YES' : 'NO',
         location: order.shippingAddress.city,
         paymentMethod: order.paymentMethod,
-        orderItems: join(
-            map(order.orderItems, (item, index) => index + 1 + '.' + ' ' + item.name + ' ' + 'Size: ' + item.size),
-            ' '
-        )
+        orderItems: join(map(order.orderItems, (item, index) => `${index + 1}. ${item.name} Size: ${item.size} `))
     }));
 
     const headers = [
@@ -159,7 +157,7 @@ const OrderListScreen = ({ history, location }) => {
         { label: 'Status', key: 'status' },
         { label: 'Name', key: 'name' },
         { label: 'Phone', key: 'phone' },
-        { label: 'Data', key: 'createdAt' },
+        { label: 'Date', key: 'createdAt' },
         { label: 'Total', key: 'totalPrice' },
         { label: 'Paid', key: 'isPaid' },
         { label: 'Location', key: 'location' },
@@ -196,6 +194,7 @@ const OrderListScreen = ({ history, location }) => {
                 ]}
             />
         ),
+        // eslint-disable-next-line
         [orders]
     );
 

@@ -15,7 +15,7 @@ const ShippingScreen = ({ history }) => {
     const dispatch = useDispatch();
 
     const cart = useSelector((state) => state.cart);
-    const { cartItems, savedAddress, loading, error, cartSuccess } = cart;
+    const { savedAddress, loading, error } = cart;
 
     const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;

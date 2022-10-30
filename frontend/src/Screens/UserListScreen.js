@@ -8,7 +8,7 @@ import MaterialTable from 'material-table';
 import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
-import { Button, Form, InputGroup } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 
 const UserListScreen = ({ history, location }) => {
     const urlSearchParams = new URLSearchParams(location.search);
@@ -121,6 +121,7 @@ const UserListScreen = ({ history, location }) => {
                 ]}
             />
         ),
+        // eslint-disable-next-line
         [users]
     );
 

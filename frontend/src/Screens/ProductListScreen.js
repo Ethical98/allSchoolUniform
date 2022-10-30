@@ -149,6 +149,7 @@ const ProductListScreen = ({ history, match, location }) => {
                 ]}
             />
         ),
+        // eslint-disable-next-line
         [products]
     );
 
