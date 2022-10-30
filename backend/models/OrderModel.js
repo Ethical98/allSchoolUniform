@@ -122,6 +122,10 @@ const orderSchema = mongoose.Schema(
     invoiceNumber: {
       type: String,
     },
+    orderStatus: {
+      type: String,
+      required: true,
+    },
     tracking: {
       isConfirmed: {
         type: Boolean,

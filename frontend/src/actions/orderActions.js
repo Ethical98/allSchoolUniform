@@ -318,7 +318,7 @@ export const listMyOrders = () => async (dispatch, getState) => {
 };
 
 export const listOrders =
-    (pageNumber = '', keyword = '') =>
+    (pageNumber = '', keyword = '', status = '') =>
     async (dispatch, getState) => {
         try {
             dispatch({
@@ -334,7 +334,10 @@ export const listOrders =
                     Authorization: `Bearer ${userInfo.token}`
                 }
             };
-            const { data } = await axios.get(`/api/orders?pageNumber=${pageNumber}&&keyword=${keyword}`, config);
+            const { data } = await axios.get(
+                `/api/orders?pageNumber=${pageNumber}&&keyword=${keyword}&&status=${status}`,
+                config
+            );
             dispatch({
                 type: ORDER_LIST_SUCCESS,
                 payload: data

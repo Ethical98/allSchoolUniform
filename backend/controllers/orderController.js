@@ -36,6 +36,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
       taxPrice,
       shippingPrice,
       totalPrice,
+      orderStatus: `Received: ${Date.now()}`,
     });
 
     // console.log(orderItems);
@@ -277,7 +278,16 @@ const sendMail = asyncHandler(async (req, res) => {
 const getOrders = asyncHandler(async (req, res) => {
   const pageSize = 25;
 
-  const { keyword } = req.query;
+  const { keyword, status } = req.query;
+
+  const orderStatusSearch = status
+    ? {
+        orderStatus: {
+          $regex: status,
+          $options: 'i',
+        },
+      }
+    : {};
 
   const searchKeyword = keyword
     ? {
@@ -307,21 +317,32 @@ const getOrders = asyncHandler(async (req, res) => {
   const page = Number(req.query.pageNumber) || 1;
 
   const orders = await Order.find({
-    $or: [
-      { ...searchKeyword },
-      { ...searchKeywordTwo },
-      { ...searchKeywordThree },
+    $and: [
+      {
+        $or: [
+          { ...searchKeyword },
+          { ...searchKeywordTwo },
+          { ...searchKeywordThree },
+        ],
+      },
+      { ...orderStatusSearch },
     ],
   })
     .populate('user', 'id name')
     .sort({ createdAt: -1 })
     .limit(pageSize)
     .skip(pageSize * (page - 1));
+
   const count = await Order.countDocuments({
-    $or: [
-      { ...searchKeyword },
-      { ...searchKeywordTwo },
-      { ...searchKeywordThree },
+    $and: [
+      {
+        $or: [
+          { ...searchKeyword },
+          { ...searchKeywordTwo },
+          { ...searchKeywordThree },
+        ],
+      },
+      { ...orderStatusSearch },
     ],
   });
 
@@ -389,6 +410,7 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
     ) {
       order.tracking.isDelivered = true;
       order.tracking.deliveredAt = Date.now();
+      order.orderStatus = `Delivered: ${Date.now()}`;
 
       const updatedOrder = await order.save();
 
@@ -415,6 +437,7 @@ const updateOrderToOutForDelivery = asyncHandler(async (req, res) => {
     if (order.tracking.isConfirmed && order.tracking.isProcessing) {
       order.tracking.isOutForDelivery = true;
       order.tracking.outForDeliveryAt = Date.now();
+      order.orderStatus = `Out For Delivery: ${Date.now()}`;
 
       const updatedOrder = await order.save();
 
@@ -443,6 +466,7 @@ const updateOrderToProcessing = asyncHandler(async (req, res) => {
     if (order.tracking.isConfirmed) {
       order.tracking.isProcessing = true;
       order.tracking.processedAt = Date.now();
+      order.orderStatus = `Processed: ${Date.now()}`;
 
       const updatedOrder = await order.save();
 
@@ -468,6 +492,7 @@ const updateOrderToConfirmed = asyncHandler(async (req, res) => {
     order.name = user.name;
     order.tracking.isConfirmed = true;
     order.tracking.confirmedAt = Date.now();
+    order.orderStatus = `Confirmed: ${Date.now()}`;
 
     const updatedOrder = await order.save();
 
@@ -489,6 +514,7 @@ const updateOrderToCanceled = asyncHandler(async (req, res) => {
     order.name = user.name;
     order.tracking.isCanceled = true;
     order.tracking.canceledAt = Date.now();
+    order.orderStatus = `Canceled: ${Date.now()}`;
 
     const updatedOrder = await order.save();
 

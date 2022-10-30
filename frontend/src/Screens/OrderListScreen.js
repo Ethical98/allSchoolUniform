@@ -15,9 +15,13 @@ import { Button, Form, InputGroup } from 'react-bootstrap';
 
 const OrderListScreen = ({ history, location }) => {
     const [keyword, setKeyword] = useState('');
+
     const urlSearchParams = new URLSearchParams(location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
+
     const pageNumber = params.page ? params.page : 1;
+    const [status, setStatus] = useState('');
+
     const dispatch = useDispatch();
 
     const orderList = useSelector((state) => state.orderList);
@@ -121,13 +125,13 @@ const OrderListScreen = ({ history, location }) => {
 
     useEffect(() => {
         if (userInfo && userInfo.isAdmin) {
-            dispatch(listOrders(pageNumber));
+            dispatch(listOrders(pageNumber, keyword, status));
         } else {
             dispatch(logout());
             history.push('/login');
         }
         // eslint-disable-next-line
-    }, [dispatch, userInfo, pageNumber]);
+    }, [dispatch, userInfo, pageNumber, status]);
 
     const csvData = map(orders, (order) => ({
         orderId: order.orderId,
@@ -189,7 +193,7 @@ const OrderListScreen = ({ history, location }) => {
                     {
                         icon: () => <i class="fa-solid fa-circle-info"></i>,
                         tooltip: 'Details',
-                        onClick: (event, rowData) => history.push(`/orderdetails/${rowData._id}`)
+                        onClick: (event, rowData) => window.open(`/orderdetails/${rowData._id}`, '_blank')
                     }
                 ]}
             />
@@ -215,6 +219,7 @@ const OrderListScreen = ({ history, location }) => {
                 >
                     Export to CSV
                 </CSVLink>
+
                 <InputGroup className="w-50">
                     <Form.Control
                         required
@@ -222,9 +227,34 @@ const OrderListScreen = ({ history, location }) => {
                         onChange={(e) => setKeyword(e.target.value)}
                         placeholder="Search Orders"
                     />
-                    <Button onClick={() => dispatch(listOrders(1, keyword))}>Search</Button>
+                    <Button
+                        onClick={() => {
+                            history.push('/admin/orderlist');
+                            dispatch(listOrders(1, keyword));
+                        }}
+                    >
+                        Search
+                    </Button>
                 </InputGroup>
             </div>
+            <Form.Group className="ms-auto w-50">
+                <Form.Select
+                    value={status}
+                    onChange={(e) => {
+                        setStatus(e.target.value);
+                        history.push('/admin/orderlist');
+                        dispatch(listOrders(1, keyword, e.target.value));
+                    }}
+                >
+                    <option value="">Filter Orders</option>
+                    <option value="Received">Received</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Processed">Processed</option>
+                    <option value="Out For Delivery">Out For Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Canceled">Canceled</option>
+                </Form.Select>
+            </Form.Group>
 
             {loading ? (
                 <Loader />
