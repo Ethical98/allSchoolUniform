@@ -177,6 +177,8 @@ const updateOrderTopaid = asyncHandler(async (req, res) => {
   const { paymentResult } = req.body;
 
   if (order) {
+    const user = await User.findById(order.user);
+    order.name = user.name;
     order.isPaid = true;
     order.paidAt = Date.now();
     order.paymentResult = {
@@ -383,6 +385,8 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
   if (order) {
+    const user = await User.findById(order.user);
+    order.name = user.name;
     if (
       order.tracking.isConfirmed &&
       order.tracking.isProcessing &&
@@ -411,6 +415,8 @@ const updateOrderToOutForDelivery = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
   if (order) {
+    const user = await User.findById(order.user);
+    order.name = user.name;
     if (order.tracking.isConfirmed && order.tracking.isProcessing) {
       order.tracking.isOutForDelivery = true;
       order.tracking.outForDeliveryAt = Date.now();
@@ -437,6 +443,8 @@ const updateOrderToProcessing = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
   if (order) {
+    const user = await User.findById(order.user);
+    order.name = user.name;
     if (order.tracking.isConfirmed) {
       order.tracking.isProcessing = true;
       order.tracking.processedAt = Date.now();
@@ -461,6 +469,8 @@ const updateOrderToConfirmed = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
   if (order) {
+    const user = await User.findById(order.user);
+    order.name = user.name;
     order.tracking.isConfirmed = true;
     order.tracking.confirmedAt = Date.now();
 
@@ -480,6 +490,8 @@ const updateOrderToCanceled = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
   if (order) {
+    const user = await User.findById(order.user);
+    order.name = user.name;
     order.tracking.isCanceled = true;
     order.tracking.canceledAt = Date.now();
 
@@ -500,6 +512,8 @@ const updateOrderBillType = asyncHandler(async (req, res) => {
   const billType = req.body.billType;
 
   if (order) {
+    const user = await User.findById(order.user);
+    order.name = user.name;
     order.billType = billType;
     const updatedOrder = await order.save();
 
@@ -517,6 +531,8 @@ const incrementInvoiceNumber = asyncHandler(async (req, res) => {
   const orderId = req.params.id;
   const order = await Order.findById(orderId);
   if (order) {
+    const user = await User.findById(order.user);
+    order.name = user.name;
     const invoice = await InvoiceNumber.findByIdAndUpdate(
       { _id: 'invoiceNumber' },
       { $inc: { number: 1 } },
@@ -529,6 +545,35 @@ const incrementInvoiceNumber = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error('Order not found');
   }
+});
+
+// @desc generate order reports
+// @route GET /api/orders/report
+// @access Private/Admin
+const orderReport = asyncHandler(async (req, res) => {
+  const orders = await Order.find({
+    createdAt: {
+      $gte: new Date('2022-10-06').toISOString(),
+      $lt: new Date().toISOString(),
+    },
+    modified: true,
+  })
+    .populate('user', 'name email phone')
+    .lean();
+
+  orders.forEach(
+    (orderObj) =>
+      (orderObj.pendingItems = orderObj.orderItems.filter(
+        (originalItem) =>
+          !orderObj.modifiedItems.some(
+            (item) => item.name === originalItem.name
+          )
+      ))
+  );
+
+  const pendingOrders = orders.filter((order) => order.pendingItems.length > 0);
+
+  res.status(200).json(pendingOrders);
 });
 
 export {
@@ -547,4 +592,5 @@ export {
   updateOrderToCanceled,
   updateOrderBillType,
   incrementInvoiceNumber,
+  orderReport,
 };

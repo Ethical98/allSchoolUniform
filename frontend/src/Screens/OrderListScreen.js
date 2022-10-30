@@ -199,10 +199,6 @@ const OrderListScreen = ({ history, location }) => {
         [orders]
     );
 
-    const searchOrders = (search) => {
-        setKeyword(search);
-    };
-
     return (
         <AdminPageLayout>
             <Meta
@@ -220,11 +216,11 @@ const OrderListScreen = ({ history, location }) => {
                 >
                     Export to CSV
                 </CSVLink>
-                <InputGroup className="w-25">
+                <InputGroup className="w-50">
                     <Form.Control
                         required
                         value={keyword}
-                        onChange={(e) => searchOrders(e.target.value)}
+                        onChange={(e) => setKeyword(e.target.value)}
                         placeholder="Search Orders"
                     />
                     <Button onClick={() => dispatch(listOrders(1, keyword))}>Search</Button>

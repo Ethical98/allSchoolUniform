@@ -423,7 +423,7 @@ export const clearResetPasswordRequest = () => async (dispatch) => {
 };
 
 export const listUsers =
-    (pageNumber = '') =>
+    (pageNumber = '', keyword = '') =>
     async (dispatch, getState) => {
         try {
             dispatch({
@@ -440,7 +440,7 @@ export const listUsers =
                 }
             };
 
-            const { data } = await axios.get(`/api/users?pageNumber=${pageNumber}`, config);
+            const { data } = await axios.get(`/api/users?pageNumber=${pageNumber}&&keyword=${keyword}`, config);
 
             dispatch({
                 type: USER_LIST_SUCCESS,

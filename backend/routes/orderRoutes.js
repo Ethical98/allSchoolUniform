@@ -8,6 +8,7 @@ import {
   getOrderByOrderId,
   getOrders,
   incrementInvoiceNumber,
+  orderReport,
   sendMail,
   updateOrderBillType,
   updateOrderToCanceled,
@@ -19,7 +20,7 @@ import {
 } from '../controllers/orderController.js';
 import { isAdmin, protect } from '../Middleware/authMiddleware.js';
 router.route('/send').get(sendMail);
-
+router.route('/report').get(orderReport);
 router.route('/').post(protect, addOrderItems).get(protect, isAdmin, getOrders);
 router.route('/myorders').get(protect, getMyOrders);
 router

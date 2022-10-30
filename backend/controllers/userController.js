@@ -202,7 +202,6 @@ const getShipppingAddress = asyncHandler(async (req, res) => {
   }
 });
 
-
 // @desc Check if email address is registered
 // @route POST /api/users/forgotPassword
 // @access public
@@ -250,12 +249,60 @@ const resetPassword = asyncHandler(async (req, res) => {
 // @route GET /api/users
 // @access Private/Admin
 const getUsers = asyncHandler(async (req, res) => {
-  const pageSize = 10;
+  const pageSize = 30;
+
+  const { keyword } = req.query;
+  let search = '';
+
+  const regExp = /[a-zA-Z]/g;
+  if (regExp.test(keyword)) {
+    search = keyword;
+  } else {
+    search = parseInt(keyword, 10);
+  }
+
+  const searchKeyword =
+    search && typeof search !== 'number'
+      ? {
+          name: {
+            $regex: search,
+            $options: 'i',
+          },
+        }
+      : {};
+  const searchKeywordTwo =
+    search && typeof search !== 'number'
+      ? {
+          email: {
+            $regex: search,
+            $options: 'i',
+          },
+        }
+      : {};
+  const searchKeywordThree =
+    search && typeof search === 'number'
+      ? {
+          phone: { $in: [search] },
+        }
+      : {};
+
   const page = Number(req.query.pageNumber) || 1;
-  const count = await User.countDocuments({});
-  const users = await User.find()
+  const count = await User.countDocuments({
+    $and: [
+      { $or: [{ ...searchKeyword }, { ...searchKeywordTwo }] },
+      { ...searchKeywordThree },
+    ],
+  });
+  const users = await User.find({
+    $and: [
+      { $or: [{ ...searchKeyword }, { ...searchKeywordTwo }] },
+      { ...searchKeywordThree },
+    ],
+  })
+    .sort({ createdAt: -1 })
     .limit(pageSize)
     .skip(pageSize * (page - 1));
+
   res.json({ users, page, pages: Math.ceil(count / pageSize) });
 });
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Row, Col, Image, Form } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
@@ -18,6 +18,8 @@ const ProductListScreen = ({ history, match, location }) => {
     const urlSearchParams = new URLSearchParams(location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
     const pageNumber = params.page ? params.page : 1;
+
+    const [keyword, setKeyword] = useState('');
 
     const dispatch = useDispatch();
 
@@ -114,7 +116,47 @@ const ProductListScreen = ({ history, match, location }) => {
         dispatch(listSchoolNames(query));
     };
     const filterBy = () => true;
-    const [newt, setNewt] = useState('');
+
+    const Table = useMemo(
+        () => (
+            <MaterialTable
+                style={{ padding: '1%' }}
+                title="Products"
+                data={products}
+                columns={columns}
+                options={{
+                    rowStyle: {
+                        border: '1px solid grey'
+                    },
+                    actionsColumnIndex: -1,
+                    paging: false
+                }}
+                editable={{
+                    onRowDelete: (oldData) =>
+                        new Promise((resolve, reject) => {
+                            setTimeout(() => {
+                                dispatch(deleteProduct(oldData._id));
+                                resolve();
+                            }, 1000);
+                        })
+                }}
+                actions={[
+                    {
+                        icon: 'edit',
+                        tooltip: 'Edit',
+                        onClick: (event, rowData) => window.open(`/admin/product/${rowData._id}/edit`, '_blank')
+                    }
+                ]}
+            />
+        ),
+        [products]
+    );
+
+    const searchProducts = (e) => {
+        e.preventDefault();
+        dispatch(listProducts(keyword, 1));
+    };
+
     return (
         <AdminPageLayout>
             <Meta title={'Product List - AllSchoolUniform'} description={'List Product'} />
@@ -122,6 +164,7 @@ const ProductListScreen = ({ history, match, location }) => {
                 <Col>
                     <h1>PRODUCTS</h1>
                 </Col>
+
                 <Col className="float-end">
                     <div>
                         <AsyncTypeahead
@@ -144,7 +187,15 @@ const ProductListScreen = ({ history, match, location }) => {
                     </Button>
                 </Col>
             </Row>
-            <Form.Control onChange={(e) => setNewt(e.target.value)}></Form.Control>
+            <Form className="d-flex w-50 ms-auto mb-3" onSubmit={searchProducts}>
+                <Form.Control
+                    required
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="Search Products"
+                />
+                <Button type="submit">Search</Button>
+            </Form>
             {errorDelete && <Message varaint="danger">{errorDelete}</Message>}
             {loading ? (
                 <Loader />
@@ -152,35 +203,7 @@ const ProductListScreen = ({ history, match, location }) => {
                 <Message variant="danger">{error}</Message>
             ) : (
                 <>
-                    <MaterialTable
-                        style={{ padding: '1%' }}
-                        title="Products"
-                        data={products}
-                        columns={columns}
-                        options={{
-                            rowStyle: {
-                                border: '1px solid grey'
-                            },
-                            actionsColumnIndex: -1,
-                            paging: false
-                        }}
-                        editable={{
-                            onRowDelete: (oldData) =>
-                                new Promise((resolve, reject) => {
-                                    setTimeout(() => {
-                                        dispatch(deleteProduct(oldData._id));
-                                        resolve();
-                                    }, 1000);
-                                })
-                        }}
-                        actions={[
-                            {
-                                icon: 'edit',
-                                tooltip: 'Edit',
-                                onClick: (event, rowData) => window.open(`/admin/product/${rowData._id}/edit`, '_blank')
-                            }
-                        ]}
-                    />
+                    {Table}
                     <Paginate pages={pages} page={page} isAdmin products />
                 </>
             )}
