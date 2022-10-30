@@ -252,50 +252,45 @@ const getUsers = asyncHandler(async (req, res) => {
   const pageSize = 30;
 
   const { keyword } = req.query;
-  let search = '';
 
-  const regExp = /[a-zA-Z]/g;
-  if (regExp.test(keyword)) {
-    search = keyword;
-  } else {
-    search = parseInt(keyword, 10);
-  }
 
-  const searchKeyword =
-    search && typeof search !== 'number'
-      ? {
-          name: {
-            $regex: search,
-            $options: 'i',
-          },
-        }
-      : {};
-  const searchKeywordTwo =
-    search && typeof search !== 'number'
-      ? {
-          email: {
-            $regex: search,
-            $options: 'i',
-          },
-        }
-      : {};
-  const searchKeywordThree =
-    search && typeof search === 'number'
-      ? {
-          phone: { $in: [search] },
-        }
-      : {};
+  const searchKeyword = keyword
+    ? {
+        name: {
+          $regex: keyword,
+          $options: 'i',
+        },
+      }
+    : {};
+  const searchKeywordTwo = keyword
+    ? {
+        email: {
+          $regex: keyword,
+          $options: 'i',
+        },
+      }
+    : {};
+  const searchKeywordThree = keyword
+    ? {
+        phone: {
+          $regex: keyword,
+          $options: 'i',
+        },
+      }
+    : {};
 
   const page = Number(req.query.pageNumber) || 1;
   const count = await User.countDocuments({
-    $and: [
-      { $or: [{ ...searchKeyword }, { ...searchKeywordTwo }] },
+    $or: [
+      { ...searchKeyword },
+      { ...searchKeywordTwo },
       { ...searchKeywordThree },
     ],
   });
   const users = await User.find({
-    $and: [
-      { $or: [{ ...searchKeyword }, { ...searchKeywordTwo }] },
+    $or: [
+      { ...searchKeyword },
+      { ...searchKeywordTwo },
       { ...searchKeywordThree },
     ],
   })

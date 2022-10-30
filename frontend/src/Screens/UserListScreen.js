@@ -66,8 +66,6 @@ const UserListScreen = ({ history, location }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {});
-
     useEffect(() => {
         if (userInfo && userInfo.token) {
             jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {

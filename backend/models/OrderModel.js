@@ -89,7 +89,7 @@ const orderSchema = mongoose.Schema(
       email_address: { type: String },
     },
     phone: {
-      type: Number,
+      type: String,
       required: true,
     },
     taxPrice: {

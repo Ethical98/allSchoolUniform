@@ -278,44 +278,38 @@ const getOrders = asyncHandler(async (req, res) => {
   const pageSize = 25;
 
   const { keyword } = req.query;
-  let search = '';
 
-  const regExp = /[a-zA-Z]/g;
-  if (regExp.test(keyword)) {
-    search = keyword;
-  } else {
-    search = parseInt(keyword, 10);
-  }
+  const searchKeyword = keyword
+    ? {
+        name: {
+          $regex: keyword,
+          $options: 'i',
+        },
+      }
+    : {};
+  const searchKeywordTwo = keyword
+    ? {
+        orderId: {
+          $regex: keyword,
+          $options: 'i',
+        },
+      }
+    : {};
+  const searchKeywordThree = keyword
+    ? {
+        phone: {
+          $regex: keyword,
+          $options: 'i',
+        },
+      }
+    : {};
 
-  const searchKeyword =
-    search && typeof search !== 'number'
-      ? {
-          name: {
-            $regex: search,
-            $options: 'i',
-          },
-        }
-      : {};
-  const searchKeywordTwo =
-    search && typeof search !== 'number'
-      ? {
-          orderId: {
-            $regex: search,
-            $options: 'i',
-          },
-        }
-      : {};
-  const searchKeywordThree =
-    search && typeof search === 'number'
-      ? {
-          phone: { $in: [search] },
-        }
-      : {};
   const page = Number(req.query.pageNumber) || 1;
 
   const orders = await Order.find({
-    $and: [
-      { $or: [{ ...searchKeyword }, { ...searchKeywordTwo }] },
+    $or: [
+      { ...searchKeyword },
+      { ...searchKeywordTwo },
       { ...searchKeywordThree },
     ],
   })
@@ -324,8 +318,9 @@ const getOrders = asyncHandler(async (req, res) => {
     .limit(pageSize)
     .skip(pageSize * (page - 1));
   const count = await Order.countDocuments({
-    $and: [
-      { $or: [{ ...searchKeyword }, { ...searchKeywordTwo }] },
+    $or: [
+      { ...searchKeyword },
+      { ...searchKeywordTwo },
       { ...searchKeywordThree },
     ],
   });
