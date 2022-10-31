@@ -313,6 +313,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     type,
     isActive,
     SEOKeywords,
+    outOfStock,
   } = req.body;
 
   const product = await Product.findById(req.params.id);
@@ -330,6 +331,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.isActive = isActive;
     product.SKU = SKU;
     product.SEOKeywords = SEOKeywords;
+    product.outOfStock = outOfStock;
 
     const updatedProduct = await product.save();
     res.status(201).json(updatedProduct);

@@ -15,6 +15,7 @@ const Product = ({ product }) => {
     const [productPrice, setProductPrice] = useState(product.size[0].price);
     const [countInStock, setCountInStock] = useState(product.size[0].countInStock);
     const [productDisc, setProductDisc] = useState(product.size[0].discount);
+    const [outOfStock, setIsOutOfStock] = useState(product.size[0].outOfStock);
 
     const typeImages = useSelector((state) => state.typeImages);
     const { loading, images } = typeImages;
@@ -40,6 +41,7 @@ const Product = ({ product }) => {
         setProductPrice(product.size[index].price);
         setCountInStock(product.size[index].countInStock);
         setProductDisc(product.size[index].discount);
+        setIsOutOfStock(product.size[index].outOfStock);
         // eslint-disable-next-line
     }, [index]);
 
@@ -72,7 +74,7 @@ const Product = ({ product }) => {
                 )}
             </DialogBox>
             <Card className="my-3  rounded text-center product-card" bg="white">
-                {productDisc !== 0 && <div className='disc-badge'>-{productDisc}%</div>}
+                {productDisc !== 0 && <div className="disc-badge">-{productDisc}%</div>}
                 <Link to={`/products/${join(split(lowerCase(product.name), ' '), '-')}`}>
                     <Card.Img
                         src={product.image}
@@ -90,85 +92,99 @@ const Product = ({ product }) => {
                         </Card.Title>
                     </Link>
 
-                    <Card.Text className="text-center" as="h6">
-                        ₹
-                        {productDisc > 0 ? (
-                            <span>
-                                <span
-                                    style={{
-                                        textDecorationLine: 'line-through',
-                                        textDecorationStyle: 'solid',
-                                        color: 'red'
-                                    }}
-                                >
-                                    {productPrice}
+                    {!product.outOfStock && (
+                        <Card.Text className="text-center" as="h6">
+                            ₹
+                            {productDisc > 0 ? (
+                                <span>
+                                    <span
+                                        style={{
+                                            textDecorationLine: 'line-through',
+                                            textDecorationStyle: 'solid',
+                                            color: 'red'
+                                        }}
+                                    >
+                                        {productPrice}
+                                    </span>
+                                    <span className="mx-1">{productPrice - productPrice * (productDisc / 100)}</span>
                                 </span>
-                                <span className="mx-1">{productPrice - productPrice * (productDisc / 100)}</span>
-                            </span>
-                        ) : (
-                            <span>{productPrice}</span>
-                        )}
-                    </Card.Text>
+                            ) : (
+                                <span>{productPrice}</span>
+                            )}
+                        </Card.Text>
+                    )}
 
                     <Card className="sizeCard" bg="white" style={{ padding: '2%' }}>
-                        <Card.Text className="text-center size-text">Choose Your Size</Card.Text>
+                        {!product.outOfStock ? (
+                            <>
+                                <Card.Text className="text-center size-text">Choose Your Size</Card.Text>
 
-                        <Row className="g-1">
-                            <Col xs>
-                                <Form.Select
-                                    size="sm"
-                                    onChange={(e) => {
-                                        handleChange(e.target.value);
-                                    }}
-                                >
-                                    {product.size
-                                        .sort((a, b) => {
-                                            return a.size - b.size;
-                                        })
-                                        .map((x) => (
-                                            <option key={x._id} value={x.size}>
-                                                {x.size}
-                                            </option>
-                                        ))}
-                                </Form.Select>
-                            </Col>
-                            {countInStock > 0 && (
-                                <Col xs>
-                                    <Form.Select size="sm" onChange={(e) => setQty(Number(e.target.value))}>
-                                        {[...Array(countInStock).keys()].map((x) => (
-                                            <option key={x + 1} value={x + 1}>
-                                                {x + 1}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                </Col>
-                            )}
-                            <Col xs>
-                                <Button
-                                    onClick={() => handleShow(product.type)}
-                                    variant="outline-info"
-                                    className="sgButton col-12"
-                                    size="sm"
-                                >
-                                    Size Guide
-                                </Button>
-                            </Col>
-                        </Row>
+                                <Row className="g-1">
+                                    <Col xs>
+                                        <Form.Select
+                                            size="sm"
+                                            onChange={(e) => {
+                                                handleChange(e.target.value);
+                                            }}
+                                        >
+                                            {product.size
+                                                .sort((a, b) => {
+                                                    return a.size - b.size;
+                                                })
+                                                .map((x) => (
+                                                    <option key={x._id} value={x.size}>
+                                                        {x.size}
+                                                    </option>
+                                                ))}
+                                        </Form.Select>
+                                    </Col>
+                                    {(countInStock > 0 || !outOfStock) && (
+                                        <Col xs>
+                                            <Form.Select size="sm" onChange={(e) => setQty(Number(e.target.value))}>
+                                                {[...Array(countInStock).keys()].map((x) => (
+                                                    <option key={x + 1} value={x + 1}>
+                                                        {x + 1}
+                                                    </option>
+                                                ))}
+                                            </Form.Select>
+                                        </Col>
+                                    )}
+                                    <Col xs>
+                                        <Button
+                                            onClick={() => handleShow(product.type)}
+                                            variant="outline-info"
+                                            className="sgButton col-12"
+                                            size="sm"
+                                        >
+                                            Size Guide
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </>
+                        ) : (
+                            <div>This Item will be Available in 5-7 Days. Please Order after 5-7 days</div>
+                        )}
                     </Card>
 
                     <div className="mb-3">
                         <Rating value={product.rating} text={`${product.numReviews} reviews`} />
                     </div>
 
-                    <Button
-                        variant="dark"
-                        size="sm"
-                        disabled={countInStock === 0}
-                        className="mb-3"
-                        onClick={() => addToCartHandler(id, qty)}
-                    >
-                        Add To Cart
-                    </Button>
+                    {!product.outOfStock ? (
+                        <Button
+                            variant="dark"
+                            size="sm"
+                            disabled={countInStock === 0 || outOfStock}
+                            className="mb-3"
+                            onClick={() => addToCartHandler(id, qty)}
+                        >
+                            {outOfStock ? 'OUT OF STOCK' : 'Add To Cart'}
+                        </Button>
+                    ) : (
+                        <p>
+                            <b>OUT OF STOCK</b>
+                        </p>
+                    )}
                 </Card.Body>
             </Card>
         </div>

@@ -64,6 +64,7 @@ const ProductDescriptionScreen = ({ history }) => {
     const [productPrice, setProductPrice] = useState(0);
     const [countInStock, setCountInStock] = useState(0);
     const [productDisc, setProductDisc] = useState(0);
+    const [outOfStock, setIsOutOfStock] = useState();
 
     const [show, setShow] = useState(false);
 
@@ -72,13 +73,13 @@ const ProductDescriptionScreen = ({ history }) => {
 
     const dispatch = useDispatch();
 
-    const productDetails = useSelector(state => state.productDetails);
+    const productDetails = useSelector((state) => state.productDetails);
     const { loading, error, product } = productDetails;
 
-    const productCreateReview = useSelector(state => state.productCreateReview);
+    const productCreateReview = useSelector((state) => state.productCreateReview);
     const { error: errorProductReview, success: successProductReview } = productCreateReview;
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
     useEffect(() => {
@@ -86,6 +87,7 @@ const ProductDescriptionScreen = ({ history }) => {
             setProductPrice(product.size[index].price);
             setCountInStock(product.size[index].countInStock);
             setProductDisc(product.size[index].discount);
+            setIsOutOfStock(product.size[index].outOfStock);
         }
     }, [product, index]);
 
@@ -116,11 +118,11 @@ const ProductDescriptionScreen = ({ history }) => {
         history.push(`/cart`);
     };
 
-    const handleSizeChange = val => {
-        setIndex(product.size.findIndex(x => x.size === val));
+    const handleSizeChange = (val) => {
+        setIndex(product.size.findIndex((x) => x.size === val));
     };
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         e.preventDefault();
         if (rating === 0) {
             setShow(true);
@@ -129,7 +131,7 @@ const ProductDescriptionScreen = ({ history }) => {
         }
     };
 
-    const renderTooltip = props => (
+    const renderTooltip = (props) => (
         <Tooltip id="button-tooltip" style={{ marginRight: '40%' }} {...props}>
             Please Fill the rating
         </Tooltip>
@@ -175,27 +177,29 @@ const ProductDescriptionScreen = ({ history }) => {
                                             text={`${product.numReviews} reviews`}
                                         />
                                     </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <div>
-                                            MRP: ₹
-                                            <span
-                                                style={{
-                                                    textDecorationLine: 'line-through',
-                                                    textDecorationStyle: 'solid',
-                                                    color: 'red'
-                                                }}
-                                            >
-                                                {productPrice}
-                                            </span>
-                                            <span className="mx-1">
-                                                {productPrice - productPrice * (productDisc / 100)}
-                                            </span>
-                                        </div>
-                                        <div>Price: ₹{productPrice - productPrice * (productDisc / 100)}</div>
-                                        <div>
-                                            You Save: ₹{productPrice * (productDisc / 100)} ({productDisc}%)
-                                        </div>
-                                    </ListGroup.Item>
+                                    {!product.outOfStock && (
+                                        <ListGroup.Item>
+                                            <div>
+                                                MRP: ₹
+                                                <span
+                                                    style={{
+                                                        textDecorationLine: 'line-through',
+                                                        textDecorationStyle: 'solid',
+                                                        color: 'red'
+                                                    }}
+                                                >
+                                                    {productPrice}
+                                                </span>
+                                                <span className="mx-1">
+                                                    {productPrice - productPrice * (productDisc / 100)}
+                                                </span>
+                                            </div>
+                                            <div>Price: ₹{productPrice - productPrice * (productDisc / 100)}</div>
+                                            <div>
+                                                You Save: ₹{productPrice * (productDisc / 100)} ({productDisc}%)
+                                            </div>
+                                        </ListGroup.Item>
+                                    )}
                                     <ListGroup.Item>Description: {product.description}</ListGroup.Item>
                                     <ListGroup.Item>
                                         Delivery & Returns:
@@ -209,45 +213,56 @@ const ProductDescriptionScreen = ({ history }) => {
                         <Col md={4}>
                             <Card>
                                 <ListGroup variant="flush">
-                                    <ListGroup.Item>
-                                        <Row>
-                                            <Col>Price:</Col>
-                                            <Col>
-                                                <strong>₹ {productPrice - productPrice * (productDisc / 100)}</strong>
-                                            </Col>
-                                        </Row>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <Row>
-                                            <Col>Status:</Col>
-                                            <Col>{countInStock > 0 ? 'In Stock' : 'Out of Stock'}</Col>
-                                        </Row>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <Row>
-                                            <Col>SIZE</Col>
-                                            <Col>
-                                                <Form.Select onChange={e => handleSizeChange(e.target.value)}>
-                                                    <option>Size</option>
-                                                    {product.size &&
-                                                        product.size.map(x => {
-                                                            return (
-                                                                <option key={x._id} value={x.size}>
-                                                                    {x.size}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                </Form.Select>
-                                            </Col>
-                                        </Row>
-                                    </ListGroup.Item>
-                                    {countInStock > 0 && (
+                                    {!product.outOfStock && (
+                                        <>
+                                            <ListGroup.Item>
+                                                <Row>
+                                                    <Col>Price:</Col>
+                                                    <Col>
+                                                        <strong>
+                                                            ₹ {productPrice - productPrice * (productDisc / 100)}
+                                                        </strong>
+                                                    </Col>
+                                                </Row>
+                                            </ListGroup.Item>
+
+                                            <ListGroup.Item>
+                                                <Row>
+                                                    <Col>Status:</Col>
+                                                    <Col>
+                                                        {countInStock > 0 || !outOfStock ? 'In Stock' : 'Out of Stock'}
+                                                    </Col>
+                                                </Row>
+                                            </ListGroup.Item>
+                                        </>
+                                    )}
+                                    {!product.outOfStock && (
+                                        <ListGroup.Item>
+                                            <Row>
+                                                <Col>SIZE</Col>
+                                                <Col>
+                                                    <Form.Select onChange={(e) => handleSizeChange(e.target.value)}>
+                                                        <option>Size</option>
+                                                        {product.size &&
+                                                            product.size.map((x) => {
+                                                                return (
+                                                                    <option key={x._id} value={x.size}>
+                                                                        {x.size}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                    </Form.Select>
+                                                </Col>
+                                            </Row>
+                                        </ListGroup.Item>
+                                    )}
+                                    {!product.outOfStock && (countInStock > 0 || !outOfStock) && (
                                         <ListGroup.Item>
                                             <Row>
                                                 <Col>QTY</Col>
                                                 <Col>
-                                                    <Form.Select value={qty} onChange={e => setQty(e.target.value)}>
-                                                        {[...Array(countInStock).keys()].map(x => (
+                                                    <Form.Select value={qty} onChange={(e) => setQty(e.target.value)}>
+                                                        {[...Array(countInStock).keys()].map((x) => (
                                                             <option key={x + 1} value={x + 1}>
                                                                 {x + 1}
                                                             </option>
@@ -257,6 +272,11 @@ const ProductDescriptionScreen = ({ history }) => {
                                             </Row>
                                         </ListGroup.Item>
                                     )}
+                                    {product.outOfStock && (
+                                        <ListGroup.Item>
+                                            <p>This Item will be Available in 5-7 Days. Please Order after 5-7 days</p>
+                                        </ListGroup.Item>
+                                    )}
 
                                     <ListGroup.Item>
                                         <Button variant="outline-info" className="col-12">
@@ -264,15 +284,21 @@ const ProductDescriptionScreen = ({ history }) => {
                                         </Button>
                                     </ListGroup.Item>
                                     <ListGroup.Item>
-                                        <Button
-                                            variant="dark"
-                                            onClick={addToCartHandler}
-                                            className="col-12"
-                                            type="button"
-                                            disabled={countInStock === 0}
-                                        >
-                                            Add To Cart
-                                        </Button>
+                                        {!product.outOfStock ? (
+                                            <Button
+                                                variant="dark"
+                                                onClick={addToCartHandler}
+                                                className="col-12"
+                                                type="button"
+                                                disabled={countInStock === 0 || outOfStock}
+                                            >
+                                                Add To Cart
+                                            </Button>
+                                        ) : (
+                                            <p>
+                                                <b>OUT OF STOCK</b>
+                                            </p>
+                                        )}
                                     </ListGroup.Item>
                                 </ListGroup>
                             </Card>
@@ -283,7 +309,7 @@ const ProductDescriptionScreen = ({ history }) => {
                             <h2>REVIEWS</h2>
                             {product.reviews.length === 0 && <Message variant="info">No Reviews</Message>}
                             <ListGroup variant="flush">
-                                {product.reviews.map(review => (
+                                {product.reviews.map((review) => (
                                     // <ListGroup.Item key={review._id}>
                                     //   <strong>{review.name}</strong>
                                     //   <Rating value={review.rating} />
@@ -345,7 +371,7 @@ const ProductDescriptionScreen = ({ history }) => {
                                                         type="text"
                                                         placeholder="Comment"
                                                         value={comment}
-                                                        onChange={e => setComment(e.target.value)}
+                                                        onChange={(e) => setComment(e.target.value)}
                                                     ></Form.Control>
                                                 </FloatingLabel>
                                             </Form.Group>

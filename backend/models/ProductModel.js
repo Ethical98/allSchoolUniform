@@ -25,6 +25,7 @@ const sizeSchema = mongoose.Schema({
   discount: { type: Number },
   alertOnQty: { type: Number },
   tax: { type: Number },
+  outOfStock: { type: Boolean, default: false },
 });
 
 const productSchema = mongoose.Schema(
@@ -35,7 +36,7 @@ const productSchema = mongoose.Schema(
       ref: 'User',
     },
     SKU: { type: String, rquired: true, unique: true },
-
+    outOfStock: { type: Boolean, default: false },
     season: { type: String, required: true },
     name: {
       type: String,

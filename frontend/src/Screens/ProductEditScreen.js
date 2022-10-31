@@ -45,6 +45,7 @@ const ProductEditScreen = ({ match, history, location }) => {
     const [size, setSize] = useState([]);
     const [message, setMessage] = useState('');
     const [isActive, setIsActive] = useState(false);
+    const [outOfStock, setIsOutOfStock] = useState(false);
 
     const [masterSize, setMasterSize] = useState([]);
 
@@ -79,6 +80,21 @@ const ProductEditScreen = ({ match, history, location }) => {
         {
             title: 'Tax',
             field: 'tax'
+        },
+        {
+            title: 'Out Of Stock',
+            field: 'outOfStock',
+            render: (rowData) => (rowData.outOfStock ? 'YES' : 'NO'),
+            editComponent: (props) => (
+                <Form.Group controlId="isOutOfStockIndividual" className="mb-3">
+                    <Form.Check
+                        className="mb-3"
+                        type="checkbox"
+                        checked={props.value}
+                        onChange={(e) => props.onChange(e.target.checked)}
+                    ></Form.Check>
+                </Form.Group>
+            )
         }
     ];
 
@@ -131,7 +147,7 @@ const ProductEditScreen = ({ match, history, location }) => {
 
     const removeIdHandler = (sizeArray) => {
         const newSizeArray = sizeArray.map(
-            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive }) => ({
+            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive, outOfStock }) => ({
                 price,
                 countInStock,
                 openingQty,
@@ -139,7 +155,8 @@ const ProductEditScreen = ({ match, history, location }) => {
                 discount,
                 size,
                 alertOnQty,
-                isActive
+                isActive,
+                outOfStock
             })
         );
         return newSizeArray;
@@ -170,6 +187,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                 setName(product.name);
                 setImage(product.image);
                 setSeason(product.season);
+
                 setSize([...product.size]);
                 setCategory(product.category);
                 setStandard([...product.class]);
@@ -179,6 +197,7 @@ const ProductEditScreen = ({ match, history, location }) => {
                 setBrand(product.brand);
                 setSKU(product.SKU);
                 setSEOKeywords(product.SEOKeywords);
+                setIsOutOfStock(product.outOfStock);
                 // If (masterSchools) {
                 //   SetMasterSchool([
                 //     ...masterSchools.filter((x) => x.isActive === true),
@@ -268,7 +287,8 @@ const ProductEditScreen = ({ match, history, location }) => {
                 season,
                 standard,
                 isActive,
-                SEOKeywords
+                SEOKeywords,
+                outOfStock
             })
         );
     };
@@ -292,6 +312,9 @@ const ProductEditScreen = ({ match, history, location }) => {
                     ? size[size.findIndex((y) => y.size === x.size)].openingQty
                     : 0;
                 x.tax = size.some((y) => y.size === x.size) ? size[size.findIndex((y) => y.size === x.size)].tax : 0;
+                x.outOfStock = size.some((y) => y.size === x.size)
+                    ? size[size.findIndex((y) => y.size === x.size)].outOfStock
+                    : false;
             });
         }
     }, [masterSize, size]);
@@ -316,6 +339,8 @@ const ProductEditScreen = ({ match, history, location }) => {
         setName(value.replace(/[^\w\s]/gi, ''));
     };
 
+    console.log(size);
+
     return (
         <AdminPageLayout>
             <Meta title={'Product Edit - AllSchoolUniform'} description={'Edit Product'} />
@@ -338,6 +363,15 @@ const ProductEditScreen = ({ match, history, location }) => {
                     <Form onSubmit={submitHandler}>
                         <Row>
                             <Col md={3}>
+                                <Form.Group controlId="isOutOfStock" className="mb-3">
+                                    <Form.Check
+                                        className="mb-3"
+                                        type="checkbox"
+                                        label="Out Of Stock"
+                                        checked={outOfStock}
+                                        onChange={(e) => setIsOutOfStock(e.target.checked)}
+                                    ></Form.Check>
+                                </Form.Group>
                                 <FloatingLabel controlId="sku" label="SKU" className="mb-3">
                                     <Form.Control
                                         required
