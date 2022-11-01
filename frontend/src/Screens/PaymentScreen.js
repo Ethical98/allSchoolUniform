@@ -16,7 +16,6 @@ const PaymentScreen = ({ history }) => {
     const cart = useSelector((state) => state.cart);
     const { shippingAddress, cartItems } = cart;
 
-
     const [paymentMethod, setPaymentMethod] = useState('');
 
     const dispatch = useDispatch();
@@ -74,6 +73,7 @@ const PaymentScreen = ({ history }) => {
                             <ListGroup.Item>
                                 <Form.Check
                                     required
+                                    disabled
                                     type="radio"
                                     label="Cash On Delivery"
                                     id="COD"
@@ -81,6 +81,17 @@ const PaymentScreen = ({ history }) => {
                                     value="COD"
                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                 ></Form.Check>
+                                <p style={{ margin: 0, color: 'red' }}>
+                                    Due to heavy rush Cash on Delivery(COD) is not available. <br />
+                                    Please Cooperate.
+                                    <br />
+                                    <p style={{ color: 'green' }}>
+                                        <b>
+                                            Your money is safe with us and will be Refunded in 5-7 Days .If Order is not
+                                            delivered.
+                                        </b>
+                                    </p>
+                                </p>
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 <Form.Check

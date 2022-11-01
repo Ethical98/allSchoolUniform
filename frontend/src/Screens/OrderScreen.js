@@ -88,7 +88,7 @@ const OrderScreen = ({ match, history }) => {
                             </h1>
 
                             <h5>Your Order Has been Placed! Thank You for Shopping with Us.</h5>
-                            <h6> An Email Confirmation has been sent to You.</h6>
+                            {/* <h6> An Email Confirmation has been sent to You.</h6> */}
 
                             <h2 className="mt-2">Details</h2>
 
@@ -106,7 +106,12 @@ const OrderScreen = ({ match, history }) => {
                                     {order.shippingAddress.postalCode},{''}
                                     {order.shippingAddress.country}
                                 </p>
-                                <p>Order will be Delivered in 24-48 Hours</p>
+                                <p>Order will be Delivered in 3-4 Days</p>
+                                <br />
+                                <p>Due to heavy rush deliveries are delayed.Please Cooperate</p>
+                                <br />
+                                <p>Sorry for the inconvenience : Team Allschooluniform</p>
+
                                 {/* {order.isPaid ? (
                     <Message variant='success'>Paid on {order.paidAt}</Message>
                   ) : (

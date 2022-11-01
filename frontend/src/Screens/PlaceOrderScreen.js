@@ -243,6 +243,10 @@ const PlaceOrderScreen = ({ history }) => {
                                 >
                                     Place Order
                                 </Button>
+                                <b>
+                                    Due to heavy rush Orders will be delivered in 3-4 Days and trial is not
+                                    available.Please Cooperate. Sorry for the inconvenience.:Team AllSchoolUniform
+                                </b>
                                 {/* )} */}
                             </ListGroup.Item>
                         </ListGroup>
