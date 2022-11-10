@@ -131,6 +131,13 @@ const PlaceOrderScreen = ({ history }) => {
             />
             <CheckoutSteps step1 step2 step3 step4 />
             {message && <Message variant="warning">{message}</Message>}
+            <div style={{ padding: '10px', backgroundColor: 'orange', marginBottom: '10px', borderRadius: '10px' }}>
+                <b>
+                    <p>
+                        Please try payments with Credit/Debit Card Only.Other Methods are facing some technical issue.
+                    </p>
+                </b>
+            </div>
             <Row>
                 <Col md={8}>
                     <Card>
