@@ -105,7 +105,73 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
     }
 };
 
-export const payOrderPayU = (totalPrice, name, email, mobile) => async (dispatch, getState) => {
+// export const payOrderPayU = (totalPrice, name, email, mobile) => async (dispatch, getState) => {
+//     try {
+//         const {
+//             userLogin: { userInfo }
+//         } = getState();
+
+//         const config = {
+//             headers: {
+//                 Accept: 'application/json',
+//                 'Content-Type': 'application/json',
+//                 Authorization: `Bearer ${userInfo.token}`
+//             }
+//         };
+//         const d = new Date();
+//         const pd = {
+//             key: process.env.REACT_APP_PAYUMONEY_MERCHANT_KEY,
+//             txnid: d.getTime().toString(),
+//             hash: '',
+//             amount: totalPrice,
+//             firstname: name,
+//             email,
+//             phone: mobile,
+//             productinfo: 'SchoolProducts',
+//             udf5: 'ALLSCHOOLUNIFORM',
+//             surl: 'http://localhost:3000/order',
+//             furl: 'http://localhost:3000/paymentfailed'
+//         };
+
+//         const detail = {
+//             txnid: pd.txnid,
+//             email: pd.email,
+//             amount: pd.amount,
+//             productinfo: pd.productinfo,
+//             firstname: pd.firstname,
+//             udf5: pd.udf5
+//         };
+//         const { data } = await axios.post('/api/pay/payment/payumoney', detail, config);
+
+//         pd.hash = data.hash;
+
+//         dispatch({
+//             type: ORDER_PAY_REQUEST,
+//             payload: pd
+//         });
+//         window.bolt.launch(
+//             pd,
+
+//             {
+//                 responseHandler: async (response) => {
+//                     dispatch(paymentStatus(response.response));
+//                 },
+//                 catchException(response) {
+//                     dispatch({
+//                         type: ORDER_PAY_FAIL,
+//                         payload: response
+//                     });
+//                 }
+//             }
+//         );
+//     } catch (error) {
+//         dispatch({
+//             type: ORDER_PAY_FAIL,
+//             payload: error.response && error.response.data.message ? error.response.data.message : error.message
+//         });
+//     }
+// };
+export const launchPaymentPortal = (amount, name, email, mobile) => async (dispatch, getState) => {
     try {
         const {
             userLogin: { userInfo }
@@ -118,52 +184,47 @@ export const payOrderPayU = (totalPrice, name, email, mobile) => async (dispatch
                 Authorization: `Bearer ${userInfo.token}`
             }
         };
-        const d = new Date();
-        const pd = {
-            key: process.env.REACT_APP_PAYUMONEY_MERCHANT_KEY,
-            txnid: d.getTime().toString(),
-            hash: '',
-            amount: totalPrice,
-            firstname: name,
-            email,
-            phone: mobile,
-            productinfo: 'SchoolProducts',
-            udf5: 'ALLSCHOOLUNIFORM',
-            surl: 'http://localhost:3000/order',
-            furl: 'http://localhost:3000/paymentfailed'
-        };
 
-        const detail = {
-            txnid: pd.txnid,
-            email: pd.email,
-            amount: pd.amount,
-            productinfo: pd.productinfo,
-            firstname: pd.firstname,
-            udf5: pd.udf5
-        };
-        const { data } = await axios.post('/api/pay/payment/payumoney', detail, config);
-
-        pd.hash = data.hash;
+        const { data } = await axios.post('/api/pay/payment', { amount }, config);
 
         dispatch({
             type: ORDER_PAY_REQUEST,
-            payload: pd
+            payload: data
         });
-        window.bolt.launch(
-            pd,
 
-            {
-                responseHandler: async (response) => {
-                    dispatch(paymentStatus(response.response));
-                },
-                catchException(response) {
-                    dispatch({
-                        type: ORDER_PAY_FAIL,
-                        payload: response
-                    });
-                }
+        var paymentDetails = {
+            key: process.env.REACT_APP_RAZORPAY_API_KEY,
+            amount: amount,
+            currency: 'INR',
+            name: 'AllSchoolUniform',
+            description: 'School Uniform',
+            image: 'https://allschooluniform.com/uploads/asu-top-logo.png',
+            order_id: data.order.id,
+            handler: function (response) {
+                dispatch(paymentStatus(response));
+            },
+            prefill: {
+                name: name,
+                email: email,
+                contact: mobile
+            },
+            notes: {
+                address: ''
+            },
+            theme: {
+                color: '#3399cc'
             }
-        );
+        };
+
+        var razorLaunch = new window.Razorpay(paymentDetails);
+        razorLaunch.on('payment.failed', function (response) {
+            dispatch({
+                type: ORDER_PAY_FAIL,
+                payload: response
+            });
+        });
+
+        razorLaunch.open();
     } catch (error) {
         dispatch({
             type: ORDER_PAY_FAIL,
@@ -186,12 +247,12 @@ const paymentStatus = (response) => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.post('/api/pay/payment/payumoney/response', { response }, config);
+        const { data: success } = await axios.post('/api/pay/payment/verify', { response }, config);
 
-        if (data.status === 'SUCCESS') {
+        if (success) {
             dispatch({
                 type: ORDER_PAY_SUCCESS,
-                payload: data
+                payload: { ...response, name: userInfo.name, email: userInfo.email }
             });
         }
     } catch (error) {

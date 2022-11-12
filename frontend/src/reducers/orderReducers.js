@@ -92,12 +92,12 @@ export const orderPayReducer = (state = { response: { order: {} } }, action) => 
         case ORDER_PAY_SUCCESS:
             return {
                 ...state,
+                paymentDetails: action.payload,
                 loading: false,
-                success: true,
-                response: action.payload
+                success: true
             };
         case ORDER_PAY_FAIL:
-            return { ...state, loading: false, error: action.payload };
+            return { ...state, loading: false, error: action.payload, success: false };
         case ORDER_PAY_RESET:
             return {};
         default:

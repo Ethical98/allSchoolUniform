@@ -183,10 +183,11 @@ const updateOrderTopaid = asyncHandler(async (req, res) => {
     order.isPaid = true;
     order.paidAt = Date.now();
     order.paymentResult = {
-      id: paymentResult.mihpayid,
-      status: paymentResult.status,
-      update_time: paymentResult.update_time,
+      id: paymentResult.razorpay_payment_id,
+      orderId: paymentResult.razorpay_order_id,
+      signature: paymentResult.razorpay_signature,
       name: paymentResult.name,
+      email: paymentResult.email,
     };
 
     const updatedOrder = await order.save();

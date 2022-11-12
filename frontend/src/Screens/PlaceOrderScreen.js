@@ -4,7 +4,7 @@ import { Button, Row, Col, Image, ListGroup, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import CheckoutSteps from '../components/CheckoutSteps';
 import Message from '../components/Message';
-import { createOrder, payOrderPayU, updateOrder } from '../actions/orderActions';
+import { createOrder, launchPaymentPortal, updateOrder } from '../actions/orderActions';
 import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
@@ -19,7 +19,7 @@ const PlaceOrderScreen = ({ history }) => {
     const { userInfo } = userLogin;
 
     const orderPay = useSelector((state) => state.orderPay);
-    const { success: successPay, error: errorPay, response: paymentResponse } = orderPay;
+    const { success: successPay, error: errorPay, paymentDetails } = orderPay;
 
     const cart = useSelector((state) => state.cart);
     const { cartItems } = cart;
@@ -43,27 +43,37 @@ const PlaceOrderScreen = ({ history }) => {
     if (!cart.paymentMethod) {
         history.push('/payment');
     }
-    const addPayUMoneyScript = () => {
+    // const addPayUMoneyScript = () => {
+    //     const script = document.createElement('script');
+    //     script.type = 'text/javascript';
+    //     script.src = 'https://checkout-static.citruspay.com/bolt/run/bolt.min.js';
+    //     script.id = 'bolt';
+    //     script.async = true;
+    //     document.body.appendChild(script);
+    // };
+
+    const addRazorPayScript = () => {
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = 'https://checkout-static.citruspay.com/bolt/run/bolt.min.js';
-        script.id = 'bolt';
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
         script.async = true;
         document.body.appendChild(script);
     };
     useEffect(() => {
-        if (cart.paymentMethod !== 'COD') {
-            addPayUMoneyScript();
+        if (cart.paymentMethod !== 'COD' && !window.Razorpay) {
+            // addPayUMoneyScript();
+            addRazorPayScript();
         }
-    }, [dispatch, cart.paymentMethod]);
+    }, [cart.paymentMethod]);
 
     useEffect(() => {
         if (cart.paymentMethod !== 'COD') {
             if (errorPay === 'Overlay closed by consumer') {
                 setMessage('Payment Canceled Please try again!!');
             }
+
             if (successPay && order) {
-                dispatch(updateOrder(order._id, paymentResponse));
+                dispatch(updateOrder(order._id, paymentDetails));
                 history.push(`/order/${order._id}`);
             }
         } else {
@@ -82,7 +92,7 @@ const PlaceOrderScreen = ({ history }) => {
         .reduce((acc, item) => acc + getDiscountedPrice(item.price, item.disc) * item.qty, 0)
         .toFixed(2);
 
-    cart.shippingPrice = cart.itemsPrice > 599 ? 0 : 100;
+    cart.shippingPrice = cart.itemsPrice > 599 ? 0 : 0;
     cart.taxPrice = addDecimals(Number((0 * cart.itemsPrice).toFixed(2)));
     cart.totalPrice = (Number(cart.itemsPrice) + Number(cart.shippingPrice) + Number(cart.taxPrice)).toFixed(2);
 
@@ -101,7 +111,8 @@ const PlaceOrderScreen = ({ history }) => {
                 })
             );
         } else {
-            dispatch(payOrderPayU(cart.totalPrice, userInfo.name, userInfo.email, userInfo.phone));
+            // dispatch(payOrderPayU(cart.totalPrice, userInfo.name, userInfo.email, userInfo.phone));
+            dispatch(launchPaymentPortal(cart.totalPrice, userInfo.name, userInfo.email, userInfo.phone));
         }
     };
 

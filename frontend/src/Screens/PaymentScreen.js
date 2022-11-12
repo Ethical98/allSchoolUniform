@@ -97,10 +97,10 @@ const PaymentScreen = ({ history }) => {
                                 <Form.Check
                                     required
                                     type="radio"
-                                    label="PayUMoney/Debit/Credit Card"
-                                    id="PayU"
+                                    label="Net Banking/UPI/Wallet/Debit/Credit Card"
+                                    id="Online"
                                     name="paymentMethod"
-                                    value="PayU"
+                                    value="Online"
                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                 ></Form.Check>
                             </ListGroup.Item>
