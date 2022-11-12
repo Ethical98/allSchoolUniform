@@ -73,7 +73,7 @@ const OrderScreen = ({ match, history }) => {
     ) : (
         <PageLayout>
             <Meta
-                title={`Order Confirmed} - Allschooluniform`}
+                title={`Order Confirmed - Allschooluniform`}
                 description={'Order Confirmed'}
                 keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details'}
             />

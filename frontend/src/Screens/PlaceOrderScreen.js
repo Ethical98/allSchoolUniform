@@ -92,7 +92,7 @@ const PlaceOrderScreen = ({ history }) => {
         .reduce((acc, item) => acc + getDiscountedPrice(item.price, item.disc) * item.qty, 0)
         .toFixed(2);
 
-    cart.shippingPrice = cart.itemsPrice > 599 ? 0 : 0;
+    cart.shippingPrice = cart.itemsPrice > 599 ? 0 : 100;
     cart.taxPrice = addDecimals(Number((0 * cart.itemsPrice).toFixed(2)));
     cart.totalPrice = (Number(cart.itemsPrice) + Number(cart.shippingPrice) + Number(cart.taxPrice)).toFixed(2);
 
@@ -142,13 +142,6 @@ const PlaceOrderScreen = ({ history }) => {
             />
             <CheckoutSteps step1 step2 step3 step4 />
             {message && <Message variant="warning">{message}</Message>}
-            <div style={{ padding: '10px', backgroundColor: 'orange', marginBottom: '10px', borderRadius: '10px' }}>
-                <b>
-                    <p>
-                        Please try payments with Credit/Debit Card Only.Other Methods are facing some technical issue.
-                    </p>
-                </b>
-            </div>
             <Row>
                 <Col md={8}>
                     <Card>
