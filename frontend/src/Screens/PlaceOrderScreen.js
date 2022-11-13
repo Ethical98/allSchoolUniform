@@ -9,7 +9,6 @@ import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
-import Loader from '../components/Loader';
 
 const PlaceOrderScreen = ({ history }) => {
     const dispatch = useDispatch();
@@ -20,7 +19,7 @@ const PlaceOrderScreen = ({ history }) => {
     const { userInfo } = userLogin;
 
     const orderPay = useSelector((state) => state.orderPay);
-    const { loading: paymentLoading, success: successPay, error: errorPay, paymentDetails } = orderPay;
+    const { success: successPay, error: errorPay, paymentDetails } = orderPay;
 
     const cart = useSelector((state) => state.cart);
     const { cartItems } = cart;
