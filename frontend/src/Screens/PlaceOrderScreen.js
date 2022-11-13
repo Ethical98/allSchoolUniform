@@ -9,6 +9,7 @@ import { logout } from '../actions/userActions';
 import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
+import Loader from '../components/Loader';
 
 const PlaceOrderScreen = ({ history }) => {
     const dispatch = useDispatch();
@@ -19,7 +20,7 @@ const PlaceOrderScreen = ({ history }) => {
     const { userInfo } = userLogin;
 
     const orderPay = useSelector((state) => state.orderPay);
-    const { success: successPay, error: errorPay, paymentDetails } = orderPay;
+    const { loading: paymentLoading, success: successPay, error: errorPay, paymentDetails } = orderPay;
 
     const cart = useSelector((state) => state.cart);
     const { cartItems } = cart;
@@ -67,6 +68,23 @@ const PlaceOrderScreen = ({ history }) => {
     }, [cart.paymentMethod]);
 
     useEffect(() => {
+        if (successPay) {
+            dispatch(
+                createOrder({
+                    orderItems: cart.cartItems,
+                    shippingAddress: cart.shippingAddress,
+                    paymentMethod: cart.paymentMethod,
+                    itemsPrice: cart.itemsPrice,
+                    shippingPrice: cart.shippingPrice,
+                    taxPrice: cart.taxPrice,
+                    totalPrice: cart.totalPrice
+                })
+            );
+        }
+        // eslint-disable-next-line
+    }, [successPay]);
+
+    useEffect(() => {
         if (cart.paymentMethod !== 'COD') {
             if (errorPay === 'Overlay closed by consumer') {
                 setMessage('Payment Canceled Please try again!!');
@@ -82,7 +100,7 @@ const PlaceOrderScreen = ({ history }) => {
             }
         }
         // eslint-disable-next-line
-    }, [dispatch, errorPay, history, success, successPay, order]);
+    }, [errorPay, success, successPay, order]);
 
     const addDecimals = (num) => {
         return (Math.round(num * 100) / 100).toFixed(2);
@@ -118,20 +136,9 @@ const PlaceOrderScreen = ({ history }) => {
 
     useEffect(() => {
         if (successPay) {
-            dispatch(
-                createOrder({
-                    orderItems: cart.cartItems,
-                    shippingAddress: cart.shippingAddress,
-                    paymentMethod: cart.paymentMethod,
-                    itemsPrice: cart.itemsPrice,
-                    shippingPrice: cart.shippingPrice,
-                    taxPrice: cart.taxPrice,
-                    totalPrice: cart.totalPrice
-                })
-            );
+            window.scrollTo(0, 0);
         }
-        // eslint-disable-next-line
-    }, [successPay, dispatch]);
+    }, [successPay]);
 
     return (
         <PageLayout>
@@ -142,6 +149,12 @@ const PlaceOrderScreen = ({ history }) => {
             />
             <CheckoutSteps step1 step2 step3 step4 />
             {message && <Message variant="warning">{message}</Message>}
+            {successPay && (
+                <Message variant="warning">
+                    Your payment is being submitted. Please do not close this window or click the Back button on your
+                    browser.
+                </Message>
+            )}
             <Row>
                 <Col md={8}>
                     <Card>
