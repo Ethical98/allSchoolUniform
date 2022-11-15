@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import ProductScreen from './Screens/ProductScreen';
 import ProductDescriptionScreen from './Screens/ProductDescriptionScreen';
 import CartScreen from './Screens/CartScreen';
@@ -91,6 +91,7 @@ const App = () => {
                 <Route path="/admin/type/create" component={TypeCreateScreen} />
                 <Route path="/admin/classlist" component={ClassListScreen} />
                 <Route path="/admin/homepage" component={HomepageEditScreen} />
+                <Route path="/all-school-listing" render={() => <Redirect to="/" />} />
                 <Route path="*" component={PageNotFoundScreen} />
             </Switch>
         </Router>
