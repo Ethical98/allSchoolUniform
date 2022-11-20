@@ -26,26 +26,37 @@ const Footer = () => {
                             <Link to={'/aboutus'}>
                                 <li style={liStyle}>About Us</li>
                             </Link>
-                            <li style={liStyle}>Contact Us</li>
-                            <li style={liStyle}>Merchant Partners</li>
-                            <li style={liStyle}>Privacy Policy</li>
-                            <li style={liStyle}>Terms & Conditions</li>
+                            <Link to={'/contactus'}>
+                                <li style={liStyle}>Contact Us</li>
+                            </Link>
+                            <Link to="/policies-and-help-guide#privacy-policy">
+                                <li style={liStyle}>Privacy Policy</li>
+                            </Link>
+                            <Link to="/policies-and-help-guide#terms-and-conditions">
+                                <li style={liStyle}>Terms & Conditions</li>
+                            </Link>
                         </ul>
                     </Col>
                     <Col sm>
                         <ul>
                             <h6>Shipping & Policies</h6>
-                            <li style={liStyle}>FAQs</li>
-                            <li style={liStyle}>Payment Methods</li>
-                            <li style={liStyle}>Cancellation, Exchange & Return </li>
-                            <li style={liStyle}>Shipping & Tracking </li>
-                            <li style={liStyle}>Vouchers Terms and Conditions</li>
+                            <Link to="/policies-and-help-guide#payment-methods">
+                                <li style={liStyle}>Payment Methods</li>
+                            </Link>
+                            <Link to="/policies-and-help-guide#cancellations-exchanges-and-returns">
+                                <li style={liStyle}>Cancellation, Exchange & Return </li>
+                            </Link>
+                            <Link to="/policies-and-help-guide#shipping-and-delivery-policy">
+                                <li style={liStyle}>Shipping & Tracking </li>
+                            </Link>
+                            <Link to="/profile">
+                                <li style={liStyle}>My Account</li>
+                            </Link>
                         </ul>
                     </Col>
                     <Col sm>
                         <ul>
                             <h6>Customer Support</h6>
-                            <li style={liStyle}>My Account</li>
                             <li className="ms-2">Talk to Us: (011) 49188800</li>
                             <li className="ms-2">Mail us: help@allschooluniform.com</li>
                             <li className="ms-2">Meet Us: (Mon-Sat) 10:00 AM to 6:00 PM</li>

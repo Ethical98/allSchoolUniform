@@ -237,6 +237,38 @@ main {
             }
         }
     }
+
+    .policies-content {
+        .size-guide-help {
+            border-top: #adadad 1px solid;
+            border-right: #adadad 1px solid;
+            width: 100%;
+
+            tr {
+                th {
+                    padding: 5px;
+                    background: #e00054;
+                    border-left: #adadad 1px solid;
+                    border-bottom: #adadad 1px solid;
+                    width: 50%;
+                    text-align: center;
+                    color: #fff;
+
+                    &:last-child {
+                        background: #02a1b4;
+                        color: #fff;
+                    }
+                }
+                td {
+                    padding: 5px;
+                    border-left: #adadad 1px solid;
+                    border-bottom: #adadad 1px solid;
+                    width: 353px;
+                    text-align: center;
+                }
+            }
+        }
+    }
 }
 
 .rating {
