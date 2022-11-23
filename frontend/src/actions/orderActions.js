@@ -247,12 +247,17 @@ const paymentStatus = (response) => async (dispatch, getState) => {
             }
         };
 
-        const { data: success } = await axios.post('/api/pay/payment/verify', { response }, config);
+        const { data } = await axios.post('/api/pay/payment/verify', { response }, config);
 
-        if (success) {
+        if (data.paymentSuccess) {
             dispatch({
                 type: ORDER_PAY_SUCCESS,
                 payload: { ...response, name: userInfo.name, email: userInfo.email }
+            });
+        } else {
+            dispatch({
+                type: ORDER_PAY_FAIL,
+                payload: 'Payment Failed'
             });
         }
     } catch (error) {
