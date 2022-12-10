@@ -75,13 +75,12 @@ const PaymentScreen = ({ history }) => {
                                     required
                                     type="radio"
                                     label="Cash On Delivery"
-                                    disabled
                                     id="COD"
                                     name="paymentMethod"
                                     value="COD"
                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                 ></Form.Check>
-                                <p style={{ margin: 0, color: 'red' }}>
+                                {/* { <p style={{ margin: 0, color: 'red' }}>
                                     Due to heavy rush Cash on Delivery(COD) is not available. <br />
                                     Please Cooperate.
                                     <br />
@@ -91,7 +90,7 @@ const PaymentScreen = ({ history }) => {
                                             delivered.
                                         </b>
                                     </p>
-                                </p>
+                                </p>} */}
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 <Form.Check
