@@ -29,13 +29,15 @@ import {
 import axios from 'axios';
 
 export const listProducts =
-    (keyword = '', pageNumber = '', category = '', season = 'Winter', standard = '', school = '') =>
+    (keyword = '', pageNumber = '', category = '', season = '', standard = '', school = '') =>
     async (dispatch) => {
         try {
             dispatch({ type: PRODUCT_LIST_REQUEST });
 
+            season = season ? season : 'Summer';
+
             const { data } = await axios.get(
-                `/api/products?category=${category}&season=${'Winter'}&standard=${standard}&keyword=${keyword}&school=${school}&pageNumber=${pageNumber}`
+                `/api/products?category=${category}&season=${season}&standard=${standard}&keyword=${keyword}&school=${school}&pageNumber=${pageNumber}`
             );
 
             dispatch({
