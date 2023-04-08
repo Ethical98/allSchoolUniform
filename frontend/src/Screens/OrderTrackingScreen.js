@@ -13,11 +13,11 @@ const OrderTrackingScreen = ({ match }) => {
 
     const dispatch = useDispatch();
 
-    const orderDetails = useSelector(state => state.orderDetails);
+    const orderDetails = useSelector((state) => state.orderDetails);
     const { order, loading, error } = orderDetails;
 
     useEffect(() => {
-        if (!order || order.orderId !== orderId) {
+        if (!order || order?.orderId !== orderId) {
             dispatch(trackOrder(orderId));
         }
     }, [dispatch, orderId, order]);
@@ -25,7 +25,7 @@ const OrderTrackingScreen = ({ match }) => {
     return (
         <PageLayout>
             <Meta
-                title={`Order Tracking #${order.orderId} - Allschooluniform`}
+                title={`Order Tracking #${order?.orderId} - Allschooluniform`}
                 description={'Order Tracking Details'}
                 keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details,tracking'}
             />
@@ -37,7 +37,7 @@ const OrderTrackingScreen = ({ match }) => {
                         <Message variant="danger">{error}</Message>
                     ) : (
                         <Card className="tracking-card">
-                            <div className="title">Purchase Reciept</div>
+                            <div className="title">Order Tracking</div>
                             <div className="info">
                                 <Row>
                                     <Col>
@@ -47,40 +47,40 @@ const OrderTrackingScreen = ({ match }) => {
                                     <Col className="text-end">
                                         <span id="heading">Order No.</span>
                                         <br />
-                                        <span id="details">{order.orderId}</span>
+                                        <span id="details">{order?.orderId}</span>
                                     </Col>
                                 </Row>
                             </div>
                             <div className="pricing">
                                 {order.modified
                                     ? order.modifiedItems.map((item, index) => (
-                                        <Row key={index}>
-                                            <Col xs={8}>
-                                                {' '}
-                                                <span id="name">{item.name}</span>{' '}
-                                            </Col>
-                                            <Col>
-                                                {' '}
-                                                <span id="price" className="float-end">
-                                                    ₹{item.price}
-                                                </span>{' '}
-                                            </Col>
-                                        </Row>
-                                    ))
+                                          <Row key={index}>
+                                              <Col xs={8}>
+                                                  {' '}
+                                                  <span id="name">{item.name}</span>{' '}
+                                              </Col>
+                                              <Col>
+                                                  {' '}
+                                                  <span id="price" className="float-end">
+                                                      ₹{item.price}
+                                                  </span>{' '}
+                                              </Col>
+                                          </Row>
+                                      ))
                                     : order.orderItems.map((item, index) => (
-                                        <Row key={index}>
-                                            <Col xs={8}>
-                                                {' '}
-                                                <span id="name">{item.name}</span>{' '}
-                                            </Col>
-                                            <Col>
-                                                {' '}
-                                                <span id="price" className="float-end">
-                                                    ₹{item.price}
-                                                </span>{' '}
-                                            </Col>
-                                        </Row>
-                                    ))}
+                                          <Row key={index}>
+                                              <Col xs={8}>
+                                                  {' '}
+                                                  <span id="name">{item.name}</span>{' '}
+                                              </Col>
+                                              <Col>
+                                                  {' '}
+                                                  <span id="price" className="float-end">
+                                                      ₹{item.price}
+                                                  </span>{' '}
+                                              </Col>
+                                          </Row>
+                                      ))}
 
                                 <Row>
                                     <Col xs={8}>
@@ -103,48 +103,51 @@ const OrderTrackingScreen = ({ match }) => {
                                 </Row>
                             </div>
                             <div className="tracking">
-                                <div className="title">Tracking Order</div>
+                                <div className="title">Order Status</div>
                             </div>
-                            <div className="progress-track">
-                                <ul id="progressbar">
-                                    {order.tracking.isConfirmed ? (
-                                        <li className="step0 active " id="step1">
-                                            Confirmed
-                                        </li>
-                                    ) : (
-                                        <li className="step0 " id="step1">
-                                            Confirmed
-                                        </li>
-                                    )}
-                                    {order.tracking.isProcessing ? (
-                                        <li className="step0 active text-center" id="step2">
-                                            Processing
-                                        </li>
-                                    ) : (
-                                        <li className="step0 text-center" id="step2">
-                                            Processing
-                                        </li>
-                                    )}
-                                    {order.tracking.isOutForDelivery ? (
-                                        <li className="step0 active text-end" id="step3">
-                                            On the way
-                                        </li>
-                                    ) : (
-                                        <li className="step0  text-end" id="step3">
-                                            On the way
-                                        </li>
-                                    )}
-                                    {order.tracking.isDelivered ? (
-                                        <li className="step0 active text-end" id="step4">
-                                            Delivered
-                                        </li>
-                                    ) : (
-                                        <li className="step0 text-end" id="step4">
-                                            Delivered
-                                        </li>
-                                    )}
-                                </ul>
-                            </div>
+                            {order.tracking.isCanceled && <p className="order-status">CANCELED</p>}
+                            {!order.tracking.isCanceled && (
+                                <div className="progress-track">
+                                    <ul id="progressbar">
+                                        {order.tracking.isConfirmed ? (
+                                            <li className="step0 active " id="step1">
+                                                Confirmed
+                                            </li>
+                                        ) : (
+                                            <li className="step0 " id="step1">
+                                                Confirmed
+                                            </li>
+                                        )}
+                                        {order.tracking.isProcessing ? (
+                                            <li className="step0 active text-center" id="step2">
+                                                Processing
+                                            </li>
+                                        ) : (
+                                            <li className="step0 text-center" id="step2">
+                                                Processing
+                                            </li>
+                                        )}
+                                        {order.tracking.isOutForDelivery ? (
+                                            <li className="step0 active text-end" id="step3">
+                                                On the way
+                                            </li>
+                                        ) : (
+                                            <li className="step0  text-end" id="step3">
+                                                On the way
+                                            </li>
+                                        )}
+                                        {order.tracking.isDelivered ? (
+                                            <li className="step0 active text-end" id="step4">
+                                                Delivered
+                                            </li>
+                                        ) : (
+                                            <li className="step0 text-end" id="step4">
+                                                Delivered
+                                            </li>
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
                             <div className="footer">
                                 <Row>
                                     <Col xs={2} className="img-col">

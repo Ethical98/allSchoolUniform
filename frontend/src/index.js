@@ -1,4 +1,4 @@
-import "core-js/stable";
+import 'core-js/stable';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
@@ -7,11 +7,14 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 import './styles/style.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import ErrorBoundary from './ErrorBoundary';
 
 ReactDOM.render(
-    <Provider store={store}>
-        <App />
-    </Provider>,
+    <ErrorBoundary>
+        <Provider store={store}>
+            <App />
+        </Provider>
+    </ErrorBoundary>,
     document.getElementById('root')
 );
 

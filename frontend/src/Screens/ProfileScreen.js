@@ -22,16 +22,16 @@ const ProfileScreen = ({ history }) => {
 
     const dispatch = useDispatch();
 
-    const userDetails = useSelector(state => state.userDetails);
+    const userDetails = useSelector((state) => state.userDetails);
     const { loading, error, user } = userDetails;
 
-    const userLogin = useSelector(state => state.userLogin);
+    const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
-    const userUpdateProfile = useSelector(state => state.userUpdateProfile);
+    const userUpdateProfile = useSelector((state) => state.userUpdateProfile);
     const { success } = userUpdateProfile;
 
-    const orderListMy = useSelector(state => state.orderListMy);
+    const orderListMy = useSelector((state) => state.orderListMy);
     const { loading: loadingOrders, error: errorOrders, orders } = orderListMy;
 
     useEffect(() => {
@@ -61,7 +61,7 @@ const ProfileScreen = ({ history }) => {
         }
     }, [dispatch, userInfo, history, user]);
 
-    const submitHandler = e => {
+    const submitHandler = (e) => {
         e.preventDefault();
 
         if (password !== confirmPassword) {
@@ -97,7 +97,7 @@ const ProfileScreen = ({ history }) => {
                                 type="email"
                                 placeholder="Email"
                                 value={email}
-                                onChange={e => setEmail(e.target.value)}
+                                onChange={(e) => setEmail(e.target.value)}
                             ></Form.Control>
                         </InputGroup>
 
@@ -110,7 +110,7 @@ const ProfileScreen = ({ history }) => {
                                 type="name"
                                 placeholder="Name"
                                 value={name}
-                                onChange={e => setName(e.target.value)}
+                                onChange={(e) => setName(e.target.value)}
                             ></Form.Control>
                         </InputGroup>
 
@@ -123,7 +123,7 @@ const ProfileScreen = ({ history }) => {
                                 type="phone"
                                 placeholder="Phone"
                                 value={phone}
-                                onChange={e => setPhone(e.target.value)}
+                                onChange={(e) => setPhone(e.target.value)}
                             ></Form.Control>
                         </InputGroup>
 
@@ -136,7 +136,7 @@ const ProfileScreen = ({ history }) => {
                                 type="password"
                                 placeholder="Password"
                                 value={password}
-                                onChange={e => setPassword(e.target.value)}
+                                onChange={(e) => setPassword(e.target.value)}
                             ></Form.Control>
                         </InputGroup>
                         <InputGroup controlId="confirmPassword" className="mb-3">
@@ -148,7 +148,7 @@ const ProfileScreen = ({ history }) => {
                                 type="password"
                                 placeholder="Confirm Password"
                                 value={confirmPassword}
-                                onChange={e => setConfirmPassword(e.target.value)}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
                             ></Form.Control>
                         </InputGroup>
 
@@ -165,20 +165,20 @@ const ProfileScreen = ({ history }) => {
                     ) : errorOrders ? (
                         <Message variant="danger">{errorOrders}</Message>
                     ) : (
-                        <Table striped bordered hover responsive className="table-sm">
+                        <Table striped bordered hover responsive className="table-sm my-orders-table">
                             <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>DATE</th>
                                     <th>TOTAL</th>
                                     <th>PAID</th>
-                                    <th>DELIVERED</th>
+                                    <th>STATUS</th>
                                     <th>PAYMENT METHOD</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {orders.map(order => (
+                                {orders.map((order) => (
                                     <tr key={order._id}>
                                         <td>{order.orderId}</td>
                                         <td>{order.createdAt.substring(0, 10)}</td>
@@ -191,10 +191,39 @@ const ProfileScreen = ({ history }) => {
                                             )}
                                         </td>
                                         <td>
-                                            {order.isDelivered ? (
-                                                order.deliveredAt.substring(0, 10)
+                                            {order.tracking.isCanceled ? (
+                                                <p style={{ color: 'red' }}>
+                                                    <strong>
+                                                        Canceled: {order.tracking.canceledAt?.substring(0, 10)}
+                                                    </strong>
+                                                </p>
+                                            ) : order.tracking.isDelivered ? (
+                                                <p style={{ color: 'darkGreen' }}>
+                                                    <strong>
+                                                        Delivered: {order.tracking.deliveredAt?.substring(0, 10)}
+                                                    </strong>
+                                                </p>
+                                            ) : order.tracking.isOutForDelivery ? (
+                                                <p style={{ color: 'yellow' }}>
+                                                    <strong>
+                                                        `Out For Delivery:{' '}
+                                                        {order.tracking.outForDeliveryAt?.substring(0, 10)}`
+                                                    </strong>
+                                                </p>
+                                            ) : order.tracking.isProcessing ? (
+                                                <p style={{ color: 'purple' }}>
+                                                    <strong>
+                                                        Processed: {order.tracking.processedAt?.substring(0, 10)}
+                                                    </strong>
+                                                </p>
+                                            ) : order.tracking.isConfirmed ? (
+                                                <p style={{ color: 'blue' }}>
+                                                    <strong>
+                                                        Confirmed: {order.tracking.confirmedAt?.substring(0, 10)}
+                                                    </strong>
+                                                </p>
                                             ) : (
-                                                <i className="fas fa-times" style={{ color: 'red' }} />
+                                                'Recieved'
                                             )}
                                         </td>
                                         <td>{order.paymentMethod}</td>
@@ -223,7 +252,7 @@ const ProfileScreen = ({ history }) => {
                             <h2>ADDRESSES</h2>
                             <ListGroup className="mt-2">
                                 <Row>
-                                    {savedAddress.map(x => (
+                                    {savedAddress.map((x) => (
                                         <Col md={3}>
                                             <ListGroup.Item key={x._id}>
                                                 {x.address}
