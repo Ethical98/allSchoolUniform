@@ -19,13 +19,13 @@ const PlaceOrderScreen = ({ history }) => {
     const { userInfo } = userLogin;
 
     const orderPay = useSelector((state) => state.orderPay);
-    const { success: successPay, error: errorPay, paymentDetails } = orderPay;
+    const { loading: orderPayLoading, success: successPay, error: errorPay, paymentDetails } = orderPay;
 
     const cart = useSelector((state) => state.cart);
     const { cartItems } = cart;
 
     const orderCreate = useSelector((state) => state.orderCreate);
-    const { order, success, error } = orderCreate;
+    const { loading: orderCreateLoading, order, success, error } = orderCreate;
 
     const getDiscountedPrice = (price, disc) => {
         return price - price * (disc / 100);
@@ -254,14 +254,11 @@ const PlaceOrderScreen = ({ history }) => {
                                 </ListGroup.Item>
                             )}
                             <ListGroup.Item>
-                                {/* {!scriptReady ? (
-                  <Loader />
-                ) : ( */}
                                 <Button
                                     variant="success"
                                     type="button"
                                     className="col-12"
-                                    disabled={cart.cartItems === 0}
+                                    disabled={cart.cartItems === 0 || orderCreateLoading}
                                     onClick={placeOrderHandler}
                                 >
                                     Place Order
@@ -270,7 +267,6 @@ const PlaceOrderScreen = ({ history }) => {
                                     Due to heavy rush Orders will be delivered in 3-4 Days and trial is not
                                     available.Please Cooperate. Sorry for the inconvenience.:Team AllSchoolUniform
                                 </b>
-                                {/* )} */}
                             </ListGroup.Item>
                         </ListGroup>
                     </Card>

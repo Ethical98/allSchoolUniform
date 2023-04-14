@@ -17,13 +17,11 @@
         "firebase": "^8.6.7",
         "jspdf": "^2.3.1",
         "material-table": "^1.69.3",
-        "otp-input-react": "^0.2.4",
         "react": "^17.0.2",
         "react-bootstrap": "^2.0.0-beta.4",
         "react-bootstrap-typeahead": "^6.0.0",
         "react-dom": "^17.0.2",
         "react-helmet": "^6.1.0",
-        "react-otp-input": "^2.3.1",
         "react-redux": "^7.2.4",
         "react-router-bootstrap": "^0.25.0",
         "react-router-dom": "^5.2.0",
@@ -76,6 +74,7 @@
         "stylelint": "14.9.1",
         "stylelint-config-sass-guidelines": "9.0.1",
         "stylelint-order": "5.0.0",
-        "stylelint-scss": "4.2.0"
+        "stylelint-scss": "4.2.0",
+        "webpack-bundle-analyzer": "^4.8.0"
     }
 }

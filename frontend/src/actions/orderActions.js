@@ -192,7 +192,7 @@ export const launchPaymentPortal = (amount, name, email, mobile) => async (dispa
             payload: data
         });
 
-        var paymentDetails = {
+        const paymentDetails = {
             key: process.env.REACT_APP_RAZORPAY_API_KEY,
             amount: amount,
             currency: 'INR',
@@ -216,7 +216,7 @@ export const launchPaymentPortal = (amount, name, email, mobile) => async (dispa
             }
         };
 
-        var razorLaunch = new window.Razorpay(paymentDetails);
+        const razorLaunch = new window.Razorpay(paymentDetails);
         razorLaunch.on('payment.failed', function (response) {
             dispatch({
                 type: ORDER_PAY_FAIL,
@@ -249,7 +249,7 @@ const paymentStatus = (response) => async (dispatch, getState) => {
 
         const { data } = await axios.post('/api/pay/payment/verify', { response }, config);
 
-        if (data.paymentSuccess) {
+        if (data?.paymentSuccess) {
             dispatch({
                 type: ORDER_PAY_SUCCESS,
                 payload: { ...response, name: userInfo.name, email: userInfo.email }

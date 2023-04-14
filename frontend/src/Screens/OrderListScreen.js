@@ -101,7 +101,7 @@ const OrderListScreen = ({ history, location }) => {
                         <strong>Confirmed: {item.tracking.confirmedAt.substring(0, 10)}</strong>
                     </p>
                 ) : (
-                    'Recieved'
+                    'Received'
                 )
         }
     ];
