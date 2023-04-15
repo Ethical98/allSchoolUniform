@@ -63,12 +63,10 @@ const RegisterScreen = ({ history, location }) => {
             setMessage('Mobile Number Not Verified');
         } else {
             if (phone.toString().length > 10) {
-                const number = Number(phone.toString().split('91')[1]);
-
-                dispatch(register(name, email, number, password));
+                const contact = String(phone.toString().replace(/\D/g, '').slice(-10));
+                dispatch(register(name, email, contact, password));
             } else {
                 dispatch(register(name, email, phone, password));
-                //Dispatch(resetOtp());
             }
         }
     };
@@ -176,7 +174,7 @@ const RegisterScreen = ({ history, location }) => {
                         <Form.Control
                             required
                             readOnly={mobileVerified}
-                            type="phone"
+                            type="tel"
                             placeholder="Phone"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}

@@ -392,15 +392,15 @@ const OrderEditScreen = ({ history, match, location }) => {
     useEffect(() => {
         if (product && product.size) {
             setProductSizes([...product.size]);
-            setCountInStock(product.size[0].countInStock);
+            setCountInStock(product.size[0]?.countInStock);
         }
     }, [product]);
 
     useEffect(() => {
         if (productSizes.length > 0 && editIndex === 0 && size) {
-            setCountInStock(productSizes[productSizes.findIndex((x) => x.size === size.toString())].countInStock);
+            setCountInStock(productSizes[productSizes.findIndex((x) => x.size === size.toString())]?.countInStock);
         } else if (productSizes.length > 0 && size) {
-            setCountInStock(productSizes[editIndex].countInStock);
+            setCountInStock(productSizes[editIndex]?.countInStock);
         } // eslint-disable-next-line
     }, [productSizes, size, editIndex]);
 
@@ -412,7 +412,6 @@ const OrderEditScreen = ({ history, match, location }) => {
                 .toFixed(2)
         );
         setItemsPrice(price);
-        console.log(price);
 
         setDiscountPrice(discount);
         if (price > Number(599)) {
