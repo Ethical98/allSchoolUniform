@@ -106,9 +106,9 @@ const OrderScreen = ({ match, history }) => {
                                     {order.shippingAddress.postalCode},{''}
                                     {order.shippingAddress.country}
                                 </p>
-                                <p>Order will be Delivered in 3-4 Days</p>
-                                <p>Due to heavy rush deliveries are delayed.Please Cooperate</p>
-                                <p>Sorry for the inconvenience : Team Allschooluniform</p>
+                                <p>Order will be Delivered in 24-48 Hours</p>
+                                {/* <p>Due to heavy rush deliveries are delayed.Please Cooperate</p>
+                                <p>Sorry for the inconvenience : Team Allschooluniform</p> */}
 
                                 {/* {order.isPaid ? (
                     <Message variant='success'>Paid on {order.paidAt}</Message>
