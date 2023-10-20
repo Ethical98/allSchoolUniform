@@ -34,7 +34,7 @@ export const listProducts =
         try {
             dispatch({ type: PRODUCT_LIST_REQUEST });
 
-            season = season ? season : 'Summer';
+            season = season ? season : 'Winter';
 
             const { data } = await axios.get(
                 `/api/products?category=${category}&season=${season}&standard=${standard}&keyword=${keyword}&school=${school}&pageNumber=${pageNumber}`

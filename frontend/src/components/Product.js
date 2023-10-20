@@ -162,7 +162,7 @@ const Product = ({ product }) => {
                                 </Row>
                             </>
                         ) : (
-                            <div>This Item will be Available in 5-7 Days. Please Order after 5-7 days</div>
+                            <div data-nosnippet>This Item will be Available in 5-7 Days. Please Order after 5-7 days</div>
                         )}
                     </Card>
 
@@ -181,7 +181,7 @@ const Product = ({ product }) => {
                             {outOfStock ? 'OUT OF STOCK' : 'Add To Cart'}
                         </Button>
                     ) : (
-                        <p>
+                        <p data-nosnippet>
                             <b>OUT OF STOCK</b>
                         </p>
                     )}
