@@ -33,8 +33,11 @@ export const listProducts =
     async (dispatch) => {
         try {
             dispatch({ type: PRODUCT_LIST_REQUEST });
+            const WINTER_MONTHS = ['november', 'december', 'january', 'february'];
+            const date = new Date();
+            const month = date.toLocaleString('default', { month: 'long' });
 
-            season = season ? season : 'Winter';
+            season = season ? season : WINTER_MONTHS.includes(month.toLowerCase()) ? 'Winter' : 'Summer';
 
             const { data } = await axios.get(
                 `/api/products?category=${category}&season=${season}&standard=${standard}&keyword=${keyword}&school=${school}&pageNumber=${pageNumber}`
