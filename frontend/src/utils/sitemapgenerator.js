@@ -26,7 +26,7 @@ const generateSitemap = async () => {
     };
 
     for (let i = 2; i <= data.pages; i++) {
-        const { data } = await axios.get(`https://allschooluniform.com/api/products?page=${i}`);
+        const { data } = await axios.get(`https://allschooluniform.com/api/products?pageNumber=${i}`);
         data.products.forEach((item) => sitemapData.push(`products/${join(split(lowerCase(item.name), ' '), '-')}`));
     }
 
@@ -36,7 +36,7 @@ const generateSitemap = async () => {
     );
 
     for (let i = 2; i <= schoolData.pages; i++) {
-        const { data: schoolData } = await axios.get(`https://allschooluniform.com/api/schools?page=${i}`, config);
+        const { data: schoolData } = await axios.get(`https://allschooluniform.com/api/schools?pageNumber=${i}`, config);
         schoolData.schools.forEach((item) =>
             sitemapData.push(`products/schools/${join(split(lowerCase(item.name), ' '), '-')}`)
         );
