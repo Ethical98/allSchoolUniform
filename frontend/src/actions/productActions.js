@@ -33,7 +33,7 @@ export const listProducts =
     async (dispatch) => {
         try {
             dispatch({ type: PRODUCT_LIST_REQUEST });
-            const WINTER_MONTHS = ['november', 'december', 'january', 'february'];
+            const WINTER_MONTHS = ['october', 'november', 'december', 'january', 'february'];
             const date = new Date();
             const month = date.toLocaleString('default', { month: 'long' });
 
