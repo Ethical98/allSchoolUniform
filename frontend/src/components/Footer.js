@@ -9,6 +9,7 @@ const Footer = () => {
         backgroundPosition: '0px 4px',
         paddingLeft: '10px'
     };
+    const currentYear = new Date().getFullYear();
     return (
         <footer
             className="p-4"
@@ -75,7 +76,7 @@ const Footer = () => {
                 <hr className="divider"></hr>
                 <Row className="m-0">
                     <Col>
-                        <p>&copy;2013-2021 AllSchoolUniform</p>
+                        <p>&copy;2013-{currentYear} AllSchoolUniform</p>
                     </Col>
 
                     <Col className="me-auto">
