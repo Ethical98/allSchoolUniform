@@ -114,7 +114,7 @@ const Policies = () => {
                         <strong>How if I want to exchange the product?</strong>
                         <br />
                         <strong>If it before shipment and After Shipment</strong>
-                        <p>Call Us on 011-49188800. We Will Help You Out</p>
+                        <p>Call Us on +91-9654264262. We Will Help You Out</p>
 
                         <strong>Returns</strong>
                         <br />
@@ -138,7 +138,7 @@ const Policies = () => {
                         <strong>How to Return the product.</strong>
 
                         <p>
-                            You can write to us at help@allschooluniform.com else call us on 011-49188800 and ask to
+                            You can write to us at help@allschooluniform.com else call us on +91-9654264262 and ask to
                             arrange for pick up of products to be returned
                         </p>
                         <p>
