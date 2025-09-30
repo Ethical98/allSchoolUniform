@@ -19,13 +19,13 @@ const ContactUs = () => {
                 </address>
                 <h5>
                     <i className="fa fa-phone me-2"></i>
-                    <span>Call us on :</span>
+                    <span>Whatsapp us on :</span>
                 </h5>
-                <address class="mgl10">(011) - 4918-8800</address>
+                <address class="mgl10">+91-9654264262</address>
                 <p>
-                    If you have any query, please go ahead and give us a call @ (011) 49188800 between 10 AM & 6 PM .You
-                    can also mail us at <a href="mailto:help@allschooluniform.com">help@allschooluniform.com </a> and
-                    we'll be happy to assist you.
+                    If you have any query, please go ahead and whatsapp us @+91-9654264262 between 10 AM & 6 PM .You can
+                    also mail us at <a href="mailto:help@allschooluniform.com">help@allschooluniform.com </a> and we'll
+                    be happy to assist you.
                 </p>
             </div>
         </PageLayout>

@@ -184,15 +184,6 @@ const Header = () => {
                                     <Row>
                                         <Image src="/uploads/asu-top-logo.png" className="logo"></Image>
                                     </Row>
-                                    <Row>
-                                        <span
-                                            className="text-center pt-1"
-                                            style={{ color: 'white', fontSize: '0.7rem' }}
-                                        >
-                                            <i class="fa-solid fa-square-phone mx-1"></i>
-                                            (011) 49188800
-                                        </span>
-                                    </Row>
                                 </Navbar.Brand>
                             </LinkContainer>
 

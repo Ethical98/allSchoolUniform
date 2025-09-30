@@ -57,7 +57,7 @@ const Footer = () => {
                     <Col sm>
                         <ul>
                             <h6>Customer Support</h6>
-                            <li className="ms-2">Talk to Us: (011) 49188800</li>
+                            <li className="ms-2">Whatsapp: +91 9654264262</li>
                             <li className="ms-2">Mail us: help@allschooluniform.com</li>
                             <li className="ms-2">Meet Us: (Mon-Sat) 10:00 AM to 6:00 PM</li>
                         </ul>
