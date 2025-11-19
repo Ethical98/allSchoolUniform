@@ -12,6 +12,7 @@ import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
 import { join, map } from 'lodash';
 import { Button, Form, InputGroup } from 'react-bootstrap';
+import OrderListSummary from '../components/OrderListSummary';
 
 const OrderListScreen = ({ history, location }) => {
     const [keyword, setKeyword] = useState('');
@@ -210,6 +211,7 @@ const OrderListScreen = ({ history, location }) => {
                 keyword={'cheap,sell,buy,allschooluniform,new,buyback,unform,online,login,order,details,orders'}
             />
             <h1>ORDERS</h1>
+            {!loading && !error && <OrderListSummary orders={orders} />}
             <div className="d-flex justify-content-between mb-3">
                 <CSVLink
                     data={csvData}
