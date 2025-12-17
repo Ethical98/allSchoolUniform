@@ -9,108 +9,89 @@ import paginate from '../utils/pagination.js';
 // @route GET /api/products
 // @access Public
 const getProducts = asyncHandler(async (req, res) => {
-  const pageSize = 12;
-  const page = Number(req.query.pageNumber) || 1;
+  // Pagination config
+  const pageSize = Number(req.query.pageSize) || 12;
+  const page = Math.max(1, Number(req.query.pageNumber) || 1);
 
-  const searchKeyword = req.query.keyword
-    ? {
-        name: {
-          $regex: req.query.keyword,
-          $options: 'i',
-        },
-      }
-    : {};
+  // Sorting config
+  const sortField = req.query.sortBy || 'name';
+  const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
+  const validSortFields = ['name', 'createdAt', 'price'];
+  const sortBy = validSortFields.includes(sortField)
+    ? { [sortField]: sortOrder }
+    : { name: 1 };
 
-  const schoolKeyword = req.query.keyword
-    ? {
-        schoolName: {
-          $regex: req.query.keyword,
-          $options: 'i',
-        },
-      }
-    : {};
+  // Build filters array
+  const filters = [];
 
-  const categoryKeyword = req.query.category
-    ? {
-        category: {
-          $regex: `${req.query.category}|unisex`,
-          $options: 'i',
-        },
-      }
-    : {};
-
-  const seasonKeyword = req.query.season
-    ? {
-        season: {
-          $regex: `${req.query.season}|all season`,
-          $options: 'i',
-        },
-      }
-    : {};
-
-  const classesKeyword = req.query.standard
-    ? {
-        class: {
-          $regex: req.query.standard,
-          $options: 'i',
-        },
-      }
-    : {};
-
-  const school = req.query.school
-    ? {
-        schoolName: {
-          $regex: req.query.school,
-          $options: 'i',
-        },
-      }
-    : {};
-
-  const count = await Product.countDocuments({
-    $and: [
-      { $or: [{ ...searchKeyword }, { ...schoolKeyword }] },
-      {
-        $and: [
-          // { ...unisexCategory },
-          { ...categoryKeyword },
-          { ...seasonKeyword },
-          { ...classesKeyword },
-        ],
-      },
-      {
-        ...school,
-      },
-    ],
-  });
-
-  const products = await Product.find({
-    $and: [
-      { $or: [{ ...searchKeyword }, { ...schoolKeyword }] },
-      {
-        $and: [
-          // { ...unisexCategory },
-
-          { ...categoryKeyword },
-          { ...seasonKeyword },
-          { ...classesKeyword },
-        ],
-      },
-      {
-        ...school,
-      },
-    ],
-  })
-    .sort({
-      name: 'asc',
-    })
-    .limit(pageSize)
-    .skip(pageSize * (page - 1));
-  if (products.length === 0) {
-    throw new Error('No Products Found');
-  } else {
-    res.json({ products, page, pages: Math.ceil(count / pageSize) });
+  // Keyword search (name or school)
+  if (req.query.keyword) {
+    const keyword = req.query.keyword.trim();
+    filters.push({
+      $or: [
+        { name: { $regex: keyword, $options: 'i' } },
+        { schoolName: { $regex: keyword, $options: 'i' } },
+      ],
+    });
   }
+
+  // School filter (exact school match)
+  if (req.query.school) {
+    filters.push({
+      schoolName: { $regex: req.query.school.trim(), $options: 'i' },
+    });
+  }
+
+  // Category filter (includes 'unisex' to show common items)
+  if (req.query.category) {
+    filters.push({
+      category: { $regex: `${req.query.category}|unisex`, $options: 'i' },
+    });
+  }
+
+  // Season filter (includes 'all season' to show year-round items)
+  if (req.query.season) {
+    filters.push({
+      season: { $regex: `${req.query.season}|all season`, $options: 'i' },
+    });
+  }
+
+  // Class/Standard filter
+  if (req.query.standard) {
+    filters.push({
+      class: { $regex: req.query.standard, $options: 'i' },
+    });
+  }
+
+  // Only show active products by default
+  if (req.query.includeInactive !== 'true') {
+    filters.push({ isActive: { $ne: false } });
+  }
+
+  // Build final query
+  const query = filters.length > 0 ? { $and: filters } : {};
+
+  // Execute count and find in parallel for better performance
+  const [count, products] = await Promise.all([
+    Product.countDocuments(query),
+    Product.find(query)
+      .select('name image brand size schoolName category season class isActive')
+      .sort(sortBy)
+      .limit(pageSize)
+      .skip(pageSize * (page - 1))
+      .lean(),
+  ]);
+
+  // Return empty array instead of throwing error for no results
+  res.json({
+    products,
+    page,
+    pages: Math.ceil(count / pageSize),
+    pageSize,
+    total: count,
+  });
 });
+
 
 // @desc Fetch Single Product
 // @route GET /api/products/:id
@@ -168,20 +149,20 @@ const filterProducts = asyncHandler(async (req, res) => {
 
   const keyword1 = category
     ? {
-        category: {
-          $regex: category,
-          $options: 'i',
-        },
-      }
+      category: {
+        $regex: category,
+        $options: 'i',
+      },
+    }
     : {};
 
   const keyword2 = season
     ? {
-        season: {
-          $regex: season,
-          $options: 'i',
-        },
-      }
+      season: {
+        $regex: season,
+        $options: 'i',
+      },
+    }
     : {};
 
   const unisexCategory = {
@@ -193,11 +174,11 @@ const filterProducts = asyncHandler(async (req, res) => {
 
   const keyword3 = classes
     ? {
-        class: {
-          $regex: classes,
-          $options: 'i',
-        },
-      }
+      class: {
+        $regex: classes,
+        $options: 'i',
+      },
+    }
     : {};
 
   const allSeason = {
@@ -442,9 +423,8 @@ const getProductImages = asyncHandler(async (req, res) => {
 // @access Public
 const uploadProductImages = asyncHandler(async (req, res) => {
   if (req.file) {
-    const newFilename = `${
-      req.file.originalname.split('.')[0]
-    }-${Date.now()}${path.extname(req.file.originalname)}`;
+    const newFilename = `${req.file.originalname.split('.')[0]
+      }-${Date.now()}${path.extname(req.file.originalname)}`;
 
     // await sharp(req.file.buffer)
     //   .resize({ width: 640, height: 640 })

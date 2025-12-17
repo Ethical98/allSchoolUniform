@@ -2,29 +2,60 @@ import jwt from 'jsonwebtoken';
 import expressAsyncHandler from 'express-async-handler';
 import User from '../models/UserModel.js';
 
+function getTokenFromCookie(cookieString) {
+  if (!cookieString) return null;
+  const match = cookieString.match(/(?:^|;\s*)token=([^;]*)/);
+  return match ? match[1] : null;
+}
+
 const protect = expressAsyncHandler(async (req, res, next) => {
   let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    try {
-      token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select('-password');
 
-      next();
+  // Get token from cookies
+  // TODO: Improve this check
+  if (req.headers.cookie) {
+    try {
+      token = getTokenFromCookie(req.headers.cookie);
+
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = await User.findById(decoded.id).select('-password');
+
+        next();
+      } else {
+        throw new Error('Not Authorized, please login again!');
+      }
     } catch (error) {
-      console.error(error);
+      console.log(error);
       res.status(401);
-      throw new Error('Not Authorized,Please Login Again!!');
+      throw new Error('Not Authorized, please login again!');
+    }
+  } else {
+    console.log("error")
+    res.status(401);
+    throw new Error('Not Authorized');
+  }
+});
+
+// Optional auth - captures user if logged in, but doesn't require auth
+const optionalAuth = expressAsyncHandler(async (req, res, next) => {
+  let token;
+
+  if (req.headers.cookie) {
+    try {
+      token = getTokenFromCookie(req.headers.cookie);
+
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = await User.findById(decoded.id).select('-password');
+      }
+    } catch (error) {
+      // Token invalid or expired - continue without user
+      req.user = null;
     }
   }
 
-  if (!token) {
-    res.status(401);
-    throw new Error('Not Authorized, no token');
-  }
+  next();
 });
 
 const isAdmin = (req, res, next) => {
@@ -35,4 +66,7 @@ const isAdmin = (req, res, next) => {
     throw new Error('Not authorized as an Admin');
   }
 };
-export { protect, isAdmin };
+
+// Export with both names for compatibility
+export { protect, isAdmin, isAdmin as admin, optionalAuth };
+

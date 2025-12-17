@@ -1,132 +1,139 @@
 import asyncHandler from 'express-async-handler';
 import Order, { InvoiceNumber } from '../models/OrderModel.js';
 import User from '../models/UserModel.js';
+import Product from '../models/ProductModel.js';
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
 import _ from 'lodash';
 dotenv.config();
 
+// Constants for pricing rules
+const FREE_SHIPPING_THRESHOLD = 500;
+const SHIPPING_CHARGE = 50;
+
 // @desc Create new order
-// @route GET /api/orders
+// @route POST /api/orders
 // @access Private
 const addOrderItems = asyncHandler(async (req, res) => {
-  const {
-    orderItems,
-    shippingAddress,
-    paymentMethod,
-    itemsPrice,
-    taxPrice,
-    shippingPrice,
-    totalPrice,
-  } = req.body;
+  const { orderItems, shippingAddress, paymentMethod } = req.body;
 
-  if (orderItems && orderItems.length === 0) {
+  // Validate order items exist
+  if (!orderItems || orderItems.length === 0) {
     res.status(400);
     throw new Error('No order items');
-  } else {
-    const order = new Order({
-      orderItems,
-      user: req.user._id,
-      name: req.user.name,
-      phone: req.user.phone,
-      shippingAddress,
-      paymentMethod,
-      itemsPrice,
-      taxPrice,
-      shippingPrice,
-      totalPrice,
-      orderStatus: `Received: ${Date.now()}`,
-    });
-
-    // console.log(orderItems);
-    // const imageArray = [];
-    // for (var i = 0; i < orderItems.length; i++) {
-    //   imageArray.push({
-    //     filename: orderItems[i].name,
-    //     path: 'frontend/public' + orderItems[i].image,
-    //     cid: orderItems[i].name,
-    //   });
-    //   // result[i].filename = orderItems[i].name;
-    //   // result[i].path = orderItems[i].image;
-    //   // result[i].cid = orderItems[i].image;
-    // }
-    // console.log(imageArray);
-    const createdOrder = await order.save();
-    res.status(201).json(createdOrder);
-
-    // const oAuth2Client = new google.auth.OAuth2(
-    //   OAUTH2_CLIENT_ID,
-    //    OAUTH2_CLIENT_SECRET,
-    //    OAUTH2_REDIRECT_URI
-    // );
-    // oAuth2Client.setCredentials({  refresh_token:  OAUTH2_REFRESH_TOKEN });
-
-    // try {
-    //   const accessToken = await oAuth2Client.getAccessToken();
-    //   const transport = nodemailer.createTransport({
-    //     service: 'gmail',
-    //     auth: {
-    //       type: 'Oauth2',
-    //       user: 'noreply@gouniform.com',
-    //       clientId:  OAUTH2_CLIENT_ID,
-    //       clientSecret:  OAUTH2_CLIENT_SECRET,
-    //       refreshToken:  OAUTH2_REFRESH_TOKEN,
-    //       accessToken: accessToken,
-    //     },
-    //   });
-
-    //   const mailOptions = {
-    //     from: 'ALLSCHOOLUNIFORM',
-    //     replyTo: 'akash@gounifrom.com',
-    //     to: 'devanshgupta54@gmail.com',
-    //     subject: 'ORDER',
-    //     text: 'HELOOOOOOO',
-    //     html:
-    //       '<h1>' +
-    //       createdOrder.orderId +
-    //       '</h1><table style="border:2px solid green;border-collapse:collapse"><tr><th style="border:2px solid green;border-collapse:collapse">S.NO</th><th>IMAGE</th><th>NAME</th><th>SIZE</th><th>PRICE</th></tr>' +
-    //       orderItems
-    //         .map(
-    //           (x, index) =>
-    //             '<tr style="border:2px solid green;border-collapse:collapse"><td style="border:2px solid green">' +
-    //             (index + 1) +
-    //             '</td><td style="border:2px solid green;border-collapse:collapse;width:20vw">' +
-    //             `<img style="width:10vw" src="cid:${x.name}"/>` +
-    //             '</td><td style="border:2px solid green;border-collapse:collapse">' +
-    //             x.name +
-    //             '</td><td style="border:2px solid green;border-collapse:collapse">' +
-    //             x.size +
-    //             '</td><td style="border:2px solid green;border-collapse:collapse" >' +
-    //             x.qty +
-    //             '*' +
-    //             x.price +
-    //             '=' +
-    //             x.qty * x.price +
-    //             '</td></tr>'
-    //         )
-    //         .join('') +
-    //       '</table>',
-    //     attachments: imageArray,
-    //   };
-
-    //   // const mailOptions2 = {
-    //   //   from: 'ALLSCHOOLUNIFORM noreply@allschooluniform.com',
-    //   //   replyTo: 'akash@gounifrom.com',
-    //   //   to: 'devanshgupta54@gmail.com',
-    //   //   subject: 'ORDER',
-    //   //   text: 'HELOOOOOOO',
-    //   //   html: '<table><thead><tr><th>HELLO</th><th>NAME</th><th>PRICE</th><th>CHANGES</th></tr></thead></table>',
-    //   // };
-    //   const result = await transport.sendMail(mailOptions);
-    //   // const result2 = await transport.sendMail(mailOptions2);
-    //   console.log(result);
-    //   // console.log(result2);
-    // } catch (error) {
-    //   console.log(error);
-    // }
   }
+
+  // Extract unique product IDs from order items
+  const productIds = [...new Set(orderItems.map((item) => item.product))];
+
+  // Fetch all products from database in one query
+  const products = await Product.find({ _id: { $in: productIds } }).lean();
+
+  // Create a map for quick product lookup
+  const productMap = new Map();
+  products.forEach((product) => {
+    productMap.set(product._id.toString(), product);
+  });
+
+  // Validate and recalculate prices for each order item
+  const validatedOrderItems = [];
+  let calculatedItemsPrice = 0;
+
+  for (const item of orderItems) {
+    const product = productMap.get(item.product);
+
+    if (!product) {
+      res.status(400);
+      throw new Error(`Product not found: ${item.product}`);
+    }
+
+    // Check if product is active
+    if (!product.isActive) {
+      res.status(400);
+      throw new Error(`Product is not available: ${product.name}`);
+    }
+
+    // Find the size variant - try by sizeVariant ID first, then by size string
+    let sizeVariant = null;
+
+    // Method 1: Match by sizeVariant ID (most precise)
+    if (item.sizeVariant) {
+      sizeVariant = product.size.find(
+        (s) => s._id.toString() === item.sizeVariant
+      );
+    }
+
+    // Method 2: Fallback to size string match
+    if (!sizeVariant && item.size) {
+      sizeVariant = product.size.find(
+        (s) => s.size.toLowerCase() === item.size.toLowerCase()
+      );
+    }
+
+    if (!sizeVariant) {
+      res.status(400);
+      throw new Error(
+        `Size "${item.size}" not found for product: ${product.name}`
+      );
+    }
+
+    // Check if size is out of stock
+    if (sizeVariant.outOfStock || sizeVariant.countInStock < item.qty) {
+      res.status(400);
+      throw new Error(
+        `Insufficient stock for ${product.name} (Size: ${item.size})`
+      );
+    }
+
+    // Get the actual price from database
+    const actualPrice = sizeVariant.price;
+    const itemTotal = actualPrice * item.qty;
+    calculatedItemsPrice += itemTotal;
+
+    // Build validated order item with server-verified data
+    validatedOrderItems.push({
+      name: product.name,
+      qty: item.qty,
+      image: product.image,
+      price: actualPrice, // Price from DB, not client
+      size: sizeVariant.size, // Use DB size string for consistency
+      sizeVariant: sizeVariant._id.toString(),
+      product: item.product,
+      schoolName: item.schoolName || product.schoolName?.[0] || '',
+    });
+  }
+
+  // Calculate shipping (free above threshold)
+  const calculatedShippingPrice =
+    calculatedItemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE;
+
+  // Calculate tax (currently 0, can be configured)
+  const calculatedTaxPrice = 0;
+
+  // Calculate total
+  const calculatedTotalPrice =
+    calculatedItemsPrice + calculatedShippingPrice + calculatedTaxPrice;
+
+  // Create the order with server-calculated prices
+  const order = new Order({
+    orderItems: validatedOrderItems,
+    user: req.user._id,
+    name: req.user.name,
+    phone: req.user.phone,
+    shippingAddress,
+    paymentMethod,
+    itemsPrice: calculatedItemsPrice,
+    taxPrice: calculatedTaxPrice,
+    shippingPrice: calculatedShippingPrice,
+    totalPrice: calculatedTotalPrice,
+    orderStatus: `Received: ${Date.now()}`,
+  });
+
+  const createdOrder = await order.save();
+  res.status(201).json(createdOrder);
 });
+
 
 // @desc Get order by ID
 // @route GET /api/orders/:id
@@ -283,36 +290,36 @@ const getOrders = asyncHandler(async (req, res) => {
 
   const orderStatusSearch = status
     ? {
-        orderStatus: {
-          $regex: status,
-          $options: 'i',
-        },
-      }
+      orderStatus: {
+        $regex: status,
+        $options: 'i',
+      },
+    }
     : {};
 
   const searchKeyword = keyword
     ? {
-        name: {
-          $regex: keyword,
-          $options: 'i',
-        },
-      }
+      name: {
+        $regex: keyword,
+        $options: 'i',
+      },
+    }
     : {};
   const searchKeywordTwo = keyword
     ? {
-        orderId: {
-          $regex: keyword,
-          $options: 'i',
-        },
-      }
+      orderId: {
+        $regex: keyword,
+        $options: 'i',
+      },
+    }
     : {};
   const searchKeywordThree = keyword
     ? {
-        phone: {
-          $regex: keyword,
-          $options: 'i',
-        },
-      }
+      phone: {
+        $regex: keyword,
+        $options: 'i',
+      },
+    }
     : {};
 
   const page = Number(req.query.pageNumber) || 1;
@@ -585,12 +592,12 @@ const orderReport = asyncHandler(async (req, res) => {
 
   orders.forEach(
     (orderObj) =>
-      (orderObj.pendingItems = orderObj.orderItems.filter(
-        (originalItem) =>
-          !orderObj.modifiedItems.some(
-            (item) => item.name === originalItem.name
-          )
-      ))
+    (orderObj.pendingItems = orderObj.orderItems.filter(
+      (originalItem) =>
+        !orderObj.modifiedItems.some(
+          (item) => item.name === originalItem.name
+        )
+    ))
   );
 
   const pendingOrders = orders.filter((order) => order.pendingItems.length > 0);

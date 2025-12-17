@@ -2,6 +2,7 @@ import express from 'express';
 import {
   createSchool,
   deleteSchool,
+  getAllSchoolsPublic,
   getSchoolDetails,
   getSchoolImages,
   getSchoolNames,
@@ -18,6 +19,7 @@ router
   .route('/images')
   .get(getSchoolImages)
   .post(upload.single('image'), uploadSchoolImages);
+router.route('/all').get(getAllSchoolsPublic);
 router
   .route('/')
   .get(protect, isAdmin, getSchools)

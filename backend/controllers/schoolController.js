@@ -49,11 +49,11 @@ const getSchoolNames = asyncHandler(async (req, res) => {
 
   const keyword1 = keyword
     ? {
-        name: {
-          $regex: keyword,
-          $options: 'i',
-        },
-      }
+      name: {
+        $regex: keyword,
+        $options: 'i',
+      },
+    }
     : {};
 
   const schoolNames = await School.find(keyword1).select('name isActive');
@@ -65,6 +65,16 @@ const getSchoolNames = asyncHandler(async (req, res) => {
     // res.status(404);
     // throw new Error('School List empty');
   }
+});
+
+// @desc Get All Schools for Public Listing
+// @route GET /api/schools/all
+// @access Public
+const getAllSchoolsPublic = asyncHandler(async (req, res) => {
+  const schools = await School.find({ isActive: true })
+    .select('name logo city state')
+    .sort({ name: 'asc' });
+  res.json(schools);
 });
 
 // @desc Create School
@@ -192,9 +202,8 @@ const getSchoolImages = asyncHandler(async (req, res) => {
 // @access Public
 const uploadSchoolImages = asyncHandler(async (req, res) => {
   if (req.file) {
-    const newFilename = `${
-      req.file.originalname.split('.')[0]
-    }-${Date.now()}${path.extname(req.file.originalname)}`;
+    const newFilename = `${req.file.originalname.split('.')[0]
+      }-${Date.now()}${path.extname(req.file.originalname)}`;
 
     await sharp(req.file.buffer)
       .resize({ width: 300, height: 300 })
@@ -206,6 +215,7 @@ const uploadSchoolImages = asyncHandler(async (req, res) => {
 export {
   getSchools,
   getSchoolNames,
+  getAllSchoolsPublic,
   deleteSchool,
   updateSchool,
   getSchoolDetails,
