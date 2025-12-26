@@ -4,6 +4,7 @@ import paginate from '../utils/pagination.js';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import { normalizeUrl } from '../utils/normalizeUrl.js';
 
 // @desc Get product Types
 // @route GET /api/types
@@ -28,7 +29,13 @@ const getTypeImages = asyncHandler(async (req, res) => {
   }).select('image sizeChart sizeGuide');
 
   if (productType) {
-    res.status(200).json(productType);
+    const typeObj = productType.toObject();
+    res.status(200).json({
+      ...typeObj,
+      image: normalizeUrl(typeObj.image),
+      sizeChart: normalizeUrl(typeObj.sizeChart),
+      sizeGuide: normalizeUrl(typeObj.sizeGuide),
+    });
   } else {
     res.status(404);
     throw new Error('Type Not Found');
@@ -156,7 +163,7 @@ const getSizeGuideImages = asyncHandler(async (req, res) => {
   );
 
   files.forEach((file) => {
-    images.push({ url: `\\uploads\\sizeguides\\${file}`, name: file });
+    images.push({ url: `/uploads/sizeguides/${file}`, name: file });
   });
 
   const { currentImages, pages } = paginate(currentPage, imagesPerPage, images);
@@ -188,10 +195,16 @@ const getCategories = asyncHandler(async (req, res) => {
     .select('type image')
     .lean();
 
+  // Normalize image URLs
+  const normalizedCategories = categories.map((cat) => ({
+    ...cat,
+    image: normalizeUrl(cat.image),
+  }));
+
   res.json({
     success: true,
-    count: categories.length,
-    data: categories,
+    count: normalizedCategories.length,
+    data: normalizedCategories,
   });
 });
 

@@ -4,6 +4,7 @@ import paginate from '../utils/pagination.js';
 import fs from 'fs';
 import sharp from 'sharp';
 import path from 'path';
+import { normalizeUrl } from '../utils/normalizeUrl.js';
 
 
 // @desc Get SchoolList
@@ -245,7 +246,7 @@ const getSchoolImages = asyncHandler(async (req, res) => {
   );
 
   files.forEach((file) => {
-    images.push({ url: `\\uploads\\schools\\${file}`, name: file });
+    images.push({ url: `/uploads/schools/${file}`, name: file });
   });
 
   const { currentImages, pages } = paginate(currentPage, imagesPerPage, images);

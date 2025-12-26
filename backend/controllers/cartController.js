@@ -1,5 +1,15 @@
 import asyncHandler from 'express-async-handler';
 import Cart from '../models/CartModel.js';
+import { normalizeUrl } from '../utils/normalizeUrl.js';
+
+// Helper to normalize cart items images
+const normalizeCartItems = (cartItems) => {
+    if (!Array.isArray(cartItems)) return cartItems;
+    return cartItems.map((item) => ({
+        ...item.toObject ? item.toObject() : item,
+        image: normalizeUrl(item.image),
+    }));
+};
 
 // @desc Add item to cart
 // @route POST /api/cart/add
@@ -45,7 +55,7 @@ const addToCart = asyncHandler(async (req, res) => {
                 return res.json({
                     success: true,
                     message: 'Item updated in cart',
-                    cartItems: updatedCart.cartItems,
+                    cartItems: normalizeCartItems(updatedCart.cartItems),
                     cartId: updatedCart._id,
                     _id: updatedCart._id,
                 });
@@ -63,7 +73,7 @@ const addToCart = asyncHandler(async (req, res) => {
                 return res.status(201).json({
                     success: true,
                     message: 'Item added to cart',
-                    cartItems: updatedCart.cartItems,
+                    cartItems: normalizeCartItems(updatedCart.cartItems),
                     cartId: updatedCart._id,
                     _id: updatedCart._id,
                 });
@@ -107,7 +117,7 @@ const addToCart = asyncHandler(async (req, res) => {
                 return res.status(201).json({
                     success: true,
                     message: 'Cart created and item added',
-                    cartItems: finalCart.cartItems,
+                    cartItems: normalizeCartItems(finalCart.cartItems),
                     cartId: finalCart._id,
                     _id: finalCart._id,
                 });
@@ -116,7 +126,7 @@ const addToCart = asyncHandler(async (req, res) => {
             return res.status(201).json({
                 success: true,
                 message: 'Cart created and item added',
-                cartItems: updatedCart.cartItems,
+                cartItems: normalizeCartItems(updatedCart.cartItems),
                 cartId: updatedCart._id,
                 _id: updatedCart._id,
             });
@@ -140,7 +150,7 @@ const addToCart = asyncHandler(async (req, res) => {
                 return res.status(201).json({
                     success: true,
                     message: 'Item added to cart',
-                    cartItems: retryCart.cartItems,
+                    cartItems: normalizeCartItems(retryCart.cartItems),
                     cartId: retryCart._id,
                     _id: retryCart._id,
                 });
@@ -201,7 +211,7 @@ const cartItemRemove = asyncHandler(async (req, res) => {
             res.json({
                 success: true,
                 message: 'Item removed from cart',
-                cartItems: cart.cartItems,
+                cartItems: normalizeCartItems(cart.cartItems),
                 cartId: cart._id,
             });
         }
@@ -222,7 +232,7 @@ const getCart = asyncHandler(async (req, res) => {
         if (cart) {
             res.json({
                 success: true,
-                cartItems: cart.cartItems || [],
+                cartItems: normalizeCartItems(cart.cartItems) || [],
                 cartId: cart._id,
                 _id: cart._id,
                 username: cart.username,
@@ -301,7 +311,7 @@ const mergeCart = asyncHandler(async (req, res) => {
             res.json({
                 success: true,
                 message: 'Cart merged successfully',
-                cartItems: cart.cartItems,
+                cartItems: normalizeCartItems(cart.cartItems),
                 cartId: cart._id,
             });
         } else {
@@ -323,7 +333,7 @@ const mergeCart = asyncHandler(async (req, res) => {
             res.json({
                 success: true,
                 message: 'Cart created',
-                cartItems: cart.cartItems,
+                cartItems: normalizeCartItems(cart.cartItems),
                 cartId: cart._id,
             });
         }
@@ -406,7 +416,7 @@ const updateItemQuantity = asyncHandler(async (req, res) => {
         res.json({
             success: true,
             message: 'Quantity updated',
-            cartItems: cart.cartItems,
+            cartItems: normalizeCartItems(cart.cartItems),
             cartId: cart._id,
         });
     } catch (error) {

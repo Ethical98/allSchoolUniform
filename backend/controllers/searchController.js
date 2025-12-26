@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Product from '../models/ProductModel.js';
 import School from '../models/SchoolModel.js';
 import ProductType from '../models/ProductTypesModel.js';
+import { normalizeUrl } from '../utils/normalizeUrl.js';
 
 // @desc    Universal search across products, schools, and types
 // @route   GET /api/search?q=term&limit=5
@@ -70,7 +71,7 @@ const universalSearch = asyncHandler(async (req, res) => {
             .lean(),
     ]);
 
-    // Calculate minimum price for products
+    // Calculate minimum price for products and normalize image URLs
     const productsWithPrice = products.map((product) => {
         const prices = product.size
             ?.filter((s) => s.price > 0)
@@ -80,7 +81,7 @@ const universalSearch = asyncHandler(async (req, res) => {
         return {
             _id: product._id,
             name: product.name,
-            image: product.image,
+            image: normalizeUrl(product.image),
             type: product.type,
             brand: product.brand,
             category: product.category,
@@ -89,14 +90,18 @@ const universalSearch = asyncHandler(async (req, res) => {
         };
     });
 
+    // Normalize school and type images
+    const normalizedSchools = schools.map((s) => ({ ...s, logo: normalizeUrl(s.logo) }));
+    const normalizedTypes = types.map((t) => ({ ...t, image: normalizeUrl(t.image) }));
+
     const totalCount = products.length + schools.length + types.length;
 
     res.json({
         query: searchTerm,
         results: {
             products: productsWithPrice,
-            schools,
-            types,
+            schools: normalizedSchools,
+            types: normalizedTypes,
         },
         totalCount,
     });

@@ -3,6 +3,7 @@ import Homepage from '../models/HomepageModel.js';
 import Product from '../models/ProductModel.js';
 import User from '../models/UserModel.js';
 import School from '../models/SchoolModel.js';
+import { normalizeUrl } from '../utils/normalizeUrl.js';
 
 // @desc Get Carousel Images
 // @route GET /api/home/carousel
@@ -11,7 +12,15 @@ const getCarouselImages = asyncHandler(async (req, res) => {
   const carouselImages = await Homepage.findOne().select('homePageCarousel');
 
   if (carouselImages) {
-    res.json(carouselImages);
+    // Normalize image URLs
+    const normalized = {
+      ...carouselImages.toObject(),
+      homePageCarousel: carouselImages.homePageCarousel.map((item) => ({
+        ...item.toObject ? item.toObject() : item,
+        image: normalizeUrl(item.image),
+      })),
+    };
+    res.json(normalized);
   } else {
     res.status(404);
     throw new Error('No Carousel Images');
@@ -130,7 +139,7 @@ const getHeaderBackground = asyncHandler(async (req, res) => {
   if (homepage) {
     const headerBackground = [
       {
-        image: homepage.headerBackground.image,
+        image: normalizeUrl(homepage.headerBackground.image),
         isActive: homepage.headerBackground.isActive,
       },
     ];
@@ -168,7 +177,12 @@ const getAnnouncement = asyncHandler(async (req, res) => {
   const homepage = await Homepage.findOne().select('announcements -_id');
 
   if (homepage) {
-    res.json(homepage.announcements);
+    // Normalize image URLs
+    const normalized = homepage.announcements.map((item) => ({
+      ...item.toObject ? item.toObject() : item,
+      image: normalizeUrl(item.image),
+    }));
+    res.json(normalized);
   } else {
     res.status(404);
     throw new Error('Not Found');

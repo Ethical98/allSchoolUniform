@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 import paginate from '../utils/pagination.js';
+import { normalizeUrl, normalizeProductImages, normalizeProductsImages } from '../utils/normalizeUrl.js';
 
 // @desc Fetch all Products
 // @route GET /api/products
@@ -92,7 +93,7 @@ const getProducts = asyncHandler(async (req, res) => {
 
   // Return empty array instead of throwing error for no results
   res.json({
-    products,
+    products: normalizeProductsImages(products),
     page,
     pages: Math.ceil(count / pageSize),
     pageSize,
@@ -108,7 +109,7 @@ const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
 
   if (product) {
-    res.json(product);
+    res.json(normalizeProductImages(product.toObject()));
   } else {
     res.status(404);
     throw new Error('Product not found');
@@ -127,7 +128,7 @@ const getProductByName = asyncHandler(async (req, res) => {
   });
 
   if (product) {
-    res.json(product);
+    res.json(normalizeProductImages(product.toObject()));
   } else {
     res.status(404);
     throw new Error('Product not found');
@@ -225,7 +226,7 @@ const filterProducts = asyncHandler(async (req, res) => {
     .limit(pageSize)
     .skip(pageSize * (page - 1));
 
-  res.json({ products, page, pages: Math.ceil(count / pageSize) });
+  res.json({ products: normalizeProductsImages(products), page, pages: Math.ceil(count / pageSize) });
 });
 
 // @desc Delete a product
@@ -418,7 +419,7 @@ const getProductImages = asyncHandler(async (req, res) => {
   );
 
   files.forEach((file) => {
-    images.push({ url: `\\uploads\\products\\${file}`, name: file });
+    images.push({ url: `/uploads/products/${file}`, name: file });
   });
 
   const { currentImages, pages } = paginate(currentPage, imagesPerPage, images);
@@ -487,7 +488,7 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     count: products.length,
-    data: products,
+    data: normalizeProductsImages(products),
   });
 });
 
@@ -539,7 +540,7 @@ const getNewArrivals = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     count: products.length,
-    data: products,
+    data: normalizeProductsImages(products),
   });
 });
 

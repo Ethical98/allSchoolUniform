@@ -6,6 +6,7 @@ import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
 import _ from 'lodash';
+import { normalizeUrl } from '../utils/normalizeUrl.js';
 dotenv.config();
 
 // Constants for pricing rules
@@ -95,7 +96,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     validatedOrderItems.push({
       name: product.name,
       qty: item.qty,
-      image: product.image,
+      image: normalizeUrl(product.image),
       price: actualPrice, // Price from DB, not client
       size: sizeVariant.size, // Use DB size string for consistency
       sizeVariant: sizeVariant._id.toString(),
