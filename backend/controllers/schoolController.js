@@ -77,6 +77,62 @@ const getAllSchoolsPublic = asyncHandler(async (req, res) => {
   res.json(schools);
 });
 
+// @desc Get Featured Schools for Homepage
+// @route GET /api/schools/featured
+// @access Public
+const getFeaturedSchools = asyncHandler(async (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 8, 20);
+
+  // First try to get featured schools
+  let featuredSchools = await School.find({
+    isFeatured: true,
+    isActive: true,
+  })
+    .select('name logo city state')
+    .sort({ featuredOrder: 'asc', name: 'asc' })
+    .limit(limit)
+    .lean();
+
+  res.json({
+    success: true,
+    count: featuredSchools.length,
+    data: featuredSchools,
+  });
+});
+
+// @desc Update School Featured Status
+// @route PUT /api/schools/:id/featured
+// @access Private/Admin
+const updateFeaturedSchool = asyncHandler(async (req, res) => {
+  const { isFeatured, featuredOrder } = req.body;
+
+  const school = await School.findById(req.params.id);
+
+  if (!school) {
+    res.status(404);
+    throw new Error('School not found');
+  }
+
+  if (typeof isFeatured === 'boolean') {
+    school.isFeatured = isFeatured;
+  }
+  if (typeof featuredOrder === 'number') {
+    school.featuredOrder = featuredOrder;
+  }
+
+  const updatedSchool = await school.save();
+
+  res.json({
+    success: true,
+    data: {
+      _id: updatedSchool._id,
+      name: updatedSchool.name,
+      isFeatured: updatedSchool.isFeatured,
+      featuredOrder: updatedSchool.featuredOrder,
+    },
+  });
+});
+
 // @desc Create School
 // @route POST /api/schools
 // @access Private/Admin
@@ -216,6 +272,8 @@ export {
   getSchools,
   getSchoolNames,
   getAllSchoolsPublic,
+  getFeaturedSchools,
+  updateFeaturedSchool,
   deleteSchool,
   updateSchool,
   getSchoolDetails,

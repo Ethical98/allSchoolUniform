@@ -169,9 +169,8 @@ const getSizeGuideImages = asyncHandler(async (req, res) => {
 // @access Public
 const uploadSizeGuideImages = asyncHandler(async (req, res) => {
   if (req.file) {
-    const newFilename = `${
-      req.file.originalname.split('.')[0]
-    }-${Date.now()}${path.extname(req.file.originalname)}`;
+    const newFilename = `${req.file.originalname.split('.')[0]
+      }-${Date.now()}${path.extname(req.file.originalname)}`;
 
     await sharp(req.file.buffer)
       .resize({ width: 300, height: 300 })
@@ -179,6 +178,21 @@ const uploadSizeGuideImages = asyncHandler(async (req, res) => {
 
     res.send(`/uploads/sizeguides/resized-${newFilename}`);
   }
+});
+
+// @desc Get Product Categories for Homepage
+// @route GET /api/types/categories
+// @access Public
+const getCategories = asyncHandler(async (req, res) => {
+  const categories = await ProductType.find({ isActive: true })
+    .select('type image')
+    .lean();
+
+  res.json({
+    success: true,
+    count: categories.length,
+    data: categories,
+  });
 });
 
 export {
@@ -192,4 +206,5 @@ export {
   getTypeImages,
   getSizeGuideImages,
   uploadSizeGuideImages,
+  getCategories,
 };

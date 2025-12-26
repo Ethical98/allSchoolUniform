@@ -50,6 +50,14 @@ const schoolSchema = mongoose.Schema({
     default: 'India',
   },
 
+  isFeatured: {
+    type: Boolean,
+    default: false,
+  },
+  featuredOrder: {
+    type: Number,
+    default: 0,
+  },
   isActive: {
     type: Boolean,
     default: false,

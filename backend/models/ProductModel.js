@@ -84,6 +84,14 @@ const productSchema = mongoose.Schema(
       required: true,
       default: 0,
     },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
+    featuredOrder: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

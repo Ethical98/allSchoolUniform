@@ -16,6 +16,7 @@ import schoolRoutes from './routes/schoolRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import homeRoutes from './routes/homeRoutes.js';
 import notFoundRequestRoutes from './routes/notFoundRequestRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use('/api/classes', classRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/home', homeRoutes);
 app.use('/api/requests', notFoundRequestRoutes);
+app.use('/api/search', searchRoutes);
 
 const __dirname = path.resolve();
 

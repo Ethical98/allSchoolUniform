@@ -394,7 +394,7 @@ const handlePaymentFailure = asyncHandler(async (req, res) => {
             name: req.user.name,
             phone: req.user.phone,
             shippingAddress: orderData.shippingAddress,
-            paymentMethod: orderData.paymentMethod || 'cod',
+            paymentMethod: orderData.paymentMethod || 'COD',
             paymentStatus: 'pending',
             itemsPrice: orderData.itemsPrice,
             taxPrice: orderData.taxPrice,
@@ -414,7 +414,7 @@ const handlePaymentFailure = asyncHandler(async (req, res) => {
             _id: savedOrder._id,
             orderNumber: savedOrder.orderNumber,
             status: savedOrder.orderStatus,
-            paymentMethod: 'cod',
+            paymentMethod: 'COD',
             createdAt: savedOrder.createdAt,
             paymentFailureDetails: failureData,
         });

@@ -14,6 +14,9 @@ import {
   getProducts,
   updateProduct,
   uploadProductImages,
+  getFeaturedProducts,
+  updateFeaturedProduct,
+  getNewArrivals,
 } from '../controllers/productController.js';
 import { protect, isAdmin } from '../Middleware/authMiddleware.js';
 
@@ -25,6 +28,9 @@ router.route('/').get(getProducts).post(protect, isAdmin, createProduct);
 router.route('/:id/reviews').post(protect, createProductReview);
 router.route('/name/:name').get(getProductByName);
 router.route('/filter').get(filterProducts).post(filterProducts);
+router.route('/featured').get(getFeaturedProducts);
+router.route('/new-arrivals').get(getNewArrivals);
+router.route('/:id/featured').put(protect, isAdmin, updateFeaturedProduct);
 
 router
   .route('/:id')

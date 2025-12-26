@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import Product from '../models/ProductModel.js';
+import Order from '../models/OrderModel.js';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
@@ -63,6 +64,13 @@ const getProducts = asyncHandler(async (req, res) => {
     });
   }
 
+  // Type filter (e.g., Shirt, Trousers, Blazer)
+  if (req.query.type) {
+    filters.push({
+      type: { $regex: req.query.type.trim(), $options: 'i' },
+    });
+  }
+
   // Only show active products by default
   if (req.query.includeInactive !== 'true') {
     filters.push({ isActive: { $ne: false } });
@@ -75,7 +83,7 @@ const getProducts = asyncHandler(async (req, res) => {
   const [count, products] = await Promise.all([
     Product.countDocuments(query),
     Product.find(query)
-      .select('name image brand size schoolName category season class isActive')
+      .select('name image brand size schoolName category season class isActive createdAt type reviews numReviews')
       .sort(sortBy)
       .limit(pageSize)
       .skip(pageSize * (page - 1))
@@ -439,6 +447,102 @@ const uploadProductImages = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Get Featured Products for Homepage
+// @route GET /api/products/featured
+// @access Public
+const getFeaturedProducts = asyncHandler(async (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 8, 20);
+
+  // First try to get featured products
+  let products = await Product.find({
+    isFeatured: true,
+    isActive: true,
+  })
+    .select('name image size rating numReviews brand')
+    .sort({ featuredOrder: 'asc', name: 'asc' })
+    .limit(limit)
+    .lean();
+
+  // Fallback: if no featured products, get most ordered products
+  if (products.length === 0) {
+    const mostOrdered = await Order.aggregate([
+      { $unwind: '$orderItems' },
+      { $group: { _id: '$orderItems.product', orderCount: { $sum: '$orderItems.qty' } } },
+      { $sort: { orderCount: -1 } },
+      { $limit: limit },
+    ]);
+
+    const productIds = mostOrdered.map((item) => item._id);
+
+    if (productIds.length > 0) {
+      products = await Product.find({
+        _id: { $in: productIds },
+        isActive: true,
+      })
+        .select('name image size rating numReviews brand')
+        .lean();
+    }
+  }
+
+  res.json({
+    success: true,
+    count: products.length,
+    data: products,
+  });
+});
+
+// @desc Update Product Featured Status
+// @route PUT /api/products/:id/featured
+// @access Private/Admin
+const updateFeaturedProduct = asyncHandler(async (req, res) => {
+  const { isFeatured, featuredOrder } = req.body;
+
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  if (typeof isFeatured === 'boolean') {
+    product.isFeatured = isFeatured;
+  }
+  if (typeof featuredOrder === 'number') {
+    product.featuredOrder = featuredOrder;
+  }
+
+  const updatedProduct = await product.save();
+
+  res.json({
+    success: true,
+    data: {
+      _id: updatedProduct._id,
+      name: updatedProduct.name,
+      isFeatured: updatedProduct.isFeatured,
+      featuredOrder: updatedProduct.featuredOrder,
+    },
+  });
+});
+
+// @desc Get New Arrivals for Homepage
+// @route GET /api/products/new-arrivals
+// @access Public
+const getNewArrivals = asyncHandler(async (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 8, 20);
+
+  const products = await Product.find({ isActive: true })
+    .select('name image size rating numReviews brand createdAt')
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+
+  res.json({
+    success: true,
+    count: products.length,
+    data: products,
+  });
+});
+
 export {
   getProducts,
   getProductById,
@@ -451,4 +555,7 @@ export {
   createProductReview,
   getProductImages,
   uploadProductImages,
+  getFeaturedProducts,
+  updateFeaturedProduct,
+  getNewArrivals,
 };

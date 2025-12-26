@@ -10,6 +10,7 @@ import {
   getTypes,
   updateType,
   uploadSizeGuideImages,
+  getCategories,
 } from '../controllers/typeController.js';
 import { protect, isAdmin } from '../Middleware/authMiddleware.js';
 import upload from '../Middleware/uploadMiddleware.js';
@@ -25,6 +26,7 @@ router
   .get(protect, isAdmin, getTypes)
   .post(protect, isAdmin, createType);
 router.route('/all').get(protect, isAdmin, getProductTypes);
+router.route('/categories').get(getCategories);
 router
   .route('/:id')
   .get(protect, isAdmin, getTypeDetails)

@@ -12,7 +12,6 @@ const protect = expressAsyncHandler(async (req, res, next) => {
   let token;
 
   // Get token from cookies
-  // TODO: Improve this check
   if (req.headers.cookie) {
     try {
       token = getTokenFromCookie(req.headers.cookie);
@@ -21,17 +20,43 @@ const protect = expressAsyncHandler(async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = await User.findById(decoded.id).select('-password');
 
+        if (!req.user) {
+          // User no longer exists - clear cookie
+          res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/',
+          });
+          res.status(401);
+          throw new Error('User not found, please login again');
+        }
+
         next();
       } else {
         throw new Error('Not Authorized, please login again!');
       }
     } catch (error) {
-      console.log(error);
+      console.log('[Auth] Token verification failed:', error.name, error.message);
+
+      // Clear the invalid/expired cookie - options must match how cookie was set
+      res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+      });
+
       res.status(401);
+
+      // Return specific error for expired tokens
+      if (error.name === 'TokenExpiredError') {
+        throw new Error('Session expired, please login again');
+      }
+
       throw new Error('Not Authorized, please login again!');
     }
   } else {
-    console.log("error")
     res.status(401);
     throw new Error('Not Authorized');
   }
