@@ -1,7 +1,10 @@
 import path from 'path';
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
+import compression from 'compression';
 import { notFound, errorHandler } from './Middleware/errorMiddleware.js';
+import queryTimingMiddleware from './Middleware/queryTimingMiddleware.js';
 import colors from 'colors';
 import morgan from 'morgan';
 import connectDB from './config/db.js';
@@ -23,6 +26,17 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// Enable CORS for cross-origin requests
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Compress all HTTP responses (gzip) - reduces payload by 70-90%
+app.use(compression());
 
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));

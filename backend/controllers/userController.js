@@ -107,8 +107,7 @@ const changePassword = asyncHandler(async (req, res) => {
 const authUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    console.log(password, 'DBG_6');
-    console.log(await user.matchPassword(password), 'DBG-5');
+
     if (user && (await user.matchPassword(password))) {
         const token = generateToken(user._id, user.name, user.isAdmin);
         res.cookie('token', token, {
@@ -137,7 +136,7 @@ const authUser = asyncHandler(async (req, res) => {
 const authUserByOTP = asyncHandler(async (req, res) => {
     const { phone } = req.body;
     const user = await User.findOne({ phone });
-    console.log(user, phone, 'DBG_1');
+
     if (user) {
         const token = generateToken(user._id, user.name, user.isAdmin);
         res.cookie('token', token, {
@@ -321,7 +320,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 // @access public
 const resetPassword = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password);
+
     const user = await User.findOne({ email });
     if (user) {
         if (password) {

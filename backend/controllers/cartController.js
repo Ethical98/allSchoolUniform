@@ -268,8 +268,6 @@ const mergeCart = asyncHandler(async (req, res) => {
 
     try {
         let cart = await Cart.findOne({ user: req.user._id });
-        console.log(cart, 'DB_DBG');
-        console.log(cartItems, 'DBG_body');
         if (cart) {
             // ✅ Merge logic: Update quantities for existing items
             cartItems.forEach((newItem) => {

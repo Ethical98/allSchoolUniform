@@ -96,6 +96,28 @@ const productSchema = mongoose.Schema(
   { timestamps: true }
 );
 
+// ========================================
+// Database Indexes for Query Performance
+// ========================================
+
+// Single field indexes for common filters
+productSchema.index({ schoolName: 1 });
+productSchema.index({ type: 1 });
+productSchema.index({ name: 1 });
+productSchema.index({ isActive: 1 });
+productSchema.index({ createdAt: -1 });
+
+// Featured products index (for homepage)
+productSchema.index({ isFeatured: -1, featuredOrder: 1 });
+
+// Compound indexes for common query patterns
+productSchema.index({ isActive: 1, schoolName: 1 });
+productSchema.index({ isActive: 1, type: 1 });
+productSchema.index({ isActive: 1, class: 1 });
+
+// Text index for search functionality
+productSchema.index({ name: 'text', schoolName: 'text', SEOKeywords: 'text' });
+
 const Product = mongoose.model('Product', productSchema);
 
 export default Product;

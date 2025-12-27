@@ -11,9 +11,9 @@ const cartSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    contact:{
-      type:String,
-      required:true,
+    contact: {
+      type: String,
+      required: true,
     },
     cartItems: [
       {
@@ -60,6 +60,12 @@ const cartSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// ========================================
+// Database Indexes for Query Performance
+// ========================================
+
+cartSchema.index({ user: 1 }); // Fast cart lookup by user
 
 const Cart = mongoose.model('cart', cartSchema);
 

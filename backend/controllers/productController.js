@@ -5,7 +5,11 @@ import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 import paginate from '../utils/pagination.js';
-import { normalizeUrl, normalizeProductImages, normalizeProductsImages } from '../utils/normalizeUrl.js';
+import {
+  normalizeUrl,
+  normalizeProductImages,
+  normalizeProductsImages,
+} from '../utils/normalizeUrl.js';
 
 // @desc Fetch all Products
 // @route GET /api/products
@@ -18,10 +22,6 @@ const getProducts = asyncHandler(async (req, res) => {
   // Sorting config
   const sortField = req.query.sortBy || 'name';
   const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
-  const validSortFields = ['name', 'createdAt', 'price'];
-  const sortBy = validSortFields.includes(sortField)
-    ? { [sortField]: sortOrder }
-    : { name: 1 };
 
   // Build filters array
   const filters = [];
@@ -72,35 +72,87 @@ const getProducts = asyncHandler(async (req, res) => {
     });
   }
 
-  // Only show active products by default
+  // Only show active products by default (using $eq for better index usage)
   if (req.query.includeInactive !== 'true') {
-    filters.push({ isActive: { $ne: false } });
+    filters.push({ isActive: true });
   }
 
-  // Build final query
-  const query = filters.length > 0 ? { $and: filters } : {};
+  // Build final match stage
+  const matchStage = filters.length > 0 ? { $and: filters } : {};
 
-  // Execute count and find in parallel for better performance
-  const [count, products] = await Promise.all([
-    Product.countDocuments(query),
-    Product.find(query)
-      .select('name image brand size schoolName category season class isActive createdAt type reviews numReviews')
-      .sort(sortBy)
-      .limit(pageSize)
-      .skip(pageSize * (page - 1))
-      .lean(),
-  ]);
+  // Check if sorting by price - requires aggregation pipeline
+  if (sortField === 'price') {
+    // Use aggregation to calculate minPrice from size array for sorting
+    const pipeline = [
+      { $match: matchStage },
+      {
+        $addFields: {
+          // Calculate minimum price from size variants for sorting
+          minPrice: { $min: '$size.price' },
+        },
+      },
+      { $sort: { minPrice: sortOrder } },
+      { $skip: pageSize * (page - 1) },
+      { $limit: pageSize },
+      {
+        $project: {
+          name: 1,
+          image: 1,
+          brand: 1,
+          size: 1,
+          schoolName: 1,
+          category: 1,
+          season: 1,
+          class: 1,
+          isActive: 1,
+          createdAt: 1,
+          type: 1,
+          reviews: 1,
+          numReviews: 1,
+        },
+      },
+    ];
 
-  // Return empty array instead of throwing error for no results
-  res.json({
-    products: normalizeProductsImages(products),
-    page,
-    pages: Math.ceil(count / pageSize),
-    pageSize,
-    total: count,
-  });
+    const [countResult, products] = await Promise.all([
+      Product.countDocuments(matchStage),
+      Product.aggregate(pipeline),
+    ]);
+
+    res.json({
+      products: normalizeProductsImages(products),
+      page,
+      pages: Math.ceil(countResult / pageSize),
+      pageSize,
+      total: countResult,
+    });
+  } else {
+    // Standard find query for non-price sorting
+    const validSortFields = ['name', 'createdAt'];
+    const sortBy = validSortFields.includes(sortField)
+      ? { [sortField]: sortOrder }
+      : { name: 1 };
+
+    const [count, products] = await Promise.all([
+      Product.countDocuments(matchStage),
+      Product.find(matchStage)
+        .select(
+          'name image brand size schoolName category season class isActive createdAt type reviews numReviews'
+        )
+        .sort(sortBy)
+        .limit(pageSize)
+        .skip(pageSize * (page - 1))
+        .lean(),
+    ]);
+
+    res.json({
+      products: normalizeProductsImages(products),
+      page,
+      pages: Math.ceil(count / pageSize),
+      pageSize,
+      total: count,
+    });
+  }
 });
-
 
 // @desc Fetch Single Product
 // @route GET /api/products/:id
@@ -226,7 +278,11 @@ const filterProducts = asyncHandler(async (req, res) => {
     .limit(pageSize)
     .skip(pageSize * (page - 1));
 
-  res.json({ products: normalizeProductsImages(products), page, pages: Math.ceil(count / pageSize) });
+  res.json({
+    products: normalizeProductsImages(products),
+    page,
+    pages: Math.ceil(count / pageSize),
+  });
 });
 
 // @desc Delete a product
@@ -422,7 +478,11 @@ const getProductImages = asyncHandler(async (req, res) => {
     images.push({ url: `/uploads/products/${file}`, name: file });
   });
 
-  const { currentImages, pages } = paginate(currentPage, imagesPerPage, images);
+  const { currentImages, pages } = paginate(
+    currentPage,
+    imagesPerPage,
+    images
+  );
 
   res.send({ images: currentImages, pages: pages });
 });
@@ -468,7 +528,12 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
   if (products.length === 0) {
     const mostOrdered = await Order.aggregate([
       { $unwind: '$orderItems' },
-      { $group: { _id: '$orderItems.product', orderCount: { $sum: '$orderItems.qty' } } },
+      {
+        $group: {
+          _id: '$orderItems.product',
+          orderCount: { $sum: '$orderItems.qty' },
+        },
+      },
       { $sort: { orderCount: -1 } },
       { $limit: limit },
     ]);

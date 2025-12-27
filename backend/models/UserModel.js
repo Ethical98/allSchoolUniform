@@ -97,6 +97,13 @@ userSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
 });
 
+// ========================================
+// Database Indexes for Query Performance
+// ========================================
+
+userSchema.index({ phone: 1 });
+userSchema.index({ email: 1 });
+
 const User = mongoose.model('User', userSchema);
 
 export default User;
