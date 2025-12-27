@@ -10,8 +10,8 @@ import { normalizeUrl } from '../utils/normalizeUrl.js';
 dotenv.config();
 
 // Constants for pricing rules
-const FREE_SHIPPING_THRESHOLD = 500;
-const SHIPPING_CHARGE = 50;
+const FREE_SHIPPING_THRESHOLD = 599;
+const SHIPPING_CHARGE = 100;
 
 // @desc Create new order
 // @route POST /api/orders
