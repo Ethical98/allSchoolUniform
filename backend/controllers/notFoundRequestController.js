@@ -81,39 +81,26 @@ const getEmailTransporter = async () => {
     return null;
 };
 
-// Send notification email to admins
+
+
 const sendNotificationEmail = async (request) => {
     try {
         const oauth2Client = new google.auth.OAuth2(
             process.env.GMAIL_CLIENT_ID,
-            process.env.GMAIL_CLIENT_SECRET,
-            'https://developers.google.com/oauthplayground' // Not used for API
+            process.env.GMAIL_CLIENT_SECRET
         );
 
         oauth2Client.setCredentials({
             refresh_token: process.env.GMAIL_REFRESH_TOKEN
         });
 
-        // Get fresh access token
-        const accessToken = await oauth2Client.getAccessToken();
-
-        // Use Nodemailer with Gmail API transport
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                type: 'OAuth2',
-                user: process.env.GMAIL_USER,
-                clientId: process.env.GMAIL_CLIENT_ID,
-                clientSecret: process.env.GMAIL_CLIENT_SECRET,
-                refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-                accessToken: accessToken.token
-            }
-        });
+        const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
         const isSchool = request.type === 'school';
         const subject = isSchool
-            ? `🏫 New School Request: ${request.schoolName}`
-            : `📦 New Product Request: ${request.productSchool}`;
+            ? `New School Request: ${request.schoolName}`
+            : `New Product Request: ${request.productSchool}`;
+
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -164,14 +151,32 @@ const sendNotificationEmail = async (request) => {
             </div>
         `;
 
-        // Get the from email - supports alias via GMAIL_FROM
-        const fromEmail = process.env.GMAIL_FROM || process.env.GMAIL_USER || process.env.SMTP_USER || 'noreply@allschooluniform.com';
+        const fromEmail = process.env.GMAIL_USER;
+        
+        // Create RFC 2822 formatted email
+        const email = [
+            'Content-Type: text/html; charset=utf-8',
+            'MIME-Version: 1.0',
+            `From: "All School Uniform" <${fromEmail}>`,
+            `To: ${ADMIN_EMAILS.join(', ')}`,
+            `Subject: ${subject}`,
+            '',
+            htmlContent
+        ].join('\n');
 
-        await transporter.sendMail({
-            from: `"All School Uniform" <${fromEmail}>`,
-            to: ADMIN_EMAILS.join(', '),
-            subject: subject,
-            html: htmlContent,
+        // Base64 URL-safe encode
+        const encodedEmail = Buffer.from(email)
+            .toString('base64')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+
+        // Send via Gmail API
+        await gmail.users.messages.send({
+            userId: 'me',
+            requestBody: {
+                raw: encodedEmail
+            }
         });
 
         // Update email sent status
@@ -180,13 +185,17 @@ const sendNotificationEmail = async (request) => {
             emailSentAt: new Date(),
         });
 
-        console.log(`[NotFound] Email sent for request ${request._id}`);
+        console.log(`[NotFound] Email sent via Gmail API for request ${request._id}`);
         return true;
     } catch (error) {
-        console.error('[NotFound] Email error:', error);
+        console.error('[NotFound] Email API error:', error.message);
+        if (error.response) {
+            console.error('[NotFound] API response:', error.response.data);
+        }
         return false;
     }
 };
+
 
 // @desc Submit school not found request
 // @route POST /api/requests/school
