@@ -104,14 +104,13 @@ const optionalAuth = expressAsyncHandler(async (req, res, next) => {
         req.user = await User.findById(decoded.id).select('-password');
       }
     } catch (error) {
+      console.log('[Auth] Optional token verification failed:', error.name, error.message);
       // Token invalid or expired - continue without user
       req.user = null;
     }
   }
 
-  // No token found in either location
-  res.status(401);
-  throw new Error('Not Authorized, no token');
+  next();
 });
 
 const isAdmin = (req, res, next) => {
