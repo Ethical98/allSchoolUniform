@@ -145,8 +145,8 @@ jobs:
             
             # Pull latest changes
             git fetch origin
-            git checkout ${{ github.event.inputs.deploy_branch || 'master' }}
-            git pull origin ${{ github.event.inputs.deploy_branch || 'master' }}
+            git checkout ${{ github.event.inputs.deploy_branch || github.ref_name }}
+            git pull origin ${{ github.event.inputs.deploy_branch || github.ref_name }}
             
             # Install dependencies
             npm ci --omit=dev

@@ -8,8 +8,8 @@ import { RedisService } from '../services/redisService.js';
 dotenv.config();
 
 const razorpayInstance = new Razorpay({
-    key_id: process.env.RAZORPAY_API_TEST_KEY,
-    key_secret: process.env.RAZORPAY_TEST_SALT,
+    key_id: process.env.RAZORPAY_API_KEY,
+    key_secret: process.env.RAZORPAY_API_SALT,
 });
 
 // ✅ Redis replaces in-memory Maps for production-ready persistence
