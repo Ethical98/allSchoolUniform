@@ -1,0 +1,142 @@
+name: React Admin & Backend CI/CD
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/workflows/react-build.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+  workflow_dispatch:
+    inputs:
+      deploy_branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+        type: string
+      deploy_target:
+        description: 'What to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - frontend
+          - backend
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  build-frontend:
+    name: Build React Admin
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.deploy_target != 'backend' }}
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.deploy_branch || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build Production Bundle
+        run: npm run build
+        env:
+          CI: false
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-admin-build
+          path: frontend/build
+          retention-days: 7
+
+  deploy-frontend:
+    name: Deploy React Admin
+    needs: build-frontend
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: react-admin-build
+          path: build
+
+      - name: Deploy to DigitalOcean Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
+          source: "build/*"
+          target: "/var/www/admin"
+          strip_components: 1
+          rm: true
+
+      - name: Reload Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
+          script: |
+            sudo nginx -t && sudo systemctl reload nginx
+            echo "✅ React Admin deployed successfully!"
+  deploy-backend:
+    name: Deploy Node.js Backend
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_target != 'frontend') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    
+    steps:
+      - name: Deploy Backend to DigitalOcean
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
+          script: |
+            cd /var/www/backend
+            
+            # Pull latest changes
+            git fetch origin
+            git checkout ${{ github.event.inputs.deploy_branch || 'main' }}
+            git pull origin ${{ github.event.inputs.deploy_branch || 'main' }}
+            
+            # Install dependencies
+            npm ci --production
+            
+            # Restart PM2 process
+            pm2 restart backend || pm2 start backend/server.js --name backend
+            pm2 save
+            
+            echo "✅ Node.js Backend deployed successfully!"
