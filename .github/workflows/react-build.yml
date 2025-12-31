@@ -1,30 +1,43 @@
-name: React Admin CI/CD
+name: React Admin & Backend CI/CD
 
 on:
   push:
-    branches: [main, master,asu-next]
+    branches: [main, master, asu-next]
     paths:
       - 'frontend/**'
+      - 'backend/**'
+      - 'package.json'
       - '.github/workflows/react-build.yml'
   pull_request:
     branches: [main, master]
     paths:
       - 'frontend/**'
+      - 'backend/**'
   workflow_dispatch:
     inputs:
       deploy_branch:
         description: 'Branch to deploy'
         required: true
-        default: 'main'
+        default: 'master'
         type: string
+      deploy_target:
+        description: 'What to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - frontend
+          - backend
 
 env:
   NODE_VERSION: '16'
 
 jobs:
-  build:
+  build-frontend:
     name: Build React Admin
     runs-on: ubuntu-latest
+    if: github.event.inputs.deploy_target != 'backend'
     
     defaults:
       run:
@@ -60,13 +73,15 @@ jobs:
         with:
           name: react-admin-build
           path: frontend/build
-          retention-days: 1
+          retention-days: 7
 
-  deploy:
+  deploy-frontend:
     name: Deploy React Admin
-    needs: build
+    needs: build-frontend
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: |
+      github.event.inputs.deploy_target != 'backend' &&
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/asu-next' || github.ref == 'refs/heads/master')))
     
     steps:
       - name: Download Build Artifacts
@@ -75,19 +90,20 @@ jobs:
           name: react-admin-build
           path: build
 
-      - name: Deploy to DigitalOcean Droplet
+      - name: Create tarball
+        run: tar -czf build.tar.gz -C build .
+
+      - name: Copy to droplet
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
-          source: "build/*"
-          target: "/var/www/admin"
-          strip_components: 1
-          rm: true
+          source: "build.tar.gz"
+          target: "/tmp"
 
-      - name: Reload Nginx
+      - name: Extract and deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -95,15 +111,23 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
           script: |
-            sudo nginx -t && sudo systemctl reload nginx
+            # Clean and prepare directory
+            rm -rf /var/www/admin/*
+            mkdir -p /var/www/admin
+            
+            # Extract tarball
+            tar -xzf /tmp/build.tar.gz -C /var/www/admin
+            
+            # Cleanup
+            rm -f /tmp/build.tar.gz
+            
             echo "✅ React Admin deployed successfully!"
-
   deploy-backend:
     name: Deploy Node.js Backend
     runs-on: ubuntu-latest
     if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      github.event.inputs.deploy_target != 'frontend' &&
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/asu-next' || github.ref == 'refs/heads/master')))
     
     steps:
       - name: Deploy Backend to DigitalOcean
@@ -121,20 +145,14 @@ jobs:
             
             # Pull latest changes
             git fetch origin
-            git checkout ${{ github.event.inputs.deploy_branch || 'main' }}
-            git pull origin ${{ github.event.inputs.deploy_branch || 'main' }}
+            git checkout ${{ github.event.inputs.deploy_branch || 'master' }}
+            git pull origin ${{ github.event.inputs.deploy_branch || 'master' }}
             
-            # Install production dependencies only
-            npm ci --production
+            # Install dependencies
+            npm ci --omit=dev
             
             # Restart PM2 process
-            pm2 describe backend > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-              pm2 restart backend
-            else
-              pm2 start backend/server.js --name backend
-            fi
-            
+            pm2 restart backend || pm2 start backend/server.js --name backend
             pm2 save
             
             echo "✅ Node.js Backend deployed successfully!"
