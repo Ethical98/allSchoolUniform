@@ -1,17 +1,15 @@
-name: React Admin & Backend CI/CD
+name: React Admin CI/CD
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master,asu-next]
     paths:
       - 'frontend/**'
-      - 'backend/**'
       - '.github/workflows/react-build.yml'
   pull_request:
     branches: [main, master]
     paths:
       - 'frontend/**'
-      - 'backend/**'
   workflow_dispatch:
     inputs:
       deploy_branch:
@@ -19,24 +17,14 @@ on:
         required: true
         default: 'main'
         type: string
-      deploy_target:
-        description: 'What to deploy'
-        required: true
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - frontend
-          - backend
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '16'
 
 jobs:
-  build-frontend:
+  build:
     name: Build React Admin
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.deploy_target != 'backend' }}
     
     defaults:
       run:
@@ -72,11 +60,11 @@ jobs:
         with:
           name: react-admin-build
           path: frontend/build
-          retention-days: 7
+          retention-days: 1
 
-  deploy-frontend:
+  deploy:
     name: Deploy React Admin
-    needs: build-frontend
+    needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     
@@ -114,7 +102,7 @@ jobs:
     name: Deploy Node.js Backend
     runs-on: ubuntu-latest
     if: |
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_target != 'frontend') ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'push' && github.ref == 'refs/heads/main')
     
     steps:
@@ -126,6 +114,9 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
           script: |
+            # Fix git safe directory
+            git config --global --add safe.directory /var/www/backend
+            
             cd /var/www/backend
             
             # Pull latest changes
@@ -133,11 +124,17 @@ jobs:
             git checkout ${{ github.event.inputs.deploy_branch || 'main' }}
             git pull origin ${{ github.event.inputs.deploy_branch || 'main' }}
             
-            # Install dependencies
+            # Install production dependencies only
             npm ci --production
             
             # Restart PM2 process
-            pm2 restart backend || pm2 start backend/server.js --name backend
+            pm2 describe backend > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+              pm2 restart backend
+            else
+              pm2 start backend/server.js --name backend
+            fi
+            
             pm2 save
             
             echo "✅ Node.js Backend deployed successfully!"
