@@ -9,8 +9,10 @@ dotenv.config();
 
 const razorpayInstance = new Razorpay({
     key_id: process.env.RAZORPAY_API_KEY,
-    key_secret: process.env.RAZORPAY_API_SALT,
+    key_secret: process.env.RAZORPAY_SALT,
 });
+
+
 
 // ✅ Redis replaces in-memory Maps for production-ready persistence
 // - Payment data and webhook status are now stored in Redis
