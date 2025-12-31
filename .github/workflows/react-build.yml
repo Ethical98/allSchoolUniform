@@ -112,20 +112,14 @@ jobs:
           port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
           script: |
             # Clean and prepare directory
-            sudo rm -rf /var/www/admin/*
-            sudo mkdir -p /var/www/admin
+            rm -rf /var/www/admin/*
+            mkdir -p /var/www/admin
             
             # Extract tarball
-            sudo tar -xzf /tmp/build.tar.gz -C /var/www/admin
-            
-            # Fix permissions
-            sudo chown -R www-data:www-data /var/www/admin
+            tar -xzf /tmp/build.tar.gz -C /var/www/admin
             
             # Cleanup
             rm -f /tmp/build.tar.gz
-            
-            # Reload nginx
-            sudo nginx -t && sudo systemctl reload nginx
             
             echo "✅ React Admin deployed successfully!"
   deploy-backend:
