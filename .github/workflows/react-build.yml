@@ -2,10 +2,11 @@ name: React Admin & Backend CI/CD
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, asu-next]
     paths:
       - 'frontend/**'
       - 'backend/**'
+      - 'package.json'
       - '.github/workflows/react-build.yml'
   pull_request:
     branches: [main, master]
@@ -36,8 +37,8 @@ jobs:
   build-frontend:
     name: Build React Admin
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.deploy_target != 'backend' }}
-
+    if: github.event.inputs.deploy_target != 'backend'
+    
     defaults:
       run:
         working-directory: frontend
@@ -78,8 +79,10 @@ jobs:
     name: Deploy React Admin
     needs: build-frontend
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
-
+    if: |
+      github.event.inputs.deploy_target != 'backend' &&
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+    
     steps:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
@@ -113,8 +116,8 @@ jobs:
     name: Deploy Node.js Backend
     runs-on: ubuntu-latest
     if: |
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_target != 'frontend') ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      github.event.inputs.deploy_target != 'frontend' &&
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     
     steps:
       - name: Deploy Backend to DigitalOcean
