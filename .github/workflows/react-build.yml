@@ -90,30 +90,20 @@ jobs:
           name: react-admin-build
           path: build
 
-      - name: Prepare deploy directory
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
-          script: |
-            sudo mkdir -p /var/www/admin
-            sudo chown -R $USER:$USER /var/www/admin
-            rm -rf /var/www/admin/*
+      - name: Create tarball
+        run: tar -czf build.tar.gz -C build .
 
-      - name: Deploy to DigitalOcean Droplet
+      - name: Copy to droplet
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
-          source: "build/*"
-          target: "/var/www/admin"
-          strip_components: 1
+          source: "build.tar.gz"
+          target: "/tmp"
 
-      - name: Reload Nginx
+      - name: Extract and deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -121,7 +111,22 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
           script: |
+            # Clean and prepare directory
+            sudo rm -rf /var/www/admin/*
+            sudo mkdir -p /var/www/admin
+            
+            # Extract tarball
+            sudo tar -xzf /tmp/build.tar.gz -C /var/www/admin
+            
+            # Fix permissions
+            sudo chown -R www-data:www-data /var/www/admin
+            
+            # Cleanup
+            rm -f /tmp/build.tar.gz
+            
+            # Reload nginx
             sudo nginx -t && sudo systemctl reload nginx
+            
             echo "✅ React Admin deployed successfully!"
   deploy-backend:
     name: Deploy Node.js Backend
