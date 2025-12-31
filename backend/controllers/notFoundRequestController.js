@@ -84,12 +84,31 @@ const getEmailTransporter = async () => {
 // Send notification email to admins
 const sendNotificationEmail = async (request) => {
     try {
-        const transporter = await getEmailTransporter();
+        const oauth2Client = new google.auth.OAuth2(
+            process.env.GMAIL_CLIENT_ID,
+            process.env.GMAIL_CLIENT_SECRET,
+            'https://developers.google.com/oauthplayground' // Not used for API
+        );
 
-        if (!transporter) {
-            console.warn('[NotFound] Email not configured, skipping notification');
-            return false;
-        }
+        oauth2Client.setCredentials({
+            refresh_token: process.env.GMAIL_REFRESH_TOKEN
+        });
+
+        // Get fresh access token
+        const accessToken = await oauth2Client.getAccessToken();
+
+        // Use Nodemailer with Gmail API transport
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                type: 'OAuth2',
+                user: process.env.GMAIL_USER,
+                clientId: process.env.GMAIL_CLIENT_ID,
+                clientSecret: process.env.GMAIL_CLIENT_SECRET,
+                refreshToken: process.env.GMAIL_REFRESH_TOKEN,
+                accessToken: accessToken.token
+            }
+        });
 
         const isSchool = request.type === 'school';
         const subject = isSchool
