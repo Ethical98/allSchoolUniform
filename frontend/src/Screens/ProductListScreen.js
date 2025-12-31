@@ -55,6 +55,17 @@ const ProductListScreen = ({ history, match, location }) => {
             field: 'season'
         },
         {
+            title: 'Display Order',
+            field: 'displayOrder',
+            type: 'numeric',
+            defaultSort: 'desc'
+        },
+        {
+            title: 'Featured',
+            field: 'isFeatured',
+            render: (item) => item.isFeatured ? '⭐' : '-'
+        },
+        {
             title: 'Image',
             field: 'image',
             render: (item) => <Image src={item.image} alt={item.name} style={{ width: '5vw' }} fluid rounded />

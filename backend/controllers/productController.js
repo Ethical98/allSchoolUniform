@@ -109,6 +109,7 @@ const getProducts = asyncHandler(async (req, res) => {
           type: 1,
           reviews: 1,
           numReviews: 1,
+          displayOrder: 1,
         },
       },
     ];
@@ -127,16 +128,21 @@ const getProducts = asyncHandler(async (req, res) => {
     });
   } else {
     // Standard find query for non-price sorting
+    // Default sort: displayOrder (descending - higher values first), then name (ascending)
     const validSortFields = ['name', 'createdAt'];
-    const sortBy = validSortFields.includes(sortField)
-      ? { [sortField]: sortOrder }
-      : { name: 1 };
+    let sortBy;
+    if (validSortFields.includes(sortField)) {
+      sortBy = { [sortField]: sortOrder };
+    } else {
+      // Default: sort by displayOrder (admin-controlled), then alphabetically by name
+      sortBy = { displayOrder: -1, name: 1 };
+    }
 
     const [count, products] = await Promise.all([
       Product.countDocuments(matchStage),
       Product.find(matchStage)
         .select(
-          'name image brand size schoolName category season class isActive createdAt type reviews numReviews'
+          'name image brand size schoolName category season class isActive createdAt type reviews numReviews displayOrder'
         )
         .sort(sortBy)
         .limit(pageSize)
@@ -318,7 +324,19 @@ const createProduct = asyncHandler(async (req, res) => {
     standard,
     isActive,
     SEOKeywords,
+    displayOrder,
   } = req.body;
+
+  // Auto-assign displayOrder if not provided
+  // Uses sparse numbering: find max existing value and add 100
+  let finalDisplayOrder = displayOrder;
+  if (typeof displayOrder !== 'number') {
+    const maxProduct = await Product.findOne({})
+      .sort({ displayOrder: -1 })
+      .select('displayOrder')
+      .lean();
+    finalDisplayOrder = (maxProduct?.displayOrder || 0) + 100;
+  }
 
   const product = new Product({
     name,
@@ -335,6 +353,7 @@ const createProduct = asyncHandler(async (req, res) => {
     isActive,
     SEOKeywords,
     class: standard,
+    displayOrder: finalDisplayOrder,
   });
 
   const createdProduct = await product.save();
@@ -360,6 +379,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     isActive,
     SEOKeywords,
     outOfStock,
+    displayOrder,
   } = req.body;
 
   const product = await Product.findById(req.params.id);
@@ -378,6 +398,9 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.SKU = SKU;
     product.SEOKeywords = SEOKeywords;
     product.outOfStock = outOfStock;
+    if (typeof displayOrder === 'number') {
+      product.displayOrder = displayOrder;
+    }
 
     const updatedProduct = await product.save();
     res.status(201).json(updatedProduct);
@@ -609,6 +632,41 @@ const getNewArrivals = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc Get All Products Display Orders (Admin Helper)
+// @route GET /api/products/admin/display-orders
+// @access Private/Admin
+const getDisplayOrders = asyncHandler(async (req, res) => {
+  const products = await Product.find({})
+    .select('_id name displayOrder isActive schoolName')
+    .sort({ displayOrder: -1, name: 1 })
+    .lean();
+
+  // Calculate the next suggested displayOrder value
+  const maxDisplayOrder = products.length > 0 ? products[0].displayOrder : 0;
+  const nextSuggestedOrder = maxDisplayOrder + 100;
+
+  res.json({
+    success: true,
+    count: products.length,
+    nextSuggestedOrder,
+    convention: {
+      description: 'Use sparse numbering (100, 200, 300...) for display order. Higher values appear first.',
+      examples: [
+        'To place a product at top: use a value higher than current max',
+        'To insert between 200 and 300: use 250',
+        'Products with same displayOrder are sorted alphabetically by name',
+      ],
+    },
+    products: products.map((p) => ({
+      _id: p._id,
+      name: p.name,
+      displayOrder: p.displayOrder,
+      isActive: p.isActive,
+      schoolName: p.schoolName,
+    })),
+  });
+});
+
 export {
   getProducts,
   getProductById,
@@ -624,4 +682,5 @@ export {
   getFeaturedProducts,
   updateFeaturedProduct,
   getNewArrivals,
+  getDisplayOrders,
 };

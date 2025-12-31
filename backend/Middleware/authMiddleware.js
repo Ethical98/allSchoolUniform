@@ -11,10 +11,41 @@ function getTokenFromCookie(cookieString) {
 const protect = expressAsyncHandler(async (req, res, next) => {
   let token;
 
-  // Get token from cookies
+  // Priority 1: Check Authorization header (for React Admin with localStorage)
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password');
+
+      if (!req.user) {
+        res.status(401);
+        throw new Error('User not found, please login again');
+      }
+
+      return next();
+    } catch (error) {
+      console.log('[Auth] Bearer token verification failed:', error.name, error.message);
+      res.status(401);
+
+      if (error.name === 'TokenExpiredError') {
+        throw new Error('Session expired, please login again');
+      }
+
+      throw new Error('Not Authorized, invalid token');
+    }
+  }
+
+  // Priority 2: Check cookies (for Next.js with httpOnly cookies)
   if (req.headers.cookie) {
     try {
-      token = getTokenFromCookie(req.headers.cookie);
+      token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password');
 
       if (token) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -32,12 +63,12 @@ const protect = expressAsyncHandler(async (req, res, next) => {
           throw new Error('User not found, please login again');
         }
 
-        next();
+        return next();
       } else {
         throw new Error('Not Authorized, please login again!');
       }
     } catch (error) {
-      console.log('[Auth] Token verification failed:', error.name, error.message);
+      console.log('[Auth] Cookie token verification failed:', error.name, error.message);
 
       // Clear the invalid/expired cookie - options must match how cookie was set
       res.clearCookie('token', {
@@ -80,7 +111,9 @@ const optionalAuth = expressAsyncHandler(async (req, res, next) => {
     }
   }
 
-  next();
+  // No token found in either location
+  res.status(401);
+  throw new Error('Not Authorized, no token');
 });
 
 const isAdmin = (req, res, next) => {

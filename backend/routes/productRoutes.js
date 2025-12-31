@@ -17,6 +17,7 @@ import {
   getFeaturedProducts,
   updateFeaturedProduct,
   getNewArrivals,
+  getDisplayOrders,
 } from '../controllers/productController.js';
 import { protect, isAdmin } from '../Middleware/authMiddleware.js';
 
@@ -30,6 +31,7 @@ router.route('/name/:name').get(getProductByName);
 router.route('/filter').get(filterProducts).post(filterProducts);
 router.route('/featured').get(getFeaturedProducts);
 router.route('/new-arrivals').get(getNewArrivals);
+router.route('/admin/display-orders').get(protect, isAdmin, getDisplayOrders);
 router.route('/:id/featured').put(protect, isAdmin, updateFeaturedProduct);
 
 router

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import {
     CART_ADD_ITEM,
     CART_REMOVE_ITEM,
@@ -23,7 +23,7 @@ const salt = process.env.REACT_APP_CRYPTO_SALT;
 
 export const addToCart = (id, index, qty) => async (dispatch, getState) => {
     try {
-        const { data } = await axios.get(`/api/products/${id}`);
+        const { data } = await api.get(`/api/products/${id}`);
         const {
             userLogin: { userInfo }
         } = getState();
@@ -55,7 +55,7 @@ export const addToCart = (id, index, qty) => async (dispatch, getState) => {
                 type: CART_ADD_ITEM,
                 payload: addItem
             });
-            await axios.post(`/api/cart/add`, { addItem }, config);
+            await api.post(`/api/cart/add`, { addItem }, config);
         } else {
             dispatch({
                 type: CART_ADD_ITEM,
@@ -99,7 +99,7 @@ export const removeFromCart = (id, name) => async (dispatch, getState) => {
                 }
             };
 
-            await axios.delete(`/api/cart/remove?id=${id}&name=${name}`, config);
+            await api.delete(`/api/cart/remove?id=${id}&name=${name}`, config);
             dispatch({
                 type: CART_REMOVE_ITEM,
                 payload: id
@@ -138,7 +138,7 @@ export const mergeCartWithDatabase = () => async (dispatch, getState) => {
                 cart: { cartItems }
             } = getState();
 
-            const { data } = await axios.post('/api/cart/', { cartItems }, config);
+            const { data } = await api.post('/api/cart/', { cartItems }, config);
 
             dispatch({
                 type: CART_GET_FROM_DATABASE,
@@ -169,7 +169,7 @@ export const getCartFromDatabase = () => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.get('/api/cart/get', config);
+        const { data } = await api.get('/api/cart/get', config);
 
         dispatch({
             type: CART_GET_FROM_DATABASE,
@@ -197,7 +197,7 @@ export const getSavedAddress = () => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.get('/api/users/shippingAddress', config);
+        const { data } = await api.get('/api/users/shippingAddress', config);
 
         dispatch({
             type: CART_GET_SHIPPING_ADDRESS,
@@ -222,7 +222,7 @@ export const saveShippingAddressDatabase = (data) => async (dispatch, getState) 
                 Authorization: `Bearer ${userInfo.token}`
             }
         };
-        await axios.post('/api/users/shippingAddress', { data }, config);
+        await api.post('/api/users/shippingAddress', { data }, config);
         dispatch({
             type: CART_SAVE_SHIPPING_ADDRESS,
             payload: data
@@ -275,7 +275,7 @@ export const clearCartFromDatabase = () => async (dispatch, getState) => {
             }
         };
 
-        await axios.get('/api/cart/clear', config);
+        await api.get('/api/cart/clear', config);
 
         dispatch({
             type: CART_RESET_SUCCESS

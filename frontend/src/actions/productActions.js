@@ -23,10 +23,16 @@ import {
     PRODUCT_IMAGE_UPLOAD_FAIL,
     PRODUCT_IMAGE_UPLOAD_REQUEST,
     PRODUCT_IMAGE_UPLOAD_SUCCESS,
-    PRODUCT_IMAGE_UPLOAD_PROGRESS
+    PRODUCT_IMAGE_UPLOAD_PROGRESS,
+    PRODUCT_DISPLAY_ORDERS_REQUEST,
+    PRODUCT_DISPLAY_ORDERS_SUCCESS,
+    PRODUCT_DISPLAY_ORDERS_FAIL,
+    PRODUCT_UPDATE_FEATURED_REQUEST,
+    PRODUCT_UPDATE_FEATURED_SUCCESS,
+    PRODUCT_UPDATE_FEATURED_FAIL
 } from '../constants/productConstants';
 
-import axios from 'axios';
+import api from '../utils/api';
 
 export const listProducts =
     (keyword = '', pageNumber = '', category = '', season = '', standard = '', school = '') =>
@@ -39,7 +45,7 @@ export const listProducts =
 
             season = season ? season : WINTER_MONTHS.includes(month.toLowerCase()) ? 'Winter' : 'Summer';
 
-            const { data } = await axios.get(
+            const { data } = await api.get(
                 `/api/products?category=${category}&season=${season}&standard=${standard}&keyword=${keyword}&school=${school}&pageNumber=${pageNumber}`
             );
 
@@ -59,7 +65,7 @@ export const listProductDetails = (name) => async (dispatch) => {
     try {
         dispatch({ type: PRODUCT_DETAILS_REQUEST });
 
-        const { data } = await axios.get(`/api/products/name/${name}`);
+        const { data } = await api.get(`/api/products/name/${name}`);
 
         dispatch({
             type: PRODUCT_DETAILS_SUCCESS,
@@ -77,7 +83,7 @@ export const listProductDetailsById = (id) => async (dispatch) => {
     try {
         dispatch({ type: PRODUCT_DETAILS_REQUEST });
 
-        const { data } = await axios.get(`/api/products/${id}`);
+        const { data } = await api.get(`/api/products/${id}`);
 
         dispatch({
             type: PRODUCT_DETAILS_SUCCESS,
@@ -101,49 +107,49 @@ export const filterProducts = (category, season, standard) => async (dispatch) =
             }
         };
         if (category && season && standard) {
-            const { data } = await axios.post('/api/products/filter/', { category, season, standard }, config);
+            const { data } = await api.post('/api/products/filter/', { category, season, standard }, config);
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
             });
         } else if (category && season) {
-            const { data } = await axios.post('/api/products/filter/', { category, season }, config);
+            const { data } = await api.post('/api/products/filter/', { category, season }, config);
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
             });
         } else if (category && standard) {
-            const { data } = await axios.post('/api/products/filter/', { category, standard }, config);
+            const { data } = await api.post('/api/products/filter/', { category, standard }, config);
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
             });
         } else if (season && standard) {
-            const { data } = await axios.post('/api/products/filter/', { season, standard }, config);
+            const { data } = await api.post('/api/products/filter/', { season, standard }, config);
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
             });
         } else if (season) {
-            const { data } = await axios.post('/api/products/filter/', { season }, config);
+            const { data } = await api.post('/api/products/filter/', { season }, config);
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
             });
         } else if (category) {
-            const { data } = await axios.post('/api/products/filter/', { category }, config);
+            const { data } = await api.post('/api/products/filter/', { category }, config);
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
             });
         } else if (standard) {
-            const { data } = await axios.post('/api/products/filter/', { standard }, config);
+            const { data } = await api.post('/api/products/filter/', { standard }, config);
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
             });
         } else {
-            const { data } = await axios.get('/api/products/filter/');
+            const { data } = await api.get('/api/products/filter/');
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
@@ -178,7 +184,7 @@ export const deleteProduct = (id) => async (dispatch, getState) => {
             }
         };
 
-        await axios.delete(`/api/products/${id}`, config);
+        await api.delete(`/api/products/${id}`, config);
         dispatch({
             type: PRODUCT_DELETE_SUCCESS
         });
@@ -207,7 +213,7 @@ export const createProduct = (product) => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.post(`/api/products/`, product, config);
+        const { data } = await api.post(`/api/products/`, product, config);
         dispatch({
             type: PRODUCT_CREATE_SUCCESS,
             payload: data
@@ -237,7 +243,7 @@ export const updateProduct = (product) => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.put(`/api/products/${product._id}`, product, config);
+        const { data } = await api.put(`/api/products/${product._id}`, product, config);
         dispatch({
             type: PRODUCT_UPDATE_SUCCESS,
             payload: data
@@ -267,7 +273,7 @@ export const createProductReview = (productId, review) => async (dispatch, getSt
             }
         };
 
-        await axios.post(`/api/products/${productId}/reviews`, review, config);
+        await api.post(`/api/products/${productId}/reviews`, review, config);
         dispatch({
             type: PRODUCT_CREATE_REVIEW_SUCCESS
         });
@@ -291,7 +297,7 @@ export const listProductImages =
             dispatch({ type: PRODUCT_IMAGE_LIST_REQUEST });
             const {
                 data: { images: productImages, pages: productImagePages }
-            } = await axios.get(`/api/products/images?page=${pageNumber}`, config);
+            } = await api.get(`/api/products/images?page=${pageNumber}`, config);
 
             dispatch({
                 type: PRODUCT_IMAGE_LIST_SUCCESS,
@@ -326,7 +332,7 @@ export const uploadProductImage = (file) => async (dispatch) => {
 
         dispatch({ type: PRODUCT_IMAGE_UPLOAD_REQUEST });
 
-        const { data } = await axios.post(baseUrl, formData, config);
+        const { data } = await api.post(baseUrl, formData, config);
 
         dispatch({
             type: PRODUCT_IMAGE_UPLOAD_SUCCESS,
@@ -335,6 +341,63 @@ export const uploadProductImage = (file) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: PRODUCT_IMAGE_UPLOAD_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message
+        });
+    }
+};
+
+export const getDisplayOrders = () => async (dispatch, getState) => {
+    try {
+        dispatch({ type: PRODUCT_DISPLAY_ORDERS_REQUEST });
+
+        const {
+            userLogin: { userInfo }
+        } = getState();
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        };
+
+        const { data } = await api.get('/api/products/admin/display-orders', config);
+
+        dispatch({
+            type: PRODUCT_DISPLAY_ORDERS_SUCCESS,
+            payload: data
+        });
+    } catch (error) {
+        dispatch({
+            type: PRODUCT_DISPLAY_ORDERS_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message
+        });
+    }
+};
+
+export const updateFeaturedProduct = (productId, featuredData) => async (dispatch, getState) => {
+    try {
+        dispatch({ type: PRODUCT_UPDATE_FEATURED_REQUEST });
+
+        const {
+            userLogin: { userInfo }
+        } = getState();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        };
+
+        const { data } = await api.put(`/api/products/${productId}/featured`, featuredData, config);
+
+        dispatch({
+            type: PRODUCT_UPDATE_FEATURED_SUCCESS,
+            payload: data
+        });
+    } catch (error) {
+        dispatch({
+            type: PRODUCT_UPDATE_FEATURED_FAIL,
             payload: error.response && error.response.data.message ? error.response.data.message : error.message
         });
     }

@@ -92,6 +92,11 @@ const productSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    displayOrder: {
+      type: Number,
+      default: 0,
+      index: true, // For efficient sorting queries
+    },
   },
   { timestamps: true }
 );
@@ -114,6 +119,9 @@ productSchema.index({ isFeatured: -1, featuredOrder: 1 });
 productSchema.index({ isActive: 1, schoolName: 1 });
 productSchema.index({ isActive: 1, type: 1 });
 productSchema.index({ isActive: 1, class: 1 });
+
+// Display order index for UI sorting
+productSchema.index({ isActive: 1, displayOrder: -1, name: 1 });
 
 // Text index for search functionality
 productSchema.index({ name: 'text', schoolName: 'text', SEOKeywords: 'text' });

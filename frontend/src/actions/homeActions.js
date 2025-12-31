@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import {
     CAROUSEL_IMAGES_ADD_FAIL,
     CAROUSEL_IMAGES_ADD_REQUEST,
@@ -42,7 +42,7 @@ export const listCarouselImages = () => async dispatch => {
     try {
         dispatch({ type: CAROUSEL_IMAGES_REQUEST });
 
-        const { data } = await axios.get('/api/home/carousel');
+        const { data } = await api.get('/api/home/carousel');
 
         dispatch({
             type: CAROUSEL_IMAGES_SUCCESS,
@@ -73,7 +73,7 @@ export const updateCarouselImages = newData => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.put(`/api/home/carousel`, { newData }, config);
+        const { data } = await api.put(`/api/home/carousel`, { newData }, config);
         dispatch({
             type: CAROUSEL_IMAGES_UPDATE_SUCCESS,
             payload: data
@@ -102,7 +102,7 @@ export const deleteCarouselImages = id => async (dispatch, getState) => {
             }
         };
 
-        await axios.delete(`/api/home/carousel/${id}`, config);
+        await api.delete(`/api/home/carousel/${id}`, config);
         dispatch({
             type: CAROUSEL_IMAGES_DELETE_SUCCESS
         });
@@ -131,7 +131,7 @@ export const addCarouselImages = newData => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.post(`/api/home/carousel`, newData, config);
+        const { data } = await api.post(`/api/home/carousel`, newData, config);
         dispatch({
             type: CAROUSEL_IMAGES_ADD_SUCCESS,
             payload: data
@@ -148,7 +148,7 @@ export const getStatisticsDetails = () => async dispatch => {
     try {
         dispatch({ type: STATISTICS_DETAILS_REQUEST });
 
-        const { data } = await axios.get('/api/home/statistics');
+        const { data } = await api.get('/api/home/statistics');
 
         dispatch({
             type: STATISTICS_DETAILS_SUCCESS,
@@ -179,7 +179,7 @@ export const updateStatistics = newData => async (dispatch, getState) => {
             }
         };
 
-        await axios.put(`/api/home/statistics`, { newData }, config);
+        await api.put(`/api/home/statistics`, { newData }, config);
         dispatch({
             type: STATISTICS_UPDATE_SUCCESS
         });
@@ -195,7 +195,7 @@ export const getHeaderBackgroundDetails = () => async dispatch => {
     try {
         dispatch({ type: HEADER_BG_DETAILS_REQUEST });
 
-        const { data } = await axios.get('/api/home/header');
+        const { data } = await api.get('/api/home/header');
 
         dispatch({
             type: HEADER_BG_DETAILS_SUCCESS,
@@ -226,7 +226,7 @@ export const updateHeaderBackground = newData => async (dispatch, getState) => {
             }
         };
 
-        await axios.put(`/api/home/header`, { newData }, config);
+        await api.put(`/api/home/header`, { newData }, config);
         dispatch({
             type: HEADER_BG_UPDATE_SUCCESS
         });
@@ -242,7 +242,7 @@ export const listAnnouncements = () => async dispatch => {
     try {
         dispatch({ type: ANNOUNCEMENT_LIST_REQUEST });
 
-        const { data } = await axios.get('/api/home/announcement');
+        const { data } = await api.get('/api/home/announcement');
 
         dispatch({
             type: ANNOUNCEMENT_LIST_SUCCESS,
@@ -273,7 +273,7 @@ export const updateAnnouncement = newData => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.put(`/api/home/announcement`, { newData }, config);
+        const { data } = await api.put(`/api/home/announcement`, { newData }, config);
         dispatch({
             type: ANNOUNCEMENT_UPDATE_SUCCESS,
             payload: data
@@ -302,7 +302,7 @@ export const deleteAnnouncement = id => async (dispatch, getState) => {
             }
         };
 
-        await axios.delete(`/api/home/announcement/${id}`, config);
+        await api.delete(`/api/home/announcement/${id}`, config);
         dispatch({
             type: ANNOUNCEMENT_DELETE_SUCCESS
         });
@@ -331,7 +331,7 @@ export const addAnnouncement = newData => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.post(`/api/home/announcement`, newData, config);
+        const { data } = await api.post(`/api/home/announcement`, newData, config);
         dispatch({
             type: ANNOUNCEMENT_ADD_SUCCESS,
             payload: data
