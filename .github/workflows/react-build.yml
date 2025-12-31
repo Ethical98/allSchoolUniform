@@ -90,6 +90,18 @@ jobs:
           name: react-admin-build
           path: build
 
+      - name: Prepare deploy directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
+          script: |
+            sudo mkdir -p /var/www/admin
+            sudo chown -R $USER:$USER /var/www/admin
+            rm -rf /var/www/admin/*
+
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -100,7 +112,6 @@ jobs:
           source: "build/*"
           target: "/var/www/admin"
           strip_components: 1
-          rm: true
 
       - name: Reload Nginx
         uses: appleboy/ssh-action@v1.0.3
