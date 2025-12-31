@@ -18,7 +18,7 @@ on:
       deploy_branch:
         description: 'Branch to deploy'
         required: true
-        default: 'main'
+        default: 'master'
         type: string
       deploy_target:
         description: 'What to deploy'
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.inputs.deploy_target != 'backend' &&
-      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/asu-next' || github.ref == 'refs/heads/master')))
     
     steps:
       - name: Download Build Artifacts
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.inputs.deploy_target != 'frontend' &&
-      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/asu-next' || github.ref == 'refs/heads/master')))
     
     steps:
       - name: Deploy Backend to DigitalOcean
