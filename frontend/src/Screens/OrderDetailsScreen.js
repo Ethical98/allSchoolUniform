@@ -6,7 +6,6 @@ import Message from '../components/Message';
 import Loader from '../components/Loader';
 import { getOrderDetails } from '../actions/orderActions';
 import { logout } from '../actions/userActions';
-import jsonwebtoken from 'jsonwebtoken';
 import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
 import Meta from '../components/Meta';
@@ -44,16 +43,6 @@ const OrderDetails = ({ match, history }) => {
         }
     }, [userInfo, history]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
 
     useEffect(() => {
         if (!order || order._id !== orderId) {
@@ -68,7 +57,7 @@ const OrderDetails = ({ match, history }) => {
 
     useEffect(() => {
         if (!userInfo) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [userInfo, dispatch, history]);

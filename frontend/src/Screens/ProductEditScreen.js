@@ -4,7 +4,6 @@ import { Button, Form, Col, Row, Container, FloatingLabel } from 'react-bootstra
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import jsonwebtoken from 'jsonwebtoken';
 import { listProductDetailsById, updateProduct, updateFeaturedProduct } from '../actions/productActions';
 import { listTypes, listTypeSizes } from '../actions/typeActions';
 import { listClasses } from '../actions/classActions';
@@ -137,16 +136,6 @@ const ProductEditScreen = ({ match, history, location }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
 
     const removeIdHandler = (sizeArray) => {
         const newSizeArray = sizeArray.map(
@@ -167,7 +156,7 @@ const ProductEditScreen = ({ match, history, location }) => {
 
     useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, userInfo]);

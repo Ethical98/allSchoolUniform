@@ -7,7 +7,6 @@ import Product from '../components/Product';
 import { listProducts } from '../actions/productActions';
 import { logout } from '../actions/userActions';
 import Paginate from '../components/Paginate';
-import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
 import Accordion from '../components/Accordion';
 import PageLayout from '../components/PageLayout';
@@ -47,16 +46,7 @@ const ProductScreen = ({ history, location, match }) => {
         );
     }, [dispatch, keyword, pageNumber, category, season, standard, formattedSchool]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
+
 
     return (
         <PageLayout>

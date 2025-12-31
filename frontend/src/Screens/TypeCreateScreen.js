@@ -4,7 +4,6 @@ import Loader from '../components/Loader';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
-import jsonwebtoken from 'jsonwebtoken';
 import { logout } from '../actions/userActions';
 import { TYPE_CREATE_RESET, TYPE_IMAGE_UPLOAD_RESET } from '../constants/typeConstants';
 import { createType } from '../actions/typeActions';
@@ -72,20 +71,10 @@ const TypeCreateScreen = ({ match, history }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
 
     useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, userInfo]);

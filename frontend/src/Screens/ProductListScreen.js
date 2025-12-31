@@ -3,7 +3,6 @@ import { Button, Row, Col, Image, Form } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import jsonwebtoken from 'jsonwebtoken';
 import { listProducts, deleteProduct } from '../actions/productActions';
 import { PRODUCT_CREATE_RESET } from '../constants/productConstants';
 import { logout } from '../actions/userActions';
@@ -81,16 +80,7 @@ const ProductListScreen = ({ history, match, location }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
+    // Auth verification handled by backend via HTTP-only cookies
 
     useEffect(() => {
         dispatch({ type: PRODUCT_CREATE_RESET });

@@ -4,7 +4,6 @@ import { Button, Form, Col, Row, Container, FloatingLabel } from 'react-bootstra
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import jsonwebtoken from 'jsonwebtoken';
 import { listClasses } from '../actions/classActions';
 import { listTypeSizes, listTypes } from '../actions/typeActions';
 import { listSchools } from '../actions/schoolActions';
@@ -143,19 +142,8 @@ const ProductCreateScreen = ({ history, location }) => {
     }, [history, userInfo]);
 
     useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
-
-    useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, userInfo]);

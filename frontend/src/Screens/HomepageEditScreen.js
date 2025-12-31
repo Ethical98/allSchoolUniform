@@ -28,7 +28,6 @@ import {
     HEADER_BG_UPDATE_RESET,
     STATISTICS_UPDATE_RESET
 } from '../constants/homeConstants';
-import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
 
@@ -91,19 +90,8 @@ const HomepageEditScreen = ({ location, history }) => {
     }, [history, userInfo]);
 
     useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
-
-    useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         } else {
             if (successUpdate) {

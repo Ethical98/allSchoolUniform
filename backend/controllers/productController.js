@@ -11,6 +11,44 @@ import {
   normalizeProductsImages,
 } from '../utils/normalizeUrl.js';
 
+// Helper: Escape special regex characters in a string
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Product name validation pattern and function
+// Allowed: letters, numbers, spaces, hyphens, ampersands, apostrophes, commas, slashes, quotes
+const PRODUCT_NAME_PATTERN = /^[a-zA-Z0-9\s\-&',\/"]+$/;
+
+const validateProductName = (name) => {
+  const errors = [];
+
+  if (!name || typeof name !== 'string') {
+    errors.push('Product name is required');
+    return errors;
+  }
+
+  const trimmedName = name.trim();
+
+  if (trimmedName.length < 3) {
+    errors.push('Product name must be at least 3 characters');
+  }
+  if (trimmedName.length > 100) {
+    errors.push('Product name should not exceed 100 characters');
+  }
+  if (!PRODUCT_NAME_PATTERN.test(trimmedName)) {
+    errors.push(
+      'Product name contains invalid characters. Allowed: letters, numbers, spaces, hyphens, ampersands, apostrophes, commas, slashes, and quotes'
+    );
+  }
+  if (name !== trimmedName) {
+    errors.push('Product name should not have leading or trailing spaces');
+  }
+  if (/\s{2,}/.test(name)) {
+    errors.push('Product name should not have multiple consecutive spaces');
+  }
+
+  return errors;
+};
+
 // @desc Fetch all Products
 // @route GET /api/products
 // @access Public
@@ -178,9 +216,12 @@ const getProductById = asyncHandler(async (req, res) => {
 // @route GET /api/products/:name
 // @access Public
 const getProductByName = asyncHandler(async (req, res) => {
+  // Escape special regex characters to prevent issues with parentheses, brackets, etc.
+  const escapedName = escapeRegex(req.params.name);
+
   const product = await Product.findOne({
     name: {
-      $regex: req.params.name,
+      $regex: escapedName,
       $options: 'i',
     },
   });
@@ -327,6 +368,13 @@ const createProduct = asyncHandler(async (req, res) => {
     displayOrder,
   } = req.body;
 
+  // Validate product name
+  const nameErrors = validateProductName(name);
+  if (nameErrors.length > 0) {
+    res.status(400);
+    throw new Error(nameErrors.join('. '));
+  }
+
   // Auto-assign displayOrder if not provided
   // Uses sparse numbering: find max existing value and add 100
   let finalDisplayOrder = displayOrder;
@@ -381,6 +429,13 @@ const updateProduct = asyncHandler(async (req, res) => {
     outOfStock,
     displayOrder,
   } = req.body;
+
+  // Validate product name
+  const nameErrors = validateProductName(name);
+  if (nameErrors.length > 0) {
+    res.status(400);
+    throw new Error(nameErrors.join('. '));
+  }
 
   const product = await Product.findById(req.params.id);
   if (product) {

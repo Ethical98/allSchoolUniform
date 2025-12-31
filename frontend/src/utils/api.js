@@ -17,14 +17,23 @@ const api = axios.create({
     withCredentials: true // Enable sending cookies with cross-origin requests
 });
 
-// Optional: Add response interceptor for global error handling
+// Handle 401 unauthorized globally - clear auth state when token is invalid/expired
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Handle 401 unauthorized globally if needed
         if (error.response?.status === 401) {
-            // Could dispatch logout action or redirect
-            console.error('[API] Unauthorized request:', error.config?.url);
+            console.error('[API] Unauthorized - clearing auth state:', error.config?.url);
+            
+            // Clear localStorage auth data
+            localStorage.removeItem('userInfo');
+            localStorage.removeItem('cartItems');
+            localStorage.removeItem('shippingAddress');
+            localStorage.removeItem('cartSuccess');
+            
+            // Redirect to login page if not already there
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }
