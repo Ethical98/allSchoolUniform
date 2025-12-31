@@ -128,15 +128,18 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
           script: |
+            # Fix git safe directory
+            git config --global --add safe.directory /var/www/backend
+            
             cd /var/www/backend
             
             # Pull latest changes
             git fetch origin
-            git checkout ${{ github.event.inputs.deploy_branch || 'main' }}
-            git pull origin ${{ github.event.inputs.deploy_branch || 'main' }}
+            git checkout ${{ github.event.inputs.deploy_branch || 'master' }}
+            git pull origin ${{ github.event.inputs.deploy_branch || 'master' }}
             
             # Install dependencies
-            npm ci --production
+            npm ci --omit=dev
             
             # Restart PM2 process
             pm2 restart backend || pm2 start backend/server.js --name backend
