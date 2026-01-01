@@ -257,7 +257,23 @@ const addAnnouncement = asyncHandler(async (req, res) => {
 // @desc Get Complete Homepage Config (Consolidated endpoint)
 // @route GET /api/home/config
 // @access Public
+
+// In-memory cache for homepage config (5 minute TTL)
+let homePageCache = null;
+let cacheExpiry = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 const getHomePageConfig = asyncHandler(async (req, res) => {
+  const now = Date.now();
+
+  // Return cached data if valid
+  if (homePageCache && now < cacheExpiry) {
+    // Add cache hit header for debugging
+    res.set('X-Cache', 'HIT');
+    res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    return res.json(homePageCache);
+  }
+
   // Fetch all homepage data in parallel for optimal performance
   const [homepage, products, users, schools, featuredSchools, featuredProducts, newArrivals, categories] = await Promise.all([
     Homepage.findOne().select('homePageCarousel statistics announcements headerBackground'),
@@ -311,7 +327,7 @@ const getHomePageConfig = asyncHandler(async (req, res) => {
     image: normalizeUrl(cat.image),
   }));
 
-  res.json({
+  const response = {
     success: true,
     data: {
       carouselImages,
@@ -322,7 +338,16 @@ const getHomePageConfig = asyncHandler(async (req, res) => {
       newArrivals: normalizeProductsImages(newArrivals),
       categories: normalizedCategories,
     },
-  });
+  };
+
+  // Update cache
+  homePageCache = response;
+  cacheExpiry = now + CACHE_TTL;
+
+  // Add cache miss header for debugging
+  res.set('X-Cache', 'MISS');
+  res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+  res.json(response);
 });
 
 export {
