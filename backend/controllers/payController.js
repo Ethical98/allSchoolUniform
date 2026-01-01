@@ -496,7 +496,7 @@ const refundPayment = asyncHandler(async (req, res) => {
 // @access Public (but verify signature)
 const handlePaymentWebhook = asyncHandler(async (req, res) => {
     const signature = req.headers['x-razorpay-signature'];
-    const body = JSON.stringify(req.body);
+    const body = req.rawBody;
 
 
 
