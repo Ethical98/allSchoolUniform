@@ -358,6 +358,7 @@ const getWebhookStatus = asyncHandler(async (req, res) => {
             errorMessage: webhookStatus.errorMessage,
         });
     } catch (error) {
+        console.log(error, "error")
         console.error('[Webhook Status] ❌ Error:', error.message);
         res.status(500);
         throw new Error('Failed to fetch webhook status');
@@ -500,6 +501,11 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
 
 
     try {
+        if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+            console.error('[Webhook] ❌ CRITICAL: RAZORPAY_WEBHOOK_SECRET is not defined in environment variables');
+            return res.status(500).json({ success: false, message: 'Server configuration error' });
+        }
+
         // ✅ Verify webhook signature using Razorpay Webhook Secret (from Dashboard → Webhooks)
         const expectedSignature = Crypto.createHmac(
             'sha256',
@@ -509,7 +515,9 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
             .digest('hex');
 
         if (expectedSignature !== signature) {
-            console.error('[Webhook] Invalid signature');
+            console.error('[Webhook] ❌ Invalid signature');
+            console.log('[Webhook] Received Signature:', signature);
+            console.log('[Webhook] Expected Signature:', expectedSignature);
             return res
                 .status(400)
                 .json({ success: false, message: 'Invalid signature' });
@@ -686,6 +694,7 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
 
         res.status(200).json({ success: true, message: 'Webhook processed' });
     } catch (error) {
+        console.log(error, "error")
         console.error('[Webhook] Error:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
