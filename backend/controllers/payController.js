@@ -166,7 +166,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
         const body = razorpay_order_id + '|' + razorpay_payment_id;
         const expectedSignature = Crypto.createHmac(
             'sha256',
-            process.env.RAZORPAY_TEST_SALT
+            process.env.RAZORPAY_SALT
         )
             .update(body.toString())
             .digest('hex');
@@ -500,10 +500,10 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
 
 
     try {
-        // ✅ Verify webhook signature
+        // ✅ Verify webhook signature using Razorpay Webhook Secret (from Dashboard → Webhooks)
         const expectedSignature = Crypto.createHmac(
             'sha256',
-            process.env.RAZORPAY_TEST_SALT
+            process.env.RAZORPAY_WEBHOOK_SECRET
         )
             .update(body)
             .digest('hex');
@@ -520,7 +520,7 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
         // ✅ FIX: order_id is inside paymentData, NOT in a separate order entity
         const razorpayOrderId = paymentData?.order_id;
 
-       
+
 
         switch (event) {
             case 'payment.authorized':
