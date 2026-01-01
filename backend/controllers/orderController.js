@@ -102,6 +102,8 @@ const addOrderItems = asyncHandler(async (req, res) => {
       sizeVariant: sizeVariant._id.toString(),
       product: item.product,
       schoolName: item.schoolName || product.schoolName?.[0] || '',
+      disc: sizeVariant.discount || 0, // Discount percentage
+      tax: sizeVariant.tax || 0, // Tax information
     });
   }
 

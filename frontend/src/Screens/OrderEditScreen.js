@@ -332,7 +332,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                     setDiscountPrice(
                         Number(
                             order.modifiedItems
-                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                                 .toFixed(2)
                         )
                     );
@@ -343,7 +343,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                     setDiscountPrice(
                         Number(
                             order.orderItems
-                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                                 .toFixed(2)
                         )
                     );
@@ -395,7 +395,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         const price = Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2));
         const discount = Number(
             modifiedOrderItems
-                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                 .toFixed(2)
         );
         setItemsPrice(price);
@@ -472,6 +472,7 @@ const OrderEditScreen = ({ history, match, location }) => {
             modifiedOrderItems[index].price = productSizes[editIndex].price;
             modifiedOrderItems[index].countInStock = productSizes[editIndex].countInStock;
             modifiedOrderItems[index].tax = productSizes[editIndex].tax;
+            modifiedOrderItems[index].disc = productSizes[editIndex].discount || 0;
             modifiedOrderItems[index].size = size;
             modifiedOrderItems[index].qty = qty;
 
@@ -481,7 +482,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         const price = Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2));
         const discount = Number(
             modifiedOrderItems
-                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                 .toFixed(2)
         );
 

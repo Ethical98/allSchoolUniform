@@ -4,6 +4,7 @@ import Product from '../models/ProductModel.js';
 import User from '../models/UserModel.js';
 import School from '../models/SchoolModel.js';
 import ProductType from '../models/ProductTypesModel.js';
+import Order from '../models/OrderModel.js';
 import { normalizeUrl, normalizeProductsImages } from '../utils/normalizeUrl.js';
 
 // @desc Get Carousel Images
@@ -275,7 +276,7 @@ const getHomePageConfig = asyncHandler(async (req, res) => {
   }
 
   // Fetch all homepage data in parallel for optimal performance
-  const [homepage, products, users, schools, featuredSchools, featuredProducts, newArrivals, categories] = await Promise.all([
+  const [homepage, products, users, schools, featuredSchools, newArrivals, categories] = await Promise.all([
     Homepage.findOne().select('homePageCarousel statistics announcements headerBackground'),
     Product.countDocuments(),
     User.countDocuments(),
@@ -285,13 +286,8 @@ const getHomePageConfig = asyncHandler(async (req, res) => {
       .sort({ featuredOrder: 'asc', name: 'asc' })
       .limit(8)
       .lean(),
-    Product.find({ isFeatured: true, isActive: true })
-      .select('name image size rating numReviews brand')
-      .sort({ featuredOrder: 'asc', name: 'asc' })
-      .limit(10)
-      .lean(),
     Product.find({ isActive: true })
-      .select('name image size rating numReviews brand createdAt')
+      .select('_id name image size rating numReviews brand schoolName createdAt')
       .sort({ createdAt: -1 })
       .limit(10)
       .lean(),
@@ -299,6 +295,39 @@ const getHomePageConfig = asyncHandler(async (req, res) => {
       .select('type image')
       .lean(),
   ]);
+
+  // Get featured products separately to handle fallback logic
+  let featuredProducts = await Product.find({ isFeatured: true, isActive: true })
+    .select('name image size rating numReviews brand')
+    .sort({ featuredOrder: 'asc', name: 'asc' })
+    .limit(10)
+    .lean();
+
+  // Fallback: if no featured products, get most ordered products
+  if (featuredProducts.length === 0) {
+    const mostOrdered = await Order.aggregate([
+      { $unwind: '$orderItems' },
+      {
+        $group: {
+          _id: '$orderItems.product',
+          orderCount: { $sum: '$orderItems.qty' },
+        },
+      },
+      { $sort: { orderCount: -1 } },
+      { $limit: 10 },
+    ]);
+
+    const productIds = mostOrdered.map((item) => item._id);
+
+    if (productIds.length > 0) {
+      featuredProducts = await Product.find({
+        _id: { $in: productIds },
+        isActive: true,
+      })
+        .select('name image size rating numReviews brand')
+        .lean();
+    }
+  }
 
   // Normalize carousel images
   const carouselImages = homepage?.homePageCarousel?.map((item) => ({
