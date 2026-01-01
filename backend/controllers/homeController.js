@@ -3,7 +3,8 @@ import Homepage from '../models/HomepageModel.js';
 import Product from '../models/ProductModel.js';
 import User from '../models/UserModel.js';
 import School from '../models/SchoolModel.js';
-import { normalizeUrl } from '../utils/normalizeUrl.js';
+import ProductType from '../models/ProductTypesModel.js';
+import { normalizeUrl, normalizeProductsImages } from '../utils/normalizeUrl.js';
 
 // @desc Get Carousel Images
 // @route GET /api/home/carousel
@@ -253,6 +254,77 @@ const addAnnouncement = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Get Complete Homepage Config (Consolidated endpoint)
+// @route GET /api/home/config
+// @access Public
+const getHomePageConfig = asyncHandler(async (req, res) => {
+  // Fetch all homepage data in parallel for optimal performance
+  const [homepage, products, users, schools, featuredSchools, featuredProducts, newArrivals, categories] = await Promise.all([
+    Homepage.findOne().select('homePageCarousel statistics announcements headerBackground'),
+    Product.countDocuments(),
+    User.countDocuments(),
+    School.countDocuments(),
+    School.find({ isFeatured: true, isActive: true })
+      .select('name logo city state')
+      .sort({ featuredOrder: 'asc', name: 'asc' })
+      .limit(8)
+      .lean(),
+    Product.find({ isFeatured: true, isActive: true })
+      .select('name image size rating numReviews brand')
+      .sort({ featuredOrder: 'asc', name: 'asc' })
+      .limit(10)
+      .lean(),
+    Product.find({ isActive: true })
+      .select('name image size rating numReviews brand createdAt')
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean(),
+    ProductType.find({ isActive: true })
+      .select('type image')
+      .lean(),
+  ]);
+
+  // Normalize carousel images
+  const carouselImages = homepage?.homePageCarousel?.map((item) => ({
+    ...item.toObject ? item.toObject() : item,
+    image: normalizeUrl(item.image),
+  })) || [];
+
+  // Calculate statistics with dynamic counts
+  const statistics = homepage?.statistics?.map((x) => ({
+    _id: x._id,
+    totalParents: x.totalHappyParents + users,
+    totalSchools: x.totalSchools + schools,
+    totalProducts: x.totalProducts + products,
+    isActive: x.isActive,
+  })) || [];
+
+  // Normalize announcement images
+  const announcements = homepage?.announcements?.map((item) => ({
+    ...item.toObject ? item.toObject() : item,
+    image: normalizeUrl(item.image),
+  })) || [];
+
+  // Normalize category images
+  const normalizedCategories = categories.map((cat) => ({
+    ...cat,
+    image: normalizeUrl(cat.image),
+  }));
+
+  res.json({
+    success: true,
+    data: {
+      carouselImages,
+      statistics,
+      announcements,
+      schools: featuredSchools,
+      featuredProducts: normalizeProductsImages(featuredProducts),
+      newArrivals: normalizeProductsImages(newArrivals),
+      categories: normalizedCategories,
+    },
+  });
+});
+
 export {
   getAnnouncement,
   updateAnnouncement,
@@ -266,4 +338,5 @@ export {
   addCarouselImages,
   getStatistics,
   updateStatistics,
+  getHomePageConfig,
 };
