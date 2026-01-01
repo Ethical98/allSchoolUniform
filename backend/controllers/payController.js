@@ -498,7 +498,8 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
     const signature = req.headers['x-razorpay-signature'];
     const body = req.rawBody;
 
-
+    console.log(body, "DBG-1")
+    console.log(process.env.RAZORPAY_WEBHOOK_SECRET, "DBG-2")
 
     try {
         if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
