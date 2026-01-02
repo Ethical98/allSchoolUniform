@@ -14,9 +14,8 @@ const __dirname = path.dirname(__filename);
  */
 const formatPrice = (amount) => {
   return new Intl.NumberFormat('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+    maximumFractionDigits: 0,
+  }).format(Math.round(amount));
 };
 
 /**
