@@ -35,8 +35,8 @@ const formatDate = (date) => {
  */
 const calculateDeliveryDate = () => {
   const today = new Date();
-  const minDays = 5;
-  const maxDays = 7;
+  const minDays = 2;
+  const maxDays = 4;
 
   const minDate = new Date(today);
   minDate.setDate(minDate.getDate() + minDays);
@@ -60,13 +60,19 @@ const calculateDeliveryDate = () => {
  * Generate order items HTML
  */
 const generateOrderItemsHTML = (orderItems) => {
-  const baseUrl = process.env.FRONTEND_URL || 'https://allschooluniform.com';
+  // Always use production URL for images so they load in email clients
+  const imgBaseUrl = 'https://allschooluniform.com';
   
   return orderItems.map(item => {
-    // Ensure image has full URL
+    // Ensure image has full URL with production domain
     let imageUrl = item.image;
     if (imageUrl && !imageUrl.startsWith('http')) {
-      imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+      imageUrl = `${imgBaseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+    }
+    
+    // Encode URL to handle spaces and special characters properly
+    if (imageUrl) {
+      imageUrl = encodeURI(imageUrl);
     }
     // Fallback placeholder if no image
     if (!imageUrl) {
@@ -77,11 +83,14 @@ const generateOrderItemsHTML = (orderItems) => {
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e5e7eb;">
       <tr>
         <td width="80" style="padding-right: 15px;">
-          <img src="${imageUrl}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; display: block; border: 1px solid #e5e7eb;">
+          <img src="${imageUrl}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px; display: block; border: 1px solid #e5e7eb;">
         </td>
         <td style="vertical-align: top;">
           <h4 style="margin: 0 0 5px; color: #111827; font-size: 16px; font-weight: 600;">${item.name}</h4>
-          <p style="margin: 0 0 5px; color: #6b7280; font-size: 14px;">Size: ${item.size}${item.schoolName ? `, School: ${item.schoolName}` : ''}</p>
+          <p style="margin: 0 0 5px; color: #6b7280; font-size: 14px;">
+            Size: ${item.size}
+            ${item.brand ? ` • Brand: ${item.brand}` : ''}
+          </p>
           <p style="margin: 0; color: #6b7280; font-size: 14px;">Quantity: ${item.qty}</p>
         </td>
         <td align="right" style="vertical-align: top;">
@@ -145,7 +154,7 @@ export const sendOrderConfirmationEmail = async (order, user) => {
       mrpTotal: formatPrice(mrpTotal),
       itemCount: itemCount,
       itemCountPlural: itemCount > 1 ? 's' : '',
-      discount: totalDiscount > 0 ? formatPrice(totalDiscount) : null,
+      discount: formatPrice(totalDiscount),
       discountPercent: discountPercent > 0 ? discountPercent : null,
       subtotal: formatPrice(subtotalAmount),
       shippingDisplay: order.shippingPrice === 0 ? 'FREE' : `₹${formatPrice(order.shippingPrice)}`,
