@@ -5,7 +5,7 @@ import { google } from 'googleapis';
 
 // Email configuration
 const ADMIN_EMAILS = [
-    'devansh@allschooluniform.com',
+    'akash@allschooluniform.com',
 ];
 
 // Create OAuth2 client for Gmail

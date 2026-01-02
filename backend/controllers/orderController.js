@@ -2,11 +2,11 @@ import asyncHandler from 'express-async-handler';
 import Order, { InvoiceNumber } from '../models/OrderModel.js';
 import User from '../models/UserModel.js';
 import Product from '../models/ProductModel.js';
-import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
 import _ from 'lodash';
 import { normalizeUrl } from '../utils/normalizeUrl.js';
+import { sendOrderConfirmationEmail } from '../utils/emailService.js';
 dotenv.config();
 
 // Constants for pricing rules
@@ -87,9 +87,17 @@ const addOrderItems = asyncHandler(async (req, res) => {
       );
     }
 
-    // Get the actual price from database
+    // Get the actual price from database (MRP)
     const actualPrice = sizeVariant.price;
-    const itemTotal = actualPrice * item.qty;
+    const discountPercentage = sizeVariant.discount || 0;
+
+    // Calculate the discounted price (actual price customer pays)
+    const discountedPrice = discountPercentage > 0
+      ? actualPrice * (1 - discountPercentage / 100)
+      : actualPrice;
+
+    // Calculate item total using discounted price
+    const itemTotal = discountedPrice * item.qty;
     calculatedItemsPrice += itemTotal;
 
     // Build validated order item with server-verified data
@@ -102,7 +110,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
       sizeVariant: sizeVariant._id.toString(),
       product: item.product,
       schoolName: item.schoolName || product.schoolName?.[0] || '',
-      disc: sizeVariant.discount || 0, // Discount percentage
+      disc: sizeVariant.discount || 0, // Discount percentage for reference
       tax: sizeVariant.tax || 0, // Tax information
     });
   }
@@ -134,6 +142,12 @@ const addOrderItems = asyncHandler(async (req, res) => {
   });
 
   const createdOrder = await order.save();
+
+  // // Send order confirmation email asynchronously (don't block response)
+  // sendOrderConfirmationEmail(createdOrder, req.user).catch(error => {
+  //   console.error('Email sending failed (non-blocking):', error.message);
+  // });
+
   res.status(201).json(createdOrder);
 });
 
@@ -201,6 +215,11 @@ const updateOrderTopaid = asyncHandler(async (req, res) => {
     };
 
     const updatedOrder = await order.save();
+
+    // // Send order confirmation email after successful payment
+    // sendOrderConfirmationEmail(updatedOrder, user).catch(error => {
+    //   console.error('Email sending failed after payment (non-blocking):', error.message);
+    // });
 
     res.json(updatedOrder);
   } else {
