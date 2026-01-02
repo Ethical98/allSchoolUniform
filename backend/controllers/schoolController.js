@@ -5,6 +5,7 @@ import fs from 'fs';
 import sharp from 'sharp';
 import path from 'path';
 import { normalizeUrl } from '../utils/normalizeUrl.js';
+import { normalizeWhitespace, slugifyFilename } from '../utils/stringUtils.js';
 
 
 // @desc Get SchoolList
@@ -151,17 +152,19 @@ const createSchool = asyncHandler(async (req, res) => {
     country,
     isActive,
   } = req.body;
+
+  // Normalize whitespace in all string fields
   const school = new School({
-    name,
-    address,
-    contact,
+    name: normalizeWhitespace(name),
+    address: normalizeWhitespace(address),
+    contact: normalizeWhitespace(contact),
     logo,
-    state,
-    city,
-    description,
-    website,
-    email,
-    country,
+    state: normalizeWhitespace(state),
+    city: normalizeWhitespace(city),
+    description: normalizeWhitespace(description),
+    website: normalizeWhitespace(website),
+    email: normalizeWhitespace(email),
+    country: normalizeWhitespace(country),
     isActive,
     user: req.user._id,
   });
@@ -205,17 +208,18 @@ const updateSchool = asyncHandler(async (req, res) => {
   } = req.body;
 
   if (school) {
-    school.name = name || school.name;
+    // Normalize whitespace in all string fields
+    school.name = normalizeWhitespace(name) || school.name;
     school.disabled = disabled;
     school.logo = logo || school.logo;
-    school.address = address || school.address;
-    school.contact = contact || school.contact;
-    school.description = description || school.description;
-    school.city = city || school.city;
-    school.state = state || school.state;
-    school.country = country || school.country;
-    school.email = email || school.email;
-    school.website = website || school.website;
+    school.address = normalizeWhitespace(address) || school.address;
+    school.contact = normalizeWhitespace(contact) || school.contact;
+    school.description = normalizeWhitespace(description) || school.description;
+    school.city = normalizeWhitespace(city) || school.city;
+    school.state = normalizeWhitespace(state) || school.state;
+    school.country = normalizeWhitespace(country) || school.country;
+    school.email = normalizeWhitespace(email) || school.email;
+    school.website = normalizeWhitespace(website) || school.website;
     school.isActive = isActive;
 
     const updatedSchool = await school.save();
@@ -259,14 +263,13 @@ const getSchoolImages = asyncHandler(async (req, res) => {
 // @access Public
 const uploadSchoolImages = asyncHandler(async (req, res) => {
   if (req.file) {
-    const newFilename = `${req.file.originalname.split('.')[0]
-      }-${Date.now()}${path.extname(req.file.originalname)}`;
+    const newFilename = slugifyFilename(req.file.originalname);
 
     await sharp(req.file.buffer)
       .resize({ width: 300, height: 300 })
-      .toFile('uploads/schools/resized-' + newFilename);
+      .toFile('uploads/schools/' + newFilename);
 
-    res.send(`/uploads/schools/resized-${newFilename}`);
+    res.send(`/uploads/schools/${newFilename}`);
   }
 });
 export {

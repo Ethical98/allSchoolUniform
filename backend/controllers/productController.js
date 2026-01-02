@@ -6,13 +6,13 @@ import path from 'path';
 import fs from 'fs';
 import paginate from '../utils/pagination.js';
 import {
-  normalizeUrl,
   normalizeProductImages,
   normalizeProductsImages,
 } from '../utils/normalizeUrl.js';
+import { normalizeWhitespace, slugifyFilename } from '../utils/stringUtils.js';
 
 // Helper: Escape special regex characters in a string
-const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
 
 // Product name validation pattern and function
 // Allowed: letters, numbers, spaces, hyphens, ampersands, apostrophes, commas, slashes, quotes
@@ -26,7 +26,7 @@ const validateProductName = (name) => {
     return errors;
   }
 
-  const trimmedName = name.trim();
+  const trimmedName = normalizeWhitespace(name);
 
   if (trimmedName.length < 3) {
     errors.push('Product name must be at least 3 characters');
@@ -38,12 +38,6 @@ const validateProductName = (name) => {
     errors.push(
       'Product name contains invalid characters. Allowed: letters, numbers, spaces, hyphens, ampersands, apostrophes, commas, slashes, and quotes'
     );
-  }
-  if (name !== trimmedName) {
-    errors.push('Product name should not have leading or trailing spaces');
-  }
-  if (/\s{2,}/.test(name)) {
-    errors.push('Product name should not have multiple consecutive spaces');
   }
 
   return errors;
@@ -375,6 +369,10 @@ const createProduct = asyncHandler(async (req, res) => {
     throw new Error(nameErrors.join('. '));
   }
 
+  // Normalize whitespace in name and schoolName
+  const normalizedName = normalizeWhitespace(name);
+  const normalizedSchoolNames = schoolName?.map((s) => normalizeWhitespace(s)) || [];
+
   // Auto-assign displayOrder if not provided
   // Uses sparse numbering: find max existing value and add 100
   let finalDisplayOrder = displayOrder;
@@ -387,10 +385,10 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 
   const product = new Product({
-    name,
+    name: normalizedName,
     SKU,
     user: req.user._id,
-    schoolName,
+    schoolName: normalizedSchoolNames,
     image,
     description,
     brand,
@@ -437,12 +435,16 @@ const updateProduct = asyncHandler(async (req, res) => {
     throw new Error(nameErrors.join('. '));
   }
 
+  // Normalize whitespace in name and schoolName
+  const normalizedName = normalizeWhitespace(name);
+  const normalizedSchoolNames = schoolName?.map((s) => normalizeWhitespace(s)) || [];
+
   const product = await Product.findById(req.params.id);
   if (product) {
     product.type = type;
-    product.name = name;
+    product.name = normalizedName;
     product.class = [...standard];
-    product.schoolName = [...schoolName];
+    product.schoolName = [...normalizedSchoolNames];
     product.image = image;
     product.description = description;
     product.category = category;
@@ -570,19 +572,15 @@ const getProductImages = asyncHandler(async (req, res) => {
 // @access Public
 const uploadProductImages = asyncHandler(async (req, res) => {
   if (req.file) {
-    const newFilename = `${req.file.originalname.split('.')[0]
-      }-${Date.now()}${path.extname(req.file.originalname)}`;
+    const newFilename = slugifyFilename(req.file.originalname);
 
-    // await sharp(req.file.buffer)
-    //   .resize({ width: 640, height: 640 })
-    //   .toFile('uploads/products/resized-' + newFilename);
     await sharp(req.file.buffer)
       .resize({
         fit: sharp.fit.contain,
       })
-      .toFile('uploads/products/resized-' + newFilename);
+      .toFile('uploads/products/' + newFilename);
 
-    res.send(`/uploads/products/resized-${newFilename}`);
+    res.send(`/uploads/products/${newFilename}`);
   }
 });
 

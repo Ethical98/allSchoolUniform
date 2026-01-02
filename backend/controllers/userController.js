@@ -36,6 +36,8 @@ const logout = asyncHandler(async (req, res) => {
     res.cookie('token', '', {
         httpOnly: true,
         expires: new Date(0), // Expire immediately
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
     });
     res.json({
         success: true,
@@ -85,7 +87,7 @@ const changePassword = asyncHandler(async (req, res) => {
     res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
     console.log(`[Auth] Password changed for user: ${user._id}`);
@@ -113,7 +115,7 @@ const authUser = asyncHandler(async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         });
         // ✅ Token removed from response body
@@ -142,7 +144,7 @@ const authUserByOTP = asyncHandler(async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         });
         // ✅ Token removed from response body
@@ -185,7 +187,7 @@ const registerUser = asyncHandler(async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         });
         // ✅ Token removed from response body
@@ -242,7 +244,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         });
 
@@ -270,7 +272,7 @@ const authUserByPhone = asyncHandler(async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         });
         // ✅ Token removed from response body
@@ -335,7 +337,7 @@ const resetPassword = asyncHandler(async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         });
         // ✅ Token removed from response body

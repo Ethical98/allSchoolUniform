@@ -54,7 +54,7 @@ const protect = expressAsyncHandler(async (req, res, next) => {
           res.clearCookie('token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             path: '/',
           });
           res.status(401);
@@ -72,7 +72,7 @@ const protect = expressAsyncHandler(async (req, res, next) => {
       res.clearCookie('token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
         path: '/',
       });
 

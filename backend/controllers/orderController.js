@@ -6,7 +6,13 @@ import { google } from 'googleapis';
 import dotenv from 'dotenv';
 import _ from 'lodash';
 import { normalizeUrl } from '../utils/normalizeUrl.js';
-import { sendOrderConfirmationEmail } from '../utils/emailService.js';
+import {
+  sendOrderConfirmationEmail,
+  sendOrderShippedEmail,
+  sendOutForDeliveryEmail,
+  sendOrderDeliveredEmail,
+  sendOrderCancelledEmail,
+} from '../utils/emailService.js';
 dotenv.config();
 
 // Constants for pricing rules
@@ -144,9 +150,9 @@ const addOrderItems = asyncHandler(async (req, res) => {
   const createdOrder = await order.save();
 
   // // Send order confirmation email asynchronously (don't block response)
-  // sendOrderConfirmationEmail(createdOrder, req.user).catch(error => {
-  //   console.error('Email sending failed (non-blocking):', error.message);
-  // });
+  sendOrderConfirmationEmail(createdOrder, req.user).catch(error => {
+    console.error('Email sending failed (non-blocking):', error.message);
+  });
 
   res.status(201).json(createdOrder);
 });
@@ -217,9 +223,9 @@ const updateOrderTopaid = asyncHandler(async (req, res) => {
     const updatedOrder = await order.save();
 
     // // Send order confirmation email after successful payment
-    // sendOrderConfirmationEmail(updatedOrder, user).catch(error => {
-    //   console.error('Email sending failed after payment (non-blocking):', error.message);
-    // });
+    sendOrderConfirmationEmail(updatedOrder, user).catch(error => {
+      console.error('Email sending failed after payment (non-blocking):', error.message);
+    });
 
     res.json(updatedOrder);
   } else {
@@ -444,6 +450,13 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 
       const updatedOrder = await order.save();
 
+
+      
+      // Send delivery confirmation email
+      sendOrderDeliveredEmail(updatedOrder, user).catch(error => {
+        console.error('Failed to send delivery email:', error.message);
+      });
+
       res.json(updatedOrder);
     } else {
       res.status(500);
@@ -470,6 +483,13 @@ const updateOrderToOutForDelivery = asyncHandler(async (req, res) => {
       order.orderStatus = `Out For Delivery: ${Date.now()}`;
 
       const updatedOrder = await order.save();
+
+
+
+      // Send out for delivery email
+      sendOutForDeliveryEmail(updatedOrder, user).catch(error => {
+        console.error('Failed to send out for delivery email:', error.message);
+      });
 
       res.json(updatedOrder);
     } else {
@@ -499,6 +519,13 @@ const updateOrderToProcessing = asyncHandler(async (req, res) => {
       order.orderStatus = `Processed: ${Date.now()}`;
 
       const updatedOrder = await order.save();
+
+
+
+      // Send shipped email (mapped to Processing status)
+      sendOrderShippedEmail(updatedOrder, user).catch(error => {
+        console.error('Failed to send shipped email:', error.message);
+      });
 
       res.json(updatedOrder);
     } else {
@@ -547,6 +574,13 @@ const updateOrderToCanceled = asyncHandler(async (req, res) => {
     order.orderStatus = `Canceled: ${Date.now()}`;
 
     const updatedOrder = await order.save();
+
+
+
+    // Send cancellation email
+    sendOrderCancelledEmail(updatedOrder, user).catch(error => {
+      console.error('Failed to send cancellation email:', error.message);
+    });
 
     res.json(updatedOrder);
   } else {

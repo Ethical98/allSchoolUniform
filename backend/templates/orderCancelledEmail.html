@@ -1,0 +1,93 @@
+{{> header}}
+
+                    <!-- Cancelled Icon & Message -->
+                    <tr>
+                        <td style="padding: 40px 20px 30px; text-align: center;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 20px;">
+                                <tr>
+                                    <td style="width: 70px; height: 70px; background-color: #ef4444; border-radius: 50%; text-align: center; vertical-align: middle;">
+                                        <img src="https://img.icons8.com/ios-filled/36/ffffff/cancel.png" alt="Cancelled" style="width: 36px; height: 36px;">
+                                    </td>
+                                </tr>
+                            </table>
+                            <h2 style="margin: 0 0 10px; color: #111827; font-size: 22px; font-weight: 600;">Order Cancelled</h2>
+                            <p style="margin: 0; color: #6b7280; font-size: 15px; line-height: 1.5;">Your order has been cancelled as per {{cancellationReason}}.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Order Details -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Order Number</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{orderNumber}}</strong>
+                                                </td>
+                                                <td align="right" style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Cancelled On</span>
+                                                    <strong style="color: #ef4444; font-size: 15px;">{{cancelledDate}}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" style="border-top: 1px solid #fecaca; padding-top: 12px;">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Order Date</span>
+                                                    <strong style="color: #111827; font-size: 14px;">{{orderDate}}</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Cancelled Items -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <h3 style="margin: 0 0 15px; color: #111827; font-size: 15px; font-weight: 600;">Cancelled Items</h3>
+                            {{itemsHTML}}
+                        </td>
+                    </tr>
+
+                    <!-- Refund Info (if applicable) -->
+                    {{#if refundAmount}}
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <h3 style="margin: 0 0 12px; color: #166534; font-size: 15px; font-weight: 600;">💰 Refund Information</h3>
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Refund Amount</td>
+                                                <td align="right" style="padding: 8px 0; color: #166534; font-size: 16px; font-weight: 700;">₹{{refundAmount}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Refund To</td>
+                                                <td align="right" style="padding: 8px 0; color: #111827; font-size: 14px;">{{refundMethod}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Expected By</td>
+                                                <td align="right" style="padding: 8px 0; color: #111827; font-size: 14px;">5-7 business days</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {{/if}}
+
+                    <!-- Shop Again CTA -->
+                    <tr>
+                        <td style="padding: 0 20px 40px;" align="center" class="email-padding">
+                            <p style="margin: 0 0 15px; color: #6b7280; font-size: 14px;">Changed your mind? You can always place a new order.</p>
+                            <a href="{{websiteUrl}}" class="cta-button" style="display: inline-block; width: 100%; max-width: 280px; padding: 14px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; text-align: center; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25); box-sizing: border-box;">Shop Again</a>
+                        </td>
+                    </tr>
+
+{{> footer}}

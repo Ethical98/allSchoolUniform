@@ -98,6 +98,39 @@ app.use(
     express.static(path.join(__dirname, '/uploads/schools'))
 );
 
+// // Temporary endpoint - run once, visit URL, copy refresh_token from callback
+// app.get('/auth/gmail', (req, res) => {
+//   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+//     new URLSearchParams({
+//       client_id: process.env.GMAIL_CLIENT_ID,
+//       redirect_uri: 'http://localhost:5001/auth/gmail/callback', // your callback
+//       response_type: 'code',
+//       scope: 'https://mail.google.com/',
+//       access_type: 'offline', // REQUIRED for refresh_token
+//       prompt: 'consent' // Forces refresh token issuance
+//     });
+//   res.redirect(authUrl);
+// });
+
+// app.get('/auth/gmail/callback', async (req, res) => {
+//   const { code } = req.query;
+//   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+//     body: new URLSearchParams({
+//       code,
+//       client_id: process.env.GMAIL_CLIENT_ID,
+//       client_secret: process.env.GMAIL_CLIENT_SECRET,
+//       redirect_uri: 'http://localhost:5001/auth/gmail/callback',
+//       grant_type: 'authorization_code'
+//     })
+//   });
+//   const tokens = await tokenResponse.json();
+//   console.log('NEW REFRESH TOKEN:', tokens.refresh_token); // Copy this!
+//   res.send('Check console for refresh token');
+// });
+
+
 if (process.env.NODE_ENV === 'production') {
     // Serve React Admin static files - BUT don't serve index.html automatically
     app.use(express.static(path.join(__dirname, '/frontend/build'), { index: false }));

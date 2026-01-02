@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 import { normalizeUrl } from '../utils/normalizeUrl.js';
+import { slugifyFilename } from '../utils/stringUtils.js';
 
 // @desc Get product Types
 // @route GET /api/types
@@ -176,14 +177,13 @@ const getSizeGuideImages = asyncHandler(async (req, res) => {
 // @access Public
 const uploadSizeGuideImages = asyncHandler(async (req, res) => {
   if (req.file) {
-    const newFilename = `${req.file.originalname.split('.')[0]
-      }-${Date.now()}${path.extname(req.file.originalname)}`;
+    const newFilename = slugifyFilename(req.file.originalname);
 
     await sharp(req.file.buffer)
       .resize({ width: 300, height: 300 })
-      .toFile('uploads/sizeguides/resized-' + newFilename);
+      .toFile('uploads/sizeguides/' + newFilename);
 
-    res.send(`/uploads/sizeguides/resized-${newFilename}`);
+    res.send(`/uploads/sizeguides/${newFilename}`);
   }
 });
 
