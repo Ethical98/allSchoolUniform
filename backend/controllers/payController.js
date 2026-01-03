@@ -510,6 +510,12 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
             return res.status(500).json({ success: false, message: 'Server configuration error' });
         }
 
+        // 🔍 DEBUG: Log values for troubleshooting
+        console.log('[Webhook] 🔍 DEBUG - Webhook Secret from .env:', process.env.RAZORPAY_WEBHOOK_SECRET);
+        console.log('[Webhook] 🔍 DEBUG - Received signature:', signature);
+        console.log('[Webhook] 🔍 DEBUG - Raw body length:', body?.length, 'bytes');
+        console.log('[Webhook] 🔍 DEBUG - Raw body type:', typeof body);
+
         // ✅ Verify webhook signature using Razorpay Webhook Secret (from Dashboard → Webhooks)
         const expectedSignature = Crypto.createHmac(
             'sha256',
@@ -518,8 +524,11 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
             .update(body)
             .digest('hex');
 
+        console.log('[Webhook] 🔍 DEBUG - Expected signature:', expectedSignature);
+
         if (expectedSignature !== signature) {
             console.error('[Webhook] ❌ Invalid signature');
+            console.error('[Webhook] ❌ Signature mismatch - Expected:', expectedSignature, 'Got:', signature);
             return res
                 .status(400)
                 .json({ success: false, message: 'Invalid signature' });
