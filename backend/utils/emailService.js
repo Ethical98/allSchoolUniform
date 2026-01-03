@@ -238,14 +238,16 @@ export const sendOrderConfirmationEmail = async (order, user) => {
     htmlTemplate = htmlTemplate.replace(/{{#each items}}[\s\S]*?{{\/each}}/g, emailData.itemsHTML);
 
     const fromEmail = process.env.GMAIL_USER;
+    const adminEmail = process.env.ADMIN_EMAIL || 'akash@allschooluniform.com';
     const subject = `Order Confirmation - ${emailData.orderNumber}`;
 
-    // Create RFC 2822 formatted email
+    // Create RFC 2822 formatted email with BCC to admin
     const email = [
       'Content-Type: text/html; charset=utf-8',
       'MIME-Version: 1.0',
       `From: "All School Uniform" <${fromEmail}>`,
       `To: ${user.email}`,
+      `Bcc: ${adminEmail}`,
       `Subject: ${subject}`,
       '',
       htmlTemplate
