@@ -2,8 +2,10 @@ import asyncHandler from 'express-async-handler';
 import Crypto from 'crypto';
 import Razorpay from 'razorpay';
 import Order from '../models/OrderModel.js';
+import User from '../models/UserModel.js';
 import dotenv from 'dotenv';
 import { RedisService } from '../services/redisService.js';
+import { sendOrderConfirmationEmail } from '../utils/emailService.js';
 
 dotenv.config();
 
@@ -255,6 +257,11 @@ const verifyPayment = asyncHandler(async (req, res) => {
             orderId: savedOrder._id,
             orderNumber: savedOrder.orderNumber,
             totalPrice: savedOrder.totalPrice,
+        });
+
+        // ✅ Send order confirmation email (non-blocking)
+        sendOrderConfirmationEmail(savedOrder, req.user).catch(error => {
+            console.error('[Payment] Email sending failed (non-blocking):', error.message);
         });
 
         // ✅ Update webhook status to completed in Redis
@@ -647,6 +654,15 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
                                 razorpayOrderId: razorpayOrderId,
                             }
                         );
+
+                        // ✅ Send order confirmation email (non-blocking)
+                        // Fetch user for email sending
+                        const user = await User.findById(pendingData.userId);
+                        if (user) {
+                            sendOrderConfirmationEmail(savedOrder, user).catch(error => {
+                                console.error('[Webhook] Email sending failed (non-blocking):', error.message);
+                            });
+                        }
 
                         // ✅ Update webhook status to completed in Redis
                         await RedisService.setWebhookStatus(razorpayOrderId, {
