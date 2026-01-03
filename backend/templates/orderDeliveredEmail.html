@@ -1,0 +1,89 @@
+{{> header}}
+
+                    <!-- Delivered Icon & Message -->
+                    <tr>
+                        <td style="padding: 40px 20px 30px; text-align: center;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 20px;">
+                                <tr>
+                                    <td style="width: 70px; height: 70px; background-color: #10b981; border-radius: 50%; text-align: center; vertical-align: middle;">
+                                        <img src="https://img.icons8.com/ios-filled/36/ffffff/checkmark.png" alt="Delivered" style="width: 36px; height: 36px;">
+                                    </td>
+                                </tr>
+                            </table>
+                            <h2 style="margin: 0 0 10px; color: #111827; font-size: 22px; font-weight: 600;">Delivered Successfully! 🎉</h2>
+                            <p style="margin: 0; color: #6b7280; font-size: 15px; line-height: 1.5;">Your order has been delivered. We hope you love your new uniforms!</p>
+                        </td>
+                    </tr>
+
+                    <!-- Delivery Confirmation -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Order Number</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{orderNumber}}</strong>
+                                                </td>
+                                                <td align="right" style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Delivered On</span>
+                                                    <strong style="color: #10b981; font-size: 15px;">{{deliveredDate}}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" style="border-top: 1px solid #a7f3d0; padding-top: 12px;">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Delivered To</span>
+                                                    <strong style="color: #111827; font-size: 14px;">{{shippingName}}, {{shippingCity}}</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Order Items -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <h3 style="margin: 0 0 15px; color: #111827; font-size: 15px; font-weight: 600;">Items Delivered</h3>
+                            {{itemsHTML}}
+                        </td>
+                    </tr>
+
+                    <!-- Order Total -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px;">
+                                <tr>
+                                    <td width="50%" style="padding: 12px 20px;" class="stack-column-center">
+                                        <span style="color: #6b7280; font-size: 14px;">Total Paid:</span>
+                                        <strong style="color: #111827; font-size: 17px; margin-left: 8px;">₹{{total}}</strong>
+                                    </td>
+                                    <td width="50%" align="right" style="padding: 12px 20px;" class="stack-column-center">
+                                        <span style="background-color: #d1fae5; color: #059669; padding: 6px 12px; border-radius: 99px; font-size: 13px; font-weight: 600; display: inline-block;">✓ Payment Complete</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+
+
+                    <!-- View Order CTA -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" align="center" class="email-padding">
+                            <a href="{{trackOrderUrl}}" class="cta-button" style="display: inline-block; width: 100%; max-width: 280px; padding: 14px 24px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; text-align: center; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.25); box-sizing: border-box;">View Order Details</a>
+                        </td>
+                    </tr>
+
+                    <!-- Download Invoice -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" align="center" class="email-padding">
+                            <a href="{{invoiceUrl}}" style="color: #667eea; text-decoration: none; font-size: 14px; font-weight: 500;">📄 Download Invoice</a>
+                        </td>
+                    </tr>
+
+{{> footer}}

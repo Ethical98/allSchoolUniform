@@ -202,6 +202,17 @@ orderSchema.pre('save', async function (next) {
   }
 });
 
+// ========================================
+// Database Indexes for Query Performance
+// ========================================
+
+orderSchema.index({ user: 1 });
+orderSchema.index({ orderId: 1 });
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ isPaid: 1 });
+orderSchema.index({ user: 1, createdAt: -1 }); // For user order history
+
 const Order = mongoose.model('Order', orderSchema);
 
 export default Order;

@@ -7,7 +7,6 @@ import { register, logout } from '../actions/userActions';
 import Loader from '../components/Loader';
 import validator from 'validator';
 import './css/RegisterScreen.css';
-import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
 
@@ -25,17 +24,7 @@ const NewCustomerByAdmin = ({ history }) => {
 
     const userLogin = useSelector(state => state.userLogin);
     const { userInfo: userLoginInfo } = userLogin;
-
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
+    // Auth verification handled by backend via HTTP-only cookies
 
     useEffect(() => {
         if (!(userLoginInfo && userLoginInfo.isAdmin)) {

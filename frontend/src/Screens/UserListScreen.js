@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import jsonwebtoken from 'jsonwebtoken';
 import { deleteUser, listUsers, logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
 import Paginate from '../components/Paginate';
@@ -25,6 +24,7 @@ const UserListScreen = ({ history, location }) => {
 
     const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
+    
 
     const [keyword, setKeyword] = useState('');
 
@@ -66,22 +66,13 @@ const UserListScreen = ({ history, location }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
+ 
 
     useEffect(() => {
         if (userInfo && userInfo.isAdmin) {
             dispatch(listUsers(pageNumber));
         } else {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, successDelete, userInfo, pageNumber]);

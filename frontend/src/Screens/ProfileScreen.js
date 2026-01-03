@@ -4,8 +4,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { Button, Form, Row, Col, ListGroup, Table, InputGroup } from 'react-bootstrap';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import { getUserDetails, updateUserProfile, logout } from '../actions/userActions';
-import jsonwebtoken from 'jsonwebtoken';
+import { getUserDetails, updateUserProfile } from '../actions/userActions';
 import { listMyOrders } from '../actions/orderActions';
 import './css/ProfileScreen.css';
 import Meta from '../components/Meta';
@@ -40,26 +39,20 @@ const ProfileScreen = ({ history }) => {
         }
     }, [userInfo, history]);
 
+    // Load user details and orders
     useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                } else {
-                    if (!user.name) {
-                        dispatch(getUserDetails('profile'));
-                        dispatch(listMyOrders());
-                    } else {
-                        setName(user.name);
-                        setPhone(user.phone);
-                        setEmail(user.email);
-                        setSavedAddress([...user.savedAddress]);
-                    }
-                }
-            });
+        if (userInfo) {
+            if (!user.name) {
+                dispatch(getUserDetails('profile'));
+                dispatch(listMyOrders());
+            } else {
+                setName(user.name);
+                setPhone(user.phone);
+                setEmail(user.email);
+                setSavedAddress([...user.savedAddress]);
+            }
         }
-    }, [dispatch, userInfo, history, user]);
+    }, [dispatch, userInfo, user]);
 
     const submitHandler = (e) => {
         e.preventDefault();

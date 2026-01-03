@@ -4,6 +4,8 @@ import paginate from '../utils/pagination.js';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import { normalizeUrl } from '../utils/normalizeUrl.js';
+import { slugifyFilename } from '../utils/stringUtils.js';
 
 // @desc Get product Types
 // @route GET /api/types
@@ -28,7 +30,13 @@ const getTypeImages = asyncHandler(async (req, res) => {
   }).select('image sizeChart sizeGuide');
 
   if (productType) {
-    res.status(200).json(productType);
+    const typeObj = productType.toObject();
+    res.status(200).json({
+      ...typeObj,
+      image: normalizeUrl(typeObj.image),
+      sizeChart: normalizeUrl(typeObj.sizeChart),
+      sizeGuide: normalizeUrl(typeObj.sizeGuide),
+    });
   } else {
     res.status(404);
     throw new Error('Type Not Found');
@@ -156,7 +164,7 @@ const getSizeGuideImages = asyncHandler(async (req, res) => {
   );
 
   files.forEach((file) => {
-    images.push({ url: `\\uploads\\sizeguides\\${file}`, name: file });
+    images.push({ url: `/uploads/sizeguides/${file}`, name: file });
   });
 
   const { currentImages, pages } = paginate(currentPage, imagesPerPage, images);
@@ -169,16 +177,35 @@ const getSizeGuideImages = asyncHandler(async (req, res) => {
 // @access Public
 const uploadSizeGuideImages = asyncHandler(async (req, res) => {
   if (req.file) {
-    const newFilename = `${
-      req.file.originalname.split('.')[0]
-    }-${Date.now()}${path.extname(req.file.originalname)}`;
+    const newFilename = slugifyFilename(req.file.originalname);
 
     await sharp(req.file.buffer)
       .resize({ width: 300, height: 300 })
-      .toFile('uploads/sizeguides/resized-' + newFilename);
+      .toFile('uploads/sizeguides/' + newFilename);
 
-    res.send(`/uploads/sizeguides/resized-${newFilename}`);
+    res.send(`/uploads/sizeguides/${newFilename}`);
   }
+});
+
+// @desc Get Product Categories for Homepage
+// @route GET /api/types/categories
+// @access Public
+const getCategories = asyncHandler(async (req, res) => {
+  const categories = await ProductType.find({ isActive: true })
+    .select('type image')
+    .lean();
+
+  // Normalize image URLs
+  const normalizedCategories = categories.map((cat) => ({
+    ...cat,
+    image: normalizeUrl(cat.image),
+  }));
+
+  res.json({
+    success: true,
+    count: normalizedCategories.length,
+    data: normalizedCategories,
+  });
 });
 
 export {
@@ -192,4 +219,5 @@ export {
   getTypeImages,
   getSizeGuideImages,
   uploadSizeGuideImages,
+  getCategories,
 };

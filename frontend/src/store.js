@@ -9,7 +9,9 @@ import {
     productImageListReducer,
     productImageUploadReducer,
     productListReducer,
-    productUpdateReducer
+    productUpdateReducer,
+    productDisplayOrdersReducer,
+    productUpdateFeaturedReducer
 } from './reducers/productReducers';
 import { cartReducer } from './reducers/cartReducers';
 import {
@@ -86,6 +88,8 @@ const reducer = combineReducers({
     productCreateReview: productCreateReviewReducer,
     productImageList: productImageListReducer,
     productImageUpload: productImageUploadReducer,
+    productDisplayOrders: productDisplayOrdersReducer,
+    productUpdateFeatured: productUpdateFeaturedReducer,
     typeSizesList: typeSizesListReducer,
     typeList: typeListReducer,
     typeListAll: typeListAllReducer,

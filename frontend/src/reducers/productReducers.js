@@ -28,7 +28,14 @@ import {
     PRODUCT_IMAGE_UPLOAD_REQUEST,
     PRODUCT_IMAGE_UPLOAD_FAIL,
     PRODUCT_IMAGE_UPLOAD_PROGRESS,
-    PRODUCT_IMAGE_UPLOAD_RESET
+    PRODUCT_IMAGE_UPLOAD_RESET,
+    PRODUCT_DISPLAY_ORDERS_REQUEST,
+    PRODUCT_DISPLAY_ORDERS_SUCCESS,
+    PRODUCT_DISPLAY_ORDERS_FAIL,
+    PRODUCT_UPDATE_FEATURED_REQUEST,
+    PRODUCT_UPDATE_FEATURED_SUCCESS,
+    PRODUCT_UPDATE_FEATURED_FAIL,
+    PRODUCT_UPDATE_FEATURED_RESET
 } from '../constants/productConstants';
 
 export const productListReducer = (state = { products: [] }, action) => {
@@ -155,6 +162,39 @@ export const productImageUploadReducer = (state = {}, action) => {
             return { loading: false, error: action.payload };
         case PRODUCT_IMAGE_UPLOAD_RESET:
             return { url: '' };
+        default:
+            return state;
+    }
+};
+
+export const productDisplayOrdersReducer = (state = { products: [], nextSuggestedOrder: 100 }, action) => {
+    switch (action.type) {
+        case PRODUCT_DISPLAY_ORDERS_REQUEST:
+            return { loading: true, products: [], nextSuggestedOrder: 100 };
+        case PRODUCT_DISPLAY_ORDERS_SUCCESS:
+            return {
+                loading: false,
+                products: action.payload.products,
+                nextSuggestedOrder: action.payload.nextSuggestedOrder,
+                convention: action.payload.convention
+            };
+        case PRODUCT_DISPLAY_ORDERS_FAIL:
+            return { loading: false, error: action.payload, products: [], nextSuggestedOrder: 100 };
+        default:
+            return state;
+    }
+};
+
+export const productUpdateFeaturedReducer = (state = {}, action) => {
+    switch (action.type) {
+        case PRODUCT_UPDATE_FEATURED_REQUEST:
+            return { loading: true };
+        case PRODUCT_UPDATE_FEATURED_SUCCESS:
+            return { loading: false, success: true, data: action.payload.data };
+        case PRODUCT_UPDATE_FEATURED_FAIL:
+            return { loading: false, error: action.payload };
+        case PRODUCT_UPDATE_FEATURED_RESET:
+            return {};
         default:
             return state;
     }

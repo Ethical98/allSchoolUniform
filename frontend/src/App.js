@@ -54,27 +54,17 @@ const App = () => {
     return (
         <Router>
             <Switch>
-                <Route path="/" component={HomeScreen} exact />
-                <Route path="/orderdetails/:id" component={OrderDetailsScreen} />
-                <Route path="/forgotpassword" component={ForgotPasswordScreen} />
-                <Route path="/resetpassword" component={ResetPasswordScreen} />
-                <Route path="/order/:id" component={OrderScreen} />
-                <Route path="/shipping" component={ShippingScreen} />
-                <Route path="/payment" component={PaymentScreen} />
-                <Route path="/placeorder" component={PlaceOrderScreen} />
-                <Route path="/otp" component={LoginScreenOTP} />
+                {/* Redirect root to admin dashboard */}
+                <Route path="/" exact render={() => <Redirect to="/login" />} />
+                
+                {/* Auth routes - needed for admin login */}
                 <Route path="/login" component={LoginScreen} />
-                <Route path="/register" component={RegisterScreen} />
-                <Route path="/aboutUs" component={AboutUs} />
-                <Route path="/contactUs" component={ContactUs} />
-                <Route path="/policies-and-help-guide" component={Policies} />
-                <Route path="/profile" component={ProfileScreen} exact />
-                <Route path="/newcustomerbyadmin" component={NewCustomerByAdminScreen} exact />
-                <Route path="/products/schools/:selectedschool" exact component={ProductScreen} />
-                <Route path="/products/:id" component={ProductDescriptionScreen} exact />
-                <Route path="/track/:id" component={OrderTrackingScreen} />
-                <Route path="/products" component={ProductScreen} exact />
-                <Route path="/cart/:id?" component={CartScreen} />
+                {/* <Route path="/register" component={RegisterScreen} />
+                <Route path="/otp" component={LoginScreenOTP} />
+                <Route path="/forgotpassword" component={ForgotPasswordScreen} />
+                <Route path="/resetpassword" component={ResetPasswordScreen} /> */}
+                
+                {/* Admin routes */}
                 <Route path="/admin/dashboard" component={AdminDashBoardScreen} />
                 <Route path="/admin/userlist" component={UserListScreen} />
                 <Route path="/admin/user/:id/edit" component={UserEditScreen} />
@@ -93,7 +83,11 @@ const App = () => {
                 <Route path="/admin/type/create" component={TypeCreateScreen} />
                 <Route path="/admin/classlist" component={ClassListScreen} />
                 <Route path="/admin/homepage" component={HomepageEditScreen} />
-                <Route path="/all-school-listing" render={() => <Redirect to="/" />} />
+                
+                {/* Admin utility routes */}
+                <Route path="/newcustomerbyadmin" component={NewCustomerByAdminScreen} exact />
+                
+                {/* 404 - catch all */}
                 <Route path="*" component={PageNotFoundScreen} />
             </Switch>
         </Router>
