@@ -5,8 +5,6 @@ import { Link } from 'react-router-dom';
 import CheckoutSteps from '../components/CheckoutSteps';
 import Message from '../components/Message';
 import { createOrder, launchPaymentPortal, updateOrder } from '../actions/orderActions';
-import { logout } from '../actions/userActions';
-import jsonwebtoken from 'jsonwebtoken';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
 
@@ -31,14 +29,7 @@ const PlaceOrderScreen = ({ history }) => {
         return price - price * (disc / 100);
     };
 
-    if (userInfo && userInfo.token) {
-        jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-            if (err) {
-                dispatch(logout());
-                history.push('/login');
-            }
-        });
-    }
+    // Auth verification handled by backend via HTTP-only cookies
 
     if (!cart.paymentMethod) {
         history.push('/payment');

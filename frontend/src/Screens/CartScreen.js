@@ -1,11 +1,9 @@
-import React, { useEffect } from 'react';
-import jsonwebtoken from 'jsonwebtoken';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Row, Col, ListGroup, Image, Form, Button, Card, FloatingLabel } from 'react-bootstrap';
 import Message from '../components/Message';
 import { addToCart, removeFromCart } from '../actions/cartActions';
-import { logout } from '../actions/userActions';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
 
@@ -18,16 +16,7 @@ const CartScreen = ({ match, location, history }) => {
     const cart = useSelector(state => state.cart);
     const { cartItems } = cart;
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
+    // Auth verification handled by backend via HTTP-only cookies
 
     const checkOutHandler = () => {
         if (userInfo && userInfo.token) {
