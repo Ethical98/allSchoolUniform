@@ -20,6 +20,8 @@ import {
     deleteShippingAddress,
     getCurrentUser,
     logout,
+    changePassword,
+    setPassword,
 } from '../controllers/userController.js';
 import { protect, isAdmin } from '../Middleware/authMiddleware.js';
 
@@ -35,6 +37,8 @@ router.get('/me', protect, getCurrentUser);
 router.post('/getUserPhone', getUserPhone);
 router.post('/forgotPassword', forgotPassword);
 router.post('/resetPassword', resetPassword);
+router.post('/change-password', protect, changePassword);
+router.post('/set-password', protect, setPassword);
 
 // ✅ USER PROFILE ROUTES
 router

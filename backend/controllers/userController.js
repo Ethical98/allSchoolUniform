@@ -20,6 +20,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
                 phone: user.phone,
                 isAdmin: user.isAdmin,
                 savedAddress: user.savedAddress || [],
+                authMethod: user.authMethod || 'password',
+                isProfileComplete: user.isProfileComplete ?? true,
             },
         });
     } else {
@@ -99,6 +101,7 @@ const changePassword = asyncHandler(async (req, res) => {
         email: user.email,
         phone: user.phone,
         isAdmin: user.isAdmin,
+        authMethod: user.authMethod || 'password',
         token,
     });
 });
@@ -125,6 +128,7 @@ const authUser = asyncHandler(async (req, res) => {
             email: user.email,
             phone: user.phone,
             isAdmin: user.isAdmin,
+            authMethod: user.authMethod || 'password',
             token: generateToken(user._id, user.name, user.isAdmin),
         });
     } else {
@@ -137,29 +141,40 @@ const authUser = asyncHandler(async (req, res) => {
 // @access Public
 const authUserByOTP = asyncHandler(async (req, res) => {
     const { phone } = req.body;
-    const user = await User.findOne({ phone });
+    let user = await User.findOne({ phone });
+    let isNewUser = false;
 
-    if (user) {
-        const token = generateToken(user._id, user.name, user.isAdmin);
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    // If user doesn't exist, auto-create with phone only
+    if (!user) {
+        user = await User.create({
+            phone,
+            name: `User_${phone.slice(-4)}`, // Temporary name using last 4 digits
+            authMethod: 'otp',
+            isProfileComplete: false,
         });
-        // ✅ Token removed from response body
-        res.json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            isAdmin: user.isAdmin,
-            token,
-        });
-    } else {
-        res.status(401);
-        throw new Error('Not Registered');
+        isNewUser = true;
+        console.log(`[Auth] New user auto-created via OTP: ${phone}`);
     }
+
+    const token = generateToken(user._id, user.name, user.isAdmin);
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    res.status(isNewUser ? 201 : 200).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+        isNewUser,
+        isProfileComplete: user.isProfileComplete,
+        authMethod: user.authMethod || 'password',
+        token,
+    });
 });
 // @desc Register a new user
 // @route POST /api/users
@@ -217,6 +232,8 @@ const getUserProfile = asyncHandler(async (req, res) => {
             phone: user.phone,
             savedAddress: user.savedAddress,
             isAdmin: user.isAdmin,
+            authMethod: user.authMethod || 'password',
+            isProfileComplete: user.isProfileComplete ?? true,
         });
     } else {
         res.status(404);
@@ -234,6 +251,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         user.phone = req.body.phone || user.phone;
         if (req.body.password) {
             user.password = req.body.password;
+        }
+        // Handle profile completion flag
+        if (req.body.isProfileComplete !== undefined) {
+            user.isProfileComplete = req.body.isProfileComplete;
         }
 
         // ✅ Skip validation to prevent errors with existing savedAddress subdocuments
@@ -254,6 +275,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             email: updatedUser.email,
             phone: updatedUser.phone,
             isAdmin: updatedUser.isAdmin,
+            isProfileComplete: updatedUser.isProfileComplete,
+            authMethod: updatedUser.authMethod || 'password',
             token: generateToken(user._id, user.name, user.isAdmin),
         });
     } else {
@@ -282,6 +305,7 @@ const authUserByPhone = asyncHandler(async (req, res) => {
             email: user.email,
             phone: user.phone,
             isAdmin: user.isAdmin,
+            authMethod: user.authMethod || 'password',
             token: generateToken(user._id, user.name, user.isAdmin),
         });
     } else {
@@ -327,6 +351,10 @@ const resetPassword = asyncHandler(async (req, res) => {
     if (user) {
         if (password) {
             user.password = password;
+            // If user was OTP-only, now they have a password
+            if (user.authMethod === 'otp') {
+                user.authMethod = 'password';
+            }
         }
         const updatedUser = await user.save();
         const token = generateToken(
@@ -340,13 +368,13 @@ const resetPassword = asyncHandler(async (req, res) => {
             sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         });
-        // ✅ Token removed from response body
         res.json({
             _id: updatedUser._id,
             name: updatedUser.name,
             email: updatedUser.email,
             phone: updatedUser.phone,
             isAdmin: updatedUser.isAdmin,
+            authMethod: updatedUser.authMethod || 'password',
             token: generateToken(
                 updatedUser._id,
                 updatedUser.name,
@@ -625,6 +653,69 @@ const deleteShippingAddress = asyncHandler(async (req, res) => {
         savedAddresses: result.savedAddress,
     });
 });
+
+/**
+ * @desc Set password for OTP-registered users who don't have one
+ * @route POST /api/users/set-password
+ * @access Private
+ */
+const setPassword = asyncHandler(async (req, res) => {
+    const { newPassword } = req.body;
+
+    // Validate request body
+    if (!newPassword) {
+        res.status(400);
+        throw new Error('New password is required');
+    }
+
+    // Validate new password strength
+    if (newPassword.length < 8) {
+        res.status(400);
+        throw new Error('Password must be at least 8 characters long');
+    }
+
+    // Find user
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Check if user already has a password (if they do, they should use change-password)
+    if (user.password) {
+        res.status(400);
+        throw new Error('Password already set. Use change password instead.');
+    }
+
+    // Set password and update authMethod
+    user.password = newPassword;
+    user.authMethod = 'password'; // Now they can use password login too
+    await user.save();
+
+    // Generate new token
+    const token = generateToken(user._id, user.name, user.isAdmin);
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    console.log(`[Auth] Password set for OTP user: ${user._id}`);
+
+    res.json({
+        success: true,
+        message: 'Password set successfully',
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+        authMethod: user.authMethod,
+        token,
+    });
+});
+
 export {
     deleteShippingAddress,
     updateShippingAddress,
@@ -646,4 +737,6 @@ export {
     getCurrentUser,
     logout,
     changePassword,
+    setPassword,
 };
+

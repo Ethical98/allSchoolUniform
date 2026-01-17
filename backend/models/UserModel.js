@@ -64,6 +64,7 @@ const userSchema = mongoose.Schema(
         email: {
             type: String,
             unique: true,
+            sparse: true, // Allow null/undefined for OTP-registered users
         },
         phone: {
             type: String,
@@ -72,7 +73,16 @@ const userSchema = mongoose.Schema(
         },
         password: {
             type: String,
-            required: true,
+            required: false, // Optional for OTP-registered users
+        },
+        authMethod: {
+            type: String,
+            enum: ['password', 'otp'],
+            default: 'password',
+        },
+        isProfileComplete: {
+            type: Boolean,
+            default: true, // true for password-registered, false for OTP auto-registered
         },
         savedAddress: [addressSchema],
         isAdmin: {
