@@ -27,7 +27,7 @@ const getTypes = asyncHandler(async (req, res) => {
 const getTypeImages = asyncHandler(async (req, res) => {
   const productType = await ProductType.findOne({
     type: req.params.type,
-  }).select('image sizeChart sizeGuide');
+  }).select('image sizeChart sizeGuide sizeGuideTable');
 
   if (productType) {
     const typeObj = productType.toObject();
@@ -36,6 +36,9 @@ const getTypeImages = asyncHandler(async (req, res) => {
       image: normalizeUrl(typeObj.image),
       sizeChart: normalizeUrl(typeObj.sizeChart),
       sizeGuide: normalizeUrl(typeObj.sizeGuide),
+      instructionImage: typeObj.sizeGuideTable?.instructionImage 
+        ? normalizeUrl(typeObj.sizeGuideTable.instructionImage) 
+        : null,
     });
   } else {
     res.status(404);
@@ -91,7 +94,7 @@ const getTypeDetails = asyncHandler(async (req, res) => {
 // @route POST /api/types
 // @access Private/Admin
 const createType = asyncHandler(async (req, res) => {
-  const { typeName, variants, sizeGuide, sizeChart, typeImage, isActive } =
+  const { typeName, variants, sizeGuide, sizeChart, typeImage, isActive, sizeGuideTable } =
     req.body;
   const productType = new ProductType({
     type: typeName,
@@ -100,6 +103,7 @@ const createType = asyncHandler(async (req, res) => {
     sizeChart,
     image: typeImage,
     isActive,
+    sizeGuideTable: sizeGuideTable || undefined,
   });
   const createdType = await productType.save();
   res.status(201).json(createdType);
@@ -125,7 +129,7 @@ const deleteType = asyncHandler(async (req, res) => {
 // @access Private/Admin
 const updateType = asyncHandler(async (req, res) => {
   const productType = await ProductType.findById(req.params.id);
-  const { typeName, variants, typeImage, sizeGuide, sizeChart, isActive } =
+  const { typeName, variants, typeImage, sizeGuide, sizeChart, isActive, sizeGuideTable } =
     req.body;
 
   if (productType) {
@@ -135,6 +139,12 @@ const updateType = asyncHandler(async (req, res) => {
     productType.sizeChart = sizeChart || productType.sizeChart;
     productType.sizeGuide = sizeGuide || productType.sizeGuide;
     productType.isActive = isActive;
+    
+    // Update sizeGuideTable if provided
+    if (sizeGuideTable !== undefined) {
+      productType.sizeGuideTable = sizeGuideTable;
+    }
+    
     const updatedType = await productType.save();
 
     res.status(200).json(updatedType);
