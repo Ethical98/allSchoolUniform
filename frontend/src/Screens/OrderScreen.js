@@ -6,8 +6,6 @@ import Message from '../components/Message';
 import Loader from '../components/Loader';
 import { getOrderDetails } from '../actions/orderActions';
 import { ORDER_CREATE_RESET, ORDER_PAY_RESET } from '../constants/orderConstants';
-import { logout } from '../actions/userActions';
-import jsonwebtoken from 'jsonwebtoken';
 import { clearCartFromDatabase, getCartFromDatabase } from '../actions/cartActions';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
@@ -32,16 +30,7 @@ const OrderScreen = ({ match, history }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
+    // Auth verification handled by backend via HTTP-only cookies
 
     useEffect(() => {
         if (!order || order._id !== orderId || successPay) {
@@ -53,12 +42,7 @@ const OrderScreen = ({ match, history }) => {
         }
     }, [dispatch, orderId, order, successPay]);
 
-    useEffect(() => {
-        if (!userInfo) {
-            dispatch(logout());
-            history.push('/login');
-        }
-    }, [userInfo, dispatch, history]);
+    // Redirect handled by other useEffect above
 
     if (!loading && order.orderItems) {
         // Calculate Prices

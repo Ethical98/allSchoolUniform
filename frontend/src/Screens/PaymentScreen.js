@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import jsonwebtoken from 'jsonwebtoken';
 import { useDispatch, useSelector } from 'react-redux';
 import FormContainer from '../components/FormContainer';
 import { Button, Form, ListGroup } from 'react-bootstrap';
 import { savePaymentMethod } from '../actions/cartActions';
-import { logout } from '../actions/userActions';
 import CheckoutSteps from '../components/CheckoutSteps';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
@@ -32,16 +30,7 @@ const PaymentScreen = ({ history }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
+    // Auth verification handled by backend via HTTP-only cookies
 
     useEffect(() => {
         if (cartItems.length === 0) {

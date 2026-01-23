@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import jsonwebtoken from 'jsonwebtoken';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import { logout } from '../actions/userActions';
 import MaterialTable from 'material-table';
@@ -67,17 +66,7 @@ const ClassListScreen = ({ history, location }) => {
             history.push('/login');
         }
     }, [history, userInfo]);
-
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
+    // Auth verification handled by backend via HTTP-only cookies
 
     useEffect(() => {
         if (userInfo && userInfo.isAdmin) {

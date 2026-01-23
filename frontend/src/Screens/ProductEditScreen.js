@@ -4,8 +4,7 @@ import { Button, Form, Col, Row, Container, FloatingLabel } from 'react-bootstra
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import jsonwebtoken from 'jsonwebtoken';
-import { listProductDetailsById, updateProduct } from '../actions/productActions';
+import { listProductDetailsById, updateProduct, updateFeaturedProduct } from '../actions/productActions';
 import { listTypes, listTypeSizes } from '../actions/typeActions';
 import { listClasses } from '../actions/classActions';
 import { listSchools } from '../actions/schoolActions';
@@ -46,6 +45,9 @@ const ProductEditScreen = ({ match, history, location }) => {
     const [message, setMessage] = useState('');
     const [isActive, setIsActive] = useState(false);
     const [outOfStock, setIsOutOfStock] = useState(false);
+    const [displayOrder, setDisplayOrder] = useState(0);
+    const [isFeatured, setIsFeatured] = useState(false);
+    const [featuredOrder, setFeaturedOrder] = useState(0);
 
     const [masterSize, setMasterSize] = useState([]);
 
@@ -134,16 +136,6 @@ const ProductEditScreen = ({ match, history, location }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
 
     const removeIdHandler = (sizeArray) => {
         const newSizeArray = sizeArray.map(
@@ -164,7 +156,7 @@ const ProductEditScreen = ({ match, history, location }) => {
 
     useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, userInfo]);
@@ -198,6 +190,9 @@ const ProductEditScreen = ({ match, history, location }) => {
                 setSKU(product.SKU);
                 setSEOKeywords(product.SEOKeywords);
                 setIsOutOfStock(product.outOfStock);
+                setDisplayOrder(product.displayOrder || 0);
+                setIsFeatured(product.isFeatured || false);
+                setFeaturedOrder(product.featuredOrder || 0);
                 // If (masterSchools) {
                 //   SetMasterSchool([
                 //     ...masterSchools.filter((x) => x.isActive === true),
@@ -288,7 +283,15 @@ const ProductEditScreen = ({ match, history, location }) => {
                 standard,
                 isActive,
                 SEOKeywords,
-                outOfStock
+                outOfStock,
+                displayOrder: Number(displayOrder)
+            })
+        );
+        // Update featured status separately
+        dispatch(
+            updateFeaturedProduct(productId, {
+                isFeatured,
+                featuredOrder: Number(featuredOrder)
             })
         );
     };
@@ -338,8 +341,6 @@ const ProductEditScreen = ({ match, history, location }) => {
     const nameValidationHandler = (value) => {
         setName(value.replace(/[^\w\s]/gi, ''));
     };
-
-    console.log(size);
 
     return (
         <AdminPageLayout>
@@ -499,6 +500,39 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         onChange={(e) => setIsActive(e.target.checked)}
                                     ></Form.Check>
                                 </Form.Group>
+                                <FloatingLabel controlId="displayOrder" label="Display Order" className="mb-3">
+                                    <Form.Control
+                                        type="number"
+                                        placeholder="Display Order (higher = appears first)"
+                                        value={displayOrder}
+                                        onChange={(e) => setDisplayOrder(e.target.value)}
+                                    ></Form.Control>
+                                    <Form.Text className="text-muted">
+                                        Higher values appear first. Use sparse numbering (100, 200, 300...).
+                                    </Form.Text>
+                                </FloatingLabel>
+                                <Form.Group controlId="isFeatured" className="mb-3">
+                                    <Form.Check
+                                        className="mb-3"
+                                        type="checkbox"
+                                        label="Featured Product"
+                                        checked={isFeatured}
+                                        onChange={(e) => setIsFeatured(e.target.checked)}
+                                    ></Form.Check>
+                                </Form.Group>
+                                {isFeatured && (
+                                    <FloatingLabel controlId="featuredOrder" label="Featured Order" className="mb-3">
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Featured Order (lower = appears first)"
+                                            value={featuredOrder}
+                                            onChange={(e) => setFeaturedOrder(e.target.value)}
+                                        ></Form.Control>
+                                        <Form.Text className="text-muted">
+                                            Lower values appear first in featured section.
+                                        </Form.Text>
+                                    </FloatingLabel>
+                                )}
                             </Col>
 
                             <Col md={9}>

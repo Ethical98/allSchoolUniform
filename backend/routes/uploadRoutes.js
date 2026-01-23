@@ -4,6 +4,7 @@ import upload from '../Middleware/uploadMiddleware.js';
 import sharp from 'sharp';
 import fs from 'fs';
 import { errorHandler } from '../Middleware/errorMiddleware.js';
+import { slugifyFilename } from '../utils/stringUtils.js';
 
 const router = express.Router();
 
@@ -42,15 +43,13 @@ let imagesPerPage = 12;
 
 router.post('/', upload.single('image'), errorHandler, async (req, res) => {
   if (req.file) {
-    const newFilename = `${
-      req.file.originalname.split('.')[0]
-    }-${Date.now()}${path.extname(req.file.originalname)}`;
+    const newFilename = slugifyFilename(req.file.originalname);
 
     await sharp(req.file.buffer)
       .resize({ width: 640, height: 640 })
-      .toFile('uploads/resized' + newFilename);
+      .toFile('uploads/' + newFilename);
 
-    res.send(`/uploads/resized${newFilename}`);
+    res.send(`/uploads/${newFilename}`);
   }
 });
 

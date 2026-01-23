@@ -4,6 +4,8 @@ import paginate from '../utils/pagination.js';
 import fs from 'fs';
 import sharp from 'sharp';
 import path from 'path';
+import { normalizeUrl } from '../utils/normalizeUrl.js';
+import { normalizeWhitespace, slugifyFilename } from '../utils/stringUtils.js';
 
 
 // @desc Get SchoolList
@@ -49,11 +51,11 @@ const getSchoolNames = asyncHandler(async (req, res) => {
 
   const keyword1 = keyword
     ? {
-        name: {
-          $regex: keyword,
-          $options: 'i',
-        },
-      }
+      name: {
+        $regex: keyword,
+        $options: 'i',
+      },
+    }
     : {};
 
   const schoolNames = await School.find(keyword1).select('name isActive');
@@ -65,6 +67,72 @@ const getSchoolNames = asyncHandler(async (req, res) => {
     // res.status(404);
     // throw new Error('School List empty');
   }
+});
+
+// @desc Get All Schools for Public Listing
+// @route GET /api/schools/all
+// @access Public
+const getAllSchoolsPublic = asyncHandler(async (req, res) => {
+  const schools = await School.find({ isActive: true })
+    .select('name logo city state')
+    .sort({ name: 'asc' });
+  res.json(schools);
+});
+
+// @desc Get Featured Schools for Homepage
+// @route GET /api/schools/featured
+// @access Public
+const getFeaturedSchools = asyncHandler(async (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 8, 20);
+
+  // First try to get featured schools
+  let featuredSchools = await School.find({
+    isFeatured: true,
+    isActive: true,
+  })
+    .select('name logo city state')
+    .sort({ featuredOrder: 'asc', name: 'asc' })
+    .limit(limit)
+    .lean();
+
+  res.json({
+    success: true,
+    count: featuredSchools.length,
+    data: featuredSchools,
+  });
+});
+
+// @desc Update School Featured Status
+// @route PUT /api/schools/:id/featured
+// @access Private/Admin
+const updateFeaturedSchool = asyncHandler(async (req, res) => {
+  const { isFeatured, featuredOrder } = req.body;
+
+  const school = await School.findById(req.params.id);
+
+  if (!school) {
+    res.status(404);
+    throw new Error('School not found');
+  }
+
+  if (typeof isFeatured === 'boolean') {
+    school.isFeatured = isFeatured;
+  }
+  if (typeof featuredOrder === 'number') {
+    school.featuredOrder = featuredOrder;
+  }
+
+  const updatedSchool = await school.save();
+
+  res.json({
+    success: true,
+    data: {
+      _id: updatedSchool._id,
+      name: updatedSchool.name,
+      isFeatured: updatedSchool.isFeatured,
+      featuredOrder: updatedSchool.featuredOrder,
+    },
+  });
 });
 
 // @desc Create School
@@ -84,17 +152,19 @@ const createSchool = asyncHandler(async (req, res) => {
     country,
     isActive,
   } = req.body;
+
+  // Normalize whitespace in all string fields
   const school = new School({
-    name,
-    address,
-    contact,
+    name: normalizeWhitespace(name),
+    address: normalizeWhitespace(address),
+    contact: normalizeWhitespace(contact),
     logo,
-    state,
-    city,
-    description,
-    website,
-    email,
-    country,
+    state: normalizeWhitespace(state),
+    city: normalizeWhitespace(city),
+    description: normalizeWhitespace(description),
+    website: normalizeWhitespace(website),
+    email: normalizeWhitespace(email),
+    country: normalizeWhitespace(country),
     isActive,
     user: req.user._id,
   });
@@ -138,17 +208,18 @@ const updateSchool = asyncHandler(async (req, res) => {
   } = req.body;
 
   if (school) {
-    school.name = name || school.name;
+    // Normalize whitespace in all string fields
+    school.name = normalizeWhitespace(name) || school.name;
     school.disabled = disabled;
     school.logo = logo || school.logo;
-    school.address = address || school.address;
-    school.contact = contact || school.contact;
-    school.description = description || school.description;
-    school.city = city || school.city;
-    school.state = state || school.state;
-    school.country = country || school.country;
-    school.email = email || school.email;
-    school.website = website || school.website;
+    school.address = normalizeWhitespace(address) || school.address;
+    school.contact = normalizeWhitespace(contact) || school.contact;
+    school.description = normalizeWhitespace(description) || school.description;
+    school.city = normalizeWhitespace(city) || school.city;
+    school.state = normalizeWhitespace(state) || school.state;
+    school.country = normalizeWhitespace(country) || school.country;
+    school.email = normalizeWhitespace(email) || school.email;
+    school.website = normalizeWhitespace(website) || school.website;
     school.isActive = isActive;
 
     const updatedSchool = await school.save();
@@ -179,7 +250,7 @@ const getSchoolImages = asyncHandler(async (req, res) => {
   );
 
   files.forEach((file) => {
-    images.push({ url: `\\uploads\\schools\\${file}`, name: file });
+    images.push({ url: `/uploads/schools/${file}`, name: file });
   });
 
   const { currentImages, pages } = paginate(currentPage, imagesPerPage, images);
@@ -192,20 +263,21 @@ const getSchoolImages = asyncHandler(async (req, res) => {
 // @access Public
 const uploadSchoolImages = asyncHandler(async (req, res) => {
   if (req.file) {
-    const newFilename = `${
-      req.file.originalname.split('.')[0]
-    }-${Date.now()}${path.extname(req.file.originalname)}`;
+    const newFilename = slugifyFilename(req.file.originalname);
 
     await sharp(req.file.buffer)
       .resize({ width: 300, height: 300 })
-      .toFile('uploads/schools/resized-' + newFilename);
+      .toFile('uploads/schools/' + newFilename);
 
-    res.send(`/uploads/schools/resized-${newFilename}`);
+    res.send(`/uploads/schools/${newFilename}`);
   }
 });
 export {
   getSchools,
   getSchoolNames,
+  getAllSchoolsPublic,
+  getFeaturedSchools,
+  updateFeaturedSchool,
   deleteSchool,
   updateSchool,
   getSchoolDetails,

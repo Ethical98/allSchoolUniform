@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import jsonwebtoken from 'jsonwebtoken';
 import { Button, Form, Col, Row, Container, FloatingLabel, Image, ListGroup, Card, InputGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
@@ -26,7 +25,6 @@ import {
     ORDER_UPDATE_INVOICE_NUMBER_RESET,
     ORDER_UPDATE_RESET
 } from '../constants/orderConstants';
-import { logout } from '../actions/userActions';
 import Loader from '../components/Loader';
 import MaterialTable from 'material-table';
 import { LinkContainer } from 'react-router-bootstrap';
@@ -263,17 +261,6 @@ const OrderEditScreen = ({ history, match, location }) => {
     }, [history, userInfo]);
 
     useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
-
-    useEffect(() => {
         if (success) {
             dispatch({ type: ORDER_UPDATE_RESET });
             dispatch({ type: ORDER_DETAILS_RESET });
@@ -300,10 +287,10 @@ const OrderEditScreen = ({ history, match, location }) => {
                 dispatch(listProducts());
                 dispatch(listSchools());
             } else {
-                setName(order.user.name);
+                setName(order.name || order.user.name);
                 setEmail(order.user.email);
                 setOrderItems(order.orderItems);
-                setPhone(order.user.phone);
+                setPhone(order.phone || order.user.phone);
                 setAddress(order.shippingAddress.address);
                 setCity(order.shippingAddress.city);
                 setCountry(order.shippingAddress.country);
@@ -345,7 +332,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                     setDiscountPrice(
                         Number(
                             order.modifiedItems
-                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                                 .toFixed(2)
                         )
                     );
@@ -356,7 +343,7 @@ const OrderEditScreen = ({ history, match, location }) => {
                     setDiscountPrice(
                         Number(
                             order.orderItems
-                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                                 .toFixed(2)
                         )
                     );
@@ -384,7 +371,7 @@ const OrderEditScreen = ({ history, match, location }) => {
 
     useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, userInfo]);
@@ -408,7 +395,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         const price = Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2));
         const discount = Number(
             modifiedOrderItems
-                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                 .toFixed(2)
         );
         setItemsPrice(price);
@@ -485,6 +472,7 @@ const OrderEditScreen = ({ history, match, location }) => {
             modifiedOrderItems[index].price = productSizes[editIndex].price;
             modifiedOrderItems[index].countInStock = productSizes[editIndex].countInStock;
             modifiedOrderItems[index].tax = productSizes[editIndex].tax;
+            modifiedOrderItems[index].disc = productSizes[editIndex].discount || 0;
             modifiedOrderItems[index].size = size;
             modifiedOrderItems[index].qty = qty;
 
@@ -494,7 +482,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         const price = Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2));
         const discount = Number(
             modifiedOrderItems
-                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                 .toFixed(2)
         );
 

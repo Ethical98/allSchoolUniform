@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import jsonwebtoken from 'jsonwebtoken';
 import { useDispatch, useSelector } from 'react-redux';
 import FormContainer from '../components/FormContainer';
 import { Button, FloatingLabel, Form, ListGroup } from 'react-bootstrap';
 import { saveShippingAddress, saveShippingAddressDatabase, getSavedAddress } from '../actions/cartActions';
-import { logout } from '../actions/userActions';
 import CheckoutSteps from '../components/CheckoutSteps';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
@@ -33,16 +31,7 @@ const ShippingScreen = ({ history }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
+    // Auth verification handled by backend via HTTP-only cookies
 
     // useEffect(() => {
     //     if (!loading && cartSuccess && cartItems.length === 0) {

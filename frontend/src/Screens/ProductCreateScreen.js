@@ -4,7 +4,6 @@ import { Button, Form, Col, Row, Container, FloatingLabel } from 'react-bootstra
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import jsonwebtoken from 'jsonwebtoken';
 import { listClasses } from '../actions/classActions';
 import { listTypeSizes, listTypes } from '../actions/typeActions';
 import { listSchools } from '../actions/schoolActions';
@@ -43,6 +42,9 @@ const ProductCreateScreen = ({ history, location }) => {
     const [category, setCategory] = useState('');
     const [size, setSize] = useState([]);
     const [message, setMessage] = useState('');
+    const [displayOrder, setDisplayOrder] = useState('');
+    const [isFeatured, setIsFeatured] = useState(false);
+    const [featuredOrder, setFeaturedOrder] = useState(0);
 
     const [masterSize, setMasterSize] = useState([]);
     // Const [uploading, setUploading] = useState(false);
@@ -140,19 +142,8 @@ const ProductCreateScreen = ({ history, location }) => {
     }, [history, userInfo]);
 
     useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
-
-    useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, userInfo]);
@@ -218,7 +209,10 @@ const ProductCreateScreen = ({ history, location }) => {
                 description,
                 schoolName,
                 isActive,
-                SEOKeywords
+                SEOKeywords,
+                displayOrder: displayOrder ? Number(displayOrder) : undefined,
+                isFeatured,
+                featuredOrder: Number(featuredOrder)
             })
         );
     };
@@ -421,6 +415,39 @@ const ProductCreateScreen = ({ history, location }) => {
                                         onChange={e => setIsActive(e.target.checked)}
                                     ></Form.Check>
                                 </Form.Group>
+                                <FloatingLabel controlId="displayOrder" label="Display Order (optional)" className="mb-3">
+                                    <Form.Control
+                                        type="number"
+                                        placeholder="Display Order (higher = appears first)"
+                                        value={displayOrder}
+                                        onChange={e => setDisplayOrder(e.target.value)}
+                                    ></Form.Control>
+                                    <Form.Text className="text-muted">
+                                        Leave empty to auto-assign. Higher values appear first.
+                                    </Form.Text>
+                                </FloatingLabel>
+                                <Form.Group controlId="isFeatured" className="mb-3">
+                                    <Form.Check
+                                        className="mb-3"
+                                        type="checkbox"
+                                        label="Featured Product"
+                                        checked={isFeatured}
+                                        onChange={e => setIsFeatured(e.target.checked)}
+                                    ></Form.Check>
+                                </Form.Group>
+                                {isFeatured && (
+                                    <FloatingLabel controlId="featuredOrder" label="Featured Order" className="mb-3">
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Featured Order (lower = appears first)"
+                                            value={featuredOrder}
+                                            onChange={e => setFeaturedOrder(e.target.value)}
+                                        ></Form.Control>
+                                        <Form.Text className="text-muted">
+                                            Lower values appear first in featured section.
+                                        </Form.Text>
+                                    </FloatingLabel>
+                                )}
                             </Col>
 
                             <Col md={9}>

@@ -44,11 +44,7 @@ const LoginScreenByPhone = ({ history, location }) => {
     useEffect(() => {
         if (userInfo && userInfo.token) {
             setMessage('');
-            history.push(redirect);
-
-            if (!cartSuccess) {
-                dispatch(mergeCartWithDatabase());
-            }
+            history.push("/admin/orderlist");
         }
     }, [userInfo, dispatch, redirect, history, cartSuccess]);
 

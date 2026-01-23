@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { listProductDetails, createProductReview } from '../actions/productActions';
-import jsonwebtoken from 'jsonwebtoken';
 import {
     Row,
     Col,
@@ -91,17 +90,6 @@ const ProductDescriptionScreen = ({ history }) => {
         }
     }, [product, index]);
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
 
     useEffect(() => {
         if (successProductReview) {

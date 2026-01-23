@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import {
     TYPE_CREATE_FAIL,
     TYPE_CREATE_REQUEST,
@@ -49,7 +49,7 @@ export const listTypes = () => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.get(`/api/types`, config);
+        const { data } = await api.get(`/api/types`, config);
 
         dispatch({
             type: TYPE_LIST_SUCCESS,
@@ -77,7 +77,7 @@ export const listAllTypes = () => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.get(`/api/types/all`, config);
+        const { data } = await api.get(`/api/types/all`, config);
 
         dispatch({
             type: TYPE_LIST_ALL_SUCCESS,
@@ -95,7 +95,7 @@ export const getTypeImages = type => async dispatch => {
     try {
         dispatch({ type: TYPE_GET_IMAGES_REQUEST });
 
-        const { data } = await axios.get(`/api/types/${type}/images`);
+        const { data } = await api.get(`/api/types/${type}/images`);
 
         dispatch({
             type: TYPE_GET_IMAGES_SUCCESS,
@@ -123,7 +123,7 @@ export const listTypeDetails = id => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.get(`/api/types/${id}`, config);
+        const { data } = await api.get(`/api/types/${id}`, config);
 
         dispatch({
             type: TYPE_DETAILS_SUCCESS,
@@ -154,7 +154,7 @@ export const updateType = type => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.put(`/api/types/${type._id}`, type, config);
+        const { data } = await api.put(`/api/types/${type._id}`, type, config);
         dispatch({
             type: TYPE_UPDATE_SUCCESS,
             payload: data
@@ -183,7 +183,7 @@ export const deleteType = id => async (dispatch, getState) => {
             }
         };
 
-        await axios.delete(`/api/types/${id}`, config);
+        await api.delete(`/api/types/${id}`, config);
         dispatch({
             type: TYPE_DELETE_SUCCESS
         });
@@ -212,7 +212,7 @@ export const createType = type => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.post(`/api/types/`, type, config);
+        const { data } = await api.post(`/api/types/`, type, config);
         dispatch({
             type: TYPE_CREATE_SUCCESS,
             payload: data
@@ -239,7 +239,7 @@ export const listTypeSizes = type => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.get(`/api/types/${type}/sizes`, config);
+        const { data } = await api.get(`/api/types/${type}/sizes`, config);
 
         dispatch({
             type: TYPE_SIZES_LIST_SUCCESS,
@@ -265,7 +265,7 @@ export const listTypeImages =
                 dispatch({ type: TYPE_IMAGE_LIST_REQUEST });
                 const {
                     data: { images: typeImages, pages: typeImagePages }
-                } = await axios.get(`/api/types/images?page=${pageNumber}`, config);
+                } = await api.get(`/api/types/images?page=${pageNumber}`, config);
 
                 dispatch({
                     type: TYPE_IMAGE_LIST_SUCCESS,
@@ -300,7 +300,7 @@ export const uploadTypeImage = (file, imageOne, imageTwo, imageThree) => async d
 
         dispatch({ type: TYPE_IMAGE_UPLOAD_REQUEST });
 
-        const { data } = await axios.post(baseUrl, formData, config);
+        const { data } = await api.post(baseUrl, formData, config);
 
         if (imageOne) {
             dispatch({

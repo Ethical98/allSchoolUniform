@@ -1,46 +1,69 @@
 import express from 'express';
 const router = express.Router();
 import {
-  saveUserShippingAddress,
-  authUser,
-  getUserProfile,
-  registerUser,
-  authUserByPhone,
-  updateUserProfile,
-  getUserPhone,
-  authUserByOTP,
-  getShipppingAddress,
-  forgotPassword,
-  resetPassword,
-  getUsers,
-  deleteUser,
-  getUserById,
-  updateUser,
+    authUser,
+    getUserProfile,
+    registerUser,
+    authUserByPhone,
+    updateUserProfile,
+    getUserPhone,
+    authUserByOTP,
+    forgotPassword,
+    resetPassword,
+    getUsers,
+    deleteUser,
+    getUserById,
+    updateUser,
+    getShippingAddress,
+    saveUserShippingAddress,
+    updateShippingAddress,
+    deleteShippingAddress,
+    getCurrentUser,
+    logout,
+    changePassword,
+    setPassword,
 } from '../controllers/userController.js';
 import { protect, isAdmin } from '../Middleware/authMiddleware.js';
 
+// ✅ MAIN ROUTES
 router.route('/').post(registerUser).get(protect, isAdmin, getUsers);
-router.post('/loginByPhone', authUserByPhone);
-router.post('/getUserPhone', getUserPhone);
+
+// ✅ AUTH ROUTES
 router.post('/login', authUser);
+router.post('/loginByPhone', authUserByPhone);
+router.post('/loginByOtp', authUserByOTP);
+router.post('/logout', logout);
+router.get('/me', protect, getCurrentUser);
+router.post('/getUserPhone', getUserPhone);
 router.post('/forgotPassword', forgotPassword);
 router.post('/resetPassword', resetPassword);
+router.post('/change-password', protect, changePassword);
+router.post('/set-password', protect, setPassword);
 
-router.post('/loginByOtp', authUserByOTP);
+// ✅ USER PROFILE ROUTES
 router
-  .route('/shippingAddress')
-  .get(protect, getShipppingAddress)
-  .post(protect, saveUserShippingAddress);
+    .route('/profile')
+    .get(protect, getUserProfile)
+    .put(protect, updateUserProfile);
 
+// ✅ SHIPPING ADDRESS ROUTES - GROUPED TOGETHER
+// Base routes (GET all, POST new)
 router
-  .route('/profile')
-  .get(protect, getUserProfile)
-  .put(protect, updateUserProfile);
+    .route('/shippingAddress')
+    .get(protect, getShippingAddress)
+    .post(protect, saveUserShippingAddress);
 
+// Dynamic routes with ID (PUT update, DELETE remove)
 router
-  .route('/:id')
-  .delete(protect, isAdmin, deleteUser)
-  .get(protect, isAdmin, getUserById)
-  .put(protect, isAdmin, updateUser);
+    .route('/shippingAddress/:addressId')
+    .put(protect, updateShippingAddress)
+    .delete(protect, deleteShippingAddress);
+
+// ✅ USER ID ROUTES (MUST BE LAST - CATCH-ALL)
+router
+    .route('/:id')
+    .delete(protect, isAdmin, deleteUser)
+    .get(protect, isAdmin, getUserById)
+    .put(protect, isAdmin, updateUser);
 
 export default router;

@@ -67,6 +67,11 @@ jobs:
         run: npm run build
         env:
           CI: false
+          REACT_APP_API_BASE_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
+          REACT_APP_CRYPTO_SALT: ${{ secrets.REACT_APP_CRYPTO_SALT }}
+          REACT_APP_JWT_SECRET: ${{ secrets.REACT_APP_JWT_SECRET }}
+          REACT_APP_RAZORPAY_API_KEY: ${{ secrets.REACT_APP_RAZORPAY_API_KEY }}
+          REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY }}
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
@@ -145,8 +150,8 @@ jobs:
             
             # Pull latest changes
             git fetch origin
-            git checkout ${{ github.event.inputs.deploy_branch || 'master' }}
-            git pull origin ${{ github.event.inputs.deploy_branch || 'master' }}
+            git checkout ${{ github.event.inputs.deploy_branch || github.ref_name }}
+            git pull origin ${{ github.event.inputs.deploy_branch || github.ref_name }}
             
             # Install dependencies
             npm ci --omit=dev

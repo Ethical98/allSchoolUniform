@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import jsonwebtoken from 'jsonwebtoken';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import { Container, Navbar, Nav, Button, Image, NavDropdown, Badge, Form, Row, FloatingLabel } from 'react-bootstrap';
@@ -36,25 +35,16 @@ const Header = () => {
         setValidated(false);
     };
 
-    const [user, setUser] = useState({});
     const dispatch = useDispatch();
     const cart = useSelector((state) => state.cart);
     const { cartItems } = cart;
 
     const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
+    console.log(userInfo)
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                } else {
-                    setUser(decoded);
-                }
-            });
-        }
-    }, [dispatch, userInfo]);
+    // Auth verification handled by backend via HTTP-only cookies
+    // 401 errors are caught by api.js interceptor which clears auth state
 
     const qty = cartItems && cartItems.reduce((acc, item) => acc + Number(item.qty), 0);
 
@@ -230,7 +220,7 @@ const Header = () => {
                                     </LinkContainer>
                                     {userInfo ? (
                                         <>
-                                            <NavDropdown title={user.name} id="username" className="d-none d-sm-block">
+                                            <NavDropdown title={userInfo.name} id="username" className="d-none d-sm-block">
                                                 {userInfo && userInfo.isAdmin && (
                                                     <LinkContainer to="/admin/dashboard">
                                                         <NavDropdown.Item>Dashboard</NavDropdown.Item>
