@@ -287,10 +287,10 @@ const OrderEditScreen = ({ history, match, location }) => {
                 dispatch(listProducts());
                 dispatch(listSchools());
             } else {
-                setName(order.user.name);
+                setName(order.name || order.user.name);
                 setEmail(order.user.email);
                 setOrderItems(order.orderItems);
-                setPhone(order.user.phone);
+                setPhone(order.phone || order.user.phone);
                 setAddress(order.shippingAddress.address);
                 setCity(order.shippingAddress.city);
                 setCountry(order.shippingAddress.country);
