@@ -132,6 +132,12 @@ const addOrderItems = asyncHandler(async (req, res) => {
   const calculatedTotalPrice =
     calculatedItemsPrice + calculatedShippingPrice + calculatedTaxPrice;
 
+  // Round all prices to 2 decimal places (consistent with frontend)
+  const roundedItemsPrice = Math.round(calculatedItemsPrice * 100) / 100;
+  const roundedTaxPrice = Math.round(calculatedTaxPrice * 100) / 100;
+  const roundedShippingPrice = Math.round(calculatedShippingPrice * 100) / 100;
+  const roundedTotalPrice = Math.round(calculatedTotalPrice * 100) / 100;
+
   // Create the order with server-calculated prices
   const order = new Order({
     orderItems: validatedOrderItems,
@@ -140,10 +146,10 @@ const addOrderItems = asyncHandler(async (req, res) => {
     phone: req.user.phone,
     shippingAddress,
     paymentMethod,
-    itemsPrice: calculatedItemsPrice,
-    taxPrice: calculatedTaxPrice,
-    shippingPrice: calculatedShippingPrice,
-    totalPrice: calculatedTotalPrice,
+    itemsPrice: roundedItemsPrice,
+    taxPrice: roundedTaxPrice,
+    shippingPrice: roundedShippingPrice,
+    totalPrice: roundedTotalPrice,
     orderStatus: `Received: ${Date.now()}`,
   });
 
@@ -451,7 +457,7 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
       const updatedOrder = await order.save();
 
 
-      
+
       // Send delivery confirmation email
       sendOrderDeliveredEmail(updatedOrder, user).catch(error => {
         console.error('Failed to send delivery email:', error.message);
