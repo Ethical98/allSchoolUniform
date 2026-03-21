@@ -39,4 +39,22 @@ api.interceptors.response.use(
     }
 );
 
+/**
+ * Extract auth config from Redux state. Throws if user is not logged in.
+ * @param {Function} getState - Redux getState function
+ * @returns {{ headers: { Authorization: string, 'Content-Type': string } }}
+ */
+export const getAuthConfig = (getState) => {
+    const userInfo = getState()?.userLogin?.userInfo;
+    if (!userInfo || !userInfo.token) {
+        throw new Error('Not authenticated');
+    }
+    return {
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userInfo.token}`,
+        },
+    };
+};
+
 export default api;

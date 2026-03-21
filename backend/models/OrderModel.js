@@ -168,6 +168,32 @@ const orderSchema = mongoose.Schema(
         default: false,
       },
     },
+    callComments: [
+      {
+        admin: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        adminName: {
+          type: String,
+          required: true,
+        },
+        commentType: {
+          type: String,
+          enum: ['Call', 'Note', 'Follow-up'],
+          default: 'Call',
+        },
+        text: {
+          type: String,
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

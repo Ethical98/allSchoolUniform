@@ -36,6 +36,24 @@ import HomepageEditScreen from './Screens/HomepageEditScreen';
 import NewCustomerByAdminScreen from './Screens/NewCustomerByAdminScreen';
 import PageNotFoundScreen from './Screens/PageNotFoundScreen';
 import AdminDashBoardScreen from './Screens/AdminDashBoardScreen';
+import StockDashboardScreen from './Screens/StockDashboardScreen';
+import StockOverviewScreen from './Screens/StockOverviewScreen';
+import StockAdjustmentScreen from './Screens/StockAdjustmentScreen';
+import StockProductDetailScreen from './Screens/StockProductDetailScreen';
+import StockValuationScreen from './Screens/StockValuationScreen';
+import StockMovementLogScreen from './Screens/StockMovementLogScreen';
+import QuotationListScreen from './Screens/QuotationListScreen';
+import QuotationCreateScreen from './Screens/QuotationCreateScreen';
+import CashBillScreen from './Screens/CashBillScreen';
+import CompanyListScreen from './Screens/CompanyListScreen';
+import CompanyEditScreen from './Screens/CompanyEditScreen';
+import QuotationViewScreen from './Screens/QuotationViewScreen';
+import CreditNoteCreateScreen from './Screens/CreditNoteCreateScreen';
+import TemplateListScreen from './Screens/TemplateListScreen';
+import BillingReportScreen from './Screens/BillingReportScreen';
+import BillingSettingsScreen from './Screens/BillingSettingsScreen';
+import TestBillScreen from './Screens/TestBillScreen'; // TEMPORARY — remove after testing
+import ErrorBoundary from './components/ErrorBoundary';
 import AboutUs from './Screens/AboutUs';
 import Policies from './Screens/Policies';
 import ContactUs from './Screens/ContactUs';
@@ -53,6 +71,7 @@ const App = () => {
 
     return (
         <Router>
+            <ErrorBoundary>
             <Switch>
                 {/* Redirect root to admin dashboard */}
                 <Route path="/" exact render={() => <Redirect to="/login" />} />
@@ -83,13 +102,41 @@ const App = () => {
                 <Route path="/admin/type/create" component={TypeCreateScreen} />
                 <Route path="/admin/classlist" component={ClassListScreen} />
                 <Route path="/admin/homepage" component={HomepageEditScreen} />
-                
+
+                {/* Stock routes */}
+                <Route path="/admin/stock" component={StockDashboardScreen} exact />
+                <Route path="/admin/stock/overview" component={StockOverviewScreen} exact />
+                <Route path="/admin/stock/adjust" component={StockAdjustmentScreen} exact />
+                <Route path="/admin/stock/adjust/:productId" component={StockAdjustmentScreen} exact />
+                <Route path="/admin/stock/product/:id" component={StockProductDetailScreen} exact />
+                <Route path="/admin/stock/valuation" component={StockValuationScreen} exact />
+                <Route path="/admin/stock/movements" component={StockMovementLogScreen} exact />
+
+                {/* Billing routes */}
+                <Route path="/admin/billing" component={QuotationListScreen} exact />
+                <Route path="/admin/billing/quotation/create" component={QuotationCreateScreen} exact />
+                <Route path="/admin/billing/quotation/:id/edit" component={QuotationCreateScreen} exact />
+                <Route path="/admin/billing/cash-bill" component={CashBillScreen} exact />
+                <Route path="/admin/billing/companies" component={CompanyListScreen} exact />
+                <Route path="/admin/billing/company/create" component={CompanyEditScreen} exact />
+                <Route path="/admin/billing/company/:id/edit" component={CompanyEditScreen} exact />
+                <Route path="/admin/billing/quotation/:id/view" component={QuotationViewScreen} exact />
+                <Route path="/admin/billing/credit-note/:invoiceId" component={CreditNoteCreateScreen} exact />
+                <Route path="/admin/billing/debit-note/:invoiceId" component={CreditNoteCreateScreen} exact />
+                <Route path="/admin/billing/templates" component={TemplateListScreen} exact />
+                <Route path="/admin/billing/reports" component={BillingReportScreen} exact />
+                <Route path="/admin/billing/settings" component={BillingSettingsScreen} exact />
+
+                {/* TEMPORARY — remove after testing */}
+                <Route path="/test-bill" component={TestBillScreen} exact />
+
                 {/* Admin utility routes */}
                 <Route path="/newcustomerbyadmin" component={NewCustomerByAdminScreen} exact />
                 
                 {/* 404 - catch all */}
                 <Route path="*" component={PageNotFoundScreen} />
             </Switch>
+            </ErrorBoundary>
         </Router>
     );
 };

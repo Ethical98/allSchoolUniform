@@ -2,10 +2,10 @@ import asyncHandler from 'express-async-handler';
 import Order, { InvoiceNumber } from '../models/OrderModel.js';
 import User from '../models/UserModel.js';
 import Product from '../models/ProductModel.js';
-import { google } from 'googleapis';
 import dotenv from 'dotenv';
 import _ from 'lodash';
 import { normalizeUrl } from '../utils/normalizeUrl.js';
+import { escapeRegex } from '../utils/stringUtils.js';
 import {
   sendOrderConfirmationEmail,
   sendOrderShippedEmail,
@@ -13,6 +13,8 @@ import {
   sendOrderDeliveredEmail,
   sendOrderCancelledEmail,
 } from '../utils/emailService.js';
+import StockMovement from '../modules/stock/models/StockMovementModel.js';
+import handleStockAlerts from '../modules/stock/utils/stockAlertHelper.js';
 dotenv.config();
 
 // Constants for pricing rules
@@ -209,7 +211,7 @@ const updateOrderToPaidPayUMoney = asyncHandler(async (req, res) => {
 // @desc Update order to Paid
 // @route GET /api/orders/:id/pay
 // @access Private
-const updateOrderTopaid = asyncHandler(async (req, res) => {
+const updateOrderToPaid = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
   const { paymentResult } = req.body;
 
@@ -247,71 +249,7 @@ const getMyOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({ user: req.user._id }).sort({
     createdAt: -1,
   });
-  if (orders.length > 0) {
-    res.json(orders);
-  } else {
-    res.status(404);
-    throw new Error('No orders Found');
-  }
-});
-
-const sendMail = asyncHandler(async (req, res) => {
-  const oAuth2Client = new google.auth.OAuth2(
-    OAUTH2_CLIENT_ID,
-    OAUTH2_CLIENT_SECRET,
-    OAUTH2_REDIRECT_URI
-  );
-  oAuth2Client.setCredentials({ refresh_token: OAUTH2_REFRESH_TOKEN });
-
-  try {
-    const accessToken = await oAuth2Client.getAccessToken();
-    const transport = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        type: 'Oauth2',
-        user: 'noreply@gouniform.com',
-        clientId: OAUTH2_CLIENT_ID,
-        clientSecret: OAUTH2_CLIENT_SECRET,
-        refreshToken: OAUTH2_REFRESH_TOKEN,
-        accessToken: accessToken,
-      },
-    });
-
-    const mailOptions = {
-      from: 'ALLSCHOOLUNIFORM noreply@allschooluniform.com',
-      replyTo: 'akash@gounifrom.com',
-      to: 'devanshgupta54@gmail.com',
-      subject: 'ORDER',
-      text: 'HELOOOOOOO',
-      html: '<table style="border:2px solid green"><thead><tr><th>HELLO</th><th>NAME</th><th>PRICE</th><th>CHANGES</th></tr></thead></table>',
-    };
-
-    const mailOptions2 = {
-      from: 'ALLSCHOOLUNIFORM noreply@allschooluniform.com',
-      replyTo: 'akash@gounifrom.com',
-      to: 'devanshgupta54@gmail.com',
-      subject: 'ORDER',
-      text: 'HELOOOOOOO',
-      html: '<table><thead><tr><th>HELLO</th><th>NAME</th><th>PRICE</th><th>CHANGES</th></tr></thead></table>',
-    };
-    const result = await transport.sendMail(mailOptions);
-    const result2 = await transport.sendMail(mailOptions2);
-
-    // const res = await gmail.users.messages.send({
-    //   userId: 'devansh.gupta73@yahoo.in',
-    //   requestBody: {
-    //     raw: 'hello',
-    //     access_token: accessToken,
-    //     refresh_token: REFRESH_TOKEN,
-
-    //     clientId: CLIENT_ID,
-    //     clientSecret: CLIENT_SECRET,
-    //   },
-    // });
-    // console.log(res.data);
-  } catch (error) {
-    console.log(error);
-  }
+  res.json(orders);
 });
 
 // @desc Get all orders
@@ -325,16 +263,17 @@ const getOrders = asyncHandler(async (req, res) => {
   const orderStatusSearch = status
     ? {
       orderStatus: {
-        $regex: status,
+        $regex: escapeRegex(status),
         $options: 'i',
       },
     }
     : {};
 
+  const escapedKeyword = keyword ? escapeRegex(keyword) : '';
   const searchKeyword = keyword
     ? {
       name: {
-        $regex: keyword,
+        $regex: escapedKeyword,
         $options: 'i',
       },
     }
@@ -342,7 +281,7 @@ const getOrders = asyncHandler(async (req, res) => {
   const searchKeywordTwo = keyword
     ? {
       orderId: {
-        $regex: keyword,
+        $regex: escapedKeyword,
         $options: 'i',
       },
     }
@@ -350,7 +289,7 @@ const getOrders = asyncHandler(async (req, res) => {
   const searchKeywordThree = keyword
     ? {
       phone: {
-        $regex: keyword,
+        $regex: escapedKeyword,
         $options: 'i',
       },
     }
@@ -388,12 +327,7 @@ const getOrders = asyncHandler(async (req, res) => {
     ],
   });
 
-  if (orders.length > 0) {
-    res.json({ orders, page, pages: Math.ceil(count / pageSize) });
-  } else {
-    res.status(404);
-    throw new Error('No orders Found');
-  }
+  res.json({ orders, page, pages: Math.ceil(count / pageSize) });
 });
 
 // @desc Edit order
@@ -465,7 +399,7 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 
       res.json(updatedOrder);
     } else {
-      res.status(500);
+      res.status(400);
       throw new Error('Cannot Update Delivered Before It is out for Delivery');
     }
   } else {
@@ -499,7 +433,7 @@ const updateOrderToOutForDelivery = asyncHandler(async (req, res) => {
 
       res.json(updatedOrder);
     } else {
-      res.status(500);
+      res.status(400);
       throw new Error(
         'Cannot Update To Out For Delivery Before It is under Processing '
       );
@@ -535,7 +469,7 @@ const updateOrderToProcessing = asyncHandler(async (req, res) => {
 
       res.json(updatedOrder);
     } else {
-      res.status(500);
+      res.status(400);
       throw new Error('Cannot Update To Processing Before It is Confirmed ');
     }
   } else {
@@ -559,6 +493,44 @@ const updateOrderToConfirmed = asyncHandler(async (req, res) => {
 
     const updatedOrder = await order.save();
 
+    // Deduct stock atomically for each order item
+    for (const item of order.orderItems) {
+      const product = await Product.findOneAndUpdate(
+        { _id: item.product, 'size.size': item.size },
+        { $inc: { 'size.$.countInStock': -item.qty } },
+        { new: true }
+      );
+      if (!product) continue;
+
+      const sizeVariant = product.size.find((s) => s.size === item.size);
+      const newStock = sizeVariant ? sizeVariant.countInStock : 0;
+      const previousStock = newStock + item.qty;
+
+      // Ensure stock doesn't go below 0
+      if (newStock < 0 && sizeVariant) {
+        sizeVariant.countInStock = 0;
+        await product.save();
+      }
+
+      await StockMovement.create({
+        product: product._id,
+        productName: product.name,
+        SKU: product.SKU,
+        size: item.size,
+        type: 'SALE',
+        quantityChange: -item.qty,
+        previousStock,
+        newStock: Math.max(0, newStock),
+        order: order._id,
+        orderId: order._id.toString(),
+        reason: `Order confirmed`,
+        performedBy: req.user._id,
+        performedByName: req.user.name,
+      });
+
+      await handleStockAlerts(product, item.size, Math.max(0, newStock));
+    }
+
     res.json(updatedOrder);
   } else {
     res.status(404);
@@ -581,7 +553,39 @@ const updateOrderToCanceled = asyncHandler(async (req, res) => {
 
     const updatedOrder = await order.save();
 
+    // Restore stock atomically if the order was previously confirmed
+    if (order.tracking.isConfirmed) {
+      for (const item of order.orderItems) {
+        const product = await Product.findOneAndUpdate(
+          { _id: item.product, 'size.size': item.size },
+          { $inc: { 'size.$.countInStock': item.qty } },
+          { new: true }
+        );
+        if (!product) continue;
 
+        const sizeVariant = product.size.find((s) => s.size === item.size);
+        const newStock = sizeVariant ? sizeVariant.countInStock : 0;
+        const previousStock = newStock - item.qty;
+
+        await StockMovement.create({
+          product: product._id,
+          productName: product.name,
+          SKU: product.SKU,
+          size: item.size,
+          type: 'SALE_CANCEL',
+          quantityChange: item.qty,
+          previousStock,
+          newStock,
+          order: order._id,
+          orderId: order._id.toString(),
+          reason: `Order cancelled`,
+          performedBy: req.user._id,
+          performedByName: req.user.name,
+        });
+
+        await handleStockAlerts(product, item.size, newStock);
+      }
+    }
 
     // Send cancellation email
     sendOrderCancelledEmail(updatedOrder, user).catch(error => {
@@ -642,9 +646,11 @@ const incrementInvoiceNumber = asyncHandler(async (req, res) => {
 // @route GET /api/orders/report
 // @access Private/Admin
 const orderReport = asyncHandler(async (req, res) => {
+  const { startDate } = req.query;
+  const reportStartDate = startDate ? new Date(startDate) : new Date('2022-10-06');
   const orders = await Order.find({
     createdAt: {
-      $gte: new Date('2022-10-06').toISOString(),
+      $gte: reportStartDate.toISOString(),
       $lt: new Date().toISOString(),
     },
     modified: true,
@@ -667,13 +673,71 @@ const orderReport = asyncHandler(async (req, res) => {
   res.status(200).json(pendingOrders);
 });
 
+// @desc Add comment to order
+// @route POST /api/orders/:id/comments
+// @access Private/Admin
+const addOrderComment = asyncHandler(async (req, res) => {
+  const { text, commentType } = req.body;
+
+  if (!text || !text.trim()) {
+    res.status(400);
+    throw new Error('Comment text is required');
+  }
+
+  const validTypes = ['Call', 'Note', 'Follow-up'];
+  const type = validTypes.includes(commentType) ? commentType : 'Call';
+
+  const order = await Order.findByIdAndUpdate(
+    req.params.id,
+    {
+      $push: {
+        callComments: {
+          admin: req.user._id,
+          adminName: req.user.name,
+          commentType: type,
+          text: text.trim(),
+        },
+      },
+    },
+    { new: true }
+  );
+
+  if (order) {
+    res.status(201).json(order.callComments);
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
+// @desc Delete comment from order
+// @route DELETE /api/orders/:id/comments/:commentId
+// @access Private/Admin
+const deleteOrderComment = asyncHandler(async (req, res) => {
+  const order = await Order.findByIdAndUpdate(
+    req.params.id,
+    {
+      $pull: {
+        callComments: { _id: req.params.commentId },
+      },
+    },
+    { new: true }
+  );
+
+  if (order) {
+    res.json(order.callComments);
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
 export {
   getOrders,
   addOrderItems,
   getOrderById,
-  updateOrderTopaid,
+  updateOrderToPaid,
   getMyOrders,
-  sendMail,
   editOrderById,
   getOrderByOrderId,
   updateOrderToConfirmed,
@@ -684,4 +748,6 @@ export {
   updateOrderBillType,
   incrementInvoiceNumber,
   orderReport,
+  addOrderComment,
+  deleteOrderComment,
 };

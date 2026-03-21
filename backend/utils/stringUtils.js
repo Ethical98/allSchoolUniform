@@ -51,6 +51,16 @@ export const slugifyFilename = (originalFilename) => {
 };
 
 /**
+ * Escape special regex characters in a string to prevent ReDoS attacks
+ * @param {string} str - The user input string
+ * @returns {string} - String safe to use in new RegExp() or $regex
+ */
+export const escapeRegex = (str) => {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+/**
  * Normalize a URL path to use forward slashes
  * @param {string} urlPath - The URL path to normalize
  * @returns {string} - Normalized URL path with forward slashes

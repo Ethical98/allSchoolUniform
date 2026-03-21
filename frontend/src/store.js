@@ -38,7 +38,9 @@ import {
     orderConfirmReducer,
     orderUpdateBillTypeReducer,
     orderUpdateInvoiceNumberReducer,
-    orderCancelReducer
+    orderCancelReducer,
+    orderAddCommentReducer,
+    orderDeleteCommentReducer
 } from './reducers/orderReducers';
 import { decryptData } from './utils/Crypto';
 import {
@@ -64,6 +66,49 @@ import {
     schoolNameListReducer,
     schoolUpdateReducer
 } from './reducers/schoolReducers';
+import {
+    quotationListReducer,
+    quotationDetailsReducer,
+    quotationCreateReducer,
+    quotationUpdateReducer,
+    quotationDeleteReducer,
+    quotationStatusReducer,
+    quotationConvertReducer,
+    quotationCloneReducer,
+    productPickerReducer,
+    cashBillCreateReducer,
+    templateListReducer,
+    templateCreateReducer,
+    templateUpdateReducer,
+    templateDeleteReducer,
+    recordPaymentReducer,
+    creditNoteCreateReducer,
+    debitNoteCreateReducer,
+    billingReportReducer,
+    billingConfigReducer,
+    billingConfigUpdateReducer,
+} from './reducers/billingReducers';
+import {
+    companyListReducer,
+    companyDetailsReducer,
+    companyCreateReducer,
+    companyUpdateReducer,
+    companyDeleteReducer,
+    companySearchReducer
+} from './reducers/companyReducers';
+import {
+    stockDashboardReducer,
+    stockOverviewReducer,
+    stockProductDetailsReducer,
+    stockAdjustReducer,
+    stockBulkAdjustReducer,
+    stockMovementsReducer,
+    stockAlertsReducer,
+    stockAlertAcknowledgeReducer,
+    stockValuationReducer,
+    stockValuationFiltersReducer,
+    stockVelocityReducer
+} from './reducers/stockReducers';
 import {
     announcementAddReducer,
     announcementDeleteReducer,
@@ -137,6 +182,8 @@ const reducer = combineReducers({
     orderConfirm: orderConfirmReducer,
     orderUpdateBillType: orderUpdateBillTypeReducer,
     orderUpdateInvoiceNumber: orderUpdateInvoiceNumberReducer,
+    orderAddComment: orderAddCommentReducer,
+    orderDeleteComment: orderDeleteCommentReducer,
     carouselImageList: carouselImageListReducer,
     carouselImageUpdate: carouselImageUpdateReducer,
     carouselImageDelete: carouselImageDeleteReducer,
@@ -148,7 +195,44 @@ const reducer = combineReducers({
     announcementList: announcementListReducer,
     announcementUpdate: announcementUpdateReducer,
     announcementDelete: announcementDeleteReducer,
-    announcementAdd: announcementAddReducer
+    announcementAdd: announcementAddReducer,
+    stockDashboard: stockDashboardReducer,
+    stockOverview: stockOverviewReducer,
+    stockProductDetails: stockProductDetailsReducer,
+    stockAdjust: stockAdjustReducer,
+    stockBulkAdjust: stockBulkAdjustReducer,
+    stockMovements: stockMovementsReducer,
+    stockAlerts: stockAlertsReducer,
+    stockAlertAcknowledge: stockAlertAcknowledgeReducer,
+    stockValuation: stockValuationReducer,
+    stockValuationFilters: stockValuationFiltersReducer,
+    stockVelocity: stockVelocityReducer,
+    quotationList: quotationListReducer,
+    quotationDetails: quotationDetailsReducer,
+    quotationCreate: quotationCreateReducer,
+    quotationUpdate: quotationUpdateReducer,
+    quotationDelete: quotationDeleteReducer,
+    quotationStatus: quotationStatusReducer,
+    quotationConvert: quotationConvertReducer,
+    quotationClone: quotationCloneReducer,
+    productPicker: productPickerReducer,
+    cashBillCreate: cashBillCreateReducer,
+    templateList: templateListReducer,
+    templateCreate: templateCreateReducer,
+    templateUpdate: templateUpdateReducer,
+    templateDelete: templateDeleteReducer,
+    recordPayment: recordPaymentReducer,
+    creditNoteCreate: creditNoteCreateReducer,
+    debitNoteCreate: debitNoteCreateReducer,
+    companyList: companyListReducer,
+    companyDetails: companyDetailsReducer,
+    companyCreate: companyCreateReducer,
+    companyUpdate: companyUpdateReducer,
+    companyDelete: companyDeleteReducer,
+    companySearch: companySearchReducer,
+    billingReport: billingReportReducer,
+    billingConfig: billingConfigReducer,
+    billingConfigUpdate: billingConfigUpdateReducer,
 });
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;

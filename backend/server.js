@@ -20,6 +20,8 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import homeRoutes from './routes/homeRoutes.js';
 import notFoundRequestRoutes from './routes/notFoundRequestRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
+import stockRoutes from './modules/stock/routes/stockRoutes.js';
+import billingRoutes from './modules/billing/routes/billingRoutes.js';
 
 dotenv.config();
 
@@ -31,6 +33,10 @@ const app = express();
 const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:3000',  // Next.js customer site
     process.env.ADMIN_URL || 'http://localhost:3001',     // React Admin
+    'http://127.0.0.1:3000',                              // Next.js (127.0.0.1)
+    'http://127.0.0.1:3001',                              // React Admin (127.0.0.1)
+    'http://127.0.0.1:5001',                              // Backend same-origin dev
+    'http://localhost:5001',                               // Backend same-origin dev
     'https://www.allschooluniform.com',                   // Production Next.js
     'https://allschooluniform.com',                       // Production Next.js (apex)
     'https://admin.allschooluniform.com',                 // Production React Admin
@@ -41,10 +47,12 @@ app.use(cors({
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        // Normalize trailing slashes for comparison
+        const normalizedOrigin = origin.replace(/\/+$/, '');
+        if (allowedOrigins.some(o => o.replace(/\/+$/, '') === normalizedOrigin)) {
             callback(null, true);
         } else {
-            callback(null, true); // Allow all in development, tighten in production if needed
+            callback(new Error(`Origin ${origin} not allowed by CORS`));
         }
     },
     credentials: true,
@@ -79,6 +87,8 @@ app.use('/api/uploads', uploadRoutes);
 app.use('/api/home', homeRoutes);
 app.use('/api/requests', notFoundRequestRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/stock', stockRoutes);
+app.use('/api/billing', billingRoutes);
 
 // SEO: Prevent indexing of Admin/API domain
 app.get('/robots.txt', (req, res) => {

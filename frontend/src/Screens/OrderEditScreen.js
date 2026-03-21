@@ -36,6 +36,7 @@ import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
+import OrderCallComments from '../components/OrderCallComments';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 
 const OrderEditScreen = ({ history, match, location }) => {
@@ -1121,6 +1122,11 @@ const OrderEditScreen = ({ history, match, location }) => {
                                         </Card>
                                     </Col>
                                 </Form.Group>
+                                <OrderCallComments
+                                    orderId={orderId}
+                                    comments={order.callComments || []}
+                                    userInfo={userInfo}
+                                />
                             </Col>
                         </Row>
 

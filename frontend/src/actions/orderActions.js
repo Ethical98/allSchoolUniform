@@ -37,7 +37,13 @@ import {
     ORDER_UPDATE_INVOICE_NUMBER_FAIL,
     ORDER_CANCEL_SUCCESS,
     ORDER_CANCEL_FAIL,
-    ORDER_CANCEL_REQUEST
+    ORDER_CANCEL_REQUEST,
+    ORDER_ADD_COMMENT_REQUEST,
+    ORDER_ADD_COMMENT_SUCCESS,
+    ORDER_ADD_COMMENT_FAIL,
+    ORDER_DELETE_COMMENT_REQUEST,
+    ORDER_DELETE_COMMENT_SUCCESS,
+    ORDER_DELETE_COMMENT_FAIL
 } from '../constants/orderConstants';
 import api from '../utils/api';
 import dotenv from 'dotenv';
@@ -610,6 +616,67 @@ export const updateOrderBillType = (order, billType) => async (dispatch, getStat
     } catch (error) {
         dispatch({
             type: ORDER_UPDATE_BILLTYPE_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message
+        });
+    }
+};
+
+export const addOrderComment = (orderId, text, commentType) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_ADD_COMMENT_REQUEST
+        });
+
+        const {
+            userLogin: { userInfo }
+        } = getState();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        };
+
+        const { data } = await api.post(`/api/orders/${orderId}/comments`, { text, commentType }, config);
+
+        dispatch({
+            type: ORDER_ADD_COMMENT_SUCCESS,
+            payload: data
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDER_ADD_COMMENT_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message
+        });
+    }
+};
+
+export const deleteOrderComment = (orderId, commentId) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_DELETE_COMMENT_REQUEST
+        });
+
+        const {
+            userLogin: { userInfo }
+        } = getState();
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        };
+
+        const { data } = await api.delete(`/api/orders/${orderId}/comments/${commentId}`, config);
+
+        dispatch({
+            type: ORDER_DELETE_COMMENT_SUCCESS,
+            payload: data
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDER_DELETE_COMMENT_FAIL,
             payload: error.response && error.response.data.message ? error.response.data.message : error.message
         });
     }

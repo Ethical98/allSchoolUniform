@@ -49,7 +49,15 @@ import {
     ORDER_CANCEL_REQUEST,
     ORDER_CANCEL_SUCCESS,
     ORDER_CANCEL_FAIL,
-    ORDER_CANCEL_RESET
+    ORDER_CANCEL_RESET,
+    ORDER_ADD_COMMENT_REQUEST,
+    ORDER_ADD_COMMENT_SUCCESS,
+    ORDER_ADD_COMMENT_FAIL,
+    ORDER_ADD_COMMENT_RESET,
+    ORDER_DELETE_COMMENT_REQUEST,
+    ORDER_DELETE_COMMENT_SUCCESS,
+    ORDER_DELETE_COMMENT_FAIL,
+    ORDER_DELETE_COMMENT_RESET
 } from '../constants/orderConstants';
 
 export const orderCreateReducer = (state = {}, action) => {
@@ -256,6 +264,36 @@ export const orderUpdateInvoiceNumberReducer = (state = {}, action) => {
         case ORDER_UPDATE_INVOICE_NUMBER_FAIL:
             return { loading: false, error: action.payload };
         case ORDER_UPDATE_INVOICE_NUMBER_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+export const orderAddCommentReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_ADD_COMMENT_REQUEST:
+            return { loading: true };
+        case ORDER_ADD_COMMENT_SUCCESS:
+            return { loading: false, success: true };
+        case ORDER_ADD_COMMENT_FAIL:
+            return { loading: false, error: action.payload };
+        case ORDER_ADD_COMMENT_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+export const orderDeleteCommentReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_DELETE_COMMENT_REQUEST:
+            return { loading: true };
+        case ORDER_DELETE_COMMENT_SUCCESS:
+            return { loading: false, success: true };
+        case ORDER_DELETE_COMMENT_FAIL:
+            return { loading: false, error: action.payload };
+        case ORDER_DELETE_COMMENT_RESET:
             return {};
         default:
             return state;

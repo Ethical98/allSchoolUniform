@@ -26,6 +26,8 @@ const sizeSchema = mongoose.Schema({
   alertOnQty: { type: Number },
   tax: { type: Number },
   outOfStock: { type: Boolean, default: false },
+  lastRestockedAt: { type: Date }, // When this size was last restocked
+  costPrice: { type: Number }, // Purchase cost (for profit tracking)
 });
 
 const productSchema = mongoose.Schema(
@@ -35,7 +37,7 @@ const productSchema = mongoose.Schema(
       required: true,
       ref: 'User',
     },
-    SKU: { type: String, rquired: true, unique: true },
+    SKU: { type: String, required: true, unique: true },
     outOfStock: { type: Boolean, default: false },
     season: { type: String, required: true },
     name: {
@@ -125,6 +127,36 @@ productSchema.index({ isActive: 1, displayOrder: -1, name: 1 });
 
 // Text index for search functionality
 productSchema.index({ name: 'text', schoolName: 'text', SEOKeywords: 'text' });
+
+// Track which denormalized fields changed before save
+productSchema.pre('save', function (next) {
+  if (!this.isNew) {
+    this._nameModified = this.isModified('name');
+    this._skuModified = this.isModified('SKU');
+  }
+  next();
+});
+
+// Sync denormalized productName/SKU in StockMovement and StockAlert after save
+productSchema.post('save', async function () {
+  if (this._nameModified || this._skuModified) {
+    const update = {};
+    if (this._nameModified) update.productName = this.name;
+    if (this._skuModified) update.SKU = this.SKU;
+
+    try {
+      const StockMovement = mongoose.model('StockMovement');
+      const StockAlert = mongoose.model('StockAlert');
+      await Promise.all([
+        StockMovement.updateMany({ product: this._id }, { $set: update }),
+        StockAlert.updateMany({ product: this._id }, { $set: update }),
+      ]);
+    } catch (err) {
+      // Log but don't fail — sync is best-effort
+      console.error(`[Product Sync] Failed to sync denormalized fields for ${this._id}:`, err.message);
+    }
+  }
+});
 
 const Product = mongoose.model('Product', productSchema);
 

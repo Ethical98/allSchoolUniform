@@ -19,7 +19,8 @@ const Paginate = ({
     products = false,
     users = false,
     schools = false,
-    school = ''
+    school = '',
+    url = ''
 }) => {
     const [pageNumberLimit, setPageNumberLimit] = useState(5);
     const [maxPageNumberLimit, setMaxPageNumberLimit] = useState(5);
@@ -147,6 +148,10 @@ const Paginate = ({
             ? `/admin/product/create?page=${prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1}`
             : editProduct && isAdmin
             ? `/admin/product/${productId}/edit?page=${
+                  prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
+              }`
+            : url
+            ? `${url}?page=${
                   prev ? page - 1 : next ? page + 1 : last ? pages : regular ? x + 1 : 1
               }`
             : `/admin/order/${orderId}/edit?page=${
