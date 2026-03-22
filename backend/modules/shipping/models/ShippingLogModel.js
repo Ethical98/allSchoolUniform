@@ -26,6 +26,8 @@ const shippingLogSchema = mongoose.Schema(
         'NDR_RTO',
         'WEBHOOK',
         'PICKUP_LOCATIONS',
+        'GENERATE_INVOICE',
+        'ADD_PICKUP_LOCATION',
       ],
     },
     endpoint: { type: String },

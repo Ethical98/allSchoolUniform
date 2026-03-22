@@ -36,20 +36,33 @@ export const calculateInventoryValuation = (products) => {
   let totalItems = 0;
   let totalValue = 0;
   let costValue = 0;
+  let totalOnHand = 0;
+  let totalAvailable = 0;
+  let totalCommitted = 0;
+  let totalDamaged = 0;
 
   for (const product of products) {
     for (const variant of product.size || []) {
-      const qty = variant.countInStock || 0;
-      totalItems += qty;
-      totalValue += qty * (variant.price || 0);
+      const onHand = variant.quantityOnHand ?? variant.countInStock ?? 0;
+      const available = variant.countInStock || 0;
+      totalOnHand += onHand;
+      totalAvailable += available;
+      totalCommitted += variant.committed || 0;
+      totalDamaged += variant.damaged || 0;
+      totalItems += onHand;
+      totalValue += onHand * (variant.price || 0);
       if (variant.costPrice) {
-        costValue += qty * variant.costPrice;
+        costValue += onHand * variant.costPrice;
       }
     }
   }
 
   return {
     totalItems,
+    totalOnHand,
+    totalAvailable,
+    totalCommitted,
+    totalDamaged,
     totalValue: Math.round(totalValue * 100) / 100,
     costValue: Math.round(costValue * 100) / 100,
     potentialProfit: Math.round((totalValue - costValue) * 100) / 100,
@@ -81,11 +94,19 @@ export const getStockSummary = (products) => {
     }
   }
 
+  let totalOnHand = 0;
+  for (const product of products) {
+    for (const variant of product.size || []) {
+      totalOnHand += variant.quantityOnHand ?? variant.countInStock ?? 0;
+    }
+  }
+
   return {
     totalProducts: products.length,
     totalVariants,
     inStock,
     outOfStock,
     lowStock,
+    totalOnHand,
   };
 };

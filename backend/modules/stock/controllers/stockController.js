@@ -8,6 +8,7 @@ import {
   getStockSummary,
 } from '../utils/stockUtils.js';
 import handleStockAlerts from '../utils/stockAlertHelper.js';
+import { updateInventoryBucket } from '../utils/inventoryCalc.js';
 import { escapeRegex } from '../../../utils/stringUtils.js';
 
 // ============================================================
@@ -220,6 +221,7 @@ const adjustStock = asyncHandler(async (req, res) => {
     'CORRECTION',
     'TRANSFER',
     'OPENING_STOCK',
+    'SAFETY_STOCK',
   ];
   if (!validTypes.includes(type)) {
     res.status(400);
@@ -235,14 +237,13 @@ const adjustStock = asyncHandler(async (req, res) => {
     throw new Error('Quantity change must be a non-zero number');
   }
 
-  // Find the product
+  // Find the product to validate and get previous state
   const product = await Product.findById(productId);
   if (!product) {
     res.status(404);
     throw new Error('Product not found');
   }
 
-  // Find the size variant
   const sizeVariant = product.size.find((s) => s.size === size);
   if (!sizeVariant) {
     res.status(404);
@@ -250,64 +251,84 @@ const adjustStock = asyncHandler(async (req, res) => {
   }
 
   const previousStock = sizeVariant.countInStock;
-  const newStock = previousStock + qty;
 
-  // Prevent negative stock (unless it's a correction)
-  if (newStock < 0 && type !== 'CORRECTION') {
-    res.status(400);
-    throw new Error(
-      `Cannot reduce stock below 0. Current stock: ${previousStock}, attempted change: ${qty}`
-    );
-  }
-
-  // Update the stock
-  sizeVariant.countInStock = Math.max(0, newStock);
-
-  // Auto-clear outOfStock on inflow; only auto-set on outflow when count hits 0
-  if (qty > 0) {
-    sizeVariant.outOfStock = false;
-  } else if (sizeVariant.countInStock <= 0) {
-    sizeVariant.outOfStock = true;
-  }
-
-  // Update lastRestockedAt if this is an inflow
-  if (qty > 0 && ['PURCHASE', 'RETURN', 'OPENING_STOCK'].includes(type)) {
-    sizeVariant.lastRestockedAt = new Date();
-  }
-
-  // Update costPrice if provided (for inflow adjustments)
-  if (costPrice !== undefined && costPrice !== null && costPrice !== '') {
-    const costVal = Number(costPrice);
-    if (!isNaN(costVal) && costVal >= 0 && ['PURCHASE', 'RETURN', 'OPENING_STOCK'].includes(type)) {
-      sizeVariant.costPrice = costVal;
+  // Prevent negative quantityOnHand (unless it's a correction)
+  const currentOnHand = sizeVariant.quantityOnHand || sizeVariant.countInStock || 0;
+  if (type !== 'CORRECTION' && type !== 'DAMAGE' && type !== 'SAFETY_STOCK') {
+    if (currentOnHand + qty < 0) {
+      res.status(400);
+      throw new Error(
+        `Cannot reduce stock below 0. Current on-hand: ${currentOnHand}, attempted change: ${qty}`
+      );
     }
   }
 
-  await product.save();
+  // Map adjustment type to inventory bucket increments
+  let increments;
+  let bucketChanged;
+  if (type === 'DAMAGE') {
+    increments = { damaged: Math.abs(qty), quantityOnHand: -Math.abs(qty) };
+    bucketChanged = 'damaged';
+  } else if (type === 'SAFETY_STOCK') {
+    increments = { safetyStock: qty };
+    bucketChanged = 'safetyStock';
+  } else {
+    increments = { quantityOnHand: qty };
+    bucketChanged = 'quantityOnHand';
+  }
+
+  const result = await updateInventoryBucket({
+    productId,
+    size,
+    increments,
+    extraMutations: (variant) => {
+      // Update lastRestockedAt if this is an inflow
+      if (qty > 0 && ['PURCHASE', 'RETURN', 'OPENING_STOCK'].includes(type)) {
+        variant.lastRestockedAt = new Date();
+      }
+      // Update costPrice if provided (for inflow adjustments)
+      if (costPrice !== undefined && costPrice !== null && costPrice !== '') {
+        const costVal = Number(costPrice);
+        if (!isNaN(costVal) && costVal >= 0 && ['PURCHASE', 'RETURN', 'OPENING_STOCK'].includes(type)) {
+          variant.costPrice = costVal;
+        }
+      }
+    },
+  });
+
+  if (!result) {
+    res.status(404);
+    throw new Error('Failed to update inventory');
+  }
+
+  const { product: updatedProduct, variant: updatedVariant } = result;
 
   // Create stock movement record
   const movement = await StockMovement.create({
-    product: product._id,
-    productName: product.name,
-    SKU: product.SKU || '',
+    product: updatedProduct._id,
+    productName: updatedProduct.name,
+    SKU: updatedProduct.SKU || '',
     size,
     type,
     quantityChange: qty,
     previousStock,
-    newStock: sizeVariant.countInStock,
+    newStock: updatedVariant.countInStock,
     reason: reason || '',
     performedBy: req.user._id,
     performedByName: req.user.name,
     notes: notes || '',
+    bucketChanged,
+    onHandAfter: updatedVariant.quantityOnHand,
   });
 
   // Handle alerts
-  await handleStockAlerts(product, size, sizeVariant.countInStock);
+  await handleStockAlerts(updatedProduct, size, updatedVariant.countInStock);
 
   res.status(201).json({
     message: 'Stock adjusted successfully',
     movement,
-    currentStock: sizeVariant.countInStock,
+    currentStock: updatedVariant.countInStock,
+    quantityOnHand: updatedVariant.quantityOnHand,
   });
 });
 
@@ -330,6 +351,7 @@ const bulkAdjustStock = asyncHandler(async (req, res) => {
     'DAMAGE',
     'CORRECTION',
     'OPENING_STOCK',
+    'SAFETY_STOCK',
   ];
   if (!validTypes.includes(type)) {
     res.status(400);
@@ -355,39 +377,49 @@ const bulkAdjustStock = asyncHandler(async (req, res) => {
         continue;
       }
 
-      const product = await Product.findById(productId);
-      if (!product) {
+      // Get previous state
+      const productBefore = await Product.findById(productId);
+      if (!productBefore) {
         errors.push({ productId, size, error: 'Product not found' });
         continue;
       }
+      const variantBefore = productBefore.size.find((s) => s.size === size);
+      if (!variantBefore) {
+        errors.push({ productId, size, error: `Size "${size}" not found` });
+        continue;
+      }
+      const previousStock = variantBefore.countInStock;
 
-      const sizeVariant = product.size.find((s) => s.size === size);
-      if (!sizeVariant) {
-        errors.push({
-          productId,
-          size,
-          error: `Size "${size}" not found`,
-        });
+      // Map type to bucket increments
+      let increments;
+      let bucketChanged;
+      if (type === 'DAMAGE') {
+        increments = { damaged: Math.abs(qty), quantityOnHand: -Math.abs(qty) };
+        bucketChanged = 'damaged';
+      } else if (type === 'SAFETY_STOCK') {
+        increments = { safetyStock: qty };
+        bucketChanged = 'safetyStock';
+      } else {
+        increments = { quantityOnHand: qty };
+        bucketChanged = 'quantityOnHand';
+      }
+
+      const result = await updateInventoryBucket({
+        productId,
+        size,
+        increments,
+        extraMutations: (variant) => {
+          if (qty > 0 && ['PURCHASE', 'RETURN', 'OPENING_STOCK'].includes(type)) {
+            variant.lastRestockedAt = new Date();
+          }
+        },
+      });
+      if (!result) {
+        errors.push({ productId, size, error: 'Failed to update inventory' });
         continue;
       }
 
-      const previousStock = sizeVariant.countInStock;
-      const newStock = previousStock + qty;
-
-      sizeVariant.countInStock = Math.max(0, newStock);
-
-      // Auto-clear outOfStock on inflow; only auto-set on outflow when count hits 0
-      if (qty > 0) {
-        sizeVariant.outOfStock = false;
-      } else if (sizeVariant.countInStock <= 0) {
-        sizeVariant.outOfStock = true;
-      }
-
-      if (qty > 0 && ['PURCHASE', 'RETURN', 'OPENING_STOCK'].includes(type)) {
-        sizeVariant.lastRestockedAt = new Date();
-      }
-
-      await product.save();
+      const { product, variant: updatedVariant } = result;
 
       const movement = await StockMovement.create({
         product: product._id,
@@ -397,21 +429,23 @@ const bulkAdjustStock = asyncHandler(async (req, res) => {
         type,
         quantityChange: qty,
         previousStock,
-        newStock: sizeVariant.countInStock,
+        newStock: updatedVariant.countInStock,
         reason: reason || '',
         performedBy: req.user._id,
         performedByName: req.user.name,
         notes: adj.notes || '',
+        bucketChanged,
+        onHandAfter: updatedVariant.quantityOnHand,
       });
 
-      await handleStockAlerts(product, size, sizeVariant.countInStock);
+      await handleStockAlerts(product, size, updatedVariant.countInStock);
 
       results.push({
         productId,
         productName: product.name,
         size,
         previousStock,
-        newStock: sizeVariant.countInStock,
+        newStock: updatedVariant.countInStock,
         movementId: movement._id,
       });
     } catch (err) {
@@ -674,7 +708,12 @@ const exportStockData = asyncHandler(async (req, res) => {
     'Type',
     'Category',
     'Size',
-    'Stock',
+    'On Hand',
+    'Committed',
+    'Damaged',
+    'Safety Stock',
+    'Available',
+    'Max Order Qty',
     'Price',
     'Cost Price',
     'Alert Qty',
@@ -700,7 +739,12 @@ const exportStockData = asyncHandler(async (req, res) => {
         `"${esc(product.type)}"`,
         `"${esc(product.category)}"`,
         `"${esc(variant.size)}"`,
+        variant.quantityOnHand ?? variant.countInStock ?? 0,
+        variant.committed || 0,
+        variant.damaged || 0,
+        variant.safetyStock || 0,
         variant.countInStock,
+        variant.maxOrderQty || '',
         variant.price,
         variant.costPrice || '',
         variant.alertOnQty || '',

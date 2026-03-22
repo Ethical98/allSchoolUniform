@@ -35,6 +35,15 @@ import {
     SHIPPING_CANCEL_REQUEST,
     SHIPPING_CANCEL_SUCCESS,
     SHIPPING_CANCEL_FAIL,
+    SHIPPING_PICKUP_LOCATIONS_REQUEST,
+    SHIPPING_PICKUP_LOCATIONS_SUCCESS,
+    SHIPPING_PICKUP_LOCATIONS_FAIL,
+    SHIPPING_GENERATE_INVOICE_REQUEST,
+    SHIPPING_GENERATE_INVOICE_SUCCESS,
+    SHIPPING_GENERATE_INVOICE_FAIL,
+    SHIPPING_ADD_PICKUP_REQUEST,
+    SHIPPING_ADD_PICKUP_SUCCESS,
+    SHIPPING_ADD_PICKUP_FAIL,
 } from '../constants/shippingConstants';
 import api, { getAuthConfig } from '../utils/api';
 
@@ -83,11 +92,11 @@ export const createShippingOrder = (orderId, weightAndDimensions = {}) => async 
     }
 };
 
-export const assignCourier = (orderId, courierId) => async (dispatch, getState) => {
+export const assignCourier = (orderId, { courierId, courierCharges, estimatedDeliveryDate, courierName } = {}) => async (dispatch, getState) => {
     try {
         dispatch({ type: SHIPPING_ASSIGN_COURIER_REQUEST });
         const config = getAuthConfig(getState);
-        const { data } = await api.post(`/api/shipping/orders/${orderId}/assign-courier`, { courierId }, config);
+        const { data } = await api.post(`/api/shipping/orders/${orderId}/assign-courier`, { courierId, courierCharges, estimatedDeliveryDate, courierName }, config);
         dispatch({ type: SHIPPING_ASSIGN_COURIER_SUCCESS, payload: data });
     } catch (error) {
         dispatch({
@@ -198,6 +207,20 @@ export const initiateRTO = (orderId, reason = '') => async (dispatch, getState) 
     }
 };
 
+export const getPickupLocations = () => async (dispatch, getState) => {
+    try {
+        dispatch({ type: SHIPPING_PICKUP_LOCATIONS_REQUEST });
+        const config = getAuthConfig(getState);
+        const { data } = await api.get('/api/shipping/pickup-locations', config);
+        dispatch({ type: SHIPPING_PICKUP_LOCATIONS_SUCCESS, payload: data });
+    } catch (error) {
+        dispatch({
+            type: SHIPPING_PICKUP_LOCATIONS_FAIL,
+            payload: error.response?.data?.message || error.message,
+        });
+    }
+};
+
 export const cancelShipment = (orderId) => async (dispatch, getState) => {
     try {
         dispatch({ type: SHIPPING_CANCEL_REQUEST });
@@ -207,6 +230,34 @@ export const cancelShipment = (orderId) => async (dispatch, getState) => {
     } catch (error) {
         dispatch({
             type: SHIPPING_CANCEL_FAIL,
+            payload: error.response?.data?.message || error.message,
+        });
+    }
+};
+
+export const generateInvoice = (orderId) => async (dispatch, getState) => {
+    try {
+        dispatch({ type: SHIPPING_GENERATE_INVOICE_REQUEST });
+        const config = getAuthConfig(getState);
+        const { data } = await api.post(`/api/shipping/orders/${orderId}/invoice`, {}, config);
+        dispatch({ type: SHIPPING_GENERATE_INVOICE_SUCCESS, payload: data });
+    } catch (error) {
+        dispatch({
+            type: SHIPPING_GENERATE_INVOICE_FAIL,
+            payload: error.response?.data?.message || error.message,
+        });
+    }
+};
+
+export const addPickupLocation = (locationData) => async (dispatch, getState) => {
+    try {
+        dispatch({ type: SHIPPING_ADD_PICKUP_REQUEST });
+        const config = getAuthConfig(getState);
+        const { data } = await api.post('/api/shipping/pickup-locations', locationData, config);
+        dispatch({ type: SHIPPING_ADD_PICKUP_SUCCESS, payload: data });
+    } catch (error) {
+        dispatch({
+            type: SHIPPING_ADD_PICKUP_FAIL,
             payload: error.response?.data?.message || error.message,
         });
     }

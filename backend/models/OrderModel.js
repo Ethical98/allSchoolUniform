@@ -203,10 +203,12 @@ const orderSchema = mongoose.Schema(
       courierId: { type: Number },
       courierCharges: { type: Number },
       estimatedDeliveryDate: { type: Date },
+      pickupLocation: { type: String },
       pickupScheduledDate: { type: Date },
       pickupTokenNumber: { type: String },
       labelUrl: { type: String },
       manifestUrl: { type: String },
+      invoiceUrl: { type: String },
       status: { type: String },
       statusCode: { type: Number },
       weight: { type: Number },
@@ -251,6 +253,7 @@ const orderSchema = mongoose.Schema(
         },
       ],
       syncedAt: { type: Date },
+      shipAttempt: { type: Number, default: 0 },
       isShipped: { type: Boolean, default: false },
       errors: [
         {

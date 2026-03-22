@@ -15,6 +15,7 @@ import {
 } from '../utils/emailService.js';
 import StockMovement from '../modules/stock/models/StockMovementModel.js';
 import handleStockAlerts from '../modules/stock/utils/stockAlertHelper.js';
+import { updateInventoryBucket } from '../modules/stock/utils/inventoryCalc.js';
 dotenv.config();
 
 // Constants for pricing rules
@@ -495,22 +496,16 @@ const updateOrderToConfirmed = asyncHandler(async (req, res) => {
 
     // Deduct stock atomically for each order item
     for (const item of order.orderItems) {
-      const product = await Product.findOneAndUpdate(
-        { _id: item.product, 'size.size': item.size },
-        { $inc: { 'size.$.countInStock': -item.qty } },
-        { new: true }
-      );
-      if (!product) continue;
+      const result = await updateInventoryBucket({
+        productId: item.product,
+        size: item.size,
+        increments: { quantityOnHand: -item.qty },
+      });
+      if (!result) continue;
 
-      const sizeVariant = product.size.find((s) => s.size === item.size);
-      const newStock = sizeVariant ? sizeVariant.countInStock : 0;
+      const { product, variant: sizeVariant } = result;
+      const newStock = sizeVariant.countInStock;
       const previousStock = newStock + item.qty;
-
-      // Ensure stock doesn't go below 0
-      if (newStock < 0 && sizeVariant) {
-        sizeVariant.countInStock = 0;
-        await product.save();
-      }
 
       await StockMovement.create({
         product: product._id,
@@ -520,15 +515,17 @@ const updateOrderToConfirmed = asyncHandler(async (req, res) => {
         type: 'SALE',
         quantityChange: -item.qty,
         previousStock,
-        newStock: Math.max(0, newStock),
+        newStock,
         order: order._id,
         orderId: order._id.toString(),
         reason: `Order confirmed`,
         performedBy: req.user._id,
         performedByName: req.user.name,
+        bucketChanged: 'quantityOnHand',
+        onHandAfter: sizeVariant.quantityOnHand,
       });
 
-      await handleStockAlerts(product, item.size, Math.max(0, newStock));
+      await handleStockAlerts(product, item.size, newStock);
     }
 
     res.json(updatedOrder);
@@ -579,15 +576,15 @@ const updateOrderToCanceled = asyncHandler(async (req, res) => {
     // Restore stock atomically if the order was previously confirmed
     if (order.tracking.isConfirmed) {
       for (const item of order.orderItems) {
-        const product = await Product.findOneAndUpdate(
-          { _id: item.product, 'size.size': item.size },
-          { $inc: { 'size.$.countInStock': item.qty } },
-          { new: true }
-        );
-        if (!product) continue;
+        const result = await updateInventoryBucket({
+          productId: item.product,
+          size: item.size,
+          increments: { quantityOnHand: item.qty },
+        });
+        if (!result) continue;
 
-        const sizeVariant = product.size.find((s) => s.size === item.size);
-        const newStock = sizeVariant ? sizeVariant.countInStock : 0;
+        const { product, variant: sizeVariant } = result;
+        const newStock = sizeVariant.countInStock;
         const previousStock = newStock - item.qty;
 
         await StockMovement.create({
@@ -604,6 +601,8 @@ const updateOrderToCanceled = asyncHandler(async (req, res) => {
           reason: `Order cancelled`,
           performedBy: req.user._id,
           performedByName: req.user.name,
+          bucketChanged: 'quantityOnHand',
+          onHandAfter: sizeVariant.quantityOnHand,
         });
 
         await handleStockAlerts(product, item.size, newStock);

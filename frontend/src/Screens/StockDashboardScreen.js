@@ -67,6 +67,13 @@ const StockDashboardScreen = ({ history }) => {
     const seasonQuery = season ? `&season=${season}` : '';
     const statCards = [
         {
+            label: 'Total On Hand',
+            value: summary.totalOnHand || 0,
+            icon: 'fas fa-warehouse',
+            color: '#36b9cc',
+            link: `/admin/stock/overview?${seasonQuery}`,
+        },
+        {
             label: 'Total SKUs',
             value: summary.totalVariants || 0,
             icon: 'fas fa-boxes',

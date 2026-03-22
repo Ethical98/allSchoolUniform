@@ -21,9 +21,10 @@ const formatDate = (date) => {
  *
  * @param {Object} order - Mongoose Order document
  * @param {Object} user - User document (for email)
+ * @param {string} pickupLocation - Selected pickup location name (from admin dropdown)
  * @returns {Object} ShipRocket-compatible payload
  */
-export const mapOrderToProvider = (order, user) => {
+export const mapOrderToProvider = (order, user, pickupLocation) => {
   // Use modifiedItems if order was modified, otherwise original orderItems
   const items = order.modified && order.modifiedItems?.length > 0
     ? order.modifiedItems
@@ -37,7 +38,7 @@ export const mapOrderToProvider = (order, user) => {
   return {
     order_id: order.orderId,
     order_date: formatDate(order.createdAt),
-    pickup_location: process.env.SHIPPING_PICKUP_LOCATION || 'Primary',
+    pickup_location: pickupLocation || process.env.SHIPPING_PICKUP_LOCATION || 'Primary',
     billing_customer_name: order.name.split(' ')[0] || order.name,
     billing_last_name: order.name.split(' ').slice(1).join(' ') || '',
     billing_address: order.shippingAddress.address,
@@ -58,10 +59,12 @@ export const mapOrderToProvider = (order, user) => {
     })),
     payment_method: order.paymentMethod === 'COD' ? 'COD' : 'Prepaid',
     sub_total: Number(subTotal.toFixed(2)),
+    ...(order.paymentMethod === 'COD' && { cod_amount: order.totalPrice }),
     length: order.shipping?.dimensions?.length || Number(process.env.SHIPPING_DEFAULT_LENGTH) || 25,
     breadth: order.shipping?.dimensions?.breadth || Number(process.env.SHIPPING_DEFAULT_BREADTH) || 20,
     height: order.shipping?.dimensions?.height || Number(process.env.SHIPPING_DEFAULT_HEIGHT) || 10,
     weight: order.shipping?.weight || Number(process.env.SHIPPING_DEFAULT_WEIGHT) || 0.5,
+    shipping_charges: order.shippingPrice || 0,
   };
 };
 

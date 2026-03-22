@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Card, Form, Button, Row, Col, Tabs, Tab, Image } from 'react-bootstrap';
+import { Card, Form, Button, Row, Col, Tabs, Tab, Image, Badge } from 'react-bootstrap';
 import Rating from './Rating';
 import { addToCart } from '../actions/cartActions';
+import { calcMaxOrderQty, getStockUrgency } from '../utils/stockDisplay';
 import './css/Product.css';
 import { getTypeImages } from '../actions/typeActions';
 import Loader from './Loader';
@@ -138,17 +139,20 @@ const Product = ({ product }) => {
                                                 ))}
                                         </Form.Select>
                                     </Col>
-                                    {(countInStock > 0 || !outOfStock) && (
-                                        <Col xs>
-                                            <Form.Select size="sm" onChange={(e) => setQty(Number(e.target.value))}>
-                                                {[...Array(countInStock).keys()].map((x) => (
-                                                    <option key={x + 1} value={x + 1}>
-                                                        {x + 1}
-                                                    </option>
-                                                ))}
-                                            </Form.Select>
-                                        </Col>
-                                    )}
+                                    {(countInStock > 0 || !outOfStock) && (() => {
+                                        const maxQty = calcMaxOrderQty(countInStock, product.size[index]?.maxOrderQty);
+                                        return maxQty > 0 ? (
+                                            <Col xs>
+                                                <Form.Select size="sm" onChange={(e) => setQty(Number(e.target.value))}>
+                                                    {[...Array(maxQty).keys()].map((x) => (
+                                                        <option key={x + 1} value={x + 1}>
+                                                            {x + 1}
+                                                        </option>
+                                                    ))}
+                                                </Form.Select>
+                                            </Col>
+                                        ) : null;
+                                    })()}
                                     <Col xs>
                                         <Button
                                             onClick={() => handleShow(product.type)}
@@ -171,15 +175,24 @@ const Product = ({ product }) => {
                     </div>
 
                     {!product.outOfStock ? (
-                        <Button
-                            variant="dark"
-                            size="sm"
-                            disabled={countInStock === 0 || outOfStock}
-                            className="mb-3"
-                            onClick={() => addToCartHandler(id, qty)}
-                        >
-                            {outOfStock ? 'OUT OF STOCK' : 'Add To Cart'}
-                        </Button>
+                        <>
+                            {(() => {
+                                const urgency = getStockUrgency(countInStock);
+                                return urgency.tier !== 'IN_STOCK' && urgency.tier !== 'OUT_OF_STOCK' ? (
+                                    <Badge bg={urgency.badge} className="mb-2">{urgency.message}</Badge>
+                                ) : null;
+                            })()}
+                            <br />
+                            <Button
+                                variant="dark"
+                                size="sm"
+                                disabled={countInStock === 0 || outOfStock}
+                                className="mb-3"
+                                onClick={() => addToCartHandler(id, qty)}
+                            >
+                                {outOfStock ? 'OUT OF STOCK' : 'Add To Cart'}
+                            </Button>
+                        </>
                     ) : (
                         <p data-nosnippet>
                             <b>OUT OF STOCK</b>

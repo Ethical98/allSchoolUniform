@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Form, Col, Row, Container, FloatingLabel, Image, ListGroup, Card, InputGroup } from 'react-bootstrap';
+import { Button, Form, Col, Row, Container, FloatingLabel, Image, ListGroup, Card, InputGroup, Tabs, Tab, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import {
@@ -147,6 +147,7 @@ const OrderEditScreen = ({ history, match, location }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [options, setOptions] = useState([]);
     const [discountPrice, setDiscountPrice] = useState(0);
+    const [activeTab, setActiveTab] = useState('details');
 
     const orderItemColumns = [
         {
@@ -778,6 +779,8 @@ const OrderEditScreen = ({ history, match, location }) => {
                 ) : error ? (
                     <Message variant="danger">{error}</Message>
                 ) : (
+                    <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
+                        <Tab eventKey="details" title="Order Details">
                     <Form onSubmit={submitHandler}>
                         <Row>
                             <Col md={4} className="mb-3">
@@ -1128,10 +1131,6 @@ const OrderEditScreen = ({ history, match, location }) => {
                                     comments={order.callComments || []}
                                     userInfo={userInfo}
                                 />
-                                <ShippingPanel
-                                    order={order}
-                                    onRefresh={() => dispatch(getOrderDetails(orderId))}
-                                />
                             </Col>
                         </Row>
 
@@ -1145,6 +1144,14 @@ const OrderEditScreen = ({ history, match, location }) => {
                             </Row>
                         )}
                     </Form>
+                        </Tab>
+                        <Tab eventKey="shipping" title={<>Shipping {order.shipping?.status && <Badge bg={order.shipping?.status === 'DELIVERED' ? 'success' : order.shipping?.status === 'CANCELLED' ? 'danger' : 'primary'} className="ms-1">{order.shipping.status}</Badge>}</>}>
+                            <ShippingPanel
+                                order={order}
+                                onRefresh={() => dispatch(getOrderDetails(orderId))}
+                            />
+                        </Tab>
+                    </Tabs>
                 )}
             </Container>
         </AdminPageLayout>

@@ -60,8 +60,30 @@ const ProductEditScreen = ({ match, history, location }) => {
             readonly: true
         },
         {
-            title: 'InStock',
-            field: 'countInStock'
+            title: 'On Hand',
+            field: 'quantityOnHand',
+        },
+        {
+            title: 'Damaged',
+            field: 'damaged',
+        },
+        {
+            title: 'Safety Stock',
+            field: 'safetyStock',
+        },
+        {
+            title: 'Available',
+            field: 'countInStock',
+            editable: 'never',
+            render: (rowData) => {
+                const val = rowData.countInStock || 0;
+                const color = val <= 0 ? 'red' : val <= 10 ? 'orange' : 'inherit';
+                return <span style={{ color, fontWeight: 'bold' }}>{val}</span>;
+            },
+        },
+        {
+            title: 'Max Order Qty',
+            field: 'maxOrderQty',
         },
         {
             title: 'Price',
@@ -143,7 +165,7 @@ const ProductEditScreen = ({ match, history, location }) => {
 
     const removeIdHandler = (sizeArray) => {
         const newSizeArray = sizeArray.map(
-            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive, outOfStock, costPrice }) => ({
+            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive, outOfStock, costPrice, quantityOnHand, committed, damaged, safetyStock, maxOrderQty }) => ({
                 price,
                 countInStock,
                 openingQty,
@@ -153,7 +175,12 @@ const ProductEditScreen = ({ match, history, location }) => {
                 alertOnQty,
                 isActive,
                 outOfStock,
-                costPrice
+                costPrice,
+                quantityOnHand,
+                committed,
+                damaged,
+                safetyStock,
+                maxOrderQty,
             })
         );
         return newSizeArray;
@@ -304,25 +331,19 @@ const ProductEditScreen = ({ match, history, location }) => {
     useEffect(() => {
         if (masterSize && size) {
             masterSize.forEach((x) => {
-                x.price = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].price
-                    : 0;
-                x.countInStock = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].countInStock
-                    : 0;
-                x.alertOnQty = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].alertOnQty
-                    : 0;
-                x.discount = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].discount
-                    : 0;
-                x.openingQty = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].openingQty
-                    : 0;
-                x.tax = size.some((y) => y.size === x.size) ? size[size.findIndex((y) => y.size === x.size)].tax : 0;
-                x.outOfStock = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].outOfStock
-                    : false;
+                const match = size.find((y) => y.size === x.size);
+                x.price = match ? match.price : 0;
+                x.countInStock = match ? match.countInStock : 0;
+                x.alertOnQty = match ? match.alertOnQty : 0;
+                x.discount = match ? match.discount : 0;
+                x.openingQty = match ? match.openingQty : 0;
+                x.tax = match ? match.tax : 0;
+                x.outOfStock = match ? match.outOfStock : false;
+                x.quantityOnHand = match ? match.quantityOnHand : 0;
+                x.committed = match ? match.committed : 0;
+                x.damaged = match ? match.damaged : 0;
+                x.safetyStock = match ? match.safetyStock : 0;
+                x.maxOrderQty = match ? match.maxOrderQty : undefined;
             });
         }
     }, [masterSize, size]);

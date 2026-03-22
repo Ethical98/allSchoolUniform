@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Row, Col, ListGroup, Image, Form, Button, Card, FloatingLabel } from 'react-bootstrap';
 import Message from '../components/Message';
 import { addToCart, removeFromCart } from '../actions/cartActions';
+import { calcMaxOrderQty } from '../utils/stockDisplay';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
 
@@ -86,7 +87,7 @@ const CartScreen = ({ match, location, history }) => {
                                                                 )
                                                             }
                                                         >
-                                                            {[...Array(item.countInStock).keys()].map(x => (
+                                                            {[...Array(calcMaxOrderQty(item.countInStock, item.maxOrderQty)).keys()].map(x => (
                                                                 <option key={x + 1} value={x + 1}>
                                                                     {x + 1}
                                                                 </option>

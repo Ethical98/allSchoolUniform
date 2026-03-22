@@ -9,6 +9,8 @@ import {
   generateManifest,
   cancelShipment,
   getPickupLocations,
+  generateInvoice,
+  addPickupLocation,
 } from '../controllers/shippingOrderController.js';
 import { trackOrder, getShippingDashboard } from '../controllers/shippingTrackingController.js';
 import {
@@ -36,6 +38,7 @@ router.post('/orders/:orderId/pickup', schedulePickup);
 router.get('/orders/:orderId/label', generateLabel);
 router.post('/orders/:orderId/manifest', generateManifest);
 router.post('/orders/:orderId/cancel-shipment', cancelShipment);
+router.post('/orders/:orderId/invoice', generateInvoice);
 
 // Tracking
 router.get('/orders/:orderId/track', trackOrder);
@@ -48,5 +51,6 @@ router.post('/ndr/:orderId/rto', initiateRTO);
 
 // Pickup locations
 router.get('/pickup-locations', getPickupLocations);
+router.post('/pickup-locations', addPickupLocation);
 
 export default router;

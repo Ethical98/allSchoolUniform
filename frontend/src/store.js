@@ -123,6 +123,9 @@ import {
     shippingNdrReattemptReducer,
     shippingNdrRtoReducer,
     shippingCancelReducer,
+    shippingPickupLocationsReducer,
+    shippingGenerateInvoiceReducer,
+    shippingAddPickupReducer,
 } from './reducers/shippingReducers';
 import {
     announcementAddReducer,
@@ -261,6 +264,9 @@ const reducer = combineReducers({
     shippingNdrReattempt: shippingNdrReattemptReducer,
     shippingNdrRto: shippingNdrRtoReducer,
     shippingCancel: shippingCancelReducer,
+    shippingPickupLocations: shippingPickupLocationsReducer,
+    shippingGenerateInvoice: shippingGenerateInvoiceReducer,
+    shippingAddPickup: shippingAddPickupReducer,
 });
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;

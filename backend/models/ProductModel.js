@@ -28,6 +28,11 @@ const sizeSchema = mongoose.Schema({
   outOfStock: { type: Boolean, default: false },
   lastRestockedAt: { type: Date }, // When this size was last restocked
   costPrice: { type: Number }, // Purchase cost (for profit tracking)
+  quantityOnHand: { type: Number, default: 0 }, // Total physical stock in warehouse
+  committed: { type: Number, default: 0 }, // Reserved for confirmed unshipped orders
+  damaged: { type: Number, default: 0 }, // Damaged / QC hold / write-off
+  safetyStock: { type: Number, default: 0 }, // Buffer held back from sale by admin
+  maxOrderQty: { type: Number }, // Per-variant cap on qty dropdown (optional)
 });
 
 const productSchema = mongoose.Schema(

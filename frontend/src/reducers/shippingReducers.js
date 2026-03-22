@@ -42,6 +42,16 @@ import {
     SHIPPING_CANCEL_SUCCESS,
     SHIPPING_CANCEL_FAIL,
     SHIPPING_CANCEL_RESET,
+    SHIPPING_PICKUP_LOCATIONS_REQUEST,
+    SHIPPING_PICKUP_LOCATIONS_SUCCESS,
+    SHIPPING_PICKUP_LOCATIONS_FAIL,
+    SHIPPING_GENERATE_INVOICE_REQUEST,
+    SHIPPING_GENERATE_INVOICE_SUCCESS,
+    SHIPPING_GENERATE_INVOICE_FAIL,
+    SHIPPING_ADD_PICKUP_REQUEST,
+    SHIPPING_ADD_PICKUP_SUCCESS,
+    SHIPPING_ADD_PICKUP_FAIL,
+    SHIPPING_ADD_PICKUP_RESET,
 } from '../constants/shippingConstants';
 
 export const shippingDashboardReducer = (state = { dashboard: {} }, action) => {
@@ -199,6 +209,19 @@ export const shippingNdrRtoReducer = (state = {}, action) => {
     }
 };
 
+export const shippingPickupLocationsReducer = (state = { locations: [], fetched: false }, action) => {
+    switch (action.type) {
+        case SHIPPING_PICKUP_LOCATIONS_REQUEST:
+            return { ...state, loading: true };
+        case SHIPPING_PICKUP_LOCATIONS_SUCCESS:
+            return { loading: false, fetched: true, locations: action.payload?.data?.shipping_address || action.payload?.shipping_address || [] };
+        case SHIPPING_PICKUP_LOCATIONS_FAIL:
+            return { ...state, loading: false, fetched: true, error: action.payload };
+        default:
+            return state;
+    }
+};
+
 export const shippingCancelReducer = (state = {}, action) => {
     switch (action.type) {
         case SHIPPING_CANCEL_REQUEST:
@@ -208,6 +231,34 @@ export const shippingCancelReducer = (state = {}, action) => {
         case SHIPPING_CANCEL_FAIL:
             return { loading: false, error: action.payload };
         case SHIPPING_CANCEL_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+export const shippingGenerateInvoiceReducer = (state = {}, action) => {
+    switch (action.type) {
+        case SHIPPING_GENERATE_INVOICE_REQUEST:
+            return { loading: true };
+        case SHIPPING_GENERATE_INVOICE_SUCCESS:
+            return { loading: false, success: true, data: action.payload };
+        case SHIPPING_GENERATE_INVOICE_FAIL:
+            return { loading: false, error: action.payload };
+        default:
+            return state;
+    }
+};
+
+export const shippingAddPickupReducer = (state = {}, action) => {
+    switch (action.type) {
+        case SHIPPING_ADD_PICKUP_REQUEST:
+            return { loading: true };
+        case SHIPPING_ADD_PICKUP_SUCCESS:
+            return { loading: false, success: true, data: action.payload };
+        case SHIPPING_ADD_PICKUP_FAIL:
+            return { loading: false, error: action.payload };
+        case SHIPPING_ADD_PICKUP_RESET:
             return {};
         default:
             return state;

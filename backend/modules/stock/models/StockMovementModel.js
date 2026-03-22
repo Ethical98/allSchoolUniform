@@ -27,6 +27,7 @@ const stockMovementSchema = mongoose.Schema(
         'OPENING_STOCK', // Initial stock entry
         'QUOTATION_RESERVE', // Reserved for quotation/invoice
         'QUOTATION_RELEASE', // Released from quotation
+        'SAFETY_STOCK', // Safety stock buffer adjustment
       ],
     },
 
@@ -56,6 +57,13 @@ const stockMovementSchema = mongoose.Schema(
     performedByName: { type: String, required: true }, // Denormalized
 
     notes: { type: String },
+
+    // Inventory bucket tracking
+    bucketChanged: {
+      type: String,
+      enum: ['quantityOnHand', 'committed', 'damaged', 'safetyStock'],
+    },
+    onHandAfter: { type: Number },
   },
   { timestamps: true }
 );

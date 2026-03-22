@@ -88,7 +88,7 @@ const StockOverviewScreen = ({ history, location }) => {
             field: 'type'
         },
         {
-            title: 'Sizes / Stock',
+            title: 'Sizes / Available',
             render: (item) =>
                 item.size && item.size.length > 0
                     ? item.size.map((s, i) => (
@@ -108,7 +108,35 @@ const StockOverviewScreen = ({ history, location }) => {
                     : '-'
         },
         {
-            title: 'Total Stock',
+            title: 'On Hand',
+            render: (item) => {
+                const total = item.size ? item.size.reduce((sum, s) => sum + (s.quantityOnHand ?? s.countInStock ?? 0), 0) : 0;
+                return <strong>{total}</strong>;
+            }
+        },
+        {
+            title: 'Committed',
+            render: (item) => {
+                const total = item.size ? item.size.reduce((sum, s) => sum + (s.committed || 0), 0) : 0;
+                return total > 0 ? <span className="text-info">{total}</span> : '0';
+            }
+        },
+        {
+            title: 'Damaged',
+            render: (item) => {
+                const total = item.size ? item.size.reduce((sum, s) => sum + (s.damaged || 0), 0) : 0;
+                return total > 0 ? <span className="text-danger">{total}</span> : '0';
+            }
+        },
+        {
+            title: 'Safety',
+            render: (item) => {
+                const total = item.size ? item.size.reduce((sum, s) => sum + (s.safetyStock || 0), 0) : 0;
+                return total > 0 ? <span className="text-warning">{total}</span> : '0';
+            }
+        },
+        {
+            title: 'Available',
             render: (item) => {
                 const total = item.size ? item.size.reduce((sum, s) => sum + (s.countInStock || 0), 0) : 0;
                 return <strong>{total}</strong>;

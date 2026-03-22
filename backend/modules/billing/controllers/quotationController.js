@@ -10,6 +10,7 @@ import {
   numberToWords,
 } from '../utils/quotationUtils.js';
 import { escapeRegex } from '../../../utils/stringUtils.js';
+import { updateInventoryBucket } from '../../stock/utils/inventoryCalc.js';
 
 /**
  * Create a snapshot of a company's details for embedding in the document.
@@ -651,28 +652,28 @@ const createCashBill = asyncHandler(async (req, res) => {
         { session }
       );
 
-      // Deduct stock atomically for cash bills using $inc to prevent lost writes
+      // Deduct stock atomically for cash bills via inventory buckets
       for (const item of cashBill.items) {
         if (item.product) {
           for (const variant of item.variants) {
-            // Atomic decrement — avoids read-modify-save race condition
-            const updated = await Product.findOneAndUpdate(
-              { _id: item.product, 'size.size': variant.size },
-              { $inc: { 'size.$.countInStock': -variant.quantity } },
-              { new: true, session }
-            );
+            const result = await updateInventoryBucket({
+              productId: item.product,
+              size: variant.size,
+              increments: { quantityOnHand: -variant.quantity },
+              session,
+            });
 
-            if (updated) {
-              const sizeVariant = updated.size.find((s) => s.size === variant.size);
-              const newStock = sizeVariant ? sizeVariant.countInStock : 0;
+            if (result) {
+              const { product: updatedProduct, variant: updatedVariant } = result;
+              const newStock = updatedVariant.countInStock;
               const previousStock = newStock + variant.quantity;
 
               await StockMovement.create(
                 [
                   {
                     product: item.product,
-                    productName: updated.name,
-                    SKU: updated.SKU,
+                    productName: updatedProduct.name,
+                    SKU: updatedProduct.SKU,
                     size: variant.size,
                     type: 'QUOTATION_RESERVE',
                     quantityChange: -variant.quantity,
@@ -683,6 +684,8 @@ const createCashBill = asyncHandler(async (req, res) => {
                     performedBy: req.user._id,
                     performedByName: req.user.name,
                     reason: `Cash bill ${documentNumber}`,
+                    bucketChanged: 'quantityOnHand',
+                    onHandAfter: updatedVariant.quantityOnHand,
                   },
                 ],
                 { session }

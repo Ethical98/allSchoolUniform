@@ -27,6 +27,7 @@ const StockAdjustmentScreen = ({ match, history }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [productSizes, setProductSizes] = useState([]);
     const [currentStock, setCurrentStock] = useState(null);
+    const [currentOnHand, setCurrentOnHand] = useState(null);
     const [currentCostPrice, setCurrentCostPrice] = useState(null);
 
     const userLogin = useSelector((state) => state.userLogin);
@@ -90,9 +91,11 @@ const StockAdjustmentScreen = ({ match, history }) => {
         if (selectedSize && productSizes.length > 0) {
             const sizeVariant = productSizes.find((s) => s.size === selectedSize);
             setCurrentStock(sizeVariant ? sizeVariant.countInStock : null);
+            setCurrentOnHand(sizeVariant ? (sizeVariant.quantityOnHand ?? sizeVariant.countInStock ?? null) : null);
             setCurrentCostPrice(sizeVariant ? sizeVariant.costPrice || null : null);
         } else {
             setCurrentStock(null);
+            setCurrentOnHand(null);
             setCurrentCostPrice(null);
         }
         setCostPrice('');
@@ -214,7 +217,7 @@ const StockAdjustmentScreen = ({ match, history }) => {
                                     <option value="">Select Size</option>
                                     {productSizes.map((s, i) => (
                                         <option key={i} value={s.size}>
-                                            {s.size} (Stock: {s.countInStock})
+                                            {s.size} (On Hand: {s.quantityOnHand ?? s.countInStock} | Available: {s.countInStock})
                                         </option>
                                     ))}
                                 </Form.Select>
@@ -230,15 +233,34 @@ const StockAdjustmentScreen = ({ match, history }) => {
                                     <option value="DAMAGE">Damage (Remove Stock)</option>
                                     <option value="CORRECTION">Correction</option>
                                     <option value="OPENING_STOCK">Opening Stock</option>
+                                    <option value="SAFETY_STOCK">Safety Stock (Set Buffer)</option>
                                 </Form.Select>
                             </FloatingLabel>
                         </Form.Group>
                     </Col>
                 </Row>
 
+                <div className="mb-3 p-2 border rounded bg-light" style={{ fontSize: '0.85rem' }}>
+                    <strong>How adjustments affect inventory:</strong>
+                    <table className="table table-sm table-bordered mt-1 mb-0" style={{ fontSize: '0.8rem' }}>
+                        <thead>
+                            <tr><th>Type</th><th>Updates</th><th>Effect on Available</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr className={adjustmentType === 'PURCHASE' ? 'table-active' : ''}><td>Purchase</td><td>On Hand + qty</td><td className="text-success">Increases</td></tr>
+                            <tr className={adjustmentType === 'RETURN' ? 'table-active' : ''}><td>Return</td><td>On Hand + qty</td><td className="text-success">Increases</td></tr>
+                            <tr className={adjustmentType === 'OPENING_STOCK' ? 'table-active' : ''}><td>Opening Stock</td><td>On Hand + qty</td><td className="text-success">Increases</td></tr>
+                            <tr className={adjustmentType === 'CORRECTION' ? 'table-active' : ''}><td>Correction</td><td>On Hand ± qty</td><td>Adjusts accordingly</td></tr>
+                            <tr className={adjustmentType === 'DAMAGE' ? 'table-active' : ''}><td>Damage</td><td>On Hand - qty, Damaged + qty</td><td className="text-danger">Decreases</td></tr>
+                            <tr className={adjustmentType === 'SAFETY_STOCK' ? 'table-active' : ''}><td>Safety Stock</td><td>Safety Stock ± qty</td><td className="text-warning">Buffer held back</td></tr>
+                        </tbody>
+                    </table>
+                    <small className="text-muted">Available = On Hand - Committed - Damaged - Safety Stock</small>
+                </div>
+
                 {currentStock !== null && (
                     <Message variant="info">
-                        Current stock for size <strong>{selectedSize}</strong>: <strong>{currentStock}</strong>
+                        Size <strong>{selectedSize}</strong> — On Hand: <strong>{currentOnHand ?? currentStock}</strong> | Available: <strong>{currentStock}</strong>
                         {currentCostPrice ? <> | Cost Price: <strong>₹{currentCostPrice}</strong></> : ''}
                     </Message>
                 )}
