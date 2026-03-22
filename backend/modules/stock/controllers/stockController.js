@@ -4,6 +4,7 @@ import StockMovement from '../models/StockMovementModel.js';
 import StockAlert from '../models/StockAlertModel.js';
 import {
   isLowStock,
+  isOutOfStock,
   calculateInventoryValuation,
   getStockSummary,
 } from '../utils/stockUtils.js';
@@ -48,14 +49,14 @@ const getStockDashboard = asyncHandler(async (req, res) => {
   const lowStockItems = [];
   for (const product of products) {
     for (const variant of product.size || []) {
-      if (isLowStock(variant)) {
+      if (isLowStock(variant) || isOutOfStock(variant)) {
         lowStockItems.push({
           productId: product._id,
           productName: product.name,
           SKU: product.SKU,
           size: variant.size,
           currentStock: variant.countInStock,
-          alertThreshold: variant.alertOnQty,
+          alertThreshold: variant.alertOnQty || 0,
           schoolName: product.schoolName,
         });
       }
@@ -117,7 +118,7 @@ const getStockOverview = asyncHandler(async (req, res) => {
 
     if (stockStatus === 'low') {
       allProducts = allProducts.filter((p) =>
-        p.size.some((s) => isLowStock(s) && s.countInStock > 0)
+        p.size.some((s) => isLowStock(s))
       );
     } else if (stockStatus === 'out') {
       allProducts = allProducts.filter((p) => {
@@ -128,7 +129,7 @@ const getStockOverview = asyncHandler(async (req, res) => {
       allProducts = allProducts.filter((p) => {
         const totalStock = (p.size || []).reduce((sum, s) => sum + (s.countInStock || 0), 0);
         if (totalStock <= 0) return false;
-        const hasLow = p.size.some((s) => isLowStock(s) && s.countInStock > 0);
+        const hasLow = p.size.some((s) => isLowStock(s));
         return !hasLow;
       });
     }

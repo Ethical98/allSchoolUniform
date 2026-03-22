@@ -11,6 +11,9 @@ export const isLowStock = (sizeVariant) => {
   if (!sizeVariant || !sizeVariant.alertOnQty || sizeVariant.alertOnQty <= 0) {
     return false;
   }
+  if (sizeVariant.countInStock <= 0 || sizeVariant.outOfStock === true) {
+    return false;
+  }
   return sizeVariant.countInStock <= sizeVariant.alertOnQty;
 };
 
@@ -87,7 +90,6 @@ export const getStockSummary = (products) => {
         outOfStock++;
       } else if (isLowStock(variant)) {
         lowStock++;
-        inStock++; // Low stock is still "in stock"
       } else {
         inStock++;
       }

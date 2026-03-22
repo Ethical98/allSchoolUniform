@@ -3,6 +3,7 @@ import Order from '../models/OrderModel.js';
 import User from '../models/UserModel.js';
 import Cart from '../models/CartModel.js';
 import Product from '../models/ProductModel.js';
+import { isLowStock, isOutOfStock } from '../modules/stock/utils/stockUtils.js';
 
 // Helper: compute date range from period string
 const getDateRange = (period, startDate, endDate) => {
@@ -238,16 +239,16 @@ const getDashboardData = asyncHandler(async (req, res) => {
   let outOfStockCount = 0;
   for (const product of activeProducts) {
     for (const variant of product.size || []) {
-      if (variant.outOfStock || variant.countInStock <= 0) {
+      if (isOutOfStock(variant)) {
         outOfStockCount++;
       }
-      if (variant.alertOnQty && variant.alertOnQty > 0 && variant.countInStock <= variant.alertOnQty) {
+      if (isLowStock(variant) || isOutOfStock(variant)) {
         lowStockItems.push({
           productName: product.name,
           SKU: product.SKU,
           size: variant.size,
           currentStock: variant.countInStock,
-          alertThreshold: variant.alertOnQty,
+          alertThreshold: variant.alertOnQty || 0,
         });
       }
     }
