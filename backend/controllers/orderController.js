@@ -545,6 +545,29 @@ const updateOrderToCanceled = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
   if (order) {
+    // Cancel on shipping provider if order was shipped
+    if (order.shipping?.isShipped && order.shipping?.status !== 'CANCELLED') {
+      try {
+        const { shippingApi } = await import('../modules/shipping/utils/shippingClient.js');
+        await shippingApi('post', '/orders/cancel', {
+          data: { ids: [order.shipping.providerOrderId] },
+          action: 'CANCEL_ORDER',
+          orderId: order._id,
+          asuOrderId: order.orderId,
+        });
+        order.shipping.status = 'CANCELLED';
+        order.shipping.syncedAt = new Date();
+      } catch (error) {
+        // Log error but don't block cancellation
+        console.error('[Cancel] Shipping provider cancel failed:', error.message);
+        if (!order.shipping.errors) order.shipping.errors = [];
+        order.shipping.errors.push({
+          action: 'CANCEL_ORDER',
+          message: error.message,
+        });
+      }
+    }
+
     const user = await User.findById(order.user);
     order.name = user.name;
     order.tracking.isCanceled = true;

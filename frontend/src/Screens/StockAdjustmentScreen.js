@@ -23,9 +23,11 @@ const StockAdjustmentScreen = ({ match, history }) => {
     const [quantity, setQuantity] = useState('');
     const [reason, setReason] = useState('');
     const [notes, setNotes] = useState('');
+    const [costPrice, setCostPrice] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [productSizes, setProductSizes] = useState([]);
     const [currentStock, setCurrentStock] = useState(null);
+    const [currentCostPrice, setCurrentCostPrice] = useState(null);
 
     const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
@@ -83,14 +85,17 @@ const StockAdjustmentScreen = ({ match, history }) => {
         return () => clearTimeout(debounce);
     }, [searchTerm, userInfo]);
 
-    // Update current stock when size is selected
+    // Update current stock and costPrice when size is selected
     useEffect(() => {
         if (selectedSize && productSizes.length > 0) {
             const sizeVariant = productSizes.find((s) => s.size === selectedSize);
             setCurrentStock(sizeVariant ? sizeVariant.countInStock : null);
+            setCurrentCostPrice(sizeVariant ? sizeVariant.costPrice || null : null);
         } else {
             setCurrentStock(null);
+            setCurrentCostPrice(null);
         }
+        setCostPrice('');
     }, [selectedSize, productSizes]);
 
     // On success redirect
@@ -120,16 +125,18 @@ const StockAdjustmentScreen = ({ match, history }) => {
         e.preventDefault();
         if (!selectedProduct || !selectedSize || !quantity) return;
 
-        dispatch(
-            adjustStock({
-                productId: selectedProduct,
-                size: selectedSize,
-                type: adjustmentType,
-                quantityChange: parseInt(quantity),
-                reason,
-                notes
-            })
-        );
+        const adjustmentData = {
+            productId: selectedProduct,
+            size: selectedSize,
+            type: adjustmentType,
+            quantityChange: parseInt(quantity),
+            reason,
+            notes
+        };
+        if (costPrice && ['PURCHASE', 'OPENING_STOCK', 'RETURN'].includes(adjustmentType)) {
+            adjustmentData.costPrice = parseFloat(costPrice);
+        }
+        dispatch(adjustStock(adjustmentData));
     };
 
     return (
@@ -232,11 +239,12 @@ const StockAdjustmentScreen = ({ match, history }) => {
                 {currentStock !== null && (
                     <Message variant="info">
                         Current stock for size <strong>{selectedSize}</strong>: <strong>{currentStock}</strong>
+                        {currentCostPrice ? <> | Cost Price: <strong>₹{currentCostPrice}</strong></> : ''}
                     </Message>
                 )}
 
                 <Row>
-                    <Col md={6}>
+                    <Col md={['PURCHASE', 'OPENING_STOCK', 'RETURN'].includes(adjustmentType) ? 4 : 6}>
                         <Form.Group className="mb-3">
                             <FloatingLabel label="Quantity">
                                 <Form.Control
@@ -249,7 +257,7 @@ const StockAdjustmentScreen = ({ match, history }) => {
                             </FloatingLabel>
                         </Form.Group>
                     </Col>
-                    <Col md={6}>
+                    <Col md={['PURCHASE', 'OPENING_STOCK', 'RETURN'].includes(adjustmentType) ? 4 : 6}>
                         <Form.Group className="mb-3">
                             <FloatingLabel label="Reason">
                                 <Form.Control
@@ -261,6 +269,22 @@ const StockAdjustmentScreen = ({ match, history }) => {
                             </FloatingLabel>
                         </Form.Group>
                     </Col>
+                    {['PURCHASE', 'OPENING_STOCK', 'RETURN'].includes(adjustmentType) && (
+                        <Col md={4}>
+                            <Form.Group className="mb-3">
+                                <FloatingLabel label="Cost Price (₹) - optional">
+                                    <Form.Control
+                                        type="number"
+                                        value={costPrice}
+                                        onChange={(e) => setCostPrice(e.target.value)}
+                                        placeholder="Purchase cost per unit"
+                                        min="0"
+                                        step="0.01"
+                                    />
+                                </FloatingLabel>
+                            </Form.Group>
+                        </Col>
+                    )}
                 </Row>
 
                 <Form.Group className="mb-3">

@@ -198,7 +198,7 @@ const getProductStock = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 // ============================================================
 const adjustStock = asyncHandler(async (req, res) => {
-  const { productId, size, quantityChange, type, reason, notes } = req.body;
+  const { productId, size, quantityChange, type, reason, notes, costPrice } = req.body;
 
   // Validate required fields
   if (!productId || !size || quantityChange === undefined || !type) {
@@ -273,6 +273,14 @@ const adjustStock = asyncHandler(async (req, res) => {
   // Update lastRestockedAt if this is an inflow
   if (qty > 0 && ['PURCHASE', 'RETURN', 'OPENING_STOCK'].includes(type)) {
     sizeVariant.lastRestockedAt = new Date();
+  }
+
+  // Update costPrice if provided (for inflow adjustments)
+  if (costPrice !== undefined && costPrice !== null && costPrice !== '') {
+    const costVal = Number(costPrice);
+    if (!isNaN(costVal) && costVal >= 0 && ['PURCHASE', 'RETURN', 'OPENING_STOCK'].includes(type)) {
+      sizeVariant.costPrice = costVal;
+    }
   }
 
   await product.save();

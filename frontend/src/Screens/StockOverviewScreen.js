@@ -101,6 +101,7 @@ const StockOverviewScreen = ({ history, location }) => {
                               >
                                   {s.countInStock}
                               </strong>
+                              {s.costPrice ? <small className="text-muted">(₹{s.costPrice})</small> : ''}
                               {i < item.size.length - 1 ? ', ' : ''}
                           </span>
                       ))

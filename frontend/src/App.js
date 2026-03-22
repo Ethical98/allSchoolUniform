@@ -53,6 +53,8 @@ import TemplateListScreen from './Screens/TemplateListScreen';
 import BillingReportScreen from './Screens/BillingReportScreen';
 import BillingSettingsScreen from './Screens/BillingSettingsScreen';
 import TestBillScreen from './Screens/TestBillScreen'; // TEMPORARY — remove after testing
+import ShippingDashboardScreen from './Screens/ShippingDashboardScreen';
+import ShippingNDRListScreen from './Screens/ShippingNDRListScreen';
 import ErrorBoundary from './components/ErrorBoundary';
 import AboutUs from './Screens/AboutUs';
 import Policies from './Screens/Policies';
@@ -126,6 +128,10 @@ const App = () => {
                 <Route path="/admin/billing/templates" component={TemplateListScreen} exact />
                 <Route path="/admin/billing/reports" component={BillingReportScreen} exact />
                 <Route path="/admin/billing/settings" component={BillingSettingsScreen} exact />
+
+                {/* Shipping routes */}
+                <Route path="/admin/shipping" component={ShippingDashboardScreen} exact />
+                <Route path="/admin/shipping/ndr" component={ShippingNDRListScreen} exact />
 
                 {/* TEMPORARY — remove after testing */}
                 <Route path="/test-bill" component={TestBillScreen} exact />

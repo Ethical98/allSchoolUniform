@@ -35,6 +35,15 @@ const NAV_CONFIG = [
             { label: 'Settings', path: '/admin/billing/settings' }
         ]
     },
+    {
+        label: 'Shipping',
+        icon: 'fas fa-shipping-fast',
+        basePath: '/admin/shipping',
+        children: [
+            { label: 'Dashboard', path: '/admin/shipping' },
+            { label: 'NDR Management', path: '/admin/shipping/ndr' },
+        ]
+    },
     { label: 'Schools', icon: 'fas fa-graduation-cap', path: '/admin/schoollist' },
     { label: 'Product Type', icon: 'fas fa-th', path: '/admin/typelist' },
     { label: 'Homepage', icon: 'fas fa-home', path: '/admin/homepage' }

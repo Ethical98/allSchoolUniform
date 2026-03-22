@@ -76,6 +76,10 @@ const ProductEditScreen = ({ match, history, location }) => {
             field: 'alertOnQty'
         },
         {
+            title: 'Cost Price',
+            field: 'costPrice'
+        },
+        {
             title: 'Discount',
             field: 'discount'
         },
@@ -139,7 +143,7 @@ const ProductEditScreen = ({ match, history, location }) => {
 
     const removeIdHandler = (sizeArray) => {
         const newSizeArray = sizeArray.map(
-            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive, outOfStock }) => ({
+            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive, outOfStock, costPrice }) => ({
                 price,
                 countInStock,
                 openingQty,
@@ -148,7 +152,8 @@ const ProductEditScreen = ({ match, history, location }) => {
                 size,
                 alertOnQty,
                 isActive,
-                outOfStock
+                outOfStock,
+                costPrice
             })
         );
         return newSizeArray;

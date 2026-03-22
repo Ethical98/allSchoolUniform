@@ -13,9 +13,9 @@ const formatCurrency = (val) => `₹ ${(val || 0).toLocaleString('en-IN')}`;
 
 const statCardConfig = [
     { key: 'totalProducts', label: 'Total Products', icon: 'fas fa-boxes', color: '#4e73df' },
-    { key: 'totalUnits', label: 'Total Units', icon: 'fas fa-cubes', color: '#6610f2' },
-    { key: 'totalRetailValue', label: 'Sell Value', icon: 'fas fa-tag', color: '#36b9cc', isCurrency: true },
-    { key: 'totalCostValue', label: 'Cost Value', icon: 'fas fa-money-bill', color: '#858796', isCurrency: true },
+    { key: 'totalItems', label: 'Total Units', icon: 'fas fa-cubes', color: '#6610f2' },
+    { key: 'totalValue', label: 'Sell Value', icon: 'fas fa-tag', color: '#36b9cc', isCurrency: true },
+    { key: 'costValue', label: 'Cost Value', icon: 'fas fa-money-bill', color: '#858796', isCurrency: true },
     { key: 'potentialProfit', label: 'Potential Profit', icon: 'fas fa-chart-line', color: '#1cc88a', isCurrency: true },
 ];
 
@@ -88,7 +88,7 @@ const StockValuationScreen = ({ history }) => {
 
     const summary = valuation?.valuation;
     const summaryWithProfit = summary
-        ? { ...summary, potentialProfit: (summary.totalRetailValue || 0) - (summary.totalCostValue || 0) }
+        ? { ...summary, totalProducts: valuation?.breakdown?.length || 0 }
         : null;
 
     // Calculate totals for the breakdown table

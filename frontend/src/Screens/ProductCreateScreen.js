@@ -75,6 +75,10 @@ const ProductCreateScreen = ({ history, location }) => {
             field: 'alertOnQty'
         },
         {
+            title: 'Cost Price',
+            field: 'costPrice'
+        },
+        {
             title: 'Discount',
             field: 'discount'
         },
@@ -150,7 +154,7 @@ const ProductCreateScreen = ({ history, location }) => {
 
     const removeIdHandler = sizeArray => {
         const newSizeArray = sizeArray.map(
-            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive }) => ({
+            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive, costPrice }) => ({
                 isActive,
                 price,
                 countInStock,
@@ -158,7 +162,8 @@ const ProductCreateScreen = ({ history, location }) => {
                 tax,
                 discount,
                 size,
-                alertOnQty
+                alertOnQty,
+                costPrice
             })
         );
         return newSizeArray;

@@ -194,6 +194,72 @@ const orderSchema = mongoose.Schema(
         },
       },
     ],
+    shipping: {
+      provider: { type: String, default: 'shiprocket' },
+      providerOrderId: { type: Number },
+      providerShipmentId: { type: Number },
+      awbCode: { type: String },
+      courierName: { type: String },
+      courierId: { type: Number },
+      courierCharges: { type: Number },
+      estimatedDeliveryDate: { type: Date },
+      pickupScheduledDate: { type: Date },
+      pickupTokenNumber: { type: String },
+      labelUrl: { type: String },
+      manifestUrl: { type: String },
+      status: { type: String },
+      statusCode: { type: Number },
+      weight: { type: Number },
+      dimensions: {
+        length: { type: Number },
+        breadth: { type: Number },
+        height: { type: Number },
+      },
+      isRTO: { type: Boolean, default: false },
+      rtoInitiatedAt: { type: Date },
+      rtoDeliveredAt: { type: Date },
+      ndr: {
+        isNDR: { type: Boolean, default: false },
+        ndrCount: { type: Number, default: 0 },
+        lastNdrAt: { type: Date },
+        lastNdrReason: { type: String },
+        ndrActions: [
+          {
+            action: {
+              type: String,
+              enum: ['reattempt', 'rto', 'pending'],
+            },
+            reason: { type: String },
+            newAddress: { type: String },
+            newPhone: { type: String },
+            preferredDate: { type: Date },
+            actionBy: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'User',
+            },
+            actionAt: { type: Date, default: Date.now },
+          },
+        ],
+      },
+      trackingHistory: [
+        {
+          status: { type: String },
+          statusCode: { type: Number },
+          location: { type: String },
+          timestamp: { type: Date },
+          remarks: { type: String },
+        },
+      ],
+      syncedAt: { type: Date },
+      isShipped: { type: Boolean, default: false },
+      errors: [
+        {
+          action: { type: String },
+          message: { type: String },
+          timestamp: { type: Date, default: Date.now },
+        },
+      ],
+    },
   },
   { timestamps: true }
 );
@@ -238,6 +304,10 @@ orderSchema.index({ createdAt: -1 });
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ isPaid: 1 });
 orderSchema.index({ user: 1, createdAt: -1 }); // For user order history
+orderSchema.index({ 'shipping.awbCode': 1 });
+orderSchema.index({ 'shipping.providerOrderId': 1 });
+orderSchema.index({ 'shipping.ndr.isNDR': 1 });
+orderSchema.index({ 'shipping.isRTO': 1 });
 
 const Order = mongoose.model('Order', orderSchema);
 

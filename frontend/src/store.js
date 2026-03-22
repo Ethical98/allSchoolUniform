@@ -109,6 +109,21 @@ import {
     stockValuationFiltersReducer,
     stockVelocityReducer
 } from './reducers/stockReducers';
+import { adminDashboardReducer } from './reducers/dashboardReducers';
+import {
+    shippingDashboardReducer,
+    shippingServiceabilityReducer,
+    shippingCreateOrderReducer,
+    shippingAssignCourierReducer,
+    shippingSchedulePickupReducer,
+    shippingGenerateLabelReducer,
+    shippingGenerateManifestReducer,
+    shippingTrackOrderReducer,
+    shippingNdrListReducer,
+    shippingNdrReattemptReducer,
+    shippingNdrRtoReducer,
+    shippingCancelReducer,
+} from './reducers/shippingReducers';
 import {
     announcementAddReducer,
     announcementDeleteReducer,
@@ -233,6 +248,19 @@ const reducer = combineReducers({
     billingReport: billingReportReducer,
     billingConfig: billingConfigReducer,
     billingConfigUpdate: billingConfigUpdateReducer,
+    adminDashboard: adminDashboardReducer,
+    shippingDashboard: shippingDashboardReducer,
+    shippingServiceability: shippingServiceabilityReducer,
+    shippingCreateOrder: shippingCreateOrderReducer,
+    shippingAssignCourier: shippingAssignCourierReducer,
+    shippingSchedulePickup: shippingSchedulePickupReducer,
+    shippingGenerateLabel: shippingGenerateLabelReducer,
+    shippingGenerateManifest: shippingGenerateManifestReducer,
+    shippingTrackOrder: shippingTrackOrderReducer,
+    shippingNdrList: shippingNdrListReducer,
+    shippingNdrReattempt: shippingNdrReattemptReducer,
+    shippingNdrRto: shippingNdrRtoReducer,
+    shippingCancel: shippingCancelReducer,
 });
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;

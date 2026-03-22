@@ -28,6 +28,7 @@
   "homepage": "https://github.com/Ethical98/ASU_MERN#readme",
   "dependencies": {
     "@react-pdf/renderer": "^2.0.21",
+    "axios": "^1.13.6",
     "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
     "compression": "^1.8.1",
