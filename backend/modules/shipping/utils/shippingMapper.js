@@ -51,7 +51,9 @@ export const mapOrderToProvider = (order, user, pickupLocation) => {
     shipping_is_billing: true,
     order_items: items.map((item) => ({
       name: item.name,
-      sku: item.productCode || `ASU-${item.product}`,
+      sku: item.productCode
+        ? `${item.productCode}${item.size ? `-${item.size}` : ''}`
+        : `ASU-${item.product}${item.size ? `-${item.size}` : ''}`,
       units: item.qty,
       selling_price: Number((item.price * (1 - (item.disc || 0) / 100)).toFixed(2)),
       discount: item.disc || 0,
