@@ -30,8 +30,9 @@ export const mapOrderToProvider = (order, user, pickupLocation) => {
     ? order.modifiedItems
     : order.orderItems;
 
+  // Round per-item discounted price before accumulating to avoid rounding drift
   const subTotal = items.reduce((acc, item) => {
-    const discountedPrice = item.price * (1 - (item.disc || 0) / 100);
+    const discountedPrice = Number((item.price * (1 - (item.disc || 0) / 100)).toFixed(2));
     return acc + discountedPrice * item.qty;
   }, 0);
 
@@ -56,7 +57,7 @@ export const mapOrderToProvider = (order, user, pickupLocation) => {
         : `ASU-${item.product}${item.size ? `-${item.size}` : ''}`,
       units: item.qty,
       selling_price: Number((item.price * (1 - (item.disc || 0) / 100)).toFixed(2)),
-      discount: item.disc || 0,
+      discount: 0,
       tax: item.tax || 0,
     })),
     payment_method: order.paymentMethod === 'COD' ? 'COD' : 'Prepaid',
