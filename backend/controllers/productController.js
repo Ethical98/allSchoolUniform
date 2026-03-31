@@ -142,6 +142,7 @@ const getProducts = asyncHandler(async (req, res) => {
           reviews: 1,
           numReviews: 1,
           displayOrder: 1,
+          outOfStock: 1,
         },
       },
     ];
@@ -174,7 +175,7 @@ const getProducts = asyncHandler(async (req, res) => {
       Product.countDocuments(matchStage),
       Product.find(matchStage)
         .select(
-          'name image brand size schoolName category season class isActive createdAt type reviews numReviews displayOrder'
+          'name image brand size schoolName category season class isActive createdAt type reviews numReviews displayOrder outOfStock'
         )
         .sort(sortBy)
         .limit(pageSize)
