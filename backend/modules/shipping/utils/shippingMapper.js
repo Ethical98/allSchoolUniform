@@ -61,7 +61,9 @@ export const mapOrderToProvider = (order, user, pickupLocation) => {
     })),
     payment_method: order.paymentMethod === 'COD' ? 'COD' : 'Prepaid',
     sub_total: Number(subTotal.toFixed(2)),
-    ...(order.paymentMethod === 'COD' && { cod_amount: order.totalPrice }),
+    ...(order.paymentMethod === 'COD' && {
+      cod_amount: Number((subTotal + (order.shippingPrice || 0)).toFixed(2)),
+    }),
     length: order.shipping?.dimensions?.length || Number(process.env.SHIPPING_DEFAULT_LENGTH) || 25,
     breadth: order.shipping?.dimensions?.breadth || Number(process.env.SHIPPING_DEFAULT_BREADTH) || 20,
     height: order.shipping?.dimensions?.height || Number(process.env.SHIPPING_DEFAULT_HEIGHT) || 10,

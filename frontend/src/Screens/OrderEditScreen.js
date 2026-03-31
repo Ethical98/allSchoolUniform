@@ -404,8 +404,11 @@ const OrderEditScreen = ({ history, match, location }) => {
         setItemsPrice(price);
 
         setDiscountPrice(discount);
-        if (price > Number(599)) {
+        const netPrice = price - discount;
+        if (netPrice >= 599) {
             setShippingPrice(0);
+        } else {
+            setShippingPrice(100);
         }
     }, [modifiedOrderItems]);
 
@@ -413,8 +416,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         if (order) {
             setTotalPrice(Number(itemsPrice - discountPrice + shippingPrice));
         }
-        // eslint-disable-next-line
-    }, [order, itemsPrice, discountPrice]);
+    }, [order, itemsPrice, discountPrice, shippingPrice]);
 
     const newSizeHandler = (newSizeValue, pId, sizes, name, image) => {
         setNewSize(newSizeValue);
@@ -491,8 +493,11 @@ const OrderEditScreen = ({ history, match, location }) => {
 
         setItemsPrice(price);
         setDiscountPrice(discount);
-        if (price > 599) {
+        const netPrice = price - discount;
+        if (netPrice >= 599) {
             setShippingPrice(0);
+        } else {
+            setShippingPrice(100);
         }
         setCountInStock(1);
         setShowEditModal(false);

@@ -335,8 +335,7 @@ const getOrders = asyncHandler(async (req, res) => {
 // @route PUT /api/orders/:id
 // @access Private/Admin
 const editOrderById = asyncHandler(async (req, res) => {
-  const { modifiedOrderItems, shippingAddress, itemsPrice, totalPrice } =
-    req.body;
+  const { modifiedOrderItems, shippingAddress } = req.body;
 
   const order = await Order.findById(req.params.id);
   if (order) {
@@ -344,14 +343,26 @@ const editOrderById = asyncHandler(async (req, res) => {
     order.name = user.name;
     order.shippingAddress = shippingAddress || order.shippingAddress;
 
-    order.totalPrice = totalPrice || order.totalPrice;
-
     if (modifiedOrderItems && modifiedOrderItems.length === 0) {
       order.modified = false;
     } else {
       order.modified = true;
       order.modifiedItems = [...modifiedOrderItems];
+
+      // Recalculate prices server-side from modified items
+      const calculatedItemsPrice = modifiedOrderItems.reduce((acc, item) => {
+        const discountedPrice = item.price * (1 - (item.disc || 0) / 100);
+        return acc + discountedPrice * item.qty;
+      }, 0);
+
+      const calculatedShippingPrice =
+        calculatedItemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE;
+      const calculatedTotalPrice = calculatedItemsPrice + calculatedShippingPrice;
+
+      order.shippingPrice = Math.round(calculatedShippingPrice * 100) / 100;
+      order.totalPrice = Math.round(calculatedTotalPrice * 100) / 100;
     }
+
     const updatedOrder = await order.save();
     res.status(200);
     res.json(updatedOrder);
