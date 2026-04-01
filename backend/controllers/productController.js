@@ -721,6 +721,68 @@ const getDisplayOrders = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc Bulk stock check for cart items
+// @route POST /api/products/check-stock
+// @access Public
+const checkStock = asyncHandler(async (req, res) => {
+  const { items } = req.body;
+
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    res.status(400);
+    throw new Error('Items array is required');
+  }
+
+  const productIds = [...new Set(items.map((i) => i.product))];
+  const products = await Product.find(
+    { _id: { $in: productIds } },
+    { name: 1, size: 1, isActive: 1, image: 1 }
+  ).lean();
+
+  const productMap = new Map();
+  products.forEach((p) => productMap.set(p._id.toString(), p));
+
+  const results = items.map((item) => {
+    const product = productMap.get(item.product);
+    if (!product || !product.isActive) {
+      return {
+        product: item.product,
+        sizeVariant: item.sizeVariant,
+        available: false,
+        countInStock: 0,
+        reason: !product ? 'Product not found' : 'Product unavailable',
+      };
+    }
+
+    const sizeVariant = product.size.find(
+      (s) => s._id.toString() === item.sizeVariant
+    );
+
+    if (!sizeVariant) {
+      return {
+        product: item.product,
+        sizeVariant: item.sizeVariant,
+        available: false,
+        countInStock: 0,
+        reason: 'Size not found',
+      };
+    }
+
+    const available =
+      !sizeVariant.outOfStock && sizeVariant.countInStock >= (item.qty || 1);
+
+    return {
+      product: item.product,
+      sizeVariant: item.sizeVariant,
+      available,
+      countInStock: sizeVariant.countInStock,
+      outOfStock: sizeVariant.outOfStock || false,
+      reason: available ? null : 'Insufficient stock',
+    };
+  });
+
+  res.json({ success: true, results });
+});
+
 export {
   getProducts,
   getProductById,
@@ -737,4 +799,5 @@ export {
   updateFeaturedProduct,
   getNewArrivals,
   getDisplayOrders,
+  checkStock,
 };

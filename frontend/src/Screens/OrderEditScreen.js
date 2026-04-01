@@ -774,6 +774,14 @@ const OrderEditScreen = ({ history, match, location }) => {
             <Link to="/admin/orderlist" className="btn btn-outline-dark my-3">
                 Go Back
             </Link>
+            {order?.tracking?.isDelivered && !order?.tracking?.isCanceled && (
+                <Link
+                    to={`/admin/returns/create/${order._id}`}
+                    className="btn btn-outline-primary my-3 ms-2"
+                >
+                    Create Return / Exchange
+                </Link>
+            )}
             <Container>
                 <h1>EDIT ORDER</h1>
                 <h5>ORDER ID:{orderNumber}</h5>

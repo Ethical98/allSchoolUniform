@@ -16,11 +16,8 @@ import {
 import StockMovement from '../modules/stock/models/StockMovementModel.js';
 import handleStockAlerts from '../modules/stock/utils/stockAlertHelper.js';
 import { updateInventoryBucket } from '../modules/stock/utils/inventoryCalc.js';
+import { validateAndBuildOrder } from '../utils/validateOrderStock.js';
 dotenv.config();
-
-// Constants for pricing rules
-const FREE_SHIPPING_THRESHOLD = 599;
-const SHIPPING_CHARGE = 100;
 
 // @desc Create new order
 // @route POST /api/orders
@@ -28,137 +25,32 @@ const SHIPPING_CHARGE = 100;
 const addOrderItems = asyncHandler(async (req, res) => {
   const { orderItems, shippingAddress, paymentMethod } = req.body;
 
-  // Validate order items exist
-  if (!orderItems || orderItems.length === 0) {
+  let validated;
+  try {
+    validated = await validateAndBuildOrder(orderItems);
+  } catch (error) {
     res.status(400);
-    throw new Error('No order items');
+    throw error;
   }
-
-  // Extract unique product IDs from order items
-  const productIds = [...new Set(orderItems.map((item) => item.product))];
-
-  // Fetch all products from database in one query
-  const products = await Product.find({ _id: { $in: productIds } }).lean();
-
-  // Create a map for quick product lookup
-  const productMap = new Map();
-  products.forEach((product) => {
-    productMap.set(product._id.toString(), product);
-  });
-
-  // Validate and recalculate prices for each order item
-  const validatedOrderItems = [];
-  let calculatedItemsPrice = 0;
-
-  for (const item of orderItems) {
-    const product = productMap.get(item.product);
-
-    if (!product) {
-      res.status(400);
-      throw new Error(`Product not found: ${item.product}`);
-    }
-
-    // Check if product is active
-    if (!product.isActive) {
-      res.status(400);
-      throw new Error(`Product is not available: ${product.name}`);
-    }
-
-    // Find the size variant - try by sizeVariant ID first, then by size string
-    let sizeVariant = null;
-
-    // Method 1: Match by sizeVariant ID (most precise)
-    if (item.sizeVariant) {
-      sizeVariant = product.size.find(
-        (s) => s._id.toString() === item.sizeVariant
-      );
-    }
-
-    // Method 2: Fallback to size string match
-    if (!sizeVariant && item.size) {
-      sizeVariant = product.size.find(
-        (s) => s.size.toLowerCase() === item.size.toLowerCase()
-      );
-    }
-
-    if (!sizeVariant) {
-      res.status(400);
-      throw new Error(
-        `Size "${item.size}" not found for product: ${product.name}`
-      );
-    }
-
-    // Check if size is out of stock
-    if (sizeVariant.outOfStock || sizeVariant.countInStock < item.qty) {
-      res.status(400);
-      throw new Error(
-        `Insufficient stock for ${product.name} (Size: ${item.size})`
-      );
-    }
-
-    // Get the actual price from database (MRP)
-    const actualPrice = sizeVariant.price;
-    const discountPercentage = sizeVariant.discount || 0;
-
-    // Calculate the discounted price (actual price customer pays)
-    const discountedPrice = discountPercentage > 0
-      ? actualPrice * (1 - discountPercentage / 100)
-      : actualPrice;
-
-    // Calculate item total using discounted price
-    const itemTotal = discountedPrice * item.qty;
-    calculatedItemsPrice += itemTotal;
-
-    // Build validated order item with server-verified data
-    validatedOrderItems.push({
-      name: product.name,
-      qty: item.qty,
-      image: normalizeUrl(product.image),
-      price: actualPrice, // Price from DB, not client
-      size: sizeVariant.size, // Use DB size string for consistency
-      sizeVariant: sizeVariant._id.toString(),
-      product: item.product,
-      schoolName: item.schoolName || product.schoolName?.[0] || '',
-      disc: sizeVariant.discount || 0, // Discount percentage for reference
-      tax: sizeVariant.tax || 0, // Tax information
-    });
-  }
-
-  // Calculate shipping (free above threshold)
-  const calculatedShippingPrice =
-    calculatedItemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE;
-
-  // Calculate tax (currently 0, can be configured)
-  const calculatedTaxPrice = 0;
-
-  // Calculate total
-  const calculatedTotalPrice =
-    calculatedItemsPrice + calculatedShippingPrice + calculatedTaxPrice;
-
-  // Round all prices to 2 decimal places (consistent with frontend)
-  const roundedItemsPrice = Math.round(calculatedItemsPrice * 100) / 100;
-  const roundedTaxPrice = Math.round(calculatedTaxPrice * 100) / 100;
-  const roundedShippingPrice = Math.round(calculatedShippingPrice * 100) / 100;
-  const roundedTotalPrice = Math.round(calculatedTotalPrice * 100) / 100;
 
   // Create the order with server-calculated prices
   const order = new Order({
-    orderItems: validatedOrderItems,
+    orderItems: validated.validatedOrderItems,
     user: req.user._id,
     name: req.user.name,
     phone: req.user.phone,
     shippingAddress,
     paymentMethod,
-    itemsPrice: roundedItemsPrice,
-    taxPrice: roundedTaxPrice,
-    shippingPrice: roundedShippingPrice,
-    totalPrice: roundedTotalPrice,
+    itemsPrice: validated.itemsPrice,
+    taxPrice: validated.taxPrice,
+    shippingPrice: validated.shippingPrice,
+    totalPrice: validated.totalPrice,
     orderStatus: `Received: ${Date.now()}`,
   });
 
   const createdOrder = await order.save();
 
-  // // Send order confirmation email asynchronously (don't block response)
+  // Send order confirmation email asynchronously (don't block response)
   sendOrderConfirmationEmail(createdOrder, req.user).catch(error => {
     console.error('Email sending failed (non-blocking):', error.message);
   });

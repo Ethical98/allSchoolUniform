@@ -1,0 +1,119 @@
+{{> header}}
+
+                    <!-- Refund Initiated Icon & Message -->
+                    <tr>
+                        <td style="padding: 40px 20px 30px; text-align: center;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 20px;">
+                                <tr>
+                                    <td style="width: 70px; height: 70px; background-color: #10b981; border-radius: 50%; text-align: center; vertical-align: middle;">
+                                        <img src="https://img.icons8.com/ios-filled/36/ffffff/refund-2.png" alt="Refund" style="width: 36px; height: 36px;">
+                                    </td>
+                                </tr>
+                            </table>
+                            <h2 style="margin: 0 0 10px; color: #111827; font-size: 22px; font-weight: 600;">Refund Initiated</h2>
+                            <p style="margin: 0; color: #6b7280; font-size: 15px; line-height: 1.5;">Hi {{customerName}}, we've initiated your refund. Here are the details.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Return Details -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Return ID</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{returnId}}</strong>
+                                                </td>
+                                                <td align="right" style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Order Number</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{orderId}}</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Items -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <h3 style="margin: 0 0 15px; color: #111827; font-size: 15px; font-weight: 600;">Refund Items ({{itemCount}})</h3>
+                            {{itemsHtml}}
+                        </td>
+                    </tr>
+
+                    <!-- Refund Breakdown -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <h3 style="margin: 0 0 15px; color: #111827; font-size: 15px; font-weight: 600;">Refund Breakdown</h3>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td>
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Items Refund</td>
+                                                <td align="right" style="padding: 8px 0; color: #111827; font-size: 14px;">{{refundAmount}}</td>
+                                            </tr>
+                                            {{#if shippingRefundAmount}}
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Shipping Refund</td>
+                                                <td align="right" style="padding: 8px 0; color: #111827; font-size: 14px;">{{shippingRefundAmount}}</td>
+                                            </tr>
+                                            {{/if}}
+                                            <tr>
+                                                <td colspan="2" style="border-top: 2px solid #e5e7eb; padding-top: 12px; margin-top: 8px;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #111827; font-size: 16px; font-weight: 700;">Total Refund</td>
+                                                <td align="right" style="padding: 8px 0; color: #10b981; font-size: 16px; font-weight: 700;">{{totalRefund}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Credit Note -->
+                    {{#if creditNoteNumber}}
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 16px 20px; text-align: center;">
+                                        <span style="color: #6b7280; font-size: 12px; display: block; margin-bottom: 4px;">Credit Note Number</span>
+                                        <strong style="color: #2563eb; font-size: 15px;">{{creditNoteNumber}}</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {{/if}}
+
+                    <!-- Timeline Info -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 16px 20px;">
+                                        <h3 style="margin: 0 0 8px; color: #92400e; font-size: 14px; font-weight: 600;">Refund Timeline</h3>
+                                        <p style="margin: 0; color: #78350f; font-size: 13px; line-height: 1.6;">The refund will be credited to your original payment method within 5-7 business days. Bank processing times may vary.</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- CTA -->
+                    <tr>
+                        <td style="padding: 0 20px 40px;" align="center" class="email-padding">
+                            <a href="{{frontendUrl}}" class="cta-button" style="display: inline-block; width: 100%; max-width: 280px; padding: 14px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; text-align: center; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25); box-sizing: border-box;">View Order Details</a>
+                        </td>
+                    </tr>
+
+{{> footer}}

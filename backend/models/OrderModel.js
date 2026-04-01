@@ -123,6 +123,19 @@ const orderSchema = mongoose.Schema(
     invoiceNumber: {
       type: String,
     },
+    // Return tracking
+    hasReturns: { type: Boolean, default: false },
+    totalRefundedSoFar: { type: Number, default: 0 },
+    // Exchange/Replacement order fields
+    isExchangeOrder: { type: Boolean, default: false },
+    originalOrderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Order',
+    },
+    linkedReturnRequest: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ReturnRequest',
+    },
     orderStatus: {
       type: String,
       required: true,

@@ -24,6 +24,7 @@ import stockRoutes from './modules/stock/routes/stockRoutes.js';
 import billingRoutes from './modules/billing/routes/billingRoutes.js';
 import shippingRoutes from './modules/shipping/routes/shippingRoutes.js';
 import shippingWebhookRoutes from './modules/shipping/routes/webhookRoutes.js';
+import returnRoutes from './modules/returns/routes/returnRoutes.js';
 
 dotenv.config();
 
@@ -91,6 +92,7 @@ app.use('/api/requests', notFoundRequestRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/stock', stockRoutes);
 app.use('/api/billing', billingRoutes);
+app.use('/api/returns', returnRoutes);
 app.use('/api/shipping/webhook', shippingWebhookRoutes); // Webhook before auth — uses secret verification
 app.use('/api/shipping', shippingRoutes);
 

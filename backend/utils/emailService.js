@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 /**
  * Format price to Indian currency format
  */
-const formatPrice = (amount) => {
+export const formatPrice = (amount) => {
   return new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 0,
   }).format(Math.round(amount));
@@ -21,7 +21,7 @@ const formatPrice = (amount) => {
 /**
  * Format date to readable format
  */
-const formatDate = (date) => {
+export const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-IN', {
     year: 'numeric',
     month: 'long',
@@ -283,7 +283,7 @@ export const sendOrderConfirmationEmail = async (order, user) => {
 /**
  * Helper function to send email via Gmail API
  */
-const sendEmailViaGmailAPI = async (toEmail, subject, htmlContent) => {
+export const sendEmailViaGmailAPI = async (toEmail, subject, htmlContent) => {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GMAIL_CLIENT_ID,
     process.env.GMAIL_CLIENT_SECRET
@@ -324,7 +324,7 @@ const sendEmailViaGmailAPI = async (toEmail, subject, htmlContent) => {
 /**
  * Process template with data and inject partials
  */
-const processTemplate = async (templateName, data) => {
+export const processTemplate = async (templateName, data) => {
   const templatePath = path.join(__dirname, `../templates/${templateName}`);
   let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
 

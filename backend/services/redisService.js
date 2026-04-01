@@ -182,6 +182,36 @@ export const RedisService = {
     },
 };
 
+// ── Generic distributed lock helpers ──────────────────────────────────────
+/**
+ * Acquire a distributed lock using Redis SETNX.
+ * @param {string} key - Lock key (e.g. 'return:lock:orderId')
+ * @param {number} ttlSeconds - Auto-expire time in seconds (default 30)
+ * @returns {Promise<boolean>} true if lock acquired, false if already held
+ */
+export const acquireLock = async (key, ttlSeconds = 30) => {
+    try {
+        const result = await redis.set(key, '1', 'EX', ttlSeconds, 'NX');
+        return result === 'OK';
+    } catch (error) {
+        console.error(`[Redis] Lock acquire failed for ${key}:`, error.message);
+        // Fail open — allow the operation to proceed if Redis is down
+        return true;
+    }
+};
+
+/**
+ * Release a distributed lock.
+ * @param {string} key - Lock key
+ */
+export const releaseLock = async (key) => {
+    try {
+        await redis.del(key);
+    } catch (error) {
+        console.error(`[Redis] Lock release failed for ${key}:`, error.message);
+    }
+};
+
 // Export the raw redis client for advanced use cases (if needed)
 export { redis };
 

@@ -36,6 +36,14 @@ const NAV_CONFIG = [
         ]
     },
     {
+        label: 'Returns',
+        icon: 'fas fa-undo-alt',
+        basePath: '/admin/returns',
+        children: [
+            { label: 'All Returns', path: '/admin/returns' },
+        ]
+    },
+    {
         label: 'Shipping',
         icon: 'fas fa-shipping-fast',
         basePath: '/admin/shipping',

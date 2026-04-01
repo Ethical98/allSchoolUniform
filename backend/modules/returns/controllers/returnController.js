@@ -1,0 +1,878 @@
+import asyncHandler from 'express-async-handler';
+import ReturnRequest from '../models/ReturnRequestModel.js';
+import Order from '../../../models/OrderModel.js';
+import User from '../../../models/UserModel.js';
+import Product from '../../../models/ProductModel.js';
+import { validateTransition, getNextStatuses } from '../utils/returnStateMachine.js';
+import {
+  validateOrderEligibility,
+  validateReturnWindow,
+  checkOverReturn,
+  validateQCCompleteness,
+  validateRefundTotal,
+  shouldRefundShipping,
+} from '../utils/returnValidation.js';
+import { processQCDispositions } from '../utils/returnStockHandler.js';
+import { generateReturnCreditNote } from '../utils/returnCreditNoteHelper.js';
+import { mapReturnToShiprocketPayload } from '../utils/returnShippingMapper.js';
+import { sendReturnEmail } from '../utils/returnEmailHelper.js';
+import { shippingApi } from '../../shipping/utils/shippingClient.js';
+import { acquireLock, releaseLock } from '../../../services/redisService.js';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Create a new return/exchange/replacement request
+// @route   POST /api/returns
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const createReturnRequest = asyncHandler(async (req, res) => {
+  const {
+    orderId,
+    type,
+    reason,
+    reasonDetails,
+    items,
+    pickupAddress,
+    overrideReturnWindow,
+  } = req.body;
+
+  // Validate input
+  if (!orderId || !type || !reason || !items || items.length === 0) {
+    res.status(400);
+    throw new Error('orderId, type, reason, and items are required');
+  }
+
+  // Acquire distributed lock to prevent concurrent returns on same order
+  const lockKey = `return:lock:${orderId}`;
+  const lockAcquired = await acquireLock(lockKey, 30);
+  if (!lockAcquired) {
+    res.status(409);
+    throw new Error('Another return is being created for this order. Please try again.');
+  }
+
+  try {
+    const order = await Order.findById(orderId);
+
+    // Validate order eligibility
+    validateOrderEligibility(order);
+
+    // Validate 7-day return window
+    const windowInfo = validateReturnWindow(order, overrideReturnWindow);
+
+    // Validate over-return
+    await checkOverReturn(orderId, items, order.orderItems);
+
+    // Fetch user for denormalization
+    const user = await User.findById(order.user);
+
+    // Build return items from order items
+    const returnItems = items.map((reqItem) => {
+      const orderItem = order.orderItems.find(
+        (oi) =>
+          oi.product.toString() === reqItem.product.toString() &&
+          oi.size === reqItem.size
+      );
+
+      const discountedPrice =
+        orderItem.price * (1 - (orderItem.disc || 0) / 100);
+      const refundAmount = discountedPrice * reqItem.returnQty;
+
+      return {
+        product: orderItem.product,
+        productName: orderItem.name,
+        SKU: orderItem.productCode || '',
+        size: orderItem.size,
+        image: orderItem.image,
+        originalQty: orderItem.qty,
+        returnQty: reqItem.returnQty,
+        price: orderItem.price,
+        disc: orderItem.disc || 0,
+        tax: orderItem.tax || 0,
+        refundAmount: Number(refundAmount.toFixed(2)),
+        // Exchange fields (only for EXCHANGE type)
+        ...(type === 'EXCHANGE' && reqItem.exchangeProduct
+          ? {
+              exchangeProduct: reqItem.exchangeProduct,
+              exchangeProductName: reqItem.exchangeProductName,
+              exchangeSize: reqItem.exchangeSize,
+              exchangeUnitPrice: reqItem.exchangeUnitPrice,
+            }
+          : {}),
+      };
+    });
+
+    // Calculate totals
+    const totalRefundAmount = returnItems.reduce(
+      (sum, item) => sum + item.refundAmount,
+      0
+    );
+
+    // Calculate price difference for exchanges
+    // Uses actual discounted price from product DB, not raw MRP from frontend
+    let priceDifference = 0;
+    if (type === 'EXCHANGE') {
+      let exchangeTotal = 0;
+      for (const item of returnItems) {
+        if (item.exchangeProduct) {
+          const exProduct = await Product.findById(item.exchangeProduct);
+          const exVariant = exProduct?.size?.find(
+            (s) => s.size === item.exchangeSize
+          );
+          const exPrice = exVariant?.price || item.exchangeUnitPrice || 0;
+          const exDisc = exVariant?.discount || 0;
+          const exDiscountedPrice = exPrice * (1 - exDisc / 100);
+          exchangeTotal += exDiscountedPrice * item.returnQty;
+
+          // Store the actual MRP on the return item (for exchange order creation later)
+          item.exchangeUnitPrice = exPrice;
+        }
+      }
+      priceDifference = Number(
+        (exchangeTotal - totalRefundAmount).toFixed(2)
+      );
+    }
+
+    // Determine shipping refund
+    const refundShipping = await shouldRefundShipping(order, reason);
+    const shippingRefundAmount = refundShipping
+      ? order.shippingPrice || 0
+      : 0;
+
+    // Build pickup address (default from order shipping address)
+    const resolvedPickupAddress = pickupAddress || {
+      address: order.shippingAddress?.address,
+      city: order.shippingAddress?.city,
+      state: order.shippingAddress?.state,
+      postalCode: order.shippingAddress?.postalCode,
+      country: order.shippingAddress?.country || 'India',
+    };
+
+    // Build timeline entry
+    const timelineEntry = {
+      action: 'CREATED',
+      toStatus: 'INITIATED',
+      note: `${type} request created. Reason: ${reason}${overrideReturnWindow ? ' (Return window overridden by admin)' : ''}`,
+      performedBy: req.user._id,
+      performedByName: req.user.name,
+    };
+
+    // Create the return request
+    const returnRequest = await ReturnRequest.create({
+      type,
+      status: 'INITIATED',
+      order: order._id,
+      orderId: order.orderId,
+      invoiceNumber: order.invoiceNumber || '',
+      customer: order.user,
+      customerName: user?.name || order.name,
+      customerEmail: user?.email || '',
+      customerPhone: order.phone || user?.phone || '',
+      items: returnItems,
+      reason,
+      reasonDetails,
+      pickupAddress: resolvedPickupAddress,
+      refundAmount: Number(totalRefundAmount.toFixed(2)),
+      shippingRefundAmount,
+      priceDifference,
+      billType: order.billType || 'CGST',
+      overrideReturnWindow: overrideReturnWindow || false,
+      timeline: [timelineEntry],
+      createdBy: req.user._id,
+      createdByName: req.user.name,
+    });
+
+    // Mark order as having returns
+    order.hasReturns = true;
+    await order.save();
+
+    // Send email (non-blocking)
+    sendReturnEmail(returnRequest, 'INITIATED').catch((err) => {
+      console.error('Return initiated email failed (non-blocking):', err.message);
+    });
+
+    res.status(201).json({
+      returnRequest,
+      returnWindowExpiresAt: windowInfo.returnWindowExpiresAt,
+      daysRemaining: windowInfo.daysRemaining,
+    });
+  } finally {
+    await releaseLock(lockKey);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Get all return requests (paginated, filterable)
+// @route   GET /api/returns
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const getReturnRequests = asyncHandler(async (req, res) => {
+  const pageSize = 20;
+  const page = Number(req.query.page) || 1;
+
+  const filter = {};
+
+  if (req.query.status) filter.status = req.query.status;
+  if (req.query.type) filter.type = req.query.type;
+  if (req.query.keyword) {
+    filter.$or = [
+      { returnId: { $regex: req.query.keyword, $options: 'i' } },
+      { orderId: { $regex: req.query.keyword, $options: 'i' } },
+      { customerName: { $regex: req.query.keyword, $options: 'i' } },
+    ];
+  }
+  if (req.query.fromDate || req.query.toDate) {
+    filter.createdAt = {};
+    if (req.query.fromDate) filter.createdAt.$gte = new Date(req.query.fromDate);
+    if (req.query.toDate) filter.createdAt.$lte = new Date(req.query.toDate);
+  }
+
+  const count = await ReturnRequest.countDocuments(filter);
+  const returns = await ReturnRequest.find(filter)
+    .sort({ createdAt: -1 })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1))
+    .lean();
+
+  res.json({
+    returns,
+    page,
+    pages: Math.ceil(count / pageSize),
+    total: count,
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Get returns dashboard stats
+// @route   GET /api/returns/dashboard
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const getReturnsDashboard = asyncHandler(async (req, res) => {
+  const [total, pendingApproval, pendingQC, pendingRefund, exchanges] =
+    await Promise.all([
+      ReturnRequest.countDocuments({}),
+      ReturnRequest.countDocuments({ status: 'INITIATED' }),
+      ReturnRequest.countDocuments({
+        status: { $in: ['RECEIVED', 'QC_IN_PROGRESS'] },
+      }),
+      ReturnRequest.countDocuments({ status: 'REFUND_INITIATED' }),
+      ReturnRequest.countDocuments({
+        type: 'EXCHANGE',
+        status: { $nin: ['COMPLETED', 'REJECTED', 'CANCELLED'] },
+      }),
+    ]);
+
+  res.json({ total, pendingApproval, pendingQC, pendingRefund, exchanges });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Get all returns for a specific order
+// @route   GET /api/returns/order/:orderId
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const getReturnsByOrder = asyncHandler(async (req, res) => {
+  const returns = await ReturnRequest.find({ order: req.params.orderId })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  res.json(returns);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Get a single return request by ID
+// @route   GET /api/returns/:id
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const getReturnRequestById = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  // Include available next statuses for the UI
+  const nextStatuses = getNextStatuses(
+    returnRequest.status,
+    returnRequest.type
+  );
+
+  res.json({ returnRequest, nextStatuses });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Update return status (state machine enforced)
+// @route   PATCH /api/returns/:id/status
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const updateReturnStatus = asyncHandler(async (req, res) => {
+  const { status, note } = req.body;
+
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  // Validate transition
+  validateTransition(returnRequest.status, status, returnRequest.type);
+
+  const previousStatus = returnRequest.status;
+
+  // ── Status-specific side effects ─────────────────────────────────────
+  switch (status) {
+    case 'PICKUP_SCHEDULED': {
+      // Create return order on Shiprocket
+      const user = await User.findById(returnRequest.customer);
+      const originalOrder = await Order.findById(returnRequest.order);
+      const payload = mapReturnToShiprocketPayload(
+        returnRequest,
+        originalOrder,
+        user
+      );
+
+      // Override weight/dimensions from admin input
+      if (req.body.weight) payload.weight = req.body.weight;
+      if (req.body.dimensions) {
+        payload.length = req.body.dimensions.length || payload.length;
+        payload.breadth = req.body.dimensions.breadth || payload.breadth;
+        payload.height = req.body.dimensions.height || payload.height;
+      }
+
+      const srData = await shippingApi('post', '/orders/create/return', {
+        data: payload,
+        action: 'CREATE_RETURN_ORDER',
+        orderId: returnRequest.order,
+        asuOrderId: returnRequest.orderId,
+      });
+
+      returnRequest.reverseShipping = {
+        ...returnRequest.reverseShipping?.toObject?.() || {},
+        provider: 'shiprocket',
+        providerOrderId: srData.order_id,
+        providerShipmentId: srData.shipment_id,
+        awbCode: srData.awb_code || '',
+        courierName: srData.courier_name || '',
+        pickupScheduledDate: new Date(),
+      };
+      break;
+    }
+
+    case 'RECEIVED':
+      returnRequest.reverseShipping = {
+        ...returnRequest.reverseShipping?.toObject?.() || {},
+        receivedAt: new Date(),
+      };
+      break;
+
+    case 'QC_COMPLETED': {
+      // Validate all items have QC disposition set
+      validateQCCompleteness(returnRequest.items);
+
+      // Process stock movements
+      const qcResults = await processQCDispositions(returnRequest, req.user);
+
+      // Add QC summary to timeline note
+      const qcSummary = qcResults.results
+        .map((r) => `${r.size}: ${r.disposition} (${r.action})`)
+        .join(', ');
+      returnRequest.timeline.push({
+        action: 'QC_RESULTS',
+        note: `QC completed: ${qcSummary}`,
+        performedBy: req.user._id,
+        performedByName: req.user.name,
+      });
+      break;
+    }
+
+    case 'REFUND_INITIATED': {
+      // Recalculate effective refund — exclude NOT_RECEIVED items
+      const effectiveRefund = returnRequest.items.reduce((sum, item) => {
+        if (item.qcDisposition === 'NOT_RECEIVED') return sum;
+        return sum + (item.refundAmount || 0);
+      }, 0);
+      returnRequest.refundAmount = Number(effectiveRefund.toFixed(2));
+
+      // Auto-generate credit note if not yet created
+      if (!returnRequest.creditNote) {
+        const creditNote = await generateReturnCreditNote(
+          returnRequest,
+          req.user
+        );
+
+        returnRequest.timeline.push({
+          action: 'CREDIT_NOTE_GENERATED',
+          note: `Credit note ${creditNote.documentNumber} generated. Effective refund: ₹${returnRequest.refundAmount}`,
+          performedBy: req.user._id,
+          performedByName: req.user.name,
+        });
+      }
+
+      // Update order's totalRefundedSoFar
+      const order = await Order.findById(returnRequest.order);
+      const totalRefund =
+        returnRequest.refundAmount + returnRequest.shippingRefundAmount;
+      validateRefundTotal(order, totalRefund);
+      order.totalRefundedSoFar =
+        (order.totalRefundedSoFar || 0) + totalRefund;
+      await order.save();
+      break;
+    }
+
+    case 'EXCHANGE_SHIPPED': {
+      if (!returnRequest.exchangeOrderId) {
+        res.status(400);
+        throw new Error(
+          'Exchange order must be created before marking as shipped'
+        );
+      }
+      if (
+        returnRequest.priceDifference > 0 &&
+        !returnRequest.priceDifferenceCollected
+      ) {
+        res.status(400);
+        throw new Error(
+          `Price difference of ${returnRequest.priceDifference} must be collected before shipping exchange`
+        );
+      }
+      break;
+    }
+
+    case 'REPLACEMENT_SHIPPED': {
+      if (!returnRequest.exchangeOrderId) {
+        res.status(400);
+        throw new Error(
+          'Replacement order must be created before marking as shipped'
+        );
+      }
+      break;
+    }
+
+    case 'COMPLETED':
+      if (returnRequest.type === 'RETURN') {
+        returnRequest.refundProcessedAt = new Date();
+      }
+      break;
+
+    case 'CANCELLED': {
+      // Cascade: cancel linked exchange order if not yet shipped
+      if (returnRequest.exchangeOrderId) {
+        const exchangeOrder = await Order.findById(
+          returnRequest.exchangeOrderId
+        );
+        if (exchangeOrder) {
+          if (
+            exchangeOrder.tracking?.isOutForDelivery ||
+            exchangeOrder.tracking?.isDelivered ||
+            exchangeOrder.shipping?.isShipped
+          ) {
+            res.status(400);
+            throw new Error(
+              'Cannot cancel return — exchange order is already shipped/delivered'
+            );
+          }
+          exchangeOrder.tracking = {
+            ...exchangeOrder.tracking?.toObject?.() || {},
+            isCanceled: true,
+            canceledAt: new Date(),
+          };
+          await exchangeOrder.save();
+
+          returnRequest.timeline.push({
+            action: 'EXCHANGE_ORDER_CANCELLED',
+            note: `Linked exchange order ${exchangeOrder.orderId} cancelled`,
+            performedBy: req.user._id,
+            performedByName: req.user.name,
+          });
+        }
+      }
+      break;
+    }
+  }
+
+  // Update status
+  returnRequest.status = status;
+
+  // Push timeline entry
+  returnRequest.timeline.push({
+    action: 'STATUS_CHANGE',
+    fromStatus: previousStatus,
+    toStatus: status,
+    note: note || '',
+    performedBy: req.user._id,
+    performedByName: req.user.name,
+  });
+
+  await returnRequest.save();
+
+  // Send email (non-blocking)
+  sendReturnEmail(returnRequest, status).catch((err) => {
+    console.error(`Return ${status} email failed (non-blocking):`, err.message);
+  });
+
+  res.json({
+    returnRequest,
+    nextStatuses: getNextStatuses(returnRequest.status, returnRequest.type),
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Update QC dispositions for return items
+// @route   PATCH /api/returns/:id/qc
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const updateQCDisposition = asyncHandler(async (req, res) => {
+  const { items } = req.body; // [{ itemId, disposition, notes }]
+
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  if (returnRequest.status !== 'QC_IN_PROGRESS') {
+    res.status(400);
+    throw new Error(
+      `QC can only be updated when status is QC_IN_PROGRESS (current: ${returnRequest.status})`
+    );
+  }
+
+  const validDispositions = ['GOOD', 'DAMAGED', 'UNSELLABLE', 'NOT_RECEIVED'];
+
+  for (const qcItem of items) {
+    if (!validDispositions.includes(qcItem.disposition)) {
+      res.status(400);
+      throw new Error(
+        `Invalid disposition "${qcItem.disposition}". Valid: ${validDispositions.join(', ')}`
+      );
+    }
+
+    const returnItem = returnRequest.items.id(qcItem.itemId);
+    if (!returnItem) {
+      res.status(400);
+      throw new Error(`Return item with id ${qcItem.itemId} not found`);
+    }
+
+    returnItem.qcDisposition = qcItem.disposition;
+    if (qcItem.notes) returnItem.qcNotes = qcItem.notes;
+  }
+
+  returnRequest.timeline.push({
+    action: 'QC_UPDATE',
+    note: `QC dispositions updated for ${items.length} item(s)`,
+    performedBy: req.user._id,
+    performedByName: req.user.name,
+  });
+
+  await returnRequest.save();
+
+  res.json(returnRequest);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Generate credit note for a return
+// @route   POST /api/returns/:id/credit-note
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const generateCreditNote = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  const creditNote = await generateReturnCreditNote(returnRequest, req.user);
+
+  returnRequest.timeline.push({
+    action: 'CREDIT_NOTE_GENERATED',
+    note: `Credit note ${creditNote.documentNumber} generated manually`,
+    performedBy: req.user._id,
+    performedByName: req.user.name,
+  });
+  await returnRequest.save();
+
+  res.status(201).json({ creditNote, returnRequest });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Create exchange/replacement order from return
+// @route   POST /api/returns/:id/exchange-order
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const createExchangeOrder = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  if (returnRequest.exchangeOrderId) {
+    res.status(400);
+    throw new Error(
+      `Exchange order already created: ${returnRequest.exchangeOrderNumber}`
+    );
+  }
+
+  if (!['EXCHANGE', 'REPLACEMENT'].includes(returnRequest.type)) {
+    res.status(400);
+    throw new Error('Exchange orders can only be created for EXCHANGE or REPLACEMENT returns');
+  }
+
+  const originalOrder = await Order.findById(returnRequest.order);
+  if (!originalOrder) {
+    res.status(404);
+    throw new Error('Original order not found');
+  }
+
+  // Build new order items
+  const newOrderItems = [];
+  for (const item of returnRequest.items) {
+    if (returnRequest.type === 'REPLACEMENT') {
+      // Same product/size for replacement
+      newOrderItems.push({
+        name: item.productName,
+        qty: item.returnQty,
+        image: item.image,
+        price: item.price,
+        size: item.size,
+        product: item.product,
+        tax: item.tax,
+        disc: item.disc,
+      });
+    } else if (returnRequest.type === 'EXCHANGE' && item.exchangeProduct) {
+      // Exchange product
+      const exchangeProduct = await Product.findById(item.exchangeProduct);
+      if (!exchangeProduct || !exchangeProduct.isActive) {
+        res.status(400);
+        throw new Error(
+          `Exchange product "${item.exchangeProductName}" is not available. Consider refund instead.`
+        );
+      }
+
+      const variant = exchangeProduct.size.find(
+        (s) => s.size === item.exchangeSize
+      );
+      if (!variant || variant.countInStock < item.returnQty) {
+        res.status(400);
+        throw new Error(
+          `Exchange product "${item.exchangeProductName}" (${item.exchangeSize}) is out of stock. Available: ${variant?.countInStock || 0}`
+        );
+      }
+
+      newOrderItems.push({
+        name: exchangeProduct.name,
+        qty: item.returnQty,
+        image: exchangeProduct.image,
+        price: item.exchangeUnitPrice || variant.price,
+        size: item.exchangeSize,
+        product: item.exchangeProduct,
+        tax: variant.tax || 0,
+        disc: variant.discount || 0,
+        productCode: exchangeProduct.SKU || '',
+      });
+    }
+  }
+
+  if (newOrderItems.length === 0) {
+    res.status(400);
+    throw new Error('No items to create exchange order with');
+  }
+
+  // Calculate exchange order totals
+  const totalPrice = newOrderItems.reduce((sum, item) => {
+    return sum + item.price * (1 - (item.disc || 0) / 100) * item.qty;
+  }, 0);
+
+  const taxPrice = newOrderItems.reduce((sum, item) => {
+    const discountedPrice = item.price * (1 - (item.disc || 0) / 100);
+    const taxableAmount = discountedPrice / (1 + (item.tax || 0) / 100);
+    return sum + (discountedPrice - taxableAmount) * item.qty;
+  }, 0);
+
+  // Create the exchange order
+  const exchangeOrder = await Order.create({
+    user: originalOrder.user,
+    name: originalOrder.name,
+    orderItems: newOrderItems,
+    shippingAddress: originalOrder.shippingAddress,
+    paymentMethod:
+      returnRequest.type === 'REPLACEMENT' ? 'Replacement' : 'Exchange',
+    phone: originalOrder.phone,
+    taxPrice: Number(taxPrice.toFixed(2)),
+    shippingPrice: 0,
+    totalPrice: Number(totalPrice.toFixed(2)),
+    isPaid: true,
+    paidAt: new Date(),
+    billType: originalOrder.billType || 'CGST',
+    tracking: {
+      isConfirmed: true,
+      confirmedAt: new Date(),
+    },
+    // Return/exchange chain fields
+    isExchangeOrder: true,
+    originalOrderId: originalOrder._id,
+    linkedReturnRequest: returnRequest._id,
+  });
+
+  // Update return request
+  returnRequest.exchangeOrderId = exchangeOrder._id;
+  returnRequest.exchangeOrderNumber = exchangeOrder.orderId;
+
+  returnRequest.timeline.push({
+    action: 'EXCHANGE_ORDER_CREATED',
+    note: `${returnRequest.type} order ${exchangeOrder.orderId} created`,
+    performedBy: req.user._id,
+    performedByName: req.user.name,
+  });
+
+  await returnRequest.save();
+
+  res.status(201).json({ exchangeOrder, returnRequest });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Process/record refund details
+// @route   PATCH /api/returns/:id/refund
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const processRefund = asyncHandler(async (req, res) => {
+  const {
+    refundMethod,
+    refundTransactionId,
+    refundBankDetails,
+    refundUpiId,
+    priceDifferenceCollected,
+  } = req.body;
+
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  if (refundMethod) returnRequest.refundMethod = refundMethod;
+  if (refundTransactionId)
+    returnRequest.refundTransactionId = refundTransactionId;
+  if (refundBankDetails) returnRequest.refundBankDetails = refundBankDetails;
+  if (refundUpiId) returnRequest.refundUpiId = refundUpiId;
+  if (priceDifferenceCollected !== undefined)
+    returnRequest.priceDifferenceCollected = priceDifferenceCollected;
+
+  returnRequest.timeline.push({
+    action: 'REFUND_DETAILS_UPDATED',
+    note: `Refund details updated: ${refundMethod || 'method unchanged'}${refundTransactionId ? ', txn: ' + refundTransactionId : ''}${priceDifferenceCollected ? ', price difference collected' : ''}`,
+    performedBy: req.user._id,
+    performedByName: req.user.name,
+  });
+
+  await returnRequest.save();
+
+  res.json(returnRequest);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Add admin note to timeline
+// @route   POST /api/returns/:id/notes
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const addAdminNote = asyncHandler(async (req, res) => {
+  const { note } = req.body;
+
+  if (!note || !note.trim()) {
+    res.status(400);
+    throw new Error('Note text is required');
+  }
+
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  returnRequest.timeline.push({
+    action: 'ADMIN_NOTE',
+    note: note.trim(),
+    performedBy: req.user._id,
+    performedByName: req.user.name,
+  });
+
+  await returnRequest.save();
+
+  res.json(returnRequest);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Assign courier for reverse pickup
+// @route   POST /api/returns/:id/assign-courier
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const assignReturnCourier = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  if (!returnRequest.reverseShipping?.providerShipmentId) {
+    res.status(400);
+    throw new Error('No Shiprocket shipment exists for this return');
+  }
+
+  if (!req.body.courierId) {
+    res.status(400);
+    throw new Error('courierId is required');
+  }
+
+  const data = await shippingApi('post', '/courier/assign/awb', {
+    data: {
+      shipment_id: returnRequest.reverseShipping.providerShipmentId,
+      courier_id: req.body.courierId,
+    },
+    action: 'ASSIGN_AWB',
+    orderId: returnRequest.order,
+    asuOrderId: returnRequest.orderId,
+  });
+
+  returnRequest.reverseShipping = {
+    ...returnRequest.reverseShipping?.toObject?.() || {},
+    awbCode: data.response?.data?.awb_code || '',
+    courierName: data.response?.data?.courier_name || '',
+    courierId: req.body.courierId,
+  };
+
+  returnRequest.timeline.push({
+    action: 'COURIER_ASSIGNED',
+    note: `AWB: ${data.response?.data?.awb_code || 'pending'}`,
+    performedBy: req.user._id,
+    performedByName: req.user.name,
+  });
+
+  await returnRequest.save();
+
+  res.json(returnRequest);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Track reverse pickup status
+// @route   GET /api/returns/:id/track-pickup
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const trackReturnPickup = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  if (!returnRequest.reverseShipping?.awbCode) {
+    res.status(400);
+    throw new Error('No AWB code assigned for this return');
+  }
+
+  const data = await shippingApi('get', '/courier/track/awb', {
+    params: { awb: returnRequest.reverseShipping.awbCode },
+    action: 'TRACK',
+    orderId: returnRequest.order,
+    asuOrderId: returnRequest.orderId,
+  });
+
+  res.json(data);
+});

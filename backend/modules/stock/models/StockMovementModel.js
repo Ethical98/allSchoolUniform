@@ -41,6 +41,10 @@ const stockMovementSchema = mongoose.Schema(
       ref: 'Order',
     },
     orderId: { type: String }, // Human-readable order ID
+    returnRequest: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ReturnRequest',
+    },
     quotation: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'BillQuotation',

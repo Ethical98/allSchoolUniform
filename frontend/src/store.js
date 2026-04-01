@@ -111,6 +111,19 @@ import {
 } from './reducers/stockReducers';
 import { adminDashboardReducer } from './reducers/dashboardReducers';
 import {
+    returnListReducer,
+    returnDetailsReducer,
+    returnCreateReducer,
+    returnUpdateStatusReducer,
+    returnQCUpdateReducer,
+    returnCreditNoteReducer,
+    returnExchangeOrderReducer,
+    returnRefundReducer,
+    returnDashboardReducer,
+    returnByOrderReducer,
+    returnNoteReducer,
+} from './reducers/returnReducers';
+import {
     shippingDashboardReducer,
     shippingServiceabilityReducer,
     shippingCreateOrderReducer,
@@ -267,6 +280,17 @@ const reducer = combineReducers({
     shippingPickupLocations: shippingPickupLocationsReducer,
     shippingGenerateInvoice: shippingGenerateInvoiceReducer,
     shippingAddPickup: shippingAddPickupReducer,
+    returnList: returnListReducer,
+    returnDetails: returnDetailsReducer,
+    returnCreate: returnCreateReducer,
+    returnUpdateStatus: returnUpdateStatusReducer,
+    returnQCUpdate: returnQCUpdateReducer,
+    returnCreditNote: returnCreditNoteReducer,
+    returnExchangeOrder: returnExchangeOrderReducer,
+    returnRefund: returnRefundReducer,
+    returnDashboard: returnDashboardReducer,
+    returnByOrder: returnByOrderReducer,
+    returnNote: returnNoteReducer,
 });
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;

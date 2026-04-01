@@ -6,6 +6,7 @@ import User from '../models/UserModel.js';
 import dotenv from 'dotenv';
 import { RedisService } from '../services/redisService.js';
 import { sendOrderConfirmationEmail } from '../utils/emailService.js';
+import { validateAndBuildOrder } from '../utils/validateOrderStock.js';
 
 dotenv.config();
 
@@ -47,6 +48,14 @@ const createPaymentOrder = asyncHandler(async (req, res) => {
     if (!orderItems || !shippingAddress) {
         res.status(400);
         throw new Error('Order items and shipping address are required');
+    }
+
+    // ✅ Validate stock before creating payment order
+    try {
+        await validateAndBuildOrder(orderItems);
+    } catch (error) {
+        res.status(400);
+        throw error;
     }
 
     try {
@@ -231,9 +240,39 @@ const verifyPayment = asyncHandler(async (req, res) => {
             throw new Error('Invalid order data - missing required fields');
         }
 
-        // ✅ Create order - Same structure as COD orders
+        // ✅ Validate stock & recalculate prices from DB
+        let validated;
+        try {
+            validated = await validateAndBuildOrder(orderData.orderItems);
+        } catch (stockError) {
+            // Payment captured but stock insufficient — auto-refund
+            console.error('[Payment] ❌ Stock validation failed after payment:', stockError.message);
+            try {
+                await razorpayInstance.payments.refund(razorpay_payment_id, {
+                    notes: {
+                        reason: 'Auto-refund: out of stock after payment',
+                        error: stockError.message,
+                    },
+                });
+                console.log('[Payment] ✅ Auto-refund initiated for:', razorpay_payment_id);
+            } catch (refundError) {
+                console.error('[Payment] ❌ Auto-refund FAILED:', refundError.message);
+            }
+
+            await RedisService.setWebhookStatus(razorpay_order_id, {
+                status: 'failed',
+                razorpayOrderId: razorpay_order_id,
+                paymentId: razorpay_payment_id,
+                errorMessage: `${stockError.message}. A refund has been initiated.`,
+            });
+
+            res.status(400);
+            throw new Error(`${stockError.message}. A refund has been initiated to your original payment method.`);
+        }
+
+        // ✅ Create order with server-validated data
         const order = new Order({
-            orderItems: orderData.orderItems,
+            orderItems: validated.validatedOrderItems,
             user: req.user._id,
             name: req.user.name,
             phone: req.user.phone,
@@ -242,10 +281,10 @@ const verifyPayment = asyncHandler(async (req, res) => {
             paymentStatus: 'paid',
             isPaid: true,
             paidAt: new Date(),
-            itemsPrice: orderData.itemsPrice,
-            taxPrice: orderData.taxPrice,
-            shippingPrice: orderData.shippingPrice || 0,
-            totalPrice: orderData.totalPrice,
+            itemsPrice: validated.itemsPrice,
+            taxPrice: validated.taxPrice,
+            shippingPrice: validated.shippingPrice,
+            totalPrice: validated.totalPrice,
             orderStatus: `Received: ${Date.now()}`,
             razorpayPaymentId: razorpay_payment_id,
             razorpayOrderId: razorpay_order_id,
@@ -396,19 +435,22 @@ const handlePaymentFailure = asyncHandler(async (req, res) => {
             failedAt: new Date().toISOString(),
         };
 
+        // ✅ Validate stock & recalculate prices from DB
+        const validated = await validateAndBuildOrder(orderData.orderItems);
+
         // ✅ Create order with COD & payment failure info
         const order = new Order({
-            orderItems: orderData.orderItems,
+            orderItems: validated.validatedOrderItems,
             user: req.user._id,
             name: req.user.name,
             phone: req.user.phone,
             shippingAddress: orderData.shippingAddress,
             paymentMethod: orderData.paymentMethod || 'COD',
             paymentStatus: 'pending',
-            itemsPrice: orderData.itemsPrice,
-            taxPrice: orderData.taxPrice,
-            shippingPrice: orderData.shippingPrice || 0,
-            totalPrice: orderData.totalPrice,
+            itemsPrice: validated.itemsPrice,
+            taxPrice: validated.taxPrice,
+            shippingPrice: validated.shippingPrice,
+            totalPrice: validated.totalPrice,
             paymentFailure: failureData,
             orderStatus: `Received: ${Date.now()}`,
         });
@@ -429,8 +471,10 @@ const handlePaymentFailure = asyncHandler(async (req, res) => {
         });
     } catch (error) {
         console.error('[PaymentFailed] Error:', error.message);
-        res.status(500);
-        throw new Error('Failed to create fallback order');
+        if (!res.headersSent) {
+            res.status(error.message?.includes('Insufficient stock') || error.message?.includes('not available') || error.message?.includes('not found') ? 400 : 500);
+        }
+        throw new Error(error.message || 'Failed to create fallback order');
     }
 });
 
@@ -631,9 +675,14 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
                             '[Webhook] ✅ Creating order in database from webhook...'
                         );
 
-                        // ✅ Create order in database
+                        // ✅ Validate stock & recalculate prices from DB
+                        const validated = await validateAndBuildOrder(
+                            pendingData.orderData.orderItems
+                        );
+
+                        // ✅ Create order in database with validated data
                         const order = new Order({
-                            orderItems: pendingData.orderData.orderItems,
+                            orderItems: validated.validatedOrderItems,
                             user: pendingData.userId,
                             name: pendingData.userName,
                             phone: pendingData.userPhone,
@@ -643,11 +692,10 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
                             paymentStatus: 'paid',
                             isPaid: true,
                             paidAt: new Date(),
-                            itemsPrice: pendingData.orderData.itemsPrice,
-                            taxPrice: pendingData.orderData.taxPrice,
-                            shippingPrice:
-                                pendingData.orderData.shippingPrice || 0,
-                            totalPrice: pendingData.orderData.totalPrice,
+                            itemsPrice: validated.itemsPrice,
+                            taxPrice: validated.taxPrice,
+                            shippingPrice: validated.shippingPrice,
+                            totalPrice: validated.totalPrice,
                             orderStatus: `Received: ${Date.now()}`,
                             razorpayPaymentId: paymentData.id,
                             razorpayOrderId: razorpayOrderId,
@@ -693,12 +741,53 @@ const handlePaymentWebhook = asyncHandler(async (req, res) => {
                             error.message
                         );
 
-                        // Mark as pending so fallback verification can retry
-                        await RedisService.setWebhookStatus(razorpayOrderId, {
-                            status: 'pending',
-                            razorpayOrderId: razorpayOrderId,
-                            paymentId: paymentData?.id,
-                        });
+                        const isStockError =
+                            error.message?.includes('Insufficient stock') ||
+                            error.message?.includes('not available') ||
+                            error.message?.includes('not found');
+
+                        if (isStockError) {
+                            // Stock issue after payment captured — auto-refund
+                            console.log(
+                                '[Webhook] ⚠️ Stock validation failed after payment. Initiating auto-refund for:',
+                                paymentData.id
+                            );
+                            try {
+                                await razorpayInstance.payments.refund(
+                                    paymentData.id,
+                                    {
+                                        notes: {
+                                            reason: 'Auto-refund: out of stock after payment',
+                                            error: error.message,
+                                        },
+                                    }
+                                );
+                                console.log(
+                                    '[Webhook] ✅ Auto-refund initiated for payment:',
+                                    paymentData.id
+                                );
+                            } catch (refundError) {
+                                console.error(
+                                    '[Webhook] ❌ Auto-refund FAILED for payment:',
+                                    paymentData.id,
+                                    refundError.message
+                                );
+                            }
+
+                            await RedisService.setWebhookStatus(razorpayOrderId, {
+                                status: 'failed',
+                                razorpayOrderId: razorpayOrderId,
+                                paymentId: paymentData.id,
+                                errorMessage: `Order could not be created: ${error.message}. A refund has been initiated.`,
+                            });
+                        } else {
+                            // Non-stock error — mark pending so fallback can retry
+                            await RedisService.setWebhookStatus(razorpayOrderId, {
+                                status: 'pending',
+                                razorpayOrderId: razorpayOrderId,
+                                paymentId: paymentData?.id,
+                            });
+                        }
                     }
                 }
                 break;
