@@ -16,7 +16,7 @@ import {
 import StockMovement from '../modules/stock/models/StockMovementModel.js';
 import handleStockAlerts from '../modules/stock/utils/stockAlertHelper.js';
 import { updateInventoryBucket } from '../modules/stock/utils/inventoryCalc.js';
-import { validateAndBuildOrder } from '../utils/validateOrderStock.js';
+import { validateAndBuildOrder, FREE_SHIPPING_THRESHOLD, SHIPPING_CHARGE } from '../utils/validateOrderStock.js';
 dotenv.config();
 
 // @desc Create new order
