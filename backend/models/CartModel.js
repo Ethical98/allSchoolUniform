@@ -51,6 +51,9 @@ const cartSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        sizeVariant: {
+          type: mongoose.Schema.Types.ObjectId,
+        },
         index: {
           type: Number,
           required: true,

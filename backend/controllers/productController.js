@@ -753,14 +753,23 @@ const checkStock = asyncHandler(async (req, res) => {
       };
     }
 
-    const sizeVariant = product.size.find(
-      (s) => s._id.toString() === item.sizeVariant
-    );
+    // Match by sizeVariant ID first, fall back to size string (for carts saved without sizeVariant)
+    let sizeVariant = null;
+    if (item.sizeVariant) {
+      sizeVariant = product.size.find(
+        (s) => s._id.toString() === item.sizeVariant
+      );
+    }
+    if (!sizeVariant && item.size) {
+      sizeVariant = product.size.find(
+        (s) => s.size.toLowerCase() === item.size.toLowerCase()
+      );
+    }
 
     if (!sizeVariant) {
       return {
         product: item.product,
-        sizeVariant: item.sizeVariant,
+        sizeVariant: item.sizeVariant || null,
         available: false,
         countInStock: 0,
         reason: 'Size not found',
@@ -772,7 +781,7 @@ const checkStock = asyncHandler(async (req, res) => {
 
     return {
       product: item.product,
-      sizeVariant: item.sizeVariant,
+      sizeVariant: item.sizeVariant || sizeVariant._id.toString(),
       available,
       countInStock: sizeVariant.countInStock,
       outOfStock: sizeVariant.outOfStock || false,
