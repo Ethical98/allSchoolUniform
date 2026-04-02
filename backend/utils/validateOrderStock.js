@@ -2,8 +2,8 @@ import Product from '../models/ProductModel.js';
 import { normalizeUrl } from './normalizeUrl.js';
 
 // Constants for pricing rules (shared with orderController)
-const FREE_SHIPPING_THRESHOLD = 599;
-const SHIPPING_CHARGE = 100;
+export const FREE_SHIPPING_THRESHOLD = 599;
+export const SHIPPING_CHARGE = 100;
 
 /**
  * Validates order items against current stock and recalculates prices from DB.
