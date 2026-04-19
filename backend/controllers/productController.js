@@ -10,6 +10,9 @@ import {
   normalizeProductsImages,
 } from '../utils/normalizeUrl.js';
 import { normalizeWhitespace, slugifyFilename } from '../utils/stringUtils.js';
+import { calcAvailable } from '../modules/stock/utils/inventoryCalc.js';
+import StockMovement from '../modules/stock/models/StockMovementModel.js';
+import handleStockAlerts from '../modules/stock/utils/stockAlertHelper.js';
 
 // Helper: Escape special regex characters in a string
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
@@ -442,6 +445,61 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   const product = await Product.findById(req.params.id);
   if (product) {
+    // ── Detect stock bucket changes and log movements ──
+    const STOCK_BUCKETS = ['quantityOnHand', 'damaged', 'safetyStock'];
+    const stockMovements = []; // collect movements to insert after save
+
+    // Build a lookup of old variants by size string
+    const oldVariantMap = new Map();
+    for (const v of product.size) {
+      oldVariantMap.set(v.size, v);
+    }
+
+    // Walk through incoming size array, detect deltas, recalculate countInStock
+    const updatedSizeArray = (size || []).map((incoming) => {
+      const old = oldVariantMap.get(incoming.size);
+      const variant = { ...incoming };
+
+      // Ensure numeric defaults
+      variant.quantityOnHand = Number(variant.quantityOnHand) || 0;
+      variant.committed = Number(variant.committed) || 0;
+      variant.damaged = Number(variant.damaged) || 0;
+      variant.safetyStock = Number(variant.safetyStock) || 0;
+
+      // Recalculate countInStock from buckets
+      variant.countInStock = calcAvailable(variant);
+      variant.outOfStock = variant.countInStock <= 0;
+
+      // Detect per-bucket deltas against old values
+      if (old) {
+        for (const bucket of STOCK_BUCKETS) {
+          const oldVal = Number(old[bucket]) || 0;
+          const newVal = Number(variant[bucket]) || 0;
+          const delta = newVal - oldVal;
+          if (delta !== 0) {
+            stockMovements.push({
+              product: product._id,
+              productName: normalizedName,
+              SKU: SKU || product.SKU,
+              size: variant.size,
+              type: 'CORRECTION',
+              quantityChange: delta,
+              previousStock: old.countInStock ?? 0,
+              newStock: variant.countInStock,
+              reason: `Product edit: ${bucket} changed from ${oldVal} to ${newVal}`,
+              performedBy: req.user._id,
+              performedByName: req.user.name,
+              bucketChanged: bucket,
+              onHandAfter: variant.quantityOnHand,
+            });
+          }
+        }
+      }
+
+      return variant;
+    });
+
+    // ── Apply all other field updates ──
     product.type = type;
     product.name = normalizedName;
     product.class = [...standard];
@@ -451,7 +509,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.category = category;
     product.brand = brand;
     product.season = season;
-    product.size = [...size];
+    product.size = updatedSizeArray;
     product.isActive = isActive;
     product.SKU = SKU;
     product.SEOKeywords = SEOKeywords;
@@ -461,6 +519,24 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
 
     const updatedProduct = await product.save();
+
+    // ── Persist stock movements & trigger alerts (non-blocking) ──
+    if (stockMovements.length > 0) {
+      try {
+        await StockMovement.insertMany(stockMovements);
+        // Trigger alerts for each changed variant
+        const changedSizes = [...new Set(stockMovements.map((m) => m.size))];
+        for (const sz of changedSizes) {
+          const v = updatedSizeArray.find((s) => s.size === sz);
+          if (v) {
+            await handleStockAlerts(updatedProduct, sz, v.countInStock);
+          }
+        }
+      } catch (err) {
+        console.error('[Product Update] Failed to log stock movements:', err.message);
+      }
+    }
+
     res.status(201).json(updatedProduct);
   } else {
     res.status(404);
