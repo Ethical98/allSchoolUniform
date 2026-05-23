@@ -138,13 +138,23 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
       : 0;
 
     // Build pickup address (default from order shipping address)
-    const resolvedPickupAddress = pickupAddress || {
-      address: order.shippingAddress?.address,
-      city: order.shippingAddress?.city,
-      state: order.shippingAddress?.state,
-      postalCode: order.shippingAddress?.postalCode,
-      country: order.shippingAddress?.country || 'India',
-    };
+    const resolvedPickupAddress = pickupAddress
+      ? {
+          address: pickupAddress.address || order.shippingAddress?.address,
+          city: pickupAddress.city || order.shippingAddress?.city,
+          state: pickupAddress.state || order.shippingAddress?.state,
+          postalCode: pickupAddress.postalCode || order.shippingAddress?.postalCode,
+          country: pickupAddress.country || order.shippingAddress?.country || 'India',
+          phone: pickupAddress.phone || order.phone || '',
+        }
+      : {
+          address: order.shippingAddress?.address,
+          city: order.shippingAddress?.city,
+          state: order.shippingAddress?.state,
+          postalCode: order.shippingAddress?.postalCode,
+          country: order.shippingAddress?.country || 'India',
+          phone: order.phone || '',
+        };
 
     // Build timeline entry
     const timelineEntry = {

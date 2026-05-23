@@ -156,6 +156,7 @@ const returnRequestSchema = mongoose.Schema(
       state: { type: String },
       postalCode: { type: String },
       country: { type: String, default: 'India' },
+      phone: { type: String },
     },
     reverseShipping: {
       provider: { type: String, default: 'shiprocket' },
