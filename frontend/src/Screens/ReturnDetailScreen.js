@@ -83,9 +83,9 @@ const ReturnDetailScreen = ({ match, history }) => {
     // Handle success resets and refetch
     useEffect(() => {
         if (statusSuccess) {
-            dispatch({ type: RETURN_UPDATE_STATUS_RESET });
             dispatch(getReturnDetails(returnId));
             setShowRejectModal(false);
+            dispatch({ type: RETURN_UPDATE_STATUS_RESET });
         }
     }, [statusSuccess, dispatch, returnId]);
 
@@ -189,6 +189,16 @@ const ReturnDetailScreen = ({ match, history }) => {
                         disabled={statusLoading}
                     >
                         Schedule Pickup
+                    </Button>
+                )}
+                {nextStatuses.includes('PICKUP_FAILED') && (
+                    <Button
+                        variant="warning"
+                        className="mr-2 mb-1"
+                        onClick={() => handleStatusUpdate('PICKUP_FAILED')}
+                        disabled={statusLoading}
+                    >
+                        Mark Pickup Failed
                     </Button>
                 )}
                 {nextStatuses.includes('RECEIVED') && (
