@@ -35,7 +35,7 @@ const STATUS_PRIORITY = {
 const REVERSE_STATUS_MAP = {
   3:  { reverseStatus: 'PICKUP_SCHEDULED' },
   6:  { reverseStatus: 'IN_TRANSIT', returnStatus: 'IN_TRANSIT' },
-  9:  { reverseStatus: 'IN_TRANSIT' },
+  9:  { reverseStatus: 'IN_TRANSIT' },    // in-transit scan: updates reverseShipping.status only, no return status change
   7:  { reverseStatus: 'RECEIVED', returnStatus: 'RECEIVED' },
   14: { reverseStatus: 'PICKUP_FAILED', returnStatus: 'PICKUP_FAILED' },
 };
@@ -43,6 +43,8 @@ const REVERSE_STATUS_MAP = {
 const handleReverseWebhook = async (awb, statusCode) => {
   if (!awb) return false;
 
+  // Exclude terminal and post-receipt states — idempotency guard:
+  // if the return is already RECEIVED or further along, duplicate webhooks are silently ignored.
   const returnRequest = await ReturnRequest.findOne({
     'reverseShipping.awbCode': awb,
     status: { $nin: ['COMPLETED', 'CANCELLED', 'REJECTED', 'RECEIVED', 'QC_IN_PROGRESS', 'QC_COMPLETED'] },
@@ -53,11 +55,8 @@ const handleReverseWebhook = async (awb, statusCode) => {
   const mapping = REVERSE_STATUS_MAP[statusCode];
   if (!mapping) return false;
 
-  returnRequest.reverseShipping = {
-    ...returnRequest.reverseShipping?.toObject?.() || {},
-    status: mapping.reverseStatus,
-    syncedAt: new Date(),
-  };
+  returnRequest.reverseShipping.status = mapping.reverseStatus;
+  returnRequest.reverseShipping.syncedAt = new Date();
 
   if (mapping.returnStatus) {
     try {
