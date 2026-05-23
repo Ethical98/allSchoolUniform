@@ -6,7 +6,6 @@ import Message from '../components/Message';
 import { register, logout } from '../actions/userActions';
 import Loader from '../components/Loader';
 import validator from 'validator';
-import './css/RegisterScreen.css';
 import Meta from '../components/Meta';
 import PageLayout from '../components/PageLayout';
 
