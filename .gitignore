@@ -31,3 +31,4 @@ notes.txt
 .vercel
 
 ./frontend/build/
+graphify-out/
