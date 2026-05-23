@@ -14,6 +14,7 @@ import {
   addAdminNote,
   assignReturnCourier,
   trackReturnPickup,
+  generateReturnLabel,
 } from '../controllers/returnController.js';
 
 const router = express.Router();
@@ -38,5 +39,6 @@ router.route('/:id/notes').post(addAdminNote);
 // Reverse shipping
 router.route('/:id/assign-courier').post(assignReturnCourier);
 router.route('/:id/track-pickup').get(trackReturnPickup);
+router.route('/:id/label').get(generateReturnLabel);
 
 export default router;

@@ -922,3 +922,37 @@ export const trackReturnPickup = asyncHandler(async (req, res) => {
 
   res.json(data);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Generate shipping label for reverse pickup
+// @route   GET /api/returns/:id/label
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const generateReturnLabel = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  if (!returnRequest.reverseShipping?.providerShipmentId) {
+    res.status(400);
+    throw new Error('No Shiprocket shipment exists for this return. Schedule pickup first.');
+  }
+
+  const data = await shippingApi('post', '/courier/generate/label', {
+    data: { shipment_id: [returnRequest.reverseShipping.providerShipmentId] },
+    action: 'GENERATE_LABEL',
+    orderId: returnRequest.order,
+    asuOrderId: returnRequest.orderId,
+  });
+
+  const labelUrl = data.label_url || data.response?.label_url || '';
+
+  if (labelUrl) {
+    returnRequest.reverseShipping.labelUrl = labelUrl;
+    await returnRequest.save();
+  }
+
+  res.json({ labelUrl, returnRequest });
+});
