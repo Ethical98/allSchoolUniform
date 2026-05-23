@@ -137,6 +137,9 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
         qty: item.returnQty,
       });
     } else if (item.qcDisposition === 'UNSELLABLE') {
+      // Zero out refund for unsellable items — cannot refund for items that cannot be resold
+      item.refundAmount = 0;
+
       // No inventory bucket change — write-off
       await StockMovement.create({
         product: item.product,
