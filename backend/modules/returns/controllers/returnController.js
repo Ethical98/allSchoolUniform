@@ -843,8 +843,8 @@ export const assignReturnCourier = asyncHandler(async (req, res) => {
 
   returnRequest.reverseShipping = {
     ...returnRequest.reverseShipping?.toObject?.() || {},
-    awbCode: data.response?.data?.awb_code || '',
-    courierName: data.response?.data?.courier_name || '',
+    awbCode: data.awb_code || data.response?.data?.awb_code || '',
+    courierName: data.courier_name || data.courier_name_code || data.response?.data?.courier_name || '',
     courierId: req.body.courierId,
   };
 
@@ -877,12 +877,15 @@ export const trackReturnPickup = asyncHandler(async (req, res) => {
     throw new Error('No AWB code assigned for this return');
   }
 
-  const data = await shippingApi('get', '/courier/track/awb', {
-    params: { awb: returnRequest.reverseShipping.awbCode },
-    action: 'TRACK',
-    orderId: returnRequest.order,
-    asuOrderId: returnRequest.orderId,
-  });
+  const data = await shippingApi(
+    'get',
+    `/courier/track/awb/${returnRequest.reverseShipping.awbCode}`,
+    {
+      action: 'TRACK',
+      orderId: returnRequest.order,
+      asuOrderId: returnRequest.orderId,
+    }
+  );
 
   res.json(data);
 });
