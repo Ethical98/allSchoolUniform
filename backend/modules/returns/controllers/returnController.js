@@ -3,6 +3,7 @@ import ReturnRequest from '../models/ReturnRequestModel.js';
 import Order from '../../../models/OrderModel.js';
 import User from '../../../models/UserModel.js';
 import Product from '../../../models/ProductModel.js';
+import { updateInventoryBucket } from '../../stock/utils/inventoryCalc.js';
 import { validateTransition, getNextStatuses } from '../utils/returnStateMachine.js';
 import {
   validateOrderEligibility,
@@ -640,7 +641,23 @@ export const createExchangeOrder = asyncHandler(async (req, res) => {
   const newOrderItems = [];
   for (const item of returnRequest.items) {
     if (returnRequest.type === 'REPLACEMENT') {
-      // Same product/size for replacement
+      const replacementProduct = await Product.findById(item.product);
+      if (!replacementProduct || !replacementProduct.isActive) {
+        res.status(400);
+        throw new Error(
+          `Replacement product "${item.productName}" is no longer available. Cannot create replacement.`
+        );
+      }
+      const replacementVariant = replacementProduct.size.find(
+        (s) => s.size === item.size
+      );
+      if (!replacementVariant || replacementVariant.countInStock < item.returnQty) {
+        res.status(400);
+        throw new Error(
+          `Replacement product "${item.productName}" (${item.size}) is out of stock. ` +
+          `Available: ${replacementVariant?.countInStock || 0}`
+        );
+      }
       newOrderItems.push({
         name: item.productName,
         qty: item.returnQty,
@@ -650,6 +667,7 @@ export const createExchangeOrder = asyncHandler(async (req, res) => {
         product: item.product,
         tax: item.tax,
         disc: item.disc,
+        productCode: item.SKU || '',
       });
     } else if (returnRequest.type === 'EXCHANGE' && item.exchangeProduct) {
       // Exchange product
@@ -725,6 +743,17 @@ export const createExchangeOrder = asyncHandler(async (req, res) => {
     originalOrderId: originalOrder._id,
     linkedReturnRequest: returnRequest._id,
   });
+
+  // Decrement stock for each exchange/replacement item
+  for (const item of newOrderItems) {
+    await updateInventoryBucket({
+      productId: item.product,
+      size: item.size,
+      increments: { quantityOnHand: -item.qty },
+    }).catch((err) => {
+      console.error(`[ExchangeOrder] Stock decrement failed for ${item.product} ${item.size}:`, err.message);
+    });
+  }
 
   // Update return request
   returnRequest.exchangeOrderId = exchangeOrder._id;
