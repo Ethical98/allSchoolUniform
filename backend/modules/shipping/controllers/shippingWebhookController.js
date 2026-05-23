@@ -1,5 +1,7 @@
 import Order from '../../../models/OrderModel.js';
 import ShippingLog from '../models/ShippingLogModel.js';
+import ReturnRequest from '../../returns/models/ReturnRequestModel.js';
+import { validateTransition } from '../../returns/utils/returnStateMachine.js';
 import StockMovement from '../../stock/models/StockMovementModel.js';
 import Product from '../../../models/ProductModel.js';
 import handleStockAlerts from '../../stock/utils/stockAlertHelper.js';
@@ -27,6 +29,59 @@ const STATUS_PRIORITY = {
   14: 35,  // RTO Initiated
   15: 40,  // RTO Delivered
   21: 0,   // Weight Discrepancy (can happen anytime)
+};
+
+// Map ShipRocket reverse shipment status codes to return status transitions
+const REVERSE_STATUS_MAP = {
+  3:  { reverseStatus: 'PICKUP_SCHEDULED' },
+  6:  { reverseStatus: 'IN_TRANSIT', returnStatus: 'IN_TRANSIT' },
+  9:  { reverseStatus: 'IN_TRANSIT' },
+  7:  { reverseStatus: 'RECEIVED', returnStatus: 'RECEIVED' },
+  14: { reverseStatus: 'PICKUP_FAILED', returnStatus: 'PICKUP_FAILED' },
+};
+
+const handleReverseWebhook = async (awb, statusCode) => {
+  if (!awb) return false;
+
+  const returnRequest = await ReturnRequest.findOne({
+    'reverseShipping.awbCode': awb,
+    status: { $nin: ['COMPLETED', 'CANCELLED', 'REJECTED', 'RECEIVED', 'QC_IN_PROGRESS', 'QC_COMPLETED'] },
+  });
+
+  if (!returnRequest) return false;
+
+  const mapping = REVERSE_STATUS_MAP[statusCode];
+  if (!mapping) return false;
+
+  returnRequest.reverseShipping = {
+    ...returnRequest.reverseShipping?.toObject?.() || {},
+    status: mapping.reverseStatus,
+    syncedAt: new Date(),
+  };
+
+  if (mapping.returnStatus) {
+    try {
+      validateTransition(returnRequest.status, mapping.returnStatus, returnRequest.type);
+      const previousStatus = returnRequest.status;
+      returnRequest.status = mapping.returnStatus;
+      returnRequest.timeline.push({
+        action: 'STATUS_CHANGE',
+        fromStatus: previousStatus,
+        toStatus: mapping.returnStatus,
+        note: `Auto-updated via ShipRocket webhook (status code: ${statusCode})`,
+        performedByName: 'System (Webhook)',
+      });
+
+      if (mapping.returnStatus === 'RECEIVED') {
+        returnRequest.reverseShipping.receivedAt = new Date();
+      }
+    } catch (e) {
+      console.warn(`[ReturnWebhook] Skipping invalid transition for ${returnRequest.returnId}: ${e.message}`);
+    }
+  }
+
+  await returnRequest.save();
+  return true;
 };
 
 /**
@@ -61,6 +116,15 @@ export const handleWebhook = async (req, res) => {
       success: true,
       source: 'webhook',
     });
+
+    // Check if this is a reverse shipment webhook first
+    const webhookAwb = req.body?.awb || req.body?.awb_code || '';
+    const webhookStatusCode = Number(req.body?.current_status_id || req.body?.status_id || 0);
+
+    const handledAsReturn = await handleReverseWebhook(webhookAwb, webhookStatusCode);
+    if (handledAsReturn) {
+      return res.status(200).json({ received: true, type: 'reverse' });
+    }
 
     // Find the order by AWB or provider order ID
     const awb = payload.awb || payload.awb_code;

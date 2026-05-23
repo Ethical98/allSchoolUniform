@@ -18,7 +18,7 @@ const timelineEntrySchema = mongoose.Schema(
     performedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
     },
     performedByName: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
