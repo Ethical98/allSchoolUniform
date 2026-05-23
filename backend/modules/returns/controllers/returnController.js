@@ -132,7 +132,7 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
     }
 
     // Determine shipping refund
-    const refundShipping = await shouldRefundShipping(order, reason);
+    const refundShipping = await shouldRefundShipping(order, reason, returnItems);
     const shippingRefundAmount = refundShipping
       ? order.shippingPrice || 0
       : 0;

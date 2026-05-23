@@ -156,20 +156,33 @@ export const validateRefundTotal = (order, newRefundAmount) => {
 };
 
 /**
- * Check if all order items have been fully returned (for shipping refund logic).
+ * Check if all order items have been fully returned.
+ * Accepts optional pendingItems to account for items being created in the
+ * current request (before they are saved to DB).
+ *
+ * @param {Object} order
+ * @param {Array} pendingItems - [{ product, size, returnQty }] from the current unsaved request
  */
-export const allOrderItemsReturned = async (order) => {
+export const allOrderItemsReturned = async (order, pendingItems = []) => {
   const existingReturns = await ReturnRequest.find({
     order: order._id,
     status: { $nin: ['REJECTED', 'CANCELLED'] },
   }).lean();
 
   const returnedMap = {};
+
+  // Count already-saved returns
   for (const ret of existingReturns) {
     for (const item of ret.items) {
       const key = `${item.product}:${item.size}`;
       returnedMap[key] = (returnedMap[key] || 0) + item.returnQty;
     }
+  }
+
+  // Add pending (current request) items
+  for (const item of pendingItems) {
+    const key = `${item.product}:${item.size}`;
+    returnedMap[key] = (returnedMap[key] || 0) + item.returnQty;
   }
 
   for (const orderItem of order.orderItems) {
@@ -184,12 +197,16 @@ export const allOrderItemsReturned = async (order) => {
 /**
  * Determine if shipping should be refunded.
  * Shipping is refunded on full returns OR seller-fault reasons.
+ *
+ * @param {Object} order
+ * @param {string} reason
+ * @param {Array} pendingItems - items from the current unsaved return request
  */
-export const shouldRefundShipping = async (order, reason) => {
+export const shouldRefundShipping = async (order, reason, pendingItems = []) => {
   if (SELLER_FAULT_REASONS.includes(reason)) {
     return true;
   }
-  return await allOrderItemsReturned(order);
+  return await allOrderItemsReturned(order, pendingItems);
 };
 
 export default {
