@@ -17,6 +17,7 @@ import {
     createExchangeOrder,
     processRefund,
     addReturnNote,
+    generateReturnLabel,
 } from '../actions/returnActions';
 import {
     RETURN_UPDATE_STATUS_RESET,
@@ -470,12 +471,58 @@ const ReturnDetailScreen = ({ match, history }) => {
                         </Tab>
 
                         {/* QC Tab */}
-                        {ret.status === 'QC_IN_PROGRESS' && (
+                        {['QC_IN_PROGRESS', 'QC_COMPLETED', 'REFUND_INITIATED', 'EXCHANGE_SHIPPED',
+                           'REPLACEMENT_SHIPPED', 'COMPLETED'].includes(ret.status) && (
                             <Tab eventKey="qc" title="QC Inspection">
-                                <QCDispositionForm
-                                    items={ret.items || []}
-                                    onSubmit={handleQCSubmit}
-                                />
+                                {ret.status === 'QC_IN_PROGRESS' ? (
+                                    <QCDispositionForm
+                                        items={ret.items || []}
+                                        onSubmit={handleQCSubmit}
+                                    />
+                                ) : (
+                                    <Card>
+                                        <Card.Header>QC Results (Read-Only)</Card.Header>
+                                        <Card.Body>
+                                            <Table bordered size="sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Product</th>
+                                                        <th>Size</th>
+                                                        <th>Qty</th>
+                                                        <th>Disposition</th>
+                                                        <th>Notes</th>
+                                                        <th>Refund</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {(ret.items || []).map((item, i) => (
+                                                        <tr key={i}>
+                                                            <td>{item.productName}</td>
+                                                            <td>{item.size}</td>
+                                                            <td>{item.returnQty}</td>
+                                                            <td>
+                                                                <Badge bg={
+                                                                    item.qcDisposition === 'GOOD' ? 'success' :
+                                                                    item.qcDisposition === 'DAMAGED' ? 'warning' :
+                                                                    item.qcDisposition === 'UNSELLABLE' ? 'danger' :
+                                                                    item.qcDisposition === 'NOT_RECEIVED' ? 'secondary' : 'light'
+                                                                }>
+                                                                    {item.qcDisposition || 'PENDING'}
+                                                                </Badge>
+                                                            </td>
+                                                            <td>{item.qcNotes || '-'}</td>
+                                                            <td>
+                                                                {item.qcDisposition === 'NOT_RECEIVED' || item.qcDisposition === 'UNSELLABLE'
+                                                                    ? <span className="text-muted">No refund</span>
+                                                                    : `₹${item.refundAmount || 0}`}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </Table>
+                                        </Card.Body>
+                                    </Card>
+                                )}
                             </Tab>
                         )}
 
@@ -503,6 +550,23 @@ const ReturnDetailScreen = ({ match, history }) => {
                                                 >
                                                     Track Shipment
                                                 </a>
+                                            )}
+                                            {ret.reverseShipping?.providerShipmentId && !ret.reverseShipping?.labelUrl && (
+                                                <Button
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    className="mt-2"
+                                                    onClick={() => dispatch(generateReturnLabel(returnId))}
+                                                >
+                                                    Generate Return Label
+                                                </Button>
+                                            )}
+                                            {ret.reverseShipping?.labelUrl && (
+                                                <p className="mt-2">
+                                                    <a href={ret.reverseShipping.labelUrl} target="_blank" rel="noopener noreferrer">
+                                                        <Button variant="outline-success" size="sm">Download Return Label</Button>
+                                                    </a>
+                                                </p>
                                             )}
                                         </>
                                     ) : (
@@ -570,8 +634,13 @@ const ReturnDetailScreen = ({ match, history }) => {
                                 <Form.Control
                                     type="number"
                                     value={refundAmount}
-                                    onChange={(e) => setRefundAmount(e.target.value)}
+                                    readOnly
+                                    disabled
+                                    className="bg-light"
                                 />
+                                <Form.Text className="text-muted">
+                                    Amount calculated from QC results. Shipping refund (if any) is added automatically.
+                                </Form.Text>
                             </Form.Group>
                             <Form.Group className="mt-2">
                                 <Form.Label>Refund Method</Form.Label>
