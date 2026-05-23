@@ -941,7 +941,7 @@ export const generateReturnLabel = asyncHandler(async (req, res) => {
   }
 
   const data = await shippingApi('post', '/courier/generate/label', {
-    data: { shipment_id: [returnRequest.reverseShipping.providerShipmentId] },
+    data: { shipment_id: [Number(returnRequest.reverseShipping.providerShipmentId)] },
     action: 'GENERATE_LABEL',
     orderId: returnRequest.order,
     asuOrderId: returnRequest.orderId,
@@ -950,6 +950,7 @@ export const generateReturnLabel = asyncHandler(async (req, res) => {
   const labelUrl = data.label_url || data.response?.label_url || '';
 
   if (labelUrl) {
+    if (!returnRequest.reverseShipping) returnRequest.reverseShipping = {};
     returnRequest.reverseShipping.labelUrl = labelUrl;
     await returnRequest.save();
   }
