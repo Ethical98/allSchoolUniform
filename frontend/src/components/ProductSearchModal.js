@@ -27,6 +27,7 @@ const ProductSearchModal = ({ show, onHide, onSelect, userInfo, title = 'Select 
       setSelectedProduct(null);
       setSelectedSize('');
       setError('');
+      setLoading(false);
     }
   }, [show]);
 
@@ -36,7 +37,7 @@ const ProductSearchModal = ({ show, onHide, onSelect, userInfo, title = 'Select 
     setError('');
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo?.token}` } };
-      const { data } = await api.get(`/api/products?keyword=${encodeURIComponent(keyword)}&pageSize=20`, config);
+      const { data } = await api.get(`/api/products?keyword=${encodeURIComponent(keyword.trim())}&pageSize=20`, config);
       setResults(data.products || []);
       if ((data.products || []).length === 0) setError('No products found');
     } catch (err) {
@@ -48,7 +49,7 @@ const ProductSearchModal = ({ show, onHide, onSelect, userInfo, title = 'Select 
 
   const handleConfirm = () => {
     if (!selectedProduct || !selectedSize) return;
-    const variant = selectedProduct.size.find((s) => s.size === selectedSize);
+    const variant = selectedProduct.size?.find((s) => s.size === selectedSize);
     onSelect({
       productId: selectedProduct._id,
       productName: selectedProduct.name,
@@ -126,7 +127,7 @@ const ProductSearchModal = ({ show, onHide, onSelect, userInfo, title = 'Select 
           <div className="mt-3 p-2 bg-light rounded">
             <strong>Selected:</strong> {selectedProduct.name} — Size: {selectedSize}
             {' '}
-            (₹{selectedProduct.size.find((s) => s.size === selectedSize)?.price || 0})
+            (₹{selectedProduct.size?.find((s) => s.size === selectedSize)?.price || 0})
           </div>
         )}
       </Modal.Body>
