@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    Row, Col, Card, Form, Button, Table, Alert, ListGroup,
+    Row, Col, Card, Form, Button, Table, Alert, ListGroup, Badge,
 } from 'react-bootstrap';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import AdminPageLayout from '../components/AdminPageLayout';
+import ProductSearchModal from '../components/ProductSearchModal';
 import { getOrderDetails } from '../actions/orderActions';
 import { createReturn, getReturnsByOrder } from '../actions/returnActions';
 import { RETURN_CREATE_RESET } from '../constants/returnConstants';
@@ -41,6 +42,8 @@ const ReturnCreateScreen = ({ match, history }) => {
         state: '',
         phone: '',
     });
+    const [showProductModal, setShowProductModal] = useState(false);
+    const [modalTargetItemId, setModalTargetItemId] = useState(null);
 
     const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
@@ -114,12 +117,13 @@ const ReturnCreateScreen = ({ match, history }) => {
         return qty;
     };
 
+    const RETURN_WINDOW_DAYS = 7;
     const isWindowExpired = () => {
         if (!order) return false;
         const deliveredAt = order.tracking?.deliveredAt;
         if (!deliveredAt) return false;
         const days = (Date.now() - new Date(deliveredAt).getTime()) / (1000 * 60 * 60 * 24);
-        return days > (order.returnWindowDays || 7);
+        return days > RETURN_WINDOW_DAYS;
     };
 
     const toggleItem = (item) => {
@@ -165,6 +169,15 @@ const ReturnCreateScreen = ({ match, history }) => {
             ...prev,
             [orderItemId]: { ...prev[orderItemId], [field]: value },
         }));
+    };
+
+    const handleExchangeProductSelected = ({ productId, productName, size, price, stock }) => {
+        if (!modalTargetItemId) return;
+        setExchangeSelections((prev) => ({
+            ...prev,
+            [modalTargetItemId]: { product: productId, productId, name: productName, productName, size, price, stock },
+        }));
+        setModalTargetItemId(null);
     };
 
     const calculateRefund = () => {
@@ -428,49 +441,49 @@ const ReturnCreateScreen = ({ match, history }) => {
                                 {returnType === 'EXCHANGE' && (
                                     <div className="mt-3">
                                         <h6>Exchange Selections</h6>
-                                        {selectedItems.map((item) => (
-                                            <Card key={item.orderItemId} className="mb-2 p-2">
-                                                <p className="mb-1">
-                                                    <strong>{item.name}</strong> (current size: {item.size})
-                                                </p>
-                                                <Row>
-                                                    <Col md={5}>
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="Exchange product ID (or same)"
-                                                            value={
-                                                                exchangeSelections[item.orderItemId]
-                                                                    ?.product || item.product || ''
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateExchangeSelection(
-                                                                    item.orderItemId,
-                                                                    'product',
-                                                                    e.target.value
-                                                                )
-                                                            }
-                                                        />
-                                                    </Col>
-                                                    <Col md={3}>
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="New size"
-                                                            value={
-                                                                exchangeSelections[item.orderItemId]
-                                                                    ?.size || ''
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateExchangeSelection(
-                                                                    item.orderItemId,
-                                                                    'size',
-                                                                    e.target.value
-                                                                )
-                                                            }
-                                                        />
-                                                    </Col>
-                                                </Row>
-                                            </Card>
-                                        ))}
+                                        {selectedItems.map((item) => {
+                                            const sel = exchangeSelections[item.orderItemId];
+                                            return (
+                                                <Card key={item.orderItemId} className="mb-2 p-2">
+                                                    <p className="mb-1">
+                                                        <strong>{item.name}</strong> (returning size: {item.size})
+                                                    </p>
+                                                    {sel?.productId || sel?.product ? (
+                                                        <div className="d-flex align-items-center">
+                                                            <span className="mr-3">
+                                                                <Badge bg="success">{sel.productName || sel.name}</Badge>{' '}
+                                                                Size: <strong>{sel.size}</strong>{' '}
+                                                                ₹{sel.price}
+                                                                {sel.stock < (item.returnQty || 1) && (
+                                                                    <Badge bg="danger" className="ml-2">Low Stock: {sel.stock}</Badge>
+                                                                )}
+                                                            </span>
+                                                            <Button
+                                                                variant="outline-secondary"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    setModalTargetItemId(item.orderItemId);
+                                                                    setShowProductModal(true);
+                                                                }}
+                                                            >
+                                                                Change
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <Button
+                                                            variant="outline-primary"
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                setModalTargetItemId(item.orderItemId);
+                                                                setShowProductModal(true);
+                                                            }}
+                                                        >
+                                                            + Select Exchange Product
+                                                        </Button>
+                                                    )}
+                                                </Card>
+                                            );
+                                        })}
                                     </div>
                                 )}
 
@@ -478,7 +491,21 @@ const ReturnCreateScreen = ({ match, history }) => {
                                     <Button variant="secondary" className="mr-2" onClick={prevStep}>
                                         Back
                                     </Button>
-                                    <Button onClick={nextStep}>Next: Reason</Button>
+                                    <Button
+                                        onClick={() => {
+                                            if (returnType === 'EXCHANGE') {
+                                                const missing = selectedItems.filter(
+                                                    (item) => !exchangeSelections[item.orderItemId]?.productId &&
+                                                              !exchangeSelections[item.orderItemId]?.product
+                                                );
+                                                if (missing.length > 0) {
+                                                    alert(`Please select exchange products for: ${missing.map(i => i.name).join(', ')}`);
+                                                    return;
+                                                }
+                                            }
+                                            nextStep();
+                                        }}
+                                    >Next: Reason</Button>
                                 </div>
                             </Card.Body>
                         </Card>
@@ -655,8 +682,8 @@ const ReturnCreateScreen = ({ match, history }) => {
                                                 <td>{item.name}</td>
                                                 <td>{item.size}</td>
                                                 <td>{item.returnQty}</td>
-                                                <td>₹{item.price}</td>
-                                                <td>₹{item.price * item.returnQty}</td>
+                                                <td>₹{(item.price * (1 - (item.disc || 0) / 100)).toFixed(2)}{item.disc > 0 && <small className="text-muted ml-1">(MRP: ₹{item.price})</small>}</td>
+                                                <td>₹{(item.price * (1 - (item.disc || 0) / 100) * item.returnQty).toFixed(2)}</td>
                                                 {returnType === 'EXCHANGE' && (
                                                     <td>
                                                         {exchangeSelections[item.orderItemId]?.size
@@ -690,6 +717,13 @@ const ReturnCreateScreen = ({ match, history }) => {
                     )}
                 </>
             )}
+            <ProductSearchModal
+                show={showProductModal}
+                onHide={() => setShowProductModal(false)}
+                onSelect={handleExchangeProductSelected}
+                userInfo={userInfo}
+                title="Select Exchange Product"
+            />
         </AdminPageLayout>
     );
 };
