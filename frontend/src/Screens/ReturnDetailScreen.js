@@ -574,7 +574,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                     )}
                                 </Card.Body>
                             </Card>
-                            {ret.exchangeOrderNumber && (
+                            {ret.exchangeOrderNumber && ret.exchangeOrderId && (
                                 <Card className="mt-3">
                                     <Card.Header>Exchange / Replacement Order</Card.Header>
                                     <Card.Body>
