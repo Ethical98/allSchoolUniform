@@ -52,7 +52,7 @@ const ReturnCreateScreen = ({ match, history }) => {
     const { loading: orderLoading, error: orderError, order } = orderDetails;
 
     const returnByOrder = useSelector((state) => state.returnByOrder);
-    const { returns: existingReturns } = returnByOrder;
+    const { returns: existingReturns, error: returnByOrderError } = returnByOrder;
 
     const returnCreate = useSelector((state) => state.returnCreate);
     const {
@@ -244,6 +244,12 @@ const ReturnCreateScreen = ({ match, history }) => {
             ) : (
                 <>
                     {createError && <Message variant="danger">{createError}</Message>}
+                    {returnByOrderError && (
+                        <Message variant="warning">
+                            Warning: Could not load existing returns for this order ({returnByOrderError}).
+                            Already-returned quantities may be inaccurate.
+                        </Message>
+                    )}
                     {createLoading && <Loader />}
 
                     {/* Step indicator */}

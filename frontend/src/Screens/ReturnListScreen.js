@@ -110,10 +110,9 @@ const ReturnListScreen = ({ history, location }) => {
                 item.refundAmount != null ? `₹ ${item.refundAmount}` : '-',
         },
         {
-            title: 'Date',
+            title: 'Created',
             field: 'createdAt',
-            render: (item) =>
-                item.createdAt ? item.createdAt.substring(0, 10) : '-',
+            render: (row) => row.createdAt?.substring(0, 10),
         },
     ];
 
