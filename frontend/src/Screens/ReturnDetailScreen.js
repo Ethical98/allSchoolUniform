@@ -421,7 +421,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                                     <td>
                                                         {item.qcDisposition ? (
                                                             <Badge
-                                                                variant={
+                                                                bg={
                                                                     item.qcDisposition === 'GOOD'
                                                                         ? 'success'
                                                                         : item.qcDisposition === 'DAMAGED'
@@ -497,7 +497,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                                 <tbody>
                                                     {(ret.items || []).map((item, i) => (
                                                         <tr key={i}>
-                                                            <td>{item.productName}</td>
+                                                            <td>{item.productName || item.name || '-'}</td>
                                                             <td>{item.size}</td>
                                                             <td>{item.returnQty}</td>
                                                             <td>
