@@ -582,9 +582,17 @@ const ReturnDetailScreen = ({ match, history }) => {
                                         <Button
                                             variant="outline-primary"
                                             size="sm"
+                                            className="mr-2"
                                             onClick={() => window.open(`/admin/order/${ret.exchangeOrderId}/edit`, '_blank')}
                                         >
                                             View Exchange Order
+                                        </Button>
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => window.open(`/admin/shipping/orders/${ret.exchangeOrderId}`, '_blank')}
+                                        >
+                                            Ship This Order →
                                         </Button>
                                     </Card.Body>
                                 </Card>
