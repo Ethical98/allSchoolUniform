@@ -122,6 +122,7 @@ import {
     returnDashboardReducer,
     returnByOrderReducer,
     returnNoteReducer,
+    returnLabelReducer,
 } from './reducers/returnReducers';
 import {
     shippingDashboardReducer,
@@ -291,6 +292,7 @@ const reducer = combineReducers({
     returnDashboard: returnDashboardReducer,
     returnByOrder: returnByOrderReducer,
     returnNote: returnNoteReducer,
+    returnLabel: returnLabelReducer,
 });
 
 const salt = process.env.REACT_APP_CRYPTO_SALT;

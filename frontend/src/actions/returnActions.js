@@ -11,6 +11,7 @@ import {
   RETURN_DASHBOARD_REQUEST, RETURN_DASHBOARD_SUCCESS, RETURN_DASHBOARD_FAIL,
   RETURN_BY_ORDER_REQUEST, RETURN_BY_ORDER_SUCCESS, RETURN_BY_ORDER_FAIL,
   RETURN_NOTE_REQUEST, RETURN_NOTE_SUCCESS, RETURN_NOTE_FAIL,
+  RETURN_LABEL_REQUEST, RETURN_LABEL_SUCCESS, RETURN_LABEL_FAIL, RETURN_LABEL_RESET,
 } from '../constants/returnConstants';
 
 const getConfig = (getState) => {
@@ -139,5 +140,17 @@ export const addReturnNote = (id, note) => async (dispatch, getState) => {
     dispatch({ type: RETURN_NOTE_SUCCESS, payload: data });
   } catch (error) {
     dispatch({ type: RETURN_NOTE_FAIL, payload: error.response?.data?.message || error.message });
+  }
+};
+
+export const generateReturnLabel = (id) => async (dispatch, getState) => {
+  try {
+    dispatch({ type: RETURN_LABEL_REQUEST });
+    const config = getConfig(getState);
+    const { data } = await api.get(`/api/returns/${id}/label`, config);
+    dispatch({ type: RETURN_LABEL_SUCCESS, payload: data });
+    dispatch(getReturnDetails(id));
+  } catch (error) {
+    dispatch({ type: RETURN_LABEL_FAIL, payload: error.response?.data?.message || error.message });
   }
 };

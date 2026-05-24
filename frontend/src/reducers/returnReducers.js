@@ -10,6 +10,7 @@ import {
   RETURN_DASHBOARD_REQUEST, RETURN_DASHBOARD_SUCCESS, RETURN_DASHBOARD_FAIL,
   RETURN_BY_ORDER_REQUEST, RETURN_BY_ORDER_SUCCESS, RETURN_BY_ORDER_FAIL, RETURN_BY_ORDER_RESET,
   RETURN_NOTE_REQUEST, RETURN_NOTE_SUCCESS, RETURN_NOTE_FAIL, RETURN_NOTE_RESET,
+  RETURN_LABEL_REQUEST, RETURN_LABEL_SUCCESS, RETURN_LABEL_FAIL, RETURN_LABEL_RESET,
 } from '../constants/returnConstants';
 
 export const returnListReducer = (state = { returns: [] }, action) => {
@@ -118,5 +119,20 @@ export const returnNoteReducer = (state = {}, action) => {
     case RETURN_NOTE_FAIL: return { loading: false, error: action.payload };
     case RETURN_NOTE_RESET: return {};
     default: return state;
+  }
+};
+
+export const returnLabelReducer = (state = {}, action) => {
+  switch (action.type) {
+    case RETURN_LABEL_REQUEST:
+      return { loading: true };
+    case RETURN_LABEL_SUCCESS:
+      return { loading: false, success: true, labelUrl: action.payload.labelUrl };
+    case RETURN_LABEL_FAIL:
+      return { loading: false, error: action.payload };
+    case RETURN_LABEL_RESET:
+      return {};
+    default:
+      return state;
   }
 };
