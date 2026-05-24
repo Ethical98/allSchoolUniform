@@ -164,13 +164,6 @@ const ReturnCreateScreen = ({ match, history }) => {
         );
     };
 
-    const updateExchangeSelection = (orderItemId, field, value) => {
-        setExchangeSelections((prev) => ({
-            ...prev,
-            [orderItemId]: { ...prev[orderItemId], [field]: value },
-        }));
-    };
-
     const handleExchangeProductSelected = ({ productId, productName, size, price, stock }) => {
         if (!modalTargetItemId) return;
         setExchangeSelections((prev) => ({
