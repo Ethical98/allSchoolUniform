@@ -1,12 +1,7 @@
 import ReturnRequest from '../models/ReturnRequestModel.js';
+import { decideShippingRefund } from '../pricing/returnPricing.js';
 
 export const RETURN_WINDOW_DAYS = 7;
-
-const SELLER_FAULT_REASONS = [
-  'DEFECTIVE',
-  'WRONG_ITEM',
-  'DAMAGED_IN_TRANSIT',
-];
 
 /**
  * Validate that the order is eligible for a return.
@@ -203,9 +198,7 @@ export const allOrderItemsReturned = async (order, pendingItems = []) => {
  * @param {Array} pendingItems - items from the current unsaved return request
  */
 export const shouldRefundShipping = async (order, reason, pendingItems = []) => {
-  if (SELLER_FAULT_REASONS.includes(reason)) {
-    return true;
-  }
+  if (decideShippingRefund(reason, false)) return true; // seller-fault short-circuit
   return await allOrderItemsReturned(order, pendingItems);
 };
 

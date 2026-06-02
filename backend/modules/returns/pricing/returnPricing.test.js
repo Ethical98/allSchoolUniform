@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { computeItemRefund, resolveOrderItems } from './returnPricing.js';
 import { computeReturnRefund } from './returnPricing.js';
+import { SELLER_FAULT_REASONS, decideShippingRefund } from './returnPricing.js';
 
 test('computeItemRefund: price × (1 - disc%) × qty, rounded to 2dp', () => {
   // 1000 MRP, 10% off = 900/unit, x2 = 1800
@@ -94,4 +95,17 @@ test('computeReturnRefund: PENDING/GOOD treated as refundable', () => {
     ],
   };
   assert.equal(computeReturnRefund(ret).itemsRefund, 100);
+});
+
+test('SELLER_FAULT_REASONS contains the three seller-fault reasons', () => {
+  assert.deepEqual([...SELLER_FAULT_REASONS].sort(), ['DAMAGED_IN_TRANSIT', 'DEFECTIVE', 'WRONG_ITEM']);
+});
+
+test('decideShippingRefund: seller-fault reason refunds shipping regardless of allReturned', () => {
+  assert.equal(decideShippingRefund('DEFECTIVE', false), true);
+});
+
+test('decideShippingRefund: non-seller-fault refunds shipping only when all items returned', () => {
+  assert.equal(decideShippingRefund('CHANGED_MIND', true), true);
+  assert.equal(decideShippingRefund('CHANGED_MIND', false), false);
 });
