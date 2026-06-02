@@ -22,3 +22,17 @@ export const computeItemRefund = (item, returnQty) => {
   const unit = round2(price * (1 - disc / 100));
   return round2(unit * (Number(returnQty) || 0));
 };
+
+/**
+ * Which item list is the source of truth for a return.
+ * M3: when the order was modified post-purchase, return against what was
+ * actually billed/shipped (modifiedItems); otherwise the original orderItems.
+ * @param {{ modified?:boolean, orderItems:Array, modifiedItems?:Array }} order
+ * @returns {Array}
+ */
+export const resolveOrderItems = (order) => {
+  if (order?.modified && Array.isArray(order.modifiedItems) && order.modifiedItems.length > 0) {
+    return order.modifiedItems;
+  }
+  return order?.orderItems || [];
+};

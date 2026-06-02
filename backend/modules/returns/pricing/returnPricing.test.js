@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeItemRefund } from './returnPricing.js';
+import { computeItemRefund, resolveOrderItems } from './returnPricing.js';
 
 test('computeItemRefund: price × (1 - disc%) × qty, rounded to 2dp', () => {
   // 1000 MRP, 10% off = 900/unit, x2 = 1800
@@ -27,4 +27,31 @@ test('computeItemRefund: accepts `discount` alias when `disc` absent', () => {
 test('computeItemRefund: rounds half to 2 decimals', () => {
   // 333 * (1 - 0.15) = 283.05, x1
   assert.equal(computeItemRefund({ price: 333, disc: 15 }, 1), 283.05);
+});
+
+test('resolveOrderItems: uses modifiedItems when order.modified is true and non-empty', () => {
+  const order = {
+    modified: true,
+    orderItems: [{ product: 'a', size: 'M', qty: 1 }],
+    modifiedItems: [{ product: 'b', size: 'L', qty: 2 }],
+  };
+  assert.deepEqual(resolveOrderItems(order), order.modifiedItems);
+});
+
+test('resolveOrderItems: falls back to orderItems when not modified', () => {
+  const order = {
+    modified: false,
+    orderItems: [{ product: 'a', size: 'M', qty: 1 }],
+    modifiedItems: [],
+  };
+  assert.deepEqual(resolveOrderItems(order), order.orderItems);
+});
+
+test('resolveOrderItems: falls back to orderItems when modified but modifiedItems empty', () => {
+  const order = {
+    modified: true,
+    orderItems: [{ product: 'a', size: 'M', qty: 1 }],
+    modifiedItems: [],
+  };
+  assert.deepEqual(resolveOrderItems(order), order.orderItems);
 });
