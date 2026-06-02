@@ -3,6 +3,7 @@ import {
   generateDocumentNumber,
   calculateTotals,
 } from '../../billing/utils/quotationUtils.js';
+import { isItemRefundable } from '../pricing/returnPricing.js';
 
 /**
  * Transform flat return items into nested billing format.
@@ -12,8 +13,9 @@ const groupReturnItemsToNested = (returnItems) => {
   const grouped = {};
 
   for (const item of returnItems) {
-    // Skip NOT_RECEIVED items — they don't get refunded
-    if (item.qcDisposition === 'NOT_RECEIVED') continue;
+    // Skip items that are not refundable (NOT_RECEIVED never arrived;
+    // UNSELLABLE written off) so the credit-note total matches the cash refund.
+    if (!isItemRefundable(item)) continue;
 
     const variant = {
       size: item.size || '',
