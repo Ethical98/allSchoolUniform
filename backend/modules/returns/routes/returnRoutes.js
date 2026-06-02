@@ -5,6 +5,8 @@ import {
   createMyReturnRequest,
   getMyReturnsByOrder,
   getMyReturnById,
+  cancelMyReturnRequest,
+  getMyReturnEligibility,
   getReturnRequests,
   getReturnsDashboard,
   getReturnsByOrder,
@@ -25,7 +27,9 @@ const router = express.Router();
 
 // Customer-facing routes (protect only, no admin required)
 router.route('/my').post(protect, createMyReturnRequest);
+router.route('/my/order/:orderId/eligibility').get(protect, getMyReturnEligibility);
 router.route('/my/order/:orderId').get(protect, getMyReturnsByOrder);
+router.route('/my/:id/cancel').patch(protect, cancelMyReturnRequest);
 router.route('/my/:id').get(protect, getMyReturnById);
 
 // All routes below require admin auth
