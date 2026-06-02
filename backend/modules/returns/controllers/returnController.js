@@ -434,12 +434,9 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
     }
 
     case 'REFUND_INITIATED': {
-      // Recalculate effective refund:
-      // - NOT_RECEIVED items: excluded (never arrived)
-      // - UNSELLABLE items: excluded (refundAmount zeroed by processQCDispositions)
-      // - DAMAGED items: full refund (damage in transit = seller responsibility)
-      // - GOOD items: full refund
-      // Effective refund (items only) — module zeroes UNSELLABLE & NOT_RECEIVED.
+      // Effective refund (items only) via returnPricing: NOT_RECEIVED & UNSELLABLE
+      // contribute 0; DAMAGED & GOOD get full refund. Shipping is added to the
+      // order ledger separately below.
       const { itemsRefund } = computeReturnRefund(returnRequest);
       returnRequest.refundAmount = Number(itemsRefund.toFixed(2));
 
