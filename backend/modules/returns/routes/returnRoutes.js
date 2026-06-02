@@ -2,6 +2,9 @@ import express from 'express';
 import { protect, isAdmin } from '../../../Middleware/authMiddleware.js';
 import {
   createReturnRequest,
+  createMyReturnRequest,
+  getMyReturnsByOrder,
+  getMyReturnById,
   getReturnRequests,
   getReturnsDashboard,
   getReturnsByOrder,
@@ -14,12 +17,18 @@ import {
   addAdminNote,
   assignReturnCourier,
   trackReturnPickup,
+  initiateReturnPickup,
   generateReturnLabel,
 } from '../controllers/returnController.js';
 
 const router = express.Router();
 
-// All routes require admin auth
+// Customer-facing routes (protect only, no admin required)
+router.route('/my').post(protect, createMyReturnRequest);
+router.route('/my/order/:orderId').get(protect, getMyReturnsByOrder);
+router.route('/my/:id').get(protect, getMyReturnById);
+
+// All routes below require admin auth
 router.use(protect, isAdmin);
 
 // Dashboard & list
@@ -39,6 +48,7 @@ router.route('/:id/notes').post(addAdminNote);
 // Reverse shipping
 router.route('/:id/assign-courier').post(assignReturnCourier);
 router.route('/:id/track-pickup').get(trackReturnPickup);
+router.route('/:id/initiate-pickup').post(initiateReturnPickup);
 router.route('/:id/label').get(generateReturnLabel);
 
 export default router;

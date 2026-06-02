@@ -18,6 +18,7 @@ import {
     processRefund,
     addReturnNote,
     generateReturnLabel,
+    initiateReturnPickup,
 } from '../actions/returnActions';
 import {
     RETURN_UPDATE_STATUS_RESET,
@@ -26,6 +27,8 @@ import {
     RETURN_EXCHANGE_ORDER_RESET,
     RETURN_REFUND_RESET,
     RETURN_NOTE_RESET,
+    RETURN_LABEL_RESET,
+    RETURN_INITIATE_PICKUP_RESET,
 } from '../constants/returnConstants';
 import { logout } from '../actions/userActions';
 
@@ -66,6 +69,12 @@ const ReturnDetailScreen = ({ match, history }) => {
 
     const returnNote = useSelector((state) => state.returnNote);
     const { loading: noteLoading, success: noteSuccess, error: noteError } = returnNote;
+
+    const returnLabel = useSelector((state) => state.returnLabel);
+    const { loading: labelLoading, success: labelSuccess, error: labelError } = returnLabel;
+
+    const returnInitiatePickup = useSelector((state) => state.returnInitiatePickup);
+    const { loading: initiateLoading, success: initiateSuccess, error: initiateError } = returnInitiatePickup;
 
     useEffect(() => {
         if (!userInfo) {
@@ -127,6 +136,26 @@ const ReturnDetailScreen = ({ match, history }) => {
             setNoteText('');
         }
     }, [noteSuccess, dispatch, returnId]);
+
+    useEffect(() => {
+        if (labelSuccess) {
+            dispatch(getReturnDetails(returnId));
+            dispatch({ type: RETURN_LABEL_RESET });
+        }
+    }, [labelSuccess, dispatch, returnId]);
+
+    useEffect(() => {
+        if (initiateSuccess) {
+            dispatch(getReturnDetails(returnId));
+            dispatch({ type: RETURN_INITIATE_PICKUP_RESET });
+        }
+    }, [initiateSuccess, dispatch, returnId]);
+
+    useEffect(() => {
+        return () => {
+            dispatch({ type: RETURN_LABEL_RESET });
+        };
+    }, [dispatch]);
 
     const handleStatusUpdate = (newStatus, extra = {}) => {
         dispatch(updateReturnStatus(returnId, { status: newStatus, ...extra }));
@@ -190,6 +219,16 @@ const ReturnDetailScreen = ({ match, history }) => {
                         disabled={statusLoading}
                     >
                         Schedule Pickup
+                    </Button>
+                )}
+                {nextStatuses.includes('IN_TRANSIT') && (
+                    <Button
+                        variant="info"
+                        className="mr-2 mb-1"
+                        onClick={() => handleStatusUpdate('IN_TRANSIT')}
+                        disabled={statusLoading}
+                    >
+                        Mark In Transit
                     </Button>
                 )}
                 {nextStatuses.includes('PICKUP_FAILED') && (
@@ -306,7 +345,9 @@ const ReturnDetailScreen = ({ match, history }) => {
             {exError && <Message variant="danger">{exError}</Message>}
             {refundError && <Message variant="danger">{refundError}</Message>}
             {noteError && <Message variant="danger">{noteError}</Message>}
-            {(statusLoading || qcLoading || cnLoading || exLoading || refundLoading || noteLoading) && <Loader />}
+            {labelError && <Message variant="danger">{labelError}</Message>}
+            {initiateError && <Message variant="danger">{initiateError}</Message>}
+            {(statusLoading || qcLoading || cnLoading || exLoading || refundLoading || noteLoading || labelLoading || initiateLoading) && <Loader />}
 
             {loading ? (
                 <Loader />
@@ -551,15 +592,27 @@ const ReturnDetailScreen = ({ match, history }) => {
                                                     Track Shipment
                                                 </a>
                                             )}
-                                            {ret.reverseShipping?.providerShipmentId && !ret.reverseShipping?.labelUrl && (
-                                                <Button
-                                                    variant="outline-primary"
-                                                    size="sm"
-                                                    className="mt-2"
-                                                    onClick={() => dispatch(generateReturnLabel(returnId))}
-                                                >
-                                                    Generate Return Label
-                                                </Button>
+                                            {ret.reverseShipping?.providerShipmentId && (
+                                                <div className="mt-2 d-flex gap-2" style={{ gap: '8px' }}>
+                                                    <Button
+                                                        variant="outline-warning"
+                                                        size="sm"
+                                                        disabled={initiateLoading}
+                                                        onClick={() => dispatch(initiateReturnPickup(returnId))}
+                                                    >
+                                                        {initiateLoading ? 'Requesting…' : '📦 Initiate Pickup on ShipRocket'}
+                                                    </Button>
+                                                    {!ret.reverseShipping?.labelUrl && (
+                                                        <Button
+                                                            variant="outline-primary"
+                                                            size="sm"
+                                                            disabled={labelLoading}
+                                                            onClick={() => dispatch(generateReturnLabel(returnId))}
+                                                        >
+                                                            {labelLoading ? 'Generating…' : 'Generate Return Label'}
+                                                        </Button>
+                                                    )}
+                                                </div>
                                             )}
                                             {ret.reverseShipping?.labelUrl && (
                                                 <p className="mt-2">

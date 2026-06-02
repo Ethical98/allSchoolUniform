@@ -82,6 +82,12 @@ export const shippingApi = async (method, endpoint, options = {}) => {
   } catch (error) {
     const errMsg = error.response?.data?.message || error.response?.data?.errors || error.message;
 
+    // Detailed console log for debugging API rejections
+    console.error(`[ShippingAPI FAIL] ${action} | ${method.toUpperCase()} ${endpoint}`);
+    console.error('[ShippingAPI FAIL] REQUEST PAYLOAD:', JSON.stringify(data || params, null, 2));
+    console.error('[ShippingAPI FAIL] RESPONSE STATUS:', error.response?.status);
+    console.error('[ShippingAPI FAIL] RESPONSE BODY:', JSON.stringify(error.response?.data, null, 2));
+
     // Log failed call
     await ShippingLog.create({
       orderId,

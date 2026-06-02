@@ -11,6 +11,7 @@ import {
   RETURN_BY_ORDER_REQUEST, RETURN_BY_ORDER_SUCCESS, RETURN_BY_ORDER_FAIL, RETURN_BY_ORDER_RESET,
   RETURN_NOTE_REQUEST, RETURN_NOTE_SUCCESS, RETURN_NOTE_FAIL, RETURN_NOTE_RESET,
   RETURN_LABEL_REQUEST, RETURN_LABEL_SUCCESS, RETURN_LABEL_FAIL, RETURN_LABEL_RESET,
+  RETURN_INITIATE_PICKUP_REQUEST, RETURN_INITIATE_PICKUP_SUCCESS, RETURN_INITIATE_PICKUP_FAIL, RETURN_INITIATE_PICKUP_RESET,
 } from '../constants/returnConstants';
 
 export const returnListReducer = (state = { returns: [] }, action) => {
@@ -118,6 +119,16 @@ export const returnNoteReducer = (state = {}, action) => {
     case RETURN_NOTE_SUCCESS: return { loading: false, success: true };
     case RETURN_NOTE_FAIL: return { loading: false, error: action.payload };
     case RETURN_NOTE_RESET: return {};
+    default: return state;
+  }
+};
+
+export const returnInitiatePickupReducer = (state = {}, action) => {
+  switch (action.type) {
+    case RETURN_INITIATE_PICKUP_REQUEST: return { loading: true };
+    case RETURN_INITIATE_PICKUP_SUCCESS: return { loading: false, success: true };
+    case RETURN_INITIATE_PICKUP_FAIL: return { loading: false, error: action.payload };
+    case RETURN_INITIATE_PICKUP_RESET: return {};
     default: return state;
   }
 };

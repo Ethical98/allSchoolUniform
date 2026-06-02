@@ -15,7 +15,8 @@ const formatDate = (date) => {
 export const mapReturnToShiprocketPayload = (
   returnRequest,
   originalOrder,
-  user
+  user,
+  warehouseLocation = null
 ) => {
   // Fallback to customerName (always populated on ReturnRequest)
   const fullName = originalOrder.name || returnRequest.customerName || '';
@@ -49,17 +50,17 @@ export const mapReturnToShiprocketPayload = (
     pickup_phone: pickup.phone || originalOrder.phone || '',
     pickup_isd_code: '+91',
 
-    // Ship TO warehouse
-    shipping_customer_name:
-      process.env.COMPANY_NAME || 'All School Uniform',
+    // Return destination — ship TO this warehouse address
+    // Prefer live ShipRocket pickup-location data; fall back to env vars
+    shipping_customer_name: warehouseLocation?.name || process.env.WAREHOUSE_NAME || 'All School Uniform',
     shipping_last_name: 'Warehouse',
-    shipping_address: process.env.WAREHOUSE_ADDRESS || '',
-    shipping_city: process.env.WAREHOUSE_CITY || '',
-    shipping_pincode: String(process.env.WAREHOUSE_PINCODE || ''),
-    shipping_state: process.env.WAREHOUSE_STATE || '',
+    shipping_address: warehouseLocation?.address || process.env.WAREHOUSE_ADDRESS || '',
+    shipping_city: warehouseLocation?.city || process.env.WAREHOUSE_CITY || '',
+    shipping_state: warehouseLocation?.state || process.env.WAREHOUSE_STATE || '',
+    shipping_pincode: String(warehouseLocation?.pin_code || process.env.WAREHOUSE_PINCODE || ''),
     shipping_country: 'India',
-    shipping_email: process.env.ADMIN_EMAIL || '',
-    shipping_phone: process.env.SUPPORT_PHONE || '',
+    shipping_phone: warehouseLocation?.phone || process.env.WAREHOUSE_PHONE || '',
+    shipping_email: warehouseLocation?.email || process.env.WAREHOUSE_EMAIL || '',
     shipping_isd_code: '+91',
 
     order_items: returnRequest.items.map((item) => {

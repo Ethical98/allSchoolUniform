@@ -35,9 +35,11 @@ const STATUS_PRIORITY = {
 const REVERSE_STATUS_MAP = {
   3:  { reverseStatus: 'PICKUP_SCHEDULED' },
   6:  { reverseStatus: 'IN_TRANSIT', returnStatus: 'IN_TRANSIT' },
-  9:  { reverseStatus: 'IN_TRANSIT' },    // in-transit scan: updates reverseShipping.status only, no return status change
+  9:  { reverseStatus: 'IN_TRANSIT' },    // in-transit scan: updates reverseShipping.status only
   7:  { reverseStatus: 'RECEIVED', returnStatus: 'RECEIVED' },
   14: { reverseStatus: 'PICKUP_FAILED', returnStatus: 'PICKUP_FAILED' },
+  16: { reverseStatus: 'CANCELLED', returnStatus: 'CANCELLED' }, // cancelled by ShipRocket/courier
+  17: { reverseStatus: 'CANCELLED', returnStatus: 'CANCELLED' }, // RTO/cancelled variant
 };
 
 const handleReverseWebhook = async (awb, statusCode) => {

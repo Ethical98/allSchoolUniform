@@ -12,6 +12,7 @@ import {
   RETURN_BY_ORDER_REQUEST, RETURN_BY_ORDER_SUCCESS, RETURN_BY_ORDER_FAIL,
   RETURN_NOTE_REQUEST, RETURN_NOTE_SUCCESS, RETURN_NOTE_FAIL,
   RETURN_LABEL_REQUEST, RETURN_LABEL_SUCCESS, RETURN_LABEL_FAIL, RETURN_LABEL_RESET,
+  RETURN_INITIATE_PICKUP_REQUEST, RETURN_INITIATE_PICKUP_SUCCESS, RETURN_INITIATE_PICKUP_FAIL,
 } from '../constants/returnConstants';
 
 const getConfig = (getState) => {
@@ -140,6 +141,18 @@ export const addReturnNote = (id, note) => async (dispatch, getState) => {
     dispatch({ type: RETURN_NOTE_SUCCESS, payload: data });
   } catch (error) {
     dispatch({ type: RETURN_NOTE_FAIL, payload: error.response?.data?.message || error.message });
+  }
+};
+
+export const initiateReturnPickup = (id) => async (dispatch, getState) => {
+  try {
+    dispatch({ type: RETURN_INITIATE_PICKUP_REQUEST });
+    const config = getConfig(getState);
+    const { data } = await api.post(`/api/returns/${id}/initiate-pickup`, {}, config);
+    dispatch({ type: RETURN_INITIATE_PICKUP_SUCCESS, payload: data });
+    dispatch(getReturnDetails(id));
+  } catch (error) {
+    dispatch({ type: RETURN_INITIATE_PICKUP_FAIL, payload: error.response?.data?.message || error.message });
   }
 };
 

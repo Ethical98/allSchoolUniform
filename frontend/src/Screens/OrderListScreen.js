@@ -82,23 +82,23 @@ const OrderListScreen = ({ history, location }) => {
             render: (item) =>
                 item.tracking.isCanceled ? (
                     <p style={{ color: 'red' }}>
-                        <strong>Canceled: {item.tracking.canceledAt.substring(0, 10)}</strong>
+                        <strong>Canceled: {item.tracking.canceledAt?.substring(0, 10)}</strong>
                     </p>
                 ) : item.tracking.isDelivered ? (
                     <p style={{ color: 'darkGreen' }}>
-                        <strong>Delivered: {item.tracking.deliveredAt.substring(0, 10)}</strong>
+                        <strong>Delivered: {item.tracking.deliveredAt?.substring(0, 10)}</strong>
                     </p>
                 ) : item.tracking.isOutForDelivery ? (
-                    <p style={{ color: 'yellow' }}>
-                        <strong>`Out For Delivery: {item.tracking.outForDeliveryAt.substring(0, 10)}`</strong>
+                    <p style={{ color: 'orange' }}>
+                        <strong>Out For Delivery: {item.tracking.outForDeliveryAt?.substring(0, 10)}</strong>
                     </p>
                 ) : item.tracking.isProcessing ? (
                     <p style={{ color: 'purple' }}>
-                        <strong>Processed: {item.tracking.processedAt.substring(0, 10)}</strong>
+                        <strong>Processed: {item.tracking.processedAt?.substring(0, 10)}</strong>
                     </p>
                 ) : item.tracking.isConfirmed ? (
                     <p style={{ color: 'blue' }}>
-                        <strong>Confirmed: {item.tracking.confirmedAt.substring(0, 10)}</strong>
+                        <strong>Confirmed: {item.tracking.confirmedAt?.substring(0, 10)}</strong>
                     </p>
                 ) : (
                     'Received'

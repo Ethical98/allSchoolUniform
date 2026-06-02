@@ -334,10 +334,45 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
       // Create return order on Shiprocket
       const user = await User.findById(returnRequest.customer);
       const originalOrder = await Order.findById(returnRequest.order);
+
+      // Fetch warehouse address from ShipRocket (same source as order-detail UI)
+      // Shiprocket response: { data: { shipping_address: [...] } }
+      let warehouseLocation = null;
+      try {
+        const locData = await shippingApi('get', '/settings/company/pickup', {
+          action: 'PICKUP_LOCATIONS',
+          orderId: returnRequest.order,
+          asuOrderId: returnRequest.orderId,
+        });
+        const locations = locData?.data?.shipping_address || locData?.shipping_address || [];
+        if (!Array.isArray(locations)) {
+          console.warn('[ReturnPickup] Unexpected pickup locations shape:', JSON.stringify(locData)?.slice(0, 200));
+        } else {
+          const targetName = process.env.SHIPPING_PICKUP_LOCATION || '';
+          warehouseLocation = (targetName
+            ? locations.find((l) => l.pickup_location?.toLowerCase() === targetName.toLowerCase())
+            : null) || locations[0] || null;
+        }
+      } catch (e) {
+        console.warn('[ReturnPickup] Could not fetch pickup locations:', e.message);
+      }
+
+      // Ensure we have a warehouse address before calling Shiprocket
+      const resolvedWarehouseAddress =
+        warehouseLocation?.address || process.env.WAREHOUSE_ADDRESS || '';
+      if (!resolvedWarehouseAddress) {
+        throw new Error(
+          'Warehouse address is not configured. Set WAREHOUSE_ADDRESS in .env or add a pickup location named "' +
+          (process.env.SHIPPING_PICKUP_LOCATION || 'ALLSCHOOLUNIFORM.COM') +
+          '" in Shiprocket settings.'
+        );
+      }
+
       const payload = mapReturnToShiprocketPayload(
         returnRequest,
         originalOrder,
-        user
+        user,
+        warehouseLocation
       );
 
       // Override weight/dimensions from admin input
@@ -924,6 +959,42 @@ export const trackReturnPickup = asyncHandler(async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// @desc    Initiate pickup request on ShipRocket (schedule the actual pickup slot)
+// @route   POST /api/returns/:id/initiate-pickup
+// @access  Admin
+// ─────────────────────────────────────────────────────────────────────────────
+export const initiateReturnPickup = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+
+  if (!returnRequest.reverseShipping?.providerShipmentId) {
+    res.status(400);
+    throw new Error('No Shiprocket shipment exists for this return. Schedule pickup first.');
+  }
+
+  const data = await shippingApi('post', '/courier/generate/pickup', {
+    data: { shipment_id: [Number(returnRequest.reverseShipping.providerShipmentId)] },
+    action: 'CREATE_RETURN_ORDER',
+    orderId: returnRequest.order,
+    asuOrderId: returnRequest.orderId,
+  });
+
+  returnRequest.reverseShipping.pickupInitiatedAt = new Date();
+  returnRequest.timeline.push({
+    action: 'NOTE',
+    note: `Pickup initiated on ShipRocket (response: ${data?.response?.message || 'success'})`,
+    performedBy: req.user._id,
+    performedByName: req.user.name,
+  });
+  await returnRequest.save();
+
+  res.json({ message: 'Pickup initiated', data, returnRequest });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // @desc    Generate shipping label for reverse pickup
 // @route   GET /api/returns/:id/label
 // @access  Admin
@@ -956,4 +1027,168 @@ export const generateReturnLabel = asyncHandler(async (req, res) => {
   }
 
   res.json({ labelUrl, returnRequest });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Customer: create a return request for their own order
+// @route   POST /api/returns/my
+// @access  Protected (customer)
+// ─────────────────────────────────────────────────────────────────────────────
+export const createMyReturnRequest = asyncHandler(async (req, res) => {
+  const { order: orderId, items, reason, reasonDetails, evidenceImages } = req.body;
+
+  if (!orderId || !reason || !items || items.length === 0) {
+    res.status(400);
+    throw new Error('order, reason, and items are required');
+  }
+
+  const lockKey = `return:lock:${orderId}`;
+  const lockAcquired = await acquireLock(lockKey, 30);
+  if (!lockAcquired) {
+    res.status(409);
+    throw new Error('Another return is being created for this order. Please try again.');
+  }
+
+  try {
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      res.status(404);
+      throw new Error('Order not found');
+    }
+
+    // Ensure order belongs to the requesting customer
+    if (order.user.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorised to return this order');
+    }
+
+    validateOrderEligibility(order);
+    validateReturnWindow(order, false);
+
+    // Resolve order items by _id first so checkOverReturn gets product+size
+    const returnItems = items.map((reqItem) => {
+      const orderItem = order.orderItems.find(
+        (oi) => oi._id.toString() === reqItem.orderItemId
+      );
+      if (!orderItem) throw new Error(`Order item ${reqItem.orderItemId} not found in order`);
+
+      const discountedPrice = orderItem.price * (1 - (orderItem.disc || 0) / 100);
+      const refundAmount = discountedPrice * reqItem.returnQty;
+
+      return {
+        product: orderItem.product,
+        productName: orderItem.name,
+        SKU: orderItem.productCode || '',
+        size: orderItem.size,
+        image: orderItem.image,
+        originalQty: orderItem.qty,
+        returnQty: reqItem.returnQty,
+        price: orderItem.price,
+        disc: orderItem.disc || 0,
+        tax: orderItem.tax || 0,
+        refundAmount: Number(refundAmount.toFixed(2)),
+      };
+    });
+
+    // checkOverReturn expects items with { product, size, returnQty }
+    await checkOverReturn(orderId, returnItems, order.orderItems);
+
+    const user = await User.findById(order.user);
+
+    const totalRefundAmount = returnItems.reduce((sum, item) => sum + item.refundAmount, 0);
+
+    const refundShipping = await shouldRefundShipping(order, reason, returnItems);
+    const shippingRefundAmount = refundShipping ? order.shippingPrice || 0 : 0;
+
+    const resolvedPickupAddress = {
+      address: order.shippingAddress?.address,
+      city: order.shippingAddress?.city,
+      state: order.shippingAddress?.state,
+      postalCode: order.shippingAddress?.postalCode,
+      country: order.shippingAddress?.country || 'India',
+      phone: order.phone || '',
+    };
+
+    const returnRequest = await ReturnRequest.create({
+      type: 'RETURN',
+      status: 'INITIATED',
+      order: order._id,
+      orderId: order.orderId,
+      invoiceNumber: order.invoiceNumber || '',
+      customer: order.user,
+      customerName: user?.name || order.name,
+      customerEmail: user?.email || '',
+      customerPhone: order.phone || user?.phone || '',
+      items: returnItems,
+      reason,
+      reasonDetails: reasonDetails || '',
+      evidenceImages: evidenceImages || [],
+      pickupAddress: resolvedPickupAddress,
+      refundAmount: Number(totalRefundAmount.toFixed(2)),
+      shippingRefundAmount,
+      billType: order.billType || 'CGST',
+      timeline: [{
+        action: 'CREATED',
+        toStatus: 'INITIATED',
+        note: `Return request created by customer. Reason: ${reason}`,
+        performedBy: req.user._id,
+        performedByName: req.user.name,
+      }],
+      createdBy: req.user._id,
+      createdByName: req.user.name,
+    });
+
+    order.hasReturns = true;
+    await order.save();
+
+    sendReturnEmail(returnRequest, 'INITIATED').catch((err) => {
+      console.error('Return initiated email failed (non-blocking):', err.message);
+    });
+
+    res.status(201).json(returnRequest);
+  } catch (err) {
+    console.error('[createMyReturnRequest] error:', err?.message, err?.stack?.split('\n')[1]);
+    throw err;
+  } finally {
+    await releaseLock(lockKey);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Customer: get returns for their own order
+// @route   GET /api/returns/my/order/:orderId
+// @access  Protected (customer)
+// ─────────────────────────────────────────────────────────────────────────────
+export const getMyReturnsByOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.orderId).select('user');
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+  if (order.user.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorised');
+  }
+
+  const returns = await ReturnRequest.find({ order: req.params.orderId }).sort({ createdAt: -1 });
+  res.json(returns);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Customer: get a single return by its MongoDB _id (must own it)
+// @route   GET /api/returns/my/:id
+// @access  Protected (customer)
+// ─────────────────────────────────────────────────────────────────────────────
+export const getMyReturnById = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+  if (returnRequest.customer.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorised');
+  }
+  res.json(returnRequest);
 });
