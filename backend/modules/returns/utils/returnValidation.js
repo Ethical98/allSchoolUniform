@@ -1,5 +1,5 @@
 import ReturnRequest from '../models/ReturnRequestModel.js';
-import { decideShippingRefund } from '../pricing/returnPricing.js';
+import { decideShippingRefund, resolveOrderItems } from '../pricing/returnPricing.js';
 
 export const RETURN_WINDOW_DAYS = 7;
 
@@ -180,7 +180,9 @@ export const allOrderItemsReturned = async (order, pendingItems = []) => {
     returnedMap[key] = (returnedMap[key] || 0) + item.returnQty;
   }
 
-  for (const orderItem of order.orderItems) {
+  // M3: measure "all returned" against what was actually billed/shipped.
+  const sourceItems = resolveOrderItems(order);
+  for (const orderItem of sourceItems) {
     const key = `${orderItem.product}:${orderItem.size}`;
     if ((returnedMap[key] || 0) < orderItem.qty) {
       return false;

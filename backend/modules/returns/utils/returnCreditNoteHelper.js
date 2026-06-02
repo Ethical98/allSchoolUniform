@@ -14,7 +14,9 @@ const groupReturnItemsToNested = (returnItems) => {
 
   for (const item of returnItems) {
     // Skip items that are not refundable (NOT_RECEIVED never arrived;
-    // UNSELLABLE written off) so the credit-note total matches the cash refund.
+    // UNSELLABLE written off) so the credit note reflects the same items as the
+    // cash refund. (Totals may differ by sub-rupee rounding: calculateTotals
+    // rounds grandTotal to whole rupees, refundAmount is rounded to 2dp.)
     if (!isItemRefundable(item)) continue;
 
     const variant = {

@@ -64,14 +64,14 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
     // Validate 7-day return window
     const windowInfo = validateReturnWindow(order, overrideReturnWindow);
 
-    // Validate over-return
-    await checkOverReturn(orderId, items, order.orderItems);
+    // M3: resolve against modifiedItems when the order was modified post-purchase.
+    const sourceItems = resolveOrderItems(order);
+
+    // Validate over-return against the same item list used for pricing
+    await checkOverReturn(orderId, items, sourceItems);
 
     // Fetch user for denormalization
     const user = await User.findById(order.user);
-
-    // M3: resolve against modifiedItems when the order was modified post-purchase.
-    const sourceItems = resolveOrderItems(order);
 
     // Build return items from order items
     const returnItems = items.map((reqItem) => {

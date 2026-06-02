@@ -18,8 +18,8 @@
     "data:import": "node backend/seeder",
     "data:destroy": "node backend/seeder -d",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend",
-    "test": "node --test backend/modules/returns/**/*.test.js",
-    "test:returns": "node --test backend/modules/returns/**/*.test.js"
+    "test": "node --test \"backend/modules/returns/**/*.test.js\"",
+    "test:returns": "node --test \"backend/modules/returns/**/*.test.js\""
   },
   "repository": {
     "type": "git",
