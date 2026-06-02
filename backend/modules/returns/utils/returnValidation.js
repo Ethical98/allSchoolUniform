@@ -56,6 +56,33 @@ export const validateReturnWindow = (order, overrideReturnWindow = false) => {
 };
 
 /**
+ * Non-throwing eligibility summary for an order, for the customer eligibility
+ * endpoint. Mirrors the client useReturnEligibility rules so both agree (C1).
+ * @param {Object} order
+ * @returns {{ isEligible:boolean, returnableUntil:Date|null, reason:string|null, daysRemaining:number }}
+ */
+export const getReturnEligibility = (order) => {
+  if (!order) return { isEligible: false, returnableUntil: null, reason: 'not_found', daysRemaining: 0 };
+  if (order.tracking?.isCanceled)
+    return { isEligible: false, returnableUntil: null, reason: 'order_cancelled', daysRemaining: 0 };
+  if (!order.tracking?.isDelivered || !order.tracking?.deliveredAt)
+    return { isEligible: false, returnableUntil: null, reason: 'not_delivered', daysRemaining: 0 };
+
+  const deliveredAt = new Date(order.tracking.deliveredAt);
+  const returnableUntil = new Date(deliveredAt.getTime() + RETURN_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const daysRemaining = Math.max(0, Math.ceil((returnableUntil.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)));
+
+  if (now > returnableUntil)
+    return { isEligible: false, returnableUntil, reason: 'window_closed', daysRemaining: 0 };
+
+  if (order.hasReturns)
+    return { isEligible: false, returnableUntil, reason: 'already_returned', daysRemaining };
+
+  return { isEligible: true, returnableUntil, reason: null, daysRemaining };
+};
+
+/**
  * Check that the requested return quantities do not exceed what is returnable.
  * Aggregates already-returned quantities across all non-REJECTED/CANCELLED returns.
  *
