@@ -849,8 +849,11 @@ export const processRefund = asyncHandler(async (req, res) => {
   if (priceDifferenceCollected !== undefined)
     returnRequest.priceDifferenceCollected = priceDifferenceCollected;
 
-  // M2: the refund is actually processed when the admin records it here.
-  returnRequest.refundProcessedAt = new Date();
+  // M2: record when the refund was first processed (PATCH may be called again
+  // to update method/txn details — keep the original processed timestamp).
+  if (!returnRequest.refundProcessedAt) {
+    returnRequest.refundProcessedAt = new Date();
+  }
 
   returnRequest.timeline.push({
     action: 'REFUND_DETAILS_UPDATED',
