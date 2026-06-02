@@ -36,3 +36,35 @@ export const resolveOrderItems = (order) => {
   }
   return order?.orderItems || [];
 };
+
+// Dispositions that produce zero refund (item not refundable).
+const ZERO_REFUND_DISPOSITIONS = new Set(['NOT_RECEIVED', 'UNSELLABLE']);
+
+/**
+ * True when a return item should be refunded given its QC disposition.
+ * Items with no disposition yet (undefined/PENDING) are refundable.
+ */
+export const isItemRefundable = (item) =>
+  !ZERO_REFUND_DISPOSITIONS.has(item?.qcDisposition);
+
+/**
+ * Total refund for a return request, honoring per-item QC dispositions.
+ * Shipping refund is read from the return (set at create time by
+ * shouldRefundShipping); this function does not recompute it.
+ * @param {{ items:Array, shippingRefundAmount?:number }} returnRequest
+ * @returns {{ itemsRefund:number, shippingRefund:number, total:number }}
+ */
+export const computeReturnRefund = (returnRequest) => {
+  const items = returnRequest?.items || [];
+  const itemsRefund = round2(
+    items.reduce(
+      (sum, item) =>
+        isItemRefundable(item)
+          ? sum + computeItemRefund(item, item.returnQty)
+          : sum,
+      0
+    )
+  );
+  const shippingRefund = round2(Number(returnRequest?.shippingRefundAmount) || 0);
+  return { itemsRefund, shippingRefund, total: round2(itemsRefund + shippingRefund) };
+};

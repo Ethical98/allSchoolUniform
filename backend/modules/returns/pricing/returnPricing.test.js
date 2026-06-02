@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { computeItemRefund, resolveOrderItems } from './returnPricing.js';
+import { computeReturnRefund } from './returnPricing.js';
 
 test('computeItemRefund: price × (1 - disc%) × qty, rounded to 2dp', () => {
   // 1000 MRP, 10% off = 900/unit, x2 = 1800
@@ -54,4 +55,43 @@ test('resolveOrderItems: falls back to orderItems when modified but modifiedItem
     modifiedItems: [],
   };
   assert.deepEqual(resolveOrderItems(order), order.orderItems);
+});
+
+test('computeReturnRefund: sums item refunds, no QC dispositions yet', () => {
+  const ret = {
+    items: [
+      { price: 1000, disc: 10, returnQty: 1 }, // 900
+      { price: 500, disc: 0, returnQty: 2 },   // 1000
+    ],
+    shippingRefundAmount: 0,
+  };
+  const r = computeReturnRefund(ret);
+  assert.equal(r.itemsRefund, 1900);
+  assert.equal(r.shippingRefund, 0);
+  assert.equal(r.total, 1900);
+});
+
+test('computeReturnRefund: NOT_RECEIVED and UNSELLABLE contribute 0', () => {
+  const ret = {
+    items: [
+      { price: 1000, disc: 0, returnQty: 1, qcDisposition: 'GOOD' },        // 1000
+      { price: 1000, disc: 0, returnQty: 1, qcDisposition: 'DAMAGED' },     // 1000
+      { price: 1000, disc: 0, returnQty: 1, qcDisposition: 'UNSELLABLE' },  // 0
+      { price: 1000, disc: 0, returnQty: 1, qcDisposition: 'NOT_RECEIVED' },// 0
+    ],
+    shippingRefundAmount: 50,
+  };
+  const r = computeReturnRefund(ret);
+  assert.equal(r.itemsRefund, 2000);
+  assert.equal(r.shippingRefund, 50);
+  assert.equal(r.total, 2050);
+});
+
+test('computeReturnRefund: PENDING/GOOD treated as refundable', () => {
+  const ret = {
+    items: [
+      { price: 100, disc: 0, returnQty: 1, qcDisposition: 'PENDING' }, // 100
+    ],
+  };
+  assert.equal(computeReturnRefund(ret).itemsRefund, 100);
 });
