@@ -15,6 +15,7 @@ import {
 } from '../utils/returnValidation.js';
 import {
   computeItemRefund,
+  computeReturnRefund,
   resolveOrderItems,
 } from '../pricing/returnPricing.js';
 import { processQCDispositions } from '../utils/returnStockHandler.js';
@@ -69,17 +70,16 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
     // Fetch user for denormalization
     const user = await User.findById(order.user);
 
+    // M3: resolve against modifiedItems when the order was modified post-purchase.
+    const sourceItems = resolveOrderItems(order);
+
     // Build return items from order items
     const returnItems = items.map((reqItem) => {
-      const orderItem = order.orderItems.find(
+      const orderItem = sourceItems.find(
         (oi) =>
           oi.product.toString() === reqItem.product.toString() &&
           oi.size === reqItem.size
       );
-
-      const discountedPrice =
-        orderItem.price * (1 - (orderItem.disc || 0) / 100);
-      const refundAmount = discountedPrice * reqItem.returnQty;
 
       return {
         product: orderItem.product,
@@ -92,7 +92,7 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
         price: orderItem.price,
         disc: orderItem.disc || 0,
         tax: orderItem.tax || 0,
-        refundAmount: Number(refundAmount.toFixed(2)),
+        refundAmount: computeItemRefund(orderItem, reqItem.returnQty),
         // Exchange fields (only for EXCHANGE type)
         ...(type === 'EXCHANGE' && reqItem.exchangeProduct
           ? {
@@ -439,11 +439,9 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
       // - UNSELLABLE items: excluded (refundAmount zeroed by processQCDispositions)
       // - DAMAGED items: full refund (damage in transit = seller responsibility)
       // - GOOD items: full refund
-      const effectiveRefund = returnRequest.items.reduce((sum, item) => {
-        if (item.qcDisposition === 'NOT_RECEIVED') return sum;
-        return sum + (item.refundAmount || 0);
-      }, 0);
-      returnRequest.refundAmount = Number(effectiveRefund.toFixed(2));
+      // Effective refund (items only) — module zeroes UNSELLABLE & NOT_RECEIVED.
+      const { itemsRefund } = computeReturnRefund(returnRequest);
+      returnRequest.refundAmount = Number(itemsRefund.toFixed(2));
 
       // Auto-generate credit note if not yet created
       if (!returnRequest.creditNote) {
@@ -460,13 +458,13 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
         });
       }
 
-      // Update order's totalRefundedSoFar
+      // Update order's totalRefundedSoFar — items refund + shipping refund, once.
       const order = await Order.findById(returnRequest.order);
-      const totalRefund =
-        returnRequest.refundAmount + returnRequest.shippingRefundAmount;
+      const totalRefund = Number(
+        (returnRequest.refundAmount + (returnRequest.shippingRefundAmount || 0)).toFixed(2)
+      );
       validateRefundTotal(order, totalRefund);
-      order.totalRefundedSoFar =
-        (order.totalRefundedSoFar || 0) + totalRefund;
+      order.totalRefundedSoFar = (order.totalRefundedSoFar || 0) + totalRefund;
       await order.save();
       break;
     }
