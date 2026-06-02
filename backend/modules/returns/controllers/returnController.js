@@ -13,6 +13,10 @@ import {
   validateRefundTotal,
   shouldRefundShipping,
 } from '../utils/returnValidation.js';
+import {
+  computeItemRefund,
+  resolveOrderItems,
+} from '../pricing/returnPricing.js';
 import { processQCDispositions } from '../utils/returnStockHandler.js';
 import { generateReturnCreditNote } from '../utils/returnCreditNoteHelper.js';
 import { mapReturnToShiprocketPayload } from '../utils/returnShippingMapper.js';
@@ -1066,15 +1070,15 @@ export const createMyReturnRequest = asyncHandler(async (req, res) => {
     validateOrderEligibility(order);
     validateReturnWindow(order, false);
 
+    // M3: resolve against modifiedItems when the order was modified post-purchase.
+    const sourceItems = resolveOrderItems(order);
+
     // Resolve order items by _id first so checkOverReturn gets product+size
     const returnItems = items.map((reqItem) => {
-      const orderItem = order.orderItems.find(
+      const orderItem = sourceItems.find(
         (oi) => oi._id.toString() === reqItem.orderItemId
       );
       if (!orderItem) throw new Error(`Order item ${reqItem.orderItemId} not found in order`);
-
-      const discountedPrice = orderItem.price * (1 - (orderItem.disc || 0) / 100);
-      const refundAmount = discountedPrice * reqItem.returnQty;
 
       return {
         product: orderItem.product,
@@ -1087,12 +1091,12 @@ export const createMyReturnRequest = asyncHandler(async (req, res) => {
         price: orderItem.price,
         disc: orderItem.disc || 0,
         tax: orderItem.tax || 0,
-        refundAmount: Number(refundAmount.toFixed(2)),
+        refundAmount: computeItemRefund(orderItem, reqItem.returnQty),
       };
     });
 
     // checkOverReturn expects items with { product, size, returnQty }
-    await checkOverReturn(orderId, returnItems, order.orderItems);
+    await checkOverReturn(orderId, returnItems, sourceItems);
 
     const user = await User.findById(order.user);
 
