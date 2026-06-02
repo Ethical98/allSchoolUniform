@@ -149,6 +149,9 @@ const returnRequestSchema = mongoose.Schema(
     },
     reasonDetails: { type: String },
 
+    // Customer-uploaded evidence photo URLs (defect/damage proof)
+    evidenceImages: [{ type: String }],
+
     // Pickup / Reverse shipping
     pickupAddress: {
       address: { type: String },
@@ -167,6 +170,7 @@ const returnRequestSchema = mongoose.Schema(
       courierId: { type: Number },
       trackingUrl: { type: String },
       pickupScheduledDate: { type: Date },
+      pickupInitiatedAt: { type: Date },
       pickupTokenNumber: { type: String },
       labelUrl: { type: String },
       status: { type: String },
@@ -187,6 +191,7 @@ const returnRequestSchema = mongoose.Schema(
       enum: ['ORIGINAL_PAYMENT', 'BANK_TRANSFER', 'UPI', 'STORE_CREDIT'],
     },
     refundTransactionId: { type: String },
+    refundInitiatedAt: { type: Date },
     refundProcessedAt: { type: Date },
     refundBankDetails: {
       accountNumber: { type: String },
