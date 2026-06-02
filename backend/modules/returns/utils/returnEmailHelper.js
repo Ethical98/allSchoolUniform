@@ -42,6 +42,14 @@ const TEMPLATE_MAP = {
     template: 'returnRejectedEmail.html',
     subject: (r) => `Return Request #${r.returnId} Update`,
   },
+  CANCELLED: {
+    template: 'returnCancelledEmail.html',
+    subject: (r) => `Return Request #${r.returnId} Cancelled`,
+  },
+  PICKUP_FAILED: {
+    template: 'returnPickupFailedEmail.html',
+    subject: (r) => `Pickup Attempt Failed - #${r.returnId}`,
+  },
 };
 
 /**
@@ -76,12 +84,12 @@ const buildEmailData = (returnRequest) => {
     type: returnRequest.type,
     reason: returnRequest.reason.replace(/_/g, ' '),
     reasonDetails: returnRequest.reasonDetails || '',
-    refundAmount: formatPrice(returnRequest.refundAmount),
+    refundAmount: formatPrice(returnRequest.refundAmount || 0),
     shippingRefundAmount: formatPrice(
       returnRequest.shippingRefundAmount || 0
     ),
     totalRefund: formatPrice(
-      returnRequest.refundAmount + (returnRequest.shippingRefundAmount || 0)
+      (returnRequest.refundAmount || 0) + (returnRequest.shippingRefundAmount || 0)
     ),
     exchangeOrderNumber: returnRequest.exchangeOrderNumber || '',
     creditNoteNumber: returnRequest.creditNoteNumber || '',
