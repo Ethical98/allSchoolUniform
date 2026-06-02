@@ -12,12 +12,15 @@ import {
   validateQCCompleteness,
   validateRefundTotal,
   shouldRefundShipping,
+  getReturnEligibility,
 } from '../utils/returnValidation.js';
 import {
   computeItemRefund,
   computeReturnRefund,
   resolveOrderItems,
 } from '../pricing/returnPricing.js';
+import { canInitiateRefund } from '../state/transitionGuards.js';
+import { recomputeOrderReturnFlag } from '../utils/orderReturnFlag.js';
 import { processQCDispositions } from '../utils/returnStockHandler.js';
 import { generateReturnCreditNote } from '../utils/returnCreditNoteHelper.js';
 import { mapReturnToShiprocketPayload } from '../utils/returnShippingMapper.js';
@@ -434,11 +437,22 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
     }
 
     case 'REFUND_INITIATED': {
+      // H4: block cash refund when a live exchange/replacement order exists.
+      const linkedExchange = returnRequest.exchangeOrderId
+        ? await Order.findById(returnRequest.exchangeOrderId)
+        : null;
+      const refundGuard = canInitiateRefund(returnRequest, linkedExchange);
+      if (!refundGuard.ok) {
+        res.status(400);
+        throw new Error(refundGuard.reason);
+      }
+
       // Effective refund (items only) via returnPricing: NOT_RECEIVED & UNSELLABLE
       // contribute 0; DAMAGED & GOOD get full refund. Shipping is added to the
       // order ledger separately below.
       const { itemsRefund } = computeReturnRefund(returnRequest);
       returnRequest.refundAmount = Number(itemsRefund.toFixed(2));
+      returnRequest.refundInitiatedAt = new Date();
 
       // Auto-generate credit note if not yet created
       if (!returnRequest.creditNote) {
@@ -496,9 +510,6 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
     }
 
     case 'COMPLETED':
-      if (returnRequest.type === 'RETURN') {
-        returnRequest.refundProcessedAt = new Date();
-      }
       break;
 
     case 'CANCELLED': {
@@ -551,6 +562,11 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
   });
 
   await returnRequest.save();
+
+  // H3: a return ending in a terminal-negative state frees the order to be returned again.
+  if (status === 'REJECTED' || status === 'CANCELLED') {
+    await recomputeOrderReturnFlag(returnRequest.order);
+  }
 
   // Send email (non-blocking)
   sendReturnEmail(returnRequest, status).catch((err) => {
@@ -832,6 +848,9 @@ export const processRefund = asyncHandler(async (req, res) => {
   if (refundUpiId) returnRequest.refundUpiId = refundUpiId;
   if (priceDifferenceCollected !== undefined)
     returnRequest.priceDifferenceCollected = priceDifferenceCollected;
+
+  // M2: the refund is actually processed when the admin records it here.
+  returnRequest.refundProcessedAt = new Date();
 
   returnRequest.timeline.push({
     action: 'REFUND_DETAILS_UPDATED',
@@ -1190,4 +1209,65 @@ export const getMyReturnById = asyncHandler(async (req, res) => {
     throw new Error('Not authorised');
   }
   res.json(returnRequest);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Customer: cancel their own return (only while cancellable)
+// @route   PATCH /api/returns/my/:id/cancel
+// @access  Protected (customer)
+// ─────────────────────────────────────────────────────────────────────────────
+export const cancelMyReturnRequest = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id);
+  if (!returnRequest) {
+    res.status(404);
+    throw new Error('Return request not found');
+  }
+  if (returnRequest.customer.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorised');
+  }
+
+  // State machine decides if CANCELLED is legal from the current status.
+  validateTransition(returnRequest.status, 'CANCELLED', returnRequest.type);
+
+  const previousStatus = returnRequest.status;
+  returnRequest.status = 'CANCELLED';
+  returnRequest.timeline.push({
+    action: 'STATUS_CHANGE',
+    fromStatus: previousStatus,
+    toStatus: 'CANCELLED',
+    note: 'Cancelled by customer',
+    performedBy: req.user._id,
+    performedByName: req.user.name,
+  });
+  await returnRequest.save();
+
+  // H3: free the order to be returned again.
+  await recomputeOrderReturnFlag(returnRequest.order);
+
+  sendReturnEmail(returnRequest, 'CANCELLED').catch((err) => {
+    console.error('Return CANCELLED email failed (non-blocking):', err.message);
+  });
+
+  res.json(returnRequest);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Customer: eligibility summary for returning one of their orders
+// @route   GET /api/returns/my/order/:orderId/eligibility
+// @access  Protected (customer)
+// ─────────────────────────────────────────────────────────────────────────────
+export const getMyReturnEligibility = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.orderId).select(
+    'user tracking hasReturns'
+  );
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+  if (order.user.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorised');
+  }
+  res.json(getReturnEligibility(order));
 });
