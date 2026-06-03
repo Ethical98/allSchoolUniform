@@ -32,6 +32,14 @@ import {
 } from '../constants/returnConstants';
 import { logout } from '../actions/userActions';
 
+// QC disposition → react-bootstrap Badge variant (shared by both QC tables).
+const QC_BADGE_VARIANT = {
+    GOOD: 'success',
+    DAMAGED: 'danger',
+    UNSELLABLE: 'dark',
+    NOT_RECEIVED: 'secondary',
+};
+
 const ReturnDetailScreen = ({ match, history }) => {
     const returnId = match.params.id;
     const dispatch = useDispatch();
@@ -40,7 +48,7 @@ const ReturnDetailScreen = ({ match, history }) => {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
     const [showRefundModal, setShowRefundModal] = useState(false);
-    const [refundMethod, setRefundMethod] = useState('ORIGINAL');
+    const [refundMethod, setRefundMethod] = useState('ORIGINAL_PAYMENT');
     const [refundReference, setRefundReference] = useState('');
     const [refundAmount, setRefundAmount] = useState('');
     const [showNoteModal, setShowNoteModal] = useState(false);
@@ -172,7 +180,7 @@ const ReturnDetailScreen = ({ match, history }) => {
     const handleRefundSubmit = () => {
         dispatch(
             processRefund(returnId, {
-                refundMethod: refundMethod === 'ORIGINAL' ? 'ORIGINAL_PAYMENT' : refundMethod,
+                refundMethod,
                 refundTransactionId: refundReference || undefined,
             })
         );
@@ -261,7 +269,8 @@ const ReturnDetailScreen = ({ match, history }) => {
                         Start QC
                     </Button>
                 )}
-                {nextStatuses.includes('REFUND_INITIATED') && (
+                {nextStatuses.includes('REFUND_INITIATED') &&
+                 !(['EXCHANGE', 'REPLACEMENT'].includes(ret.type) && ret.exchangeOrderId) && (
                     <Button
                         variant="success"
                         className="mr-2 mb-1"
@@ -461,15 +470,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                                     <td>₹{item.price || 0}</td>
                                                     <td>
                                                         {item.qcDisposition ? (
-                                                            <Badge
-                                                                bg={
-                                                                    item.qcDisposition === 'GOOD'
-                                                                        ? 'success'
-                                                                        : item.qcDisposition === 'DAMAGED'
-                                                                        ? 'danger'
-                                                                        : 'warning'
-                                                                }
-                                                            >
+                                                            <Badge bg={QC_BADGE_VARIANT[item.qcDisposition] || 'warning'}>
                                                                 {item.qcDisposition}
                                                             </Badge>
                                                         ) : (
@@ -542,12 +543,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                                             <td>{item.size}</td>
                                                             <td>{item.returnQty}</td>
                                                             <td>
-                                                                <Badge bg={
-                                                                    item.qcDisposition === 'GOOD' ? 'success' :
-                                                                    item.qcDisposition === 'DAMAGED' ? 'warning' :
-                                                                    item.qcDisposition === 'UNSELLABLE' ? 'danger' :
-                                                                    item.qcDisposition === 'NOT_RECEIVED' ? 'secondary' : 'light'
-                                                                }>
+                                                                <Badge bg={QC_BADGE_VARIANT[item.qcDisposition] || 'warning'}>
                                                                     {item.qcDisposition || 'PENDING'}
                                                                 </Badge>
                                                             </td>
@@ -710,7 +706,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                     value={refundMethod}
                                     onChange={(e) => setRefundMethod(e.target.value)}
                                 >
-                                    <option value="ORIGINAL">Original Payment Method</option>
+                                    <option value="ORIGINAL_PAYMENT">Original Payment Method</option>
                                     <option value="BANK_TRANSFER">Bank Transfer</option>
                                     <option value="STORE_CREDIT">Store Credit</option>
                                     <option value="UPI">UPI</option>
