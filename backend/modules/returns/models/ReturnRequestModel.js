@@ -193,6 +193,10 @@ const returnRequestSchema = mongoose.Schema(
     refundTransactionId: { type: String },
     refundInitiatedAt: { type: Date },
     refundProcessedAt: { type: Date },
+    // Idempotency guard: true once this return's refund has been added to the
+    // order's totalRefundedSoFar ledger, so re-entering REFUND_INITIATED can't
+    // double-credit the order.
+    refundLedgerPosted: { type: Boolean, default: false },
     refundBankDetails: {
       accountNumber: { type: String },
       ifscCode: { type: String },

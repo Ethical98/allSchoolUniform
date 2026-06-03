@@ -16,3 +16,9 @@ test('schema declares reverseShipping.pickupInitiatedAt (H8)', () => {
     'reverseShipping.pickupInitiatedAt must be a declared path'
   );
 });
+
+test('schema declares refundLedgerPosted with default false (M-2)', () => {
+  const path = ReturnRequest.schema.path('refundLedgerPosted');
+  assert.ok(path, 'refundLedgerPosted must be a declared path');
+  assert.equal(path.getDefault(), false, 'refundLedgerPosted must default to false');
+});

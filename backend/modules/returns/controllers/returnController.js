@@ -470,13 +470,17 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
       }
 
       // Update order's totalRefundedSoFar — items refund + shipping refund, once.
-      const order = await Order.findById(returnRequest.order);
-      const totalRefund = Number(
-        (returnRequest.refundAmount + (returnRequest.shippingRefundAmount || 0)).toFixed(2)
-      );
-      validateRefundTotal(order, totalRefund);
-      order.totalRefundedSoFar = (order.totalRefundedSoFar || 0) + totalRefund;
-      await order.save();
+      // Idempotent: only post to the ledger if this return hasn't already (M-2).
+      if (!returnRequest.refundLedgerPosted) {
+        const order = await Order.findById(returnRequest.order);
+        const totalRefund = Number(
+          (returnRequest.refundAmount + (returnRequest.shippingRefundAmount || 0)).toFixed(2)
+        );
+        validateRefundTotal(order, totalRefund);
+        order.totalRefundedSoFar = (order.totalRefundedSoFar || 0) + totalRefund;
+        await order.save();
+        returnRequest.refundLedgerPosted = true;
+      }
       break;
     }
 
