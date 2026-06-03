@@ -10,7 +10,11 @@ const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
 const clampPct = (n) => Math.max(0, Math.min(100, Number(n) || 0));
 
 /**
- * Refund for a single line: price × (1 - disc%) × qty, rounded to 2dp.
+ * Refund for a single line = what the customer actually PAID for it.
+ * Matches the order-details display (OrderItemsList): the discount is computed
+ * on the whole line (price × qty) and rounded once, then subtracted — NOT
+ * applied-and-rounded per unit, which would diverge by up to ₹1 (e.g. ₹99 @25%
+ * ×2 paid 148, per-unit rounding gives 148.5 → 149).
  * Accepts `disc` (canonical) or `discount` (alias) for the discount percent.
  * @param {{ price:number, disc?:number, discount?:number }} item
  * @param {number} returnQty
@@ -19,8 +23,10 @@ const clampPct = (n) => Math.max(0, Math.min(100, Number(n) || 0));
 export const computeItemRefund = (item, returnQty) => {
   const price = Number(item?.price) || 0;
   const disc = clampPct(item?.disc ?? item?.discount ?? 0);
-  const unit = round2(price * (1 - disc / 100));
-  return round2(unit * (Number(returnQty) || 0));
+  const qty = Number(returnQty) || 0;
+  const lineMrp = price * qty;
+  const lineDiscount = disc > 0 ? Math.round((lineMrp * disc) / 100) : 0;
+  return round2(lineMrp - lineDiscount);
 };
 
 /**

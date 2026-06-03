@@ -4,8 +4,10 @@ import { computeItemRefund, resolveOrderItems } from './returnPricing.js';
 import { computeReturnRefund } from './returnPricing.js';
 import { SELLER_FAULT_REASONS, decideShippingRefund } from './returnPricing.js';
 
-test('computeItemRefund: price × (1 - disc%) × qty, rounded to 2dp', () => {
-  // 1000 MRP, 10% off = 900/unit, x2 = 1800
+// Refund equals what the customer actually PAID for the line, matching the
+// order-details display (OrderItemsList): price*qty - round(price*qty*disc/100).
+test('computeItemRefund: price*qty minus rounded line discount', () => {
+  // 1000 MRP, 10% off, x2: 2000 - round(200) = 1800
   assert.equal(computeItemRefund({ price: 1000, disc: 10 }, 2), 1800);
 });
 
@@ -26,9 +28,14 @@ test('computeItemRefund: accepts `discount` alias when `disc` absent', () => {
   assert.equal(computeItemRefund({ price: 200, discount: 50 }, 1), 100);
 });
 
-test('computeItemRefund: rounds half to 2 decimals', () => {
-  // 333 * (1 - 0.15) = 283.05, x1
-  assert.equal(computeItemRefund({ price: 333, disc: 15 }, 1), 283.05);
+test('computeItemRefund: matches paid price when line discount has a half-rupee', () => {
+  // The reported bug: 99, 25% off, qty 2.
+  // Paid (order details): 198 - round(49.5)=50 = 148  (NOT 148.5 from per-unit rounding)
+  assert.equal(computeItemRefund({ price: 99, disc: 25 }, 2), 148);
+  // 333, 15%, qty 1: 333 - round(49.95)=50 = 283  (NOT 283.05)
+  assert.equal(computeItemRefund({ price: 333, disc: 15 }, 1), 283);
+  // 199, 10%, qty 5: 995 - round(99.5)=100 = 895
+  assert.equal(computeItemRefund({ price: 199, disc: 10 }, 5), 895);
 });
 
 test('resolveOrderItems: uses modifiedItems when order.modified is true and non-empty', () => {
