@@ -11,7 +11,6 @@ import {
   checkOverReturn,
   validateQCCompleteness,
   validateRefundTotal,
-  shouldRefundShipping,
   getReturnEligibility,
 } from '../utils/returnValidation.js';
 import {
@@ -149,12 +148,6 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
       );
     }
 
-    // Determine shipping refund
-    const refundShipping = await shouldRefundShipping(order, reason, returnItems);
-    const shippingRefundAmount = refundShipping
-      ? order.shippingPrice || 0
-      : 0;
-
     // Build pickup address (default from order shipping address)
     const resolvedPickupAddress = pickupAddress
       ? {
@@ -199,7 +192,8 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
       reasonDetails,
       pickupAddress: resolvedPickupAddress,
       refundAmount: Number(totalRefundAmount.toFixed(2)),
-      shippingRefundAmount,
+      // Shipping is never refunded on returns.
+      shippingRefundAmount: 0,
       priceDifference,
       billType: order.billType || 'CGST',
       overrideReturnWindow: overrideReturnWindow || false,
@@ -457,35 +451,33 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
         throw new Error(refundGuard.reason);
       }
 
-      // Effective refund (items only) via returnPricing: NOT_RECEIVED & UNSELLABLE
-      // contribute 0; DAMAGED & GOOD get full refund. Shipping is added to the
-      // order ledger separately below.
-      const { itemsRefund } = computeReturnRefund(returnRequest);
-      returnRequest.refundAmount = Number(itemsRefund.toFixed(2));
-      returnRequest.refundInitiatedAt = new Date();
-
-      // Auto-generate credit note if not yet created
-      if (!returnRequest.creditNote) {
-        const creditNote = await generateReturnCreditNote(
-          returnRequest,
-          req.user
-        );
-
-        returnRequest.timeline.push({
-          action: 'CREDIT_NOTE_GENERATED',
-          note: `Credit note ${creditNote.documentNumber} generated. Effective refund: ₹${returnRequest.refundAmount}`,
-          performedBy: req.user._id,
-          performedByName: req.user.name,
-        });
-      }
-
-      // Update order's totalRefundedSoFar — items refund + shipping refund, once.
-      // Idempotent: only post to the ledger if this return hasn't already (M-2).
+      // All refund effects post exactly once. Re-entry is a no-op so the stored
+      // refundAmount can never diverge from what was credited to the order ledger.
       if (!returnRequest.refundLedgerPosted) {
+        if (req.body.fullRefundOverride !== undefined) {
+          returnRequest.fullRefundOverride = req.body.fullRefundOverride === true;
+        }
+
+        // Effective refund (items only): NOT_RECEIVED & UNSELLABLE contribute 0;
+        // DAMAGED & GOOD refund the accepted qty. Shipping is never refunded.
+        const { itemsRefund } = computeReturnRefund(returnRequest);
+        returnRequest.refundAmount = Number(itemsRefund.toFixed(2));
+        returnRequest.refundInitiatedAt = new Date();
+
+        // Auto-generate credit note if not yet created
+        if (!returnRequest.creditNote) {
+          const creditNote = await generateReturnCreditNote(returnRequest, req.user);
+          returnRequest.timeline.push({
+            action: 'CREDIT_NOTE_GENERATED',
+            note: `Credit note ${creditNote.documentNumber} generated. Effective refund: ₹${returnRequest.refundAmount}`,
+            performedBy: req.user._id,
+            performedByName: req.user.name,
+          });
+        }
+
+        // Update order's totalRefundedSoFar — items refund only (shipping is never refunded).
         const order = await Order.findById(returnRequest.order);
-        const totalRefund = Number(
-          (returnRequest.refundAmount + (returnRequest.shippingRefundAmount || 0)).toFixed(2)
-        );
+        const totalRefund = Number(returnRequest.refundAmount.toFixed(2));
         validateRefundTotal(order, totalRefund);
         order.totalRefundedSoFar = (order.totalRefundedSoFar || 0) + totalRefund;
         await order.save();
@@ -1152,9 +1144,6 @@ export const createMyReturnRequest = asyncHandler(async (req, res) => {
 
     const totalRefundAmount = returnItems.reduce((sum, item) => sum + item.refundAmount, 0);
 
-    const refundShipping = await shouldRefundShipping(order, reason, returnItems);
-    const shippingRefundAmount = refundShipping ? order.shippingPrice || 0 : 0;
-
     const resolvedPickupAddress = {
       address: order.shippingAddress?.address,
       city: order.shippingAddress?.city,
@@ -1180,7 +1169,8 @@ export const createMyReturnRequest = asyncHandler(async (req, res) => {
       evidenceImages: evidenceImages || [],
       pickupAddress: resolvedPickupAddress,
       refundAmount: Number(totalRefundAmount.toFixed(2)),
-      shippingRefundAmount,
+      // Shipping is never refunded on returns.
+      shippingRefundAmount: 0,
       billType: order.billType || 'CGST',
       timeline: [{
         action: 'CREATED',
