@@ -53,6 +53,7 @@ const ReturnDetailScreen = ({ match, history }) => {
     const [refundAmount, setRefundAmount] = useState('');
     const [showNoteModal, setShowNoteModal] = useState(false);
     const [noteText, setNoteText] = useState('');
+    const [fullRefundOverride, setFullRefundOverride] = useState(false);
 
     const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
@@ -284,14 +285,23 @@ const ReturnDetailScreen = ({ match, history }) => {
                 )}
                 {nextStatuses.includes('REFUND_INITIATED') &&
                  !(['EXCHANGE', 'REPLACEMENT'].includes(ret.type) && ret.exchangeOrderId) && (
-                    <Button
-                        variant="success"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('REFUND_INITIATED')}
-                        disabled={statusLoading}
-                    >
-                        Initiate Refund
-                    </Button>
+                    <span className="mr-2 mb-1 d-inline-flex align-items-center" style={{ gap: '8px' }}>
+                        <Form.Check
+                            type="checkbox"
+                            id="full-refund-override"
+                            label="Full refund"
+                            className="mb-0"
+                            checked={fullRefundOverride}
+                            onChange={(e) => setFullRefundOverride(e.target.checked)}
+                        />
+                        <Button
+                            variant="success"
+                            onClick={() => handleStatusUpdate('REFUND_INITIATED', { fullRefundOverride })}
+                            disabled={statusLoading}
+                        >
+                            Initiate Refund
+                        </Button>
+                    </span>
                 )}
                 {(ret.type === 'EXCHANGE' || ret.type === 'REPLACEMENT') &&
                  !ret.exchangeOrderId &&
@@ -415,10 +425,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                         <Card.Header>Financials</Card.Header>
                                         <Card.Body>
                                             <p><strong>Refund Amount:</strong> ₹{ret.refundAmount || 0}</p>
-                                            {ret.shippingRefundAmount > 0 && (
-                                                <p><strong>Shipping Refund:</strong> ₹{ret.shippingRefundAmount}</p>
-                                            )}
-                                            <p><strong>Total Refund:</strong> ₹{(ret.refundAmount || 0) + (ret.shippingRefundAmount || 0)}</p>
+                                            <p><strong>Total Refund:</strong> ₹{ret.refundAmount || 0}</p>
                                             <p><strong>Refund Method:</strong> {ret.refundMethod?.replace(/_/g, ' ') || '-'}</p>
                                             {ret.refundTransactionId && (
                                                 <p><strong>Transaction ID:</strong> {ret.refundTransactionId}</p>
@@ -544,6 +551,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                                         <th>Product</th>
                                                         <th>Size</th>
                                                         <th>Qty</th>
+                                                        <th>Accepted</th>
                                                         <th>Disposition</th>
                                                         <th>Notes</th>
                                                         <th>Refund</th>
@@ -555,6 +563,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                                             <td>{item.productName || item.name || '-'}</td>
                                                             <td>{item.size}</td>
                                                             <td>{item.returnQty}</td>
+                                                            <td>{item.acceptedQty ?? item.returnQty}</td>
                                                             <td>
                                                                 <Badge bg={QC_BADGE_VARIANT[item.qcDisposition] || 'warning'}>
                                                                     {item.qcDisposition || 'PENDING'}
@@ -709,7 +718,7 @@ const ReturnDetailScreen = ({ match, history }) => {
                                     className="bg-light"
                                 />
                                 <Form.Text className="text-muted">
-                                    Amount calculated from QC results. Shipping refund (if any) is added automatically.
+                                    Amount calculated from QC results.
                                 </Form.Text>
                             </Form.Group>
                             <Form.Group className="mt-2">
