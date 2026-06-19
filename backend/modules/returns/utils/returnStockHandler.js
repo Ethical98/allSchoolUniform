@@ -2,6 +2,7 @@ import Product from '../../../models/ProductModel.js';
 import StockMovement from '../../stock/models/StockMovementModel.js';
 import { updateInventoryBucket } from '../../stock/utils/inventoryCalc.js';
 import handleStockAlerts from '../../stock/utils/stockAlertHelper.js';
+import { resolveQcQty } from '../pricing/returnPricing.js';
 
 /**
  * Process QC dispositions and update stock accordingly.
@@ -68,11 +69,24 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
     // validation on an empty SKU.
     const movementSKU = item.SKU || product?.SKU || 'UNKNOWN';
 
+    const qty = resolveQcQty(item);
+    if (qty <= 0) {
+      // Nothing accepted for this item — no stock movement, no refund qty.
+      results.push({
+        product: item.product,
+        size: item.size,
+        disposition: item.qcDisposition,
+        action: 'zero_accepted_qty',
+      });
+      processed++;
+      continue;
+    }
+
     if (item.qcDisposition === 'GOOD') {
       const result = await updateInventoryBucket({
         productId: item.product,
         size: item.size,
-        increments: { quantityOnHand: item.returnQty },
+        increments: { quantityOnHand: qty },
       });
 
       await StockMovement.create({
@@ -81,9 +95,9 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
         SKU: movementSKU,
         size: item.size,
         type: 'RETURN',
-        quantityChange: item.returnQty,
+        quantityChange: qty,
         previousStock,
-        newStock: previousStock + item.returnQty,
+        newStock: previousStock + qty,
         order: returnRequest.order,
         orderId: returnRequest.orderId,
         returnRequest: returnRequest._id,
@@ -107,13 +121,13 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
         size: item.size,
         disposition: 'GOOD',
         action: 'restocked_to_quantityOnHand',
-        qty: item.returnQty,
+        qty,
       });
     } else if (item.qcDisposition === 'DAMAGED') {
       const result = await updateInventoryBucket({
         productId: item.product,
         size: item.size,
-        increments: { damaged: item.returnQty },
+        increments: { damaged: qty },
       });
 
       await StockMovement.create({
@@ -122,9 +136,9 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
         SKU: movementSKU,
         size: item.size,
         type: 'RETURN',
-        quantityChange: item.returnQty,
+        quantityChange: qty,
         previousStock: sizeVariant?.damaged || 0,
-        newStock: (sizeVariant?.damaged || 0) + item.returnQty,
+        newStock: (sizeVariant?.damaged || 0) + qty,
         order: returnRequest.order,
         orderId: returnRequest.orderId,
         returnRequest: returnRequest._id,
@@ -140,7 +154,7 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
         size: item.size,
         disposition: 'DAMAGED',
         action: 'added_to_damaged_bucket',
-        qty: item.returnQty,
+        qty,
       });
     } else if (item.qcDisposition === 'UNSELLABLE') {
       // Zero out refund for unsellable items — cannot refund for items that cannot be resold
@@ -170,7 +184,7 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
         size: item.size,
         disposition: 'UNSELLABLE',
         action: 'written_off',
-        qty: item.returnQty,
+        qty,
       });
     }
 
