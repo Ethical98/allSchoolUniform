@@ -45,6 +45,9 @@ const returnItemSchema = mongoose.Schema(
     originalQty: { type: Number, required: true },
     returnQty: { type: Number, required: true },
 
+    // QC accepted quantity (≤ returnQty). Unset ⇒ falls back to returnQty.
+    acceptedQty: { type: Number },
+
     // Pricing snapshot (from order item — uses same field names)
     price: { type: Number, required: true }, // MRP
     disc: { type: Number, default: 0 }, // Discount %
@@ -186,6 +189,8 @@ const returnRequestSchema = mongoose.Schema(
     // Financial — refund
     refundAmount: { type: Number, default: 0 },
     shippingRefundAmount: { type: Number, default: 0 },
+    // Admin chose to refund all item units at paid price, ignoring QC reductions.
+    fullRefundOverride: { type: Boolean, default: false },
     refundMethod: {
       type: String,
       enum: ['ORIGINAL_PAYMENT', 'BANK_TRANSFER', 'UPI', 'STORE_CREDIT'],
