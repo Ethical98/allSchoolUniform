@@ -1,8 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeItemRefund, resolveOrderItems } from './returnPricing.js';
-import { computeReturnRefund } from './returnPricing.js';
-import { SELLER_FAULT_REASONS, decideShippingRefund } from './returnPricing.js';
+import {
+  computeItemRefund,
+  resolveOrderItems,
+  computeReturnRefund,
+  SELLER_FAULT_REASONS,
+  decideShippingRefund,
+  resolveQcQty,
+} from './returnPricing.js';
 
 // Refund equals what the customer actually PAID for the line, matching the
 // order-details display (OrderItemsList): price*qty - round(price*qty*disc/100).
@@ -115,4 +120,16 @@ test('decideShippingRefund: seller-fault reason refunds shipping regardless of a
 test('decideShippingRefund: non-seller-fault refunds shipping only when all items returned', () => {
   assert.equal(decideShippingRefund('CHANGED_MIND', true), true);
   assert.equal(decideShippingRefund('CHANGED_MIND', false), false);
+});
+
+test('resolveQcQty: uses acceptedQty when finite', () => {
+  assert.equal(resolveQcQty({ returnQty: 3, acceptedQty: 1 }), 1);
+});
+
+test('resolveQcQty: accepts 0 as a valid accepted qty', () => {
+  assert.equal(resolveQcQty({ returnQty: 3, acceptedQty: 0 }), 0);
+});
+
+test('resolveQcQty: falls back to returnQty when acceptedQty unset', () => {
+  assert.equal(resolveQcQty({ returnQty: 3 }), 3);
 });

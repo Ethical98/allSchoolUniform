@@ -10,6 +10,17 @@ const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
 const clampPct = (n) => Math.max(0, Math.min(100, Number(n) || 0));
 
 /**
+ * Quantity that QC accepted for an item — drives refund and restock.
+ * Falls back to returnQty for legacy items with no acceptedQty.
+ * @param {{ returnQty:number, acceptedQty?:number }} item
+ * @returns {number}
+ */
+export const resolveQcQty = (item) =>
+  Number.isFinite(item?.acceptedQty)
+    ? item.acceptedQty
+    : (Number(item?.returnQty) || 0);
+
+/**
  * Refund for a single line = what the customer actually PAID for it.
  * Matches the order-details display (OrderItemsList): the discount is computed
  * on the whole line (price × qty) and rounded once, then subtracted — NOT
