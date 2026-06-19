@@ -630,6 +630,17 @@ export const updateQCDisposition = asyncHandler(async (req, res) => {
       throw new Error(`Return item with id ${qcItem.itemId} not found`);
     }
 
+    if (qcItem.acceptedQty !== undefined) {
+      const aq = Number(qcItem.acceptedQty);
+      if (!Number.isInteger(aq) || aq < 0 || aq > returnItem.returnQty) {
+        res.status(400);
+        throw new Error(
+          `Accepted qty for "${returnItem.productName}" (${returnItem.size}) must be an integer between 0 and ${returnItem.returnQty}`
+        );
+      }
+      returnItem.acceptedQty = aq;
+    }
+
     returnItem.qcDisposition = qcItem.disposition;
     if (qcItem.notes) returnItem.qcNotes = qcItem.notes;
   }
