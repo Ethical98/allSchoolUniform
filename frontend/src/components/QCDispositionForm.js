@@ -9,6 +9,7 @@ const QCDispositionForm = ({ items = [], onSubmit }) => {
             itemId: item._id || item.itemId,
             disposition: item.qcDisposition || '',
             notes: item.qcNotes || '',
+            acceptedQty: item.acceptedQty ?? item.returnQty ?? 0,
         }))
     );
 
@@ -28,6 +29,14 @@ const QCDispositionForm = ({ items = [], onSubmit }) => {
         });
     };
 
+    const handleAcceptedQtyChange = (index, value) => {
+        setDispositions((prev) => {
+            const updated = [...prev];
+            updated[index] = { ...updated[index], acceptedQty: value === '' ? '' : Number(value) };
+            return updated;
+        });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const allFilled = dispositions.every((d) => d.disposition);
@@ -35,7 +44,20 @@ const QCDispositionForm = ({ items = [], onSubmit }) => {
             alert('Please select a disposition for every item.');
             return;
         }
-        onSubmit(dispositions);
+        const qtyOk = dispositions.every((d, i) => {
+            const max = items[i].returnQty;
+            const q = Number(d.acceptedQty);
+            return Number.isInteger(q) && q >= 0 && q <= max;
+        });
+        if (!qtyOk) {
+            alert('Accepted qty must be a whole number between 0 and the return qty for every item.');
+            return;
+        }
+        const normalized = dispositions.map((d) => ({
+            ...d,
+            acceptedQty: Number(d.acceptedQty) || 0,
+        }));
+        onSubmit(normalized);
     };
 
     return (
@@ -46,6 +68,7 @@ const QCDispositionForm = ({ items = [], onSubmit }) => {
                         <th>Product</th>
                         <th>Size</th>
                         <th>Qty</th>
+                        <th>Accepted Qty</th>
                         <th>Disposition</th>
                         <th>Notes</th>
                     </tr>
@@ -56,6 +79,15 @@ const QCDispositionForm = ({ items = [], onSubmit }) => {
                             <td>{item.productName || item.name || '-'}</td>
                             <td>{item.size || '-'}</td>
                             <td>{item.returnQty || 0}</td>
+                            <td style={{ maxWidth: 90 }}>
+                                <Form.Control
+                                    type="number"
+                                    min={0}
+                                    max={item.returnQty}
+                                    value={dispositions[index]?.acceptedQty}
+                                    onChange={(e) => handleAcceptedQtyChange(index, e.target.value)}
+                                />
+                            </td>
                             <td>
                                 {DISPOSITIONS.map((d) => (
                                     <Form.Check
