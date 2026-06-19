@@ -1,5 +1,5 @@
 import ReturnRequest from '../models/ReturnRequestModel.js';
-import { decideShippingRefund, resolveOrderItems } from '../pricing/returnPricing.js';
+import { resolveOrderItems } from '../pricing/returnPricing.js';
 
 export const RETURN_WINDOW_DAYS = 7;
 
@@ -219,17 +219,11 @@ export const allOrderItemsReturned = async (order, pendingItems = []) => {
 };
 
 /**
- * Determine if shipping should be refunded.
- * Shipping is refunded on full returns OR seller-fault reasons.
- *
- * @param {Object} order
- * @param {string} reason
- * @param {Array} pendingItems - items from the current unsaved return request
+ * Shipping is never refunded on returns (policy: only the discounted item
+ * amount is refundable). Kept as an async no-op so existing call sites and
+ * their awaits remain unchanged.
  */
-export const shouldRefundShipping = async (order, reason, pendingItems = []) => {
-  if (decideShippingRefund(reason, false)) return true; // seller-fault short-circuit
-  return await allOrderItemsReturned(order, pendingItems);
-};
+export const shouldRefundShipping = async () => false;
 
 export default {
   RETURN_WINDOW_DAYS,
