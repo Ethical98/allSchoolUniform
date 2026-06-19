@@ -108,6 +108,16 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
       };
     });
 
+    // Backfill SKU from the product's canonical SKU when the order item's
+    // productCode is blank — keeps the denormalized return-item SKU valid so
+    // downstream StockMovement creation (QC) never fails on a required SKU.
+    for (const ri of returnItems) {
+      if (!ri.SKU) {
+        const prod = await Product.findById(ri.product).select('SKU');
+        if (prod?.SKU) ri.SKU = prod.SKU;
+      }
+    }
+
     // Calculate totals
     const totalRefundAmount = returnItems.reduce(
       (sum, item) => sum + item.refundAmount,
@@ -1115,6 +1125,14 @@ export const createMyReturnRequest = asyncHandler(async (req, res) => {
         refundAmount: computeItemRefund(orderItem, reqItem.returnQty),
       };
     });
+
+    // Backfill SKU from the product's canonical SKU when productCode is blank.
+    for (const ri of returnItems) {
+      if (!ri.SKU) {
+        const prod = await Product.findById(ri.product).select('SKU');
+        if (prod?.SKU) ri.SKU = prod.SKU;
+      }
+    }
 
     // checkOverReturn expects items with { product, size, returnQty }
     await checkOverReturn(orderId, returnItems, sourceItems);

@@ -269,6 +269,19 @@ const ReturnDetailScreen = ({ match, history }) => {
                         Start QC
                     </Button>
                 )}
+                {nextStatuses.includes('QC_COMPLETED') && (
+                    <Button
+                        variant="warning"
+                        className="mr-2 mb-1"
+                        onClick={() => handleStatusUpdate('QC_COMPLETED')}
+                        disabled={statusLoading || (ret.items || []).some((it) => !it.qcDisposition)}
+                        title={(ret.items || []).some((it) => !it.qcDisposition)
+                            ? 'Set a QC disposition for every item first'
+                            : 'Finalize QC — runs stock movements and unlocks refund/exchange'}
+                    >
+                        Complete QC
+                    </Button>
+                )}
                 {nextStatuses.includes('REFUND_INITIATED') &&
                  !(['EXCHANGE', 'REPLACEMENT'].includes(ret.type) && ret.exchangeOrderId) && (
                     <Button

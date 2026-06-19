@@ -62,6 +62,12 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
     const sizeVariant = product?.size?.find((s) => s.size === item.size);
     const previousStock = sizeVariant?.quantityOnHand || 0;
 
+    // StockMovement.SKU is a required string; the return item's denormalized SKU
+    // comes from the order's productCode, which can be blank. Fall back to the
+    // product's canonical (required, unique) SKU so QC completion never fails
+    // validation on an empty SKU.
+    const movementSKU = item.SKU || product?.SKU || 'UNKNOWN';
+
     if (item.qcDisposition === 'GOOD') {
       const result = await updateInventoryBucket({
         productId: item.product,
@@ -72,7 +78,7 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
       await StockMovement.create({
         product: item.product,
         productName: item.productName,
-        SKU: item.SKU || '',
+        SKU: movementSKU,
         size: item.size,
         type: 'RETURN',
         quantityChange: item.returnQty,
@@ -113,7 +119,7 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
       await StockMovement.create({
         product: item.product,
         productName: item.productName,
-        SKU: item.SKU || '',
+        SKU: movementSKU,
         size: item.size,
         type: 'RETURN',
         quantityChange: item.returnQty,
@@ -144,7 +150,7 @@ export const processQCDispositions = async (returnRequest, adminUser) => {
       await StockMovement.create({
         product: item.product,
         productName: item.productName,
-        SKU: item.SKU || '',
+        SKU: movementSKU,
         size: item.size,
         type: 'DAMAGE',
         quantityChange: 0,
