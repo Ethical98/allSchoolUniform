@@ -66,24 +66,31 @@ export const isItemRefundable = (item) =>
 
 /**
  * Total refund for a return request, honoring per-item QC dispositions.
- * Shipping refund is read from the return (set at create time by
- * shouldRefundShipping); this function does not recompute it.
- * @param {{ items:Array, shippingRefundAmount?:number }} returnRequest
+ * Shipping is never refunded by this function (always 0).
+ * When `fullRefundOverride` is true, every item is refunded at its full
+ * requested quantity, ignoring QC disposition and accepted-qty reductions.
+ * @param {{ items:Array, fullRefundOverride?:boolean }} returnRequest
  * @returns {{ itemsRefund:number, shippingRefund:number, total:number }}
  */
 export const computeReturnRefund = (returnRequest) => {
   const items = returnRequest?.items || [];
+  const fullRefund = returnRequest?.fullRefundOverride === true;
+
   const itemsRefund = round2(
-    items.reduce(
-      (sum, item) =>
-        isItemRefundable(item)
-          ? sum + computeItemRefund(item, item.returnQty)
-          : sum,
-      0
-    )
+    items.reduce((sum, item) => {
+      // Full refund: every item at full requested qty, ignore disposition zeroing.
+      if (fullRefund) {
+        return sum + computeItemRefund(item, item.returnQty);
+      }
+      // QC-adjusted: only refundable dispositions, at the accepted quantity.
+      return isItemRefundable(item)
+        ? sum + computeItemRefund(item, resolveQcQty(item))
+        : sum;
+    }, 0)
   );
-  const shippingRefund = round2(Number(returnRequest?.shippingRefundAmount) || 0);
-  return { itemsRefund, shippingRefund, total: round2(itemsRefund + shippingRefund) };
+
+  // Shipping is never refunded.
+  return { itemsRefund, shippingRefund: 0, total: itemsRefund };
 };
 
 // Reasons where the seller is at fault → shipping is always refunded.

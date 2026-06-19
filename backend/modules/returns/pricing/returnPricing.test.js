@@ -96,8 +96,8 @@ test('computeReturnRefund: NOT_RECEIVED and UNSELLABLE contribute 0', () => {
   };
   const r = computeReturnRefund(ret);
   assert.equal(r.itemsRefund, 2000);
-  assert.equal(r.shippingRefund, 50);
-  assert.equal(r.total, 2050);
+  assert.equal(r.shippingRefund, 0);
+  assert.equal(r.total, 2000);
 });
 
 test('computeReturnRefund: PENDING/GOOD treated as refundable', () => {
@@ -132,4 +132,53 @@ test('resolveQcQty: accepts 0 as a valid accepted qty', () => {
 
 test('resolveQcQty: falls back to returnQty when acceptedQty unset', () => {
   assert.equal(resolveQcQty({ returnQty: 3 }), 3);
+});
+
+test('computeReturnRefund: shipping is always 0', () => {
+  const ret = {
+    items: [{ price: 1000, disc: 0, returnQty: 1, qcDisposition: 'GOOD' }],
+    shippingRefundAmount: 50,
+  };
+  const r = computeReturnRefund(ret);
+  assert.equal(r.shippingRefund, 0);
+  assert.equal(r.total, r.itemsRefund);
+});
+
+test('computeReturnRefund: QC-adjusted uses acceptedQty', () => {
+  const ret = {
+    items: [{ price: 1000, disc: 0, returnQty: 3, acceptedQty: 1, qcDisposition: 'GOOD' }],
+  };
+  assert.equal(computeReturnRefund(ret).itemsRefund, 1000);
+});
+
+test('computeReturnRefund: acceptedQty 0 contributes 0', () => {
+  const ret = {
+    items: [{ price: 1000, disc: 0, returnQty: 2, acceptedQty: 0, qcDisposition: 'GOOD' }],
+  };
+  assert.equal(computeReturnRefund(ret).itemsRefund, 0);
+});
+
+test('computeReturnRefund: fullRefundOverride ignores accepted qty and disposition', () => {
+  const ret = {
+    fullRefundOverride: true,
+    items: [
+      { price: 1000, disc: 0, returnQty: 3, acceptedQty: 1, qcDisposition: 'UNSELLABLE' },
+      { price: 500, disc: 0, returnQty: 1, qcDisposition: 'NOT_RECEIVED' },
+    ],
+    shippingRefundAmount: 99,
+  };
+  const r = computeReturnRefund(ret);
+  assert.equal(r.itemsRefund, 3500);
+  assert.equal(r.shippingRefund, 0);
+  assert.equal(r.total, 3500);
+});
+
+test('computeReturnRefund: QC-adjusted mixes reduced accepted qty with a non-refundable item', () => {
+  const ret = {
+    items: [
+      { price: 1000, disc: 0, returnQty: 3, acceptedQty: 2, qcDisposition: 'GOOD' }, // 2000
+      { price: 500, disc: 0, returnQty: 1, qcDisposition: 'UNSELLABLE' },            // 0
+    ],
+  };
+  assert.equal(computeReturnRefund(ret).itemsRefund, 2000);
 });
