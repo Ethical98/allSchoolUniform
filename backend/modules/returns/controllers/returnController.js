@@ -24,6 +24,7 @@ import { processQCDispositions } from '../utils/returnStockHandler.js';
 import { generateReturnCreditNote } from '../utils/returnCreditNoteHelper.js';
 import { mapReturnToShiprocketPayload } from '../utils/returnShippingMapper.js';
 import { sendReturnEmail } from '../utils/returnEmailHelper.js';
+import { validateRefundDestination } from '../utils/refundDestination.js';
 import { shippingApi } from '../../shipping/utils/shippingClient.js';
 import { acquireLock, releaseLock } from '../../../services/redisService.js';
 
@@ -41,6 +42,9 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
     items,
     pickupAddress,
     overrideReturnWindow,
+    refundMethod,
+    refundUpiId,
+    refundBankDetails,
   } = req.body;
 
   // Validate input
@@ -62,6 +66,18 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
 
     // Validate order eligibility
     validateOrderEligibility(order);
+
+    // COD returns must carry a valid refund destination (no original payment to reverse).
+    const refundDest = validateRefundDestination({
+      paymentMethod: order.paymentMethod,
+      refundMethod,
+      refundUpiId,
+      refundBankDetails,
+    });
+    if (!refundDest.ok) {
+      res.status(400);
+      throw new Error(refundDest.error);
+    }
 
     // Validate 7-day return window
     const windowInfo = validateReturnWindow(order, overrideReturnWindow);
@@ -197,6 +213,7 @@ export const createReturnRequest = asyncHandler(async (req, res) => {
       priceDifference,
       billType: order.billType || 'CGST',
       overrideReturnWindow: overrideReturnWindow || false,
+      ...refundDest.normalized,
       timeline: [timelineEntry],
       createdBy: req.user._id,
       createdByName: req.user.name,
