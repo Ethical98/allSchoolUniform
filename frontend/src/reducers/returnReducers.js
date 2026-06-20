@@ -24,12 +24,12 @@ export const returnListReducer = (state = { returns: [] }, action) => {
   }
 };
 
-export const returnDetailsReducer = (state = { returnRequest: {}, nextStatuses: [] }, action) => {
+export const returnDetailsReducer = (state = { returnRequest: {}, nextStatuses: [], payment: null }, action) => {
   switch (action.type) {
     case RETURN_DETAILS_REQUEST: return { ...state, loading: true };
-    case RETURN_DETAILS_SUCCESS: return { loading: false, returnRequest: action.payload.returnRequest, nextStatuses: action.payload.nextStatuses };
+    case RETURN_DETAILS_SUCCESS: return { loading: false, returnRequest: action.payload.returnRequest, nextStatuses: action.payload.nextStatuses, payment: action.payload.payment || null };
     case RETURN_DETAILS_FAIL: return { loading: false, error: action.payload };
-    case RETURN_DETAILS_RESET: return { returnRequest: {}, nextStatuses: [] };
+    case RETURN_DETAILS_RESET: return { returnRequest: {}, nextStatuses: [], payment: null };
     default: return state;
   }
 };

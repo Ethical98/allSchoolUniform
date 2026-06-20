@@ -59,7 +59,7 @@ const ReturnDetailScreen = ({ match, history }) => {
     const { userInfo } = userLogin;
 
     const returnDetailsState = useSelector((state) => state.returnDetails);
-    const { loading, error, returnRequest, nextStatuses: stateNextStatuses } = returnDetailsState;
+    const { loading, error, returnRequest, nextStatuses: stateNextStatuses, payment } = returnDetailsState;
 
     const returnUpdateStatus = useSelector((state) => state.returnUpdateStatus);
     const { loading: statusLoading, success: statusSuccess, error: statusError } = returnUpdateStatus;
@@ -195,6 +195,68 @@ const ReturnDetailScreen = ({ match, history }) => {
 
     const ret = returnRequest;
     const nextStatuses = stateNextStatuses || [];
+
+    const copyToClipboard = (value) => {
+        if (value && navigator.clipboard) {
+            navigator.clipboard.writeText(String(value)).catch(() => {});
+        }
+    };
+
+    // One labelled value with a copy button (for UPI IDs, account numbers, etc.).
+    const CopyRow = ({ label, value }) => (
+        <p className="mb-1">
+            <strong>{label}:</strong> {value}{' '}
+            <Button
+                variant="link"
+                size="sm"
+                className="p-0 align-baseline"
+                title={`Copy ${label}`}
+                onClick={() => copyToClipboard(value)}
+            >
+                Copy
+            </Button>
+        </p>
+    );
+
+    // Where to send the refund. COD returns carry a customer-provided UPI/bank
+    // destination on the return; PREPAID returns reference the original
+    // Razorpay payment (from the order, via the `payment` field).
+    const renderRefundDestination = () => {
+        const isCod = payment ? payment.paymentMethod === 'COD' : !!ret?.refundUpiId || !!ret?.refundBankDetails;
+        if (isCod) {
+            if (ret?.refundMethod === 'UPI' && ret?.refundUpiId) {
+                return (
+                    <>
+                        <p className="mb-1"><strong>Refund via:</strong> UPI</p>
+                        <CopyRow label="UPI ID" value={ret.refundUpiId} />
+                    </>
+                );
+            }
+            if (ret?.refundMethod === 'BANK_TRANSFER' && ret?.refundBankDetails) {
+                const b = ret.refundBankDetails;
+                return (
+                    <>
+                        <p className="mb-1"><strong>Refund via:</strong> Bank Transfer</p>
+                        <p className="mb-1"><strong>Account Holder:</strong> {b.accountHolderName || '-'}</p>
+                        <CopyRow label="Account Number" value={b.accountNumber || '-'} />
+                        <CopyRow label="IFSC" value={b.ifscCode || '-'} />
+                    </>
+                );
+            }
+            return <p className="mb-1 text-muted">COD order — no refund destination was provided by the customer.</p>;
+        }
+        // Prepaid → Razorpay reference for refunding to the original payment.
+        if (payment && (payment.razorpayPaymentId || payment.razorpayOrderId)) {
+            return (
+                <>
+                    <p className="mb-1"><strong>Refund to:</strong> Original payment (Razorpay)</p>
+                    {payment.razorpayPaymentId && <CopyRow label="Razorpay Payment ID" value={payment.razorpayPaymentId} />}
+                    {payment.razorpayOrderId && <CopyRow label="Razorpay Order ID" value={payment.razorpayOrderId} />}
+                </>
+            );
+        }
+        return <p className="mb-1 text-muted">Prepaid order — refund to original payment method.</p>;
+    };
 
     const renderActionButtons = () => {
         if (!ret) return null;
@@ -341,6 +403,11 @@ const ReturnDetailScreen = ({ match, history }) => {
                         className="mr-2 mb-1"
                         onClick={() => {
                             setRefundAmount(ret.refundAmount || '');
+                            // Pre-select the destination the customer chose at
+                            // return time (COD). Admin can still override.
+                            if (ret.refundMethod === 'UPI' || ret.refundMethod === 'BANK_TRANSFER') {
+                                setRefundMethod(ret.refundMethod);
+                            }
                             setShowRefundModal(true);
                         }}
                         disabled={refundLoading}
@@ -447,6 +514,12 @@ const ReturnDetailScreen = ({ match, history }) => {
                                             <p><strong>Refund Amount:</strong> ₹{ret.refundAmount || 0}</p>
                                             <p><strong>Total Refund:</strong> ₹{ret.refundAmount || 0}</p>
                                             <p><strong>Refund Method:</strong> {ret.refundMethod?.replace(/_/g, ' ') || '-'}</p>
+                                            <div className="border rounded p-2 my-2 bg-light">
+                                                <p className="mb-1 text-uppercase text-muted" style={{ fontSize: '0.75rem', letterSpacing: '0.03em' }}>
+                                                    Refund Destination
+                                                </p>
+                                                {renderRefundDestination()}
+                                            </div>
                                             {ret.refundTransactionId && (
                                                 <p><strong>Transaction ID:</strong> {ret.refundTransactionId}</p>
                                             )}
@@ -748,6 +821,12 @@ const ReturnDetailScreen = ({ match, history }) => {
                             <Modal.Title>Record Refund</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
+                            <div className="border rounded p-2 mb-3 bg-light">
+                                <p className="mb-1 text-uppercase text-muted" style={{ fontSize: '0.75rem', letterSpacing: '0.03em' }}>
+                                    Send refund to
+                                </p>
+                                {renderRefundDestination()}
+                            </div>
                             <Form.Group>
                                 <Form.Label>Refund Amount</Form.Label>
                                 <Form.Control

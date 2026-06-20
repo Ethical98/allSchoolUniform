@@ -334,7 +334,24 @@ export const getReturnRequestById = asyncHandler(async (req, res) => {
     returnRequest.type
   );
 
-  res.json({ returnRequest, nextStatuses });
+  // Attach the order's payment info so the admin can process the refund:
+  // COD returns carry the customer's UPI/bank destination on the return
+  // itself; PREPAID returns need the original Razorpay payment reference,
+  // which lives on the order. Only the refund-relevant fields are exposed.
+  let payment = null;
+  const order = await Order.findById(returnRequest.order).select(
+    'paymentMethod isPaid paymentResult'
+  );
+  if (order) {
+    payment = {
+      paymentMethod: order.paymentMethod,
+      isPaid: order.isPaid,
+      razorpayPaymentId: order.paymentResult?.id || null,
+      razorpayOrderId: order.paymentResult?.orderId || null,
+    };
+  }
+
+  res.json({ returnRequest, nextStatuses, payment });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
