@@ -85,6 +85,16 @@ const userSchema = mongoose.Schema(
             default: true, // true for password-registered, false for OTP auto-registered
         },
         savedAddress: [addressSchema],
+        savedRefundDestination: {
+            method: { type: String, enum: ['UPI', 'BANK_TRANSFER'] },
+            upiId: { type: String },
+            bankDetails: {
+                accountHolderName: { type: String },
+                accountNumber: { type: String },
+                ifscCode: { type: String },
+            },
+            updatedAt: { type: Date },
+        },
         isAdmin: {
             type: Boolean,
             required: true,
