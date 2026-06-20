@@ -9,7 +9,7 @@ export function isValidUpiId(v) {
   return typeof v === 'string' && UPI_RE.test(v.trim());
 }
 export function isValidIfsc(v) {
-  return typeof v === 'string' && IFSC_RE.test(v);
+  return typeof v === 'string' && IFSC_RE.test(v.trim().toUpperCase());
 }
 export function isValidAccountNumber(v) {
   return typeof v === 'string' && ACCOUNT_RE.test(v.trim());

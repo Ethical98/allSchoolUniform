@@ -17,8 +17,10 @@ test('isValidUpiId rejects missing handle', () => {
 });
 test('isValidIfsc enforces the 11-char bank format', () => {
   assert.equal(isValidIfsc('HDFC0001234'), true);
-  assert.equal(isValidIfsc('hdfc0001234'), false);
-  assert.equal(isValidIfsc('HDFC1001234'), false);
+  // self-normalizes case (mirrors the frontend isValidIfsc), so lowercase is accepted
+  assert.equal(isValidIfsc('hdfc0001234'), true);
+  assert.equal(isValidIfsc('HDFC1001234'), false); // 5th char must be 0
+  assert.equal(isValidIfsc('NOPE'), false);
 });
 test('isValidAccountNumber wants 9-18 digits', () => {
   assert.equal(isValidAccountNumber('123456789'), true);

@@ -262,6 +262,11 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
         // Save reusable refund destination (validated with the same COD rules,
         // forcing paymentMethod 'COD' so a destination is actually required).
+        // Consent lives on the client (the return wizard only sends this field
+        // when the user checks "save for future refunds"); this is the only
+        // code path that writes savedRefundDestination, and it validates in
+        // application code because the save below runs with validateBeforeSave:
+        // false (so the schema enum is not a backstop here). Keep both true.
         if (req.body.savedRefundDestination) {
             const d = req.body.savedRefundDestination;
             const v = validateRefundDestination({
