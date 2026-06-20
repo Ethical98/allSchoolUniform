@@ -92,19 +92,3 @@ export const computeReturnRefund = (returnRequest) => {
   // Shipping is never refunded.
   return { itemsRefund, shippingRefund: 0, total: itemsRefund };
 };
-
-// Reasons where the seller is at fault → shipping is always refunded.
-export const SELLER_FAULT_REASONS = new Set([
-  'DEFECTIVE',
-  'WRONG_ITEM',
-  'DAMAGED_IN_TRANSIT',
-]);
-
-/**
- * Pure shipping-refund decision.
- * @param {string} reason - return reason
- * @param {boolean} allItemsReturned - whether every order item is fully returned
- * @returns {boolean}
- */
-export const decideShippingRefund = (reason, allItemsReturned) =>
-  SELLER_FAULT_REASONS.has(reason) || Boolean(allItemsReturned);

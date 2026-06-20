@@ -85,12 +85,9 @@ const buildEmailData = (returnRequest) => {
     reason: returnRequest.reason.replace(/_/g, ' '),
     reasonDetails: returnRequest.reasonDetails || '',
     refundAmount: formatPrice(returnRequest.refundAmount || 0),
-    shippingRefundAmount: formatPrice(
-      returnRequest.shippingRefundAmount || 0
-    ),
-    totalRefund: formatPrice(
-      (returnRequest.refundAmount || 0) + (returnRequest.shippingRefundAmount || 0)
-    ),
+    // Shipping is never refunded on returns; kept for template compatibility.
+    shippingRefundAmount: formatPrice(0),
+    totalRefund: formatPrice(returnRequest.refundAmount || 0),
     exchangeOrderNumber: returnRequest.exchangeOrderNumber || '',
     creditNoteNumber: returnRequest.creditNoteNumber || '',
     priceDifference: formatPrice(
@@ -123,8 +120,11 @@ export const sendReturnEmail = async (returnRequest, statusTrigger) => {
   try {
     const mapping = TEMPLATE_MAP[statusTrigger];
     if (!mapping) {
+      // Intentionally silent states (IN_TRANSIT, RECEIVED, QC_IN_PROGRESS,
+      // QC_COMPLETED) have no customer email — these are internal-progress
+      // states. Not an error; logged for traceability only.
       console.log(
-        `[ReturnEmail] No template mapped for status: ${statusTrigger}`
+        `[ReturnEmail] No customer email for status (intentional): ${statusTrigger}`
       );
       return { success: false, error: 'No template for status' };
     }

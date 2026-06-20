@@ -275,8 +275,8 @@ const ReturnDetailScreen = ({ match, history }) => {
                         variant="warning"
                         className="mr-2 mb-1"
                         onClick={() => handleStatusUpdate('QC_COMPLETED')}
-                        disabled={statusLoading || (ret.items || []).some((it) => !it.qcDisposition)}
-                        title={(ret.items || []).some((it) => !it.qcDisposition)
+                        disabled={statusLoading || (ret.items || []).some((it) => !it.qcDisposition || it.qcDisposition === 'PENDING')}
+                        title={(ret.items || []).some((it) => !it.qcDisposition || it.qcDisposition === 'PENDING')
                             ? 'Set a QC disposition for every item first'
                             : 'Finalize QC — runs stock movements and unlocks refund/exchange'}
                     >
@@ -315,7 +315,27 @@ const ReturnDetailScreen = ({ match, history }) => {
                         Create {ret.type === 'REPLACEMENT' ? 'Replacement' : 'Exchange'} Order
                     </Button>
                 )}
-                {nextStatuses.includes('REFUND_INITIATED') && ret.type === 'RETURN' && (
+                {ret.exchangeOrderId && nextStatuses.includes('EXCHANGE_SHIPPED') && (
+                    <Button
+                        variant="success"
+                        className="mr-2 mb-1"
+                        onClick={() => handleStatusUpdate('EXCHANGE_SHIPPED')}
+                        disabled={statusLoading}
+                    >
+                        Mark Exchange Shipped
+                    </Button>
+                )}
+                {ret.exchangeOrderId && nextStatuses.includes('REPLACEMENT_SHIPPED') && (
+                    <Button
+                        variant="success"
+                        className="mr-2 mb-1"
+                        onClick={() => handleStatusUpdate('REPLACEMENT_SHIPPED')}
+                        disabled={statusLoading}
+                    >
+                        Mark Replacement Shipped
+                    </Button>
+                )}
+                {(ret.status === 'REFUND_INITIATED') && ret.type === 'RETURN' && (
                     <Button
                         variant="outline-success"
                         className="mr-2 mb-1"
@@ -511,6 +531,26 @@ const ReturnDetailScreen = ({ match, history }) => {
                                     </Table>
                                 </Card.Body>
                             </Card>
+
+                            {/* Evidence Photos (customer-submitted) */}
+                            {Array.isArray(ret.evidenceImages) && ret.evidenceImages.length > 0 && (
+                                <Card className="mb-3">
+                                    <Card.Header>Evidence Photos</Card.Header>
+                                    <Card.Body>
+                                        <div className="d-flex flex-wrap" style={{ gap: '8px' }}>
+                                            {ret.evidenceImages.map((src, i) => (
+                                                <a key={i} href={src} target="_blank" rel="noopener noreferrer">
+                                                    <img
+                                                        src={src}
+                                                        alt={`Evidence ${i + 1}`}
+                                                        style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 4, border: '1px solid #ddd' }}
+                                                    />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            )}
 
                             {/* Pickup Address */}
                             {ret.pickupAddress && (

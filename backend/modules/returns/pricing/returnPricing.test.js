@@ -4,8 +4,6 @@ import {
   computeItemRefund,
   resolveOrderItems,
   computeReturnRefund,
-  SELLER_FAULT_REASONS,
-  decideShippingRefund,
   resolveQcQty,
 } from './returnPricing.js';
 
@@ -107,19 +105,6 @@ test('computeReturnRefund: PENDING/GOOD treated as refundable', () => {
     ],
   };
   assert.equal(computeReturnRefund(ret).itemsRefund, 100);
-});
-
-test('SELLER_FAULT_REASONS contains the three seller-fault reasons', () => {
-  assert.deepEqual([...SELLER_FAULT_REASONS].sort(), ['DAMAGED_IN_TRANSIT', 'DEFECTIVE', 'WRONG_ITEM']);
-});
-
-test('decideShippingRefund: seller-fault reason refunds shipping regardless of allReturned', () => {
-  assert.equal(decideShippingRefund('DEFECTIVE', false), true);
-});
-
-test('decideShippingRefund: non-seller-fault refunds shipping only when all items returned', () => {
-  assert.equal(decideShippingRefund('CHANGED_MIND', true), true);
-  assert.equal(decideShippingRefund('CHANGED_MIND', false), false);
 });
 
 test('resolveQcQty: uses acceptedQty when finite', () => {

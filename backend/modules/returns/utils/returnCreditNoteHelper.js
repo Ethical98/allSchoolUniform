@@ -3,25 +3,35 @@ import {
   generateDocumentNumber,
   calculateTotals,
 } from '../../billing/utils/quotationUtils.js';
-import { isItemRefundable } from '../pricing/returnPricing.js';
+import { isItemRefundable, resolveQcQty } from '../pricing/returnPricing.js';
 
 /**
  * Transform flat return items into nested billing format.
  * Matches the groupFlatItemsToNested pattern in quotationController.js.
+ * @param {Array} returnItems
+ * @param {boolean} fullRefund - when true, the credit note covers every item at
+ *   its full requested quantity (mirrors computeReturnRefund's full-refund mode).
  */
-const groupReturnItemsToNested = (returnItems) => {
+const groupReturnItemsToNested = (returnItems, fullRefund = false) => {
   const grouped = {};
 
   for (const item of returnItems) {
-    // Skip items that are not refundable (NOT_RECEIVED never arrived;
-    // UNSELLABLE written off) so the credit note reflects the same items as the
-    // cash refund. (Totals may differ by sub-rupee rounding: calculateTotals
-    // rounds grandTotal to whole rupees, refundAmount is rounded to 2dp.)
-    if (!isItemRefundable(item)) continue;
+    // Full refund covers every item at full requested qty. Otherwise skip items
+    // that are not refundable (NOT_RECEIVED never arrived; UNSELLABLE written
+    // off) so the credit note reflects the same items as the cash refund.
+    // (Totals may differ by sub-rupee rounding: calculateTotals rounds
+    // grandTotal to whole rupees, refundAmount is rounded to 2dp.)
+    if (!fullRefund && !isItemRefundable(item)) continue;
+
+    // Match the cash-refund quantity: full refund uses returnQty, otherwise the
+    // QC-accepted quantity (resolveQcQty honors acceptedQty, falls back to
+    // returnQty). Skip lines that resolve to zero accepted units.
+    const quantity = fullRefund ? (item.returnQty || 0) : resolveQcQty(item);
+    if (!quantity || quantity <= 0) continue;
 
     const variant = {
       size: item.size || '',
-      quantity: item.returnQty || 0,
+      quantity,
       unitPrice: item.price || 0, // Maps from `price` (order field name)
       discount: item.disc || 0, // Maps from `disc` (order field name)
       taxRate: item.tax || 0, // Maps from `tax` (order field name)
@@ -71,8 +81,11 @@ export const generateReturnCreditNote = async (returnRequest, adminUser) => {
     });
   }
 
-  // Build nested items from return items
-  const nestedItems = groupReturnItemsToNested(returnRequest.items);
+  // Build nested items from return items (honor full-refund mode)
+  const nestedItems = groupReturnItemsToNested(
+    returnRequest.items,
+    returnRequest.fullRefundOverride === true
+  );
 
   if (nestedItems.length === 0) {
     throw new Error('No refundable items found for credit note generation');
@@ -105,13 +118,8 @@ export const generateReturnCreditNote = async (returnRequest, adminUser) => {
     updatedBy: adminUser._id,
   };
 
-  // Include shipping refund if applicable
-  if (returnRequest.shippingRefundAmount > 0) {
-    creditNoteData.shippingCharges = returnRequest.shippingRefundAmount;
-    // Recalculate grand total to include shipping refund
-    creditNoteData.grandTotal =
-      totals.grandTotal + returnRequest.shippingRefundAmount;
-  }
+  // Shipping is never refunded on returns, so the credit note carries no
+  // shipping charges (no grand-total adjustment).
 
   // Copy sender/buyer snapshots from original invoice if available
   if (invoice) {
