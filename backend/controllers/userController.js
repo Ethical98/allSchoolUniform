@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import User from '../models/UserModel.js';
 import generateToken from '../utils/generateToken.js';
 import mongoose from 'mongoose';
+import { validateRefundDestination } from '../modules/returns/utils/refundDestination.js';
 // ==================== NEW ENDPOINTS ====================
 /**
  * @desc Get current user (validate session from HTTP-only cookie)
@@ -22,6 +23,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
                 savedAddress: user.savedAddress || [],
                 authMethod: user.authMethod || 'password',
                 isProfileComplete: user.isProfileComplete ?? true,
+                savedRefundDestination: user.savedRefundDestination,
             },
         });
     } else {
@@ -234,6 +236,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
             isAdmin: user.isAdmin,
             authMethod: user.authMethod || 'password',
             isProfileComplete: user.isProfileComplete ?? true,
+            savedRefundDestination: user.savedRefundDestination,
         });
     } else {
         res.status(404);
@@ -257,6 +260,28 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             user.isProfileComplete = req.body.isProfileComplete;
         }
 
+        // Save reusable refund destination (validated with the same COD rules,
+        // forcing paymentMethod 'COD' so a destination is actually required).
+        if (req.body.savedRefundDestination) {
+            const d = req.body.savedRefundDestination;
+            const v = validateRefundDestination({
+                paymentMethod: 'COD',
+                refundMethod: d.method,
+                refundUpiId: d.upiId,
+                refundBankDetails: d.bankDetails,
+            });
+            if (!v.ok) {
+                res.status(400);
+                throw new Error(v.error);
+            }
+            user.savedRefundDestination = {
+                method: v.normalized.refundMethod,
+                upiId: v.normalized.refundUpiId,
+                bankDetails: v.normalized.refundBankDetails,
+                updatedAt: new Date(),
+            };
+        }
+
         // ✅ Skip validation to prevent errors with existing savedAddress subdocuments
         // that don't have new required fields (fullName, email, phone)
         const updatedUser = await user.save({ validateBeforeSave: false });
@@ -277,6 +302,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             isAdmin: updatedUser.isAdmin,
             isProfileComplete: updatedUser.isProfileComplete,
             authMethod: updatedUser.authMethod || 'password',
+            savedRefundDestination: updatedUser.savedRefundDestination,
             token: generateToken(user._id, user.name, user.isAdmin),
         });
     } else {
