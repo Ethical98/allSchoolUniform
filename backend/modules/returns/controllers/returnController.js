@@ -1107,7 +1107,16 @@ export const generateReturnLabel = asyncHandler(async (req, res) => {
 // @access  Protected (customer)
 // ─────────────────────────────────────────────────────────────────────────────
 export const createMyReturnRequest = asyncHandler(async (req, res) => {
-  const { order: orderId, items, reason, reasonDetails, evidenceImages } = req.body;
+  const {
+    order: orderId,
+    items,
+    reason,
+    reasonDetails,
+    evidenceImages,
+    refundMethod,
+    refundUpiId,
+    refundBankDetails,
+  } = req.body;
 
   if (!orderId || !reason || !items || items.length === 0) {
     res.status(400);
@@ -1137,6 +1146,19 @@ export const createMyReturnRequest = asyncHandler(async (req, res) => {
 
     validateOrderEligibility(order);
     validateReturnWindow(order, false);
+
+    // COD returns must carry a valid refund destination (no original payment
+    // to reverse). Validated + normalized server-side; spread into create below.
+    const refundDest = validateRefundDestination({
+      paymentMethod: order.paymentMethod,
+      refundMethod,
+      refundUpiId,
+      refundBankDetails,
+    });
+    if (!refundDest.ok) {
+      res.status(400);
+      throw new Error(refundDest.error);
+    }
 
     // M3: resolve against modifiedItems when the order was modified post-purchase.
     const sourceItems = resolveOrderItems(order);
@@ -1205,6 +1227,7 @@ export const createMyReturnRequest = asyncHandler(async (req, res) => {
       refundAmount: Number(totalRefundAmount.toFixed(2)),
       // Shipping is never refunded on returns.
       shippingRefundAmount: 0,
+      ...refundDest.normalized,
       billType: order.billType || 'CGST',
       timeline: [{
         action: 'CREATED',
