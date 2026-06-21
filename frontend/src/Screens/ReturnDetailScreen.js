@@ -407,6 +407,9 @@ const ReturnDetailScreen = ({ match, history }) => {
                                             <p className="mb-1"><strong>AWB:</strong> {ret.reverseShipping.awbCode || '-'}</p>
                                             <p className="mb-1"><strong>Courier:</strong> {ret.reverseShipping.courierName || '-'}</p>
                                             <p className="mb-1"><strong>Status:</strong> {ret.reverseShipping.status || '-'}</p>
+                                            {ret.reverseShipping.providerOrderId && (
+                                                <p className="mb-1"><strong>Shiprocket Order ID:</strong> {ret.reverseShipping.providerOrderId}</p>
+                                            )}
                                             {ret.reverseShipping.trackingUrl && (
                                                 <a href={ret.reverseShipping.trackingUrl} target="_blank" rel="noopener noreferrer">Track Shipment</a>
                                             )}
@@ -457,6 +460,9 @@ const ReturnDetailScreen = ({ match, history }) => {
                                         <a href={`/admin/order/${ret.order}/edit`} target="_blank" rel="noopener noreferrer">{ret.orderId}</a>
                                     </p>
                                     <p className="mb-1"><strong>Created:</strong> {ret.createdAt?.substring(0, 10)} by {ret.createdByName || '-'}</p>
+                                    {ret.overrideReturnWindow && (
+                                        <Badge bg="warning" className="mb-1">Return Window Override</Badge>
+                                    )}
                                     {ret.pickupAddress && (
                                         <p className="mb-0 mt-2"><strong>Pickup:</strong> {ret.pickupAddress.address}, {ret.pickupAddress.city}, {ret.pickupAddress.state} - {ret.pickupAddress.postalCode} · {ret.pickupAddress.phone}</p>
                                     )}
