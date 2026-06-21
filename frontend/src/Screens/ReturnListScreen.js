@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Row, Col, Card, Form, InputGroup, Button } from 'react-bootstrap';
+import { Row, Col, Form, InputGroup, Button } from 'react-bootstrap';
 import MaterialTable from 'material-table';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import AdminPageLayout from '../components/AdminPageLayout';
 import Paginate from '../components/Paginate';
 import ReturnStatusBadge from '../components/ReturnStatusBadge';
+import ReturnTriageCards from '../components/returns/ReturnTriageCards';
+import buildReturnActions from '../components/returns/nextActionMap';
 import { listReturns, getReturnsDashboard } from '../actions/returnActions';
 import { logout } from '../actions/userActions';
 
@@ -19,10 +21,18 @@ const STATUSES = [
 
 const TYPES = ['', 'RETURN', 'EXCHANGE', 'REPLACEMENT'];
 
+const ageLabel = (createdAt) => {
+    if (!createdAt) return { text: '-', stale: false };
+    const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / 86400000);
+    if (days <= 0) return { text: 'today', stale: false };
+    return { text: `${days}d`, stale: days >= 3 };
+};
+
 const ReturnListScreen = ({ history, location }) => {
     const [keyword, setKeyword] = useState('');
     const [status, setStatus] = useState('');
     const [type, setType] = useState('');
+    const [activeBucket, setActiveBucket] = useState('');
 
     const urlSearchParams = new URLSearchParams(location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
@@ -70,6 +80,20 @@ const ReturnListScreen = ({ history, location }) => {
         dispatch(listReturns(1, keyword, status, type));
     };
 
+    const handleBucketSelect = (bucket) => {
+        if (!bucket) {
+            setActiveBucket('');
+            setStatus('');
+            setType('');
+            dispatch(listReturns(1, keyword, '', ''));
+            return;
+        }
+        setActiveBucket(bucket.key);
+        setStatus(bucket.filter.status);
+        setType(bucket.filter.type);
+        dispatch(listReturns(1, keyword, bucket.filter.status, bucket.filter.type));
+    };
+
     const columns = [
         {
             title: '#',
@@ -114,20 +138,24 @@ const ReturnListScreen = ({ history, location }) => {
             field: 'createdAt',
             render: (row) => row.createdAt?.substring(0, 10),
         },
+        {
+            title: 'Age',
+            field: 'createdAt',
+            render: (row) => {
+                const a = ageLabel(row.createdAt);
+                return <span className={a.stale ? 'ret-age-stale' : ''}>{a.text}</span>;
+            },
+        },
+        {
+            title: 'Next',
+            sorting: false,
+            render: (row) => {
+                const actions = buildReturnActions(row, row.nextStatuses || []);
+                const primary = actions.find((x) => x.kind === 'primary');
+                return primary ? <span className="ret-next-link">{primary.label.split(' · ')[0]} →</span> : '-';
+            },
+        },
     ];
-
-    const DashCard = ({ title, value, variant }) => (
-        <Col md={2} sm={4} xs={6} className="mb-3">
-            <Card border={variant || 'primary'} className="text-center">
-                <Card.Body>
-                    <Card.Title style={{ fontSize: '1.5rem' }}>
-                        {dashLoading ? '...' : value != null ? value : 0}
-                    </Card.Title>
-                    <Card.Text style={{ fontSize: '0.8rem' }}>{title}</Card.Text>
-                </Card.Body>
-            </Card>
-        </Col>
-    );
 
     const Table = useMemo(
         () => (
@@ -156,33 +184,12 @@ const ReturnListScreen = ({ history, location }) => {
 
             {/* Dashboard Stats */}
             {dashError && <Message variant="danger">{dashError}</Message>}
-            <Row className="mb-3">
-                <DashCard
-                    title="Total"
-                    value={dashboard?.total}
-                    variant="dark"
-                />
-                <DashCard
-                    title="Pending Approval"
-                    value={dashboard?.pendingApproval}
-                    variant="info"
-                />
-                <DashCard
-                    title="Pending QC"
-                    value={dashboard?.pendingQC}
-                    variant="warning"
-                />
-                <DashCard
-                    title="Pending Refund"
-                    value={dashboard?.pendingRefund}
-                    variant="success"
-                />
-                <DashCard
-                    title="Exchanges"
-                    value={dashboard?.exchanges}
-                    variant="primary"
-                />
-            </Row>
+            <ReturnTriageCards
+                stats={dashboard}
+                dashLoading={dashLoading}
+                activeKey={activeBucket}
+                onSelect={handleBucketSelect}
+            />
 
             {/* Filters */}
             <Row className="mb-3">
@@ -205,7 +212,7 @@ const ReturnListScreen = ({ history, location }) => {
                     <Form.Control
                         as="select"
                         value={status}
-                        onChange={(e) => setStatus(e.target.value)}
+                        onChange={(e) => { setStatus(e.target.value); setActiveBucket(''); }}
                     >
                         {STATUSES.map((s) => (
                             <option key={s} value={s}>
@@ -218,7 +225,7 @@ const ReturnListScreen = ({ history, location }) => {
                     <Form.Control
                         as="select"
                         value={type}
-                        onChange={(e) => setType(e.target.value)}
+                        onChange={(e) => { setType(e.target.value); setActiveBucket(''); }}
                     >
                         {TYPES.map((t) => (
                             <option key={t} value={t}>
