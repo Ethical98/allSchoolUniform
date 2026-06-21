@@ -1,0 +1,30 @@
+/* frontend/src/components/returns/returns.css */
+
+/* Stepper */
+.ret-stepper { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 8px 0 4px; }
+.ret-step { font-size: 0.72rem; padding: 3px 10px; border-radius: 14px; background: #e2e3ea; color: #888; white-space: nowrap; }
+.ret-step--done { background: #cfe9d2; color: #256b2a; }
+.ret-step--now { background: #1f6feb; color: #fff; font-weight: 600; }
+.ret-step--terminal { background: #f8d7da; color: #842029; font-weight: 600; }
+.ret-step-sep { color: #c4c4cc; font-size: 0.7rem; }
+
+/* Action bar */
+.ret-actionbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  padding: 12px 14px; background: #fff7e6; border: 1px solid #f0e2c0; border-radius: 8px;
+  position: sticky; top: 0; z-index: 5; margin-bottom: 16px; }
+.ret-actionbar--terminal { background: #eef7ef; border-color: #cfe9d2; }
+.ret-actionbar__next { font-weight: 700; color: #7a5b00; }
+.ret-actionbar__hint { font-size: 0.8rem; color: #a06000; }
+.ret-actionbar__more { margin-left: auto; }
+
+/* Triage bucket cards */
+.ret-bucket { cursor: pointer; border: 1px solid #e6e7ee; border-radius: 8px;
+  padding: 10px 12px; text-align: center; transition: border-color .12s, background .12s; }
+.ret-bucket:hover { border-color: #1f6feb; }
+.ret-bucket--active { border-color: #1f6feb; background: #eef4ff; }
+.ret-bucket__n { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.ret-bucket__t { font-size: 0.72rem; color: #888; text-transform: uppercase; letter-spacing: .03em; margin-top: 4px; }
+
+/* List age + next-action */
+.ret-age-stale { color: #c62828; font-weight: 600; }
+.ret-next-link { color: #1f6feb; font-weight: 600; }
