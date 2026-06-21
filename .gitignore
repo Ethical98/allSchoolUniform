@@ -33,3 +33,6 @@ notes.txt
 
 ./frontend/build/
 graphify-out/
+
+# Superpowers brainstorm/visual-companion artifacts
+.superpowers/
