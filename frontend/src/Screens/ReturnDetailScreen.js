@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    Row, Col, Card, Table, Button, Tabs, Tab, Badge, Modal, Form,
+    Row, Col, Card, Table, Button, Badge, Modal, Form, Collapse,
 } from 'react-bootstrap';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -9,6 +9,9 @@ import AdminPageLayout from '../components/AdminPageLayout';
 import ReturnStatusBadge from '../components/ReturnStatusBadge';
 import ReturnTimeline from '../components/ReturnTimeline';
 import QCDispositionForm from '../components/QCDispositionForm';
+import ReturnStatusStepper from '../components/returns/ReturnStatusStepper';
+import ReturnActionBar from '../components/returns/ReturnActionBar';
+import CopyRow from '../components/returns/CopyRow';
 import {
     getReturnDetails,
     updateReturnStatus,
@@ -44,7 +47,7 @@ const ReturnDetailScreen = ({ match, history }) => {
     const returnId = match.params.id;
     const dispatch = useDispatch();
 
-    const [activeTab, setActiveTab] = useState('overview');
+    const [showTimeline, setShowTimeline] = useState(false);
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
     const [showRefundModal, setShowRefundModal] = useState(false);
@@ -196,28 +199,6 @@ const ReturnDetailScreen = ({ match, history }) => {
     const ret = returnRequest;
     const nextStatuses = stateNextStatuses || [];
 
-    const copyToClipboard = (value) => {
-        if (value && navigator.clipboard) {
-            navigator.clipboard.writeText(String(value)).catch(() => {});
-        }
-    };
-
-    // One labelled value with a copy button (for UPI IDs, account numbers, etc.).
-    const CopyRow = ({ label, value }) => (
-        <p className="mb-1">
-            <strong>{label}:</strong> {value}{' '}
-            <Button
-                variant="link"
-                size="sm"
-                className="p-0 align-baseline"
-                title={`Copy ${label}`}
-                onClick={() => copyToClipboard(value)}
-            >
-                Copy
-            </Button>
-        </p>
-    );
-
     // Where to send the refund. COD returns carry a customer-provided UPI/bank
     // destination on the return; PREPAID returns reference the original
     // Razorpay payment (from the order, via the `payment` field).
@@ -258,193 +239,21 @@ const ReturnDetailScreen = ({ match, history }) => {
         return <p className="mb-1 text-muted">Prepaid order — refund to original payment method.</p>;
     };
 
-    const renderActionButtons = () => {
-        if (!ret) return null;
-        return (
-            <div className="mb-3">
-                {nextStatuses.includes('APPROVED') && (
-                    <Button
-                        variant="success"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('APPROVED')}
-                        disabled={statusLoading}
-                    >
-                        Approve
-                    </Button>
-                )}
-                {nextStatuses.includes('REJECTED') && (
-                    <Button
-                        variant="danger"
-                        className="mr-2 mb-1"
-                        onClick={() => setShowRejectModal(true)}
-                        disabled={statusLoading}
-                    >
-                        Reject
-                    </Button>
-                )}
-                {nextStatuses.includes('PICKUP_SCHEDULED') && (
-                    <Button
-                        variant="primary"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('PICKUP_SCHEDULED')}
-                        disabled={statusLoading}
-                    >
-                        Schedule Pickup
-                    </Button>
-                )}
-                {nextStatuses.includes('IN_TRANSIT') && (
-                    <Button
-                        variant="info"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('IN_TRANSIT')}
-                        disabled={statusLoading}
-                    >
-                        Mark In Transit
-                    </Button>
-                )}
-                {nextStatuses.includes('PICKUP_FAILED') && (
-                    <Button
-                        variant="warning"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('PICKUP_FAILED')}
-                        disabled={statusLoading}
-                    >
-                        Mark Pickup Failed
-                    </Button>
-                )}
-                {nextStatuses.includes('RECEIVED') && (
-                    <Button
-                        variant="info"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('RECEIVED')}
-                        disabled={statusLoading}
-                    >
-                        Mark Received
-                    </Button>
-                )}
-                {nextStatuses.includes('QC_IN_PROGRESS') && (
-                    <Button
-                        variant="warning"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('QC_IN_PROGRESS')}
-                        disabled={statusLoading}
-                    >
-                        Start QC
-                    </Button>
-                )}
-                {nextStatuses.includes('QC_COMPLETED') && (
-                    <Button
-                        variant="warning"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('QC_COMPLETED')}
-                        disabled={statusLoading || (ret.items || []).some((it) => !it.qcDisposition || it.qcDisposition === 'PENDING')}
-                        title={(ret.items || []).some((it) => !it.qcDisposition || it.qcDisposition === 'PENDING')
-                            ? 'Set a QC disposition for every item first'
-                            : 'Finalize QC — runs stock movements and unlocks refund/exchange'}
-                    >
-                        Complete QC
-                    </Button>
-                )}
-                {nextStatuses.includes('REFUND_INITIATED') &&
-                 !(['EXCHANGE', 'REPLACEMENT'].includes(ret.type) && ret.exchangeOrderId) && (
-                    <span className="mr-2 mb-1 d-inline-flex align-items-center" style={{ gap: '8px' }}>
-                        <Form.Check
-                            type="checkbox"
-                            id="full-refund-override"
-                            label="Full refund"
-                            className="mb-0"
-                            checked={fullRefundOverride}
-                            onChange={(e) => setFullRefundOverride(e.target.checked)}
-                        />
-                        <Button
-                            variant="success"
-                            onClick={() => handleStatusUpdate('REFUND_INITIATED', { fullRefundOverride })}
-                            disabled={statusLoading}
-                        >
-                            Initiate Refund
-                        </Button>
-                    </span>
-                )}
-                {(ret.type === 'EXCHANGE' || ret.type === 'REPLACEMENT') &&
-                 !ret.exchangeOrderId &&
-                 (nextStatuses.includes('EXCHANGE_SHIPPED') || nextStatuses.includes('REPLACEMENT_SHIPPED')) && (
-                    <Button
-                        variant="success"
-                        className="mr-2 mb-1"
-                        onClick={() => dispatch(createExchangeOrder(returnId))}
-                        disabled={exLoading}
-                    >
-                        Create {ret.type === 'REPLACEMENT' ? 'Replacement' : 'Exchange'} Order
-                    </Button>
-                )}
-                {ret.exchangeOrderId && nextStatuses.includes('EXCHANGE_SHIPPED') && (
-                    <Button
-                        variant="success"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('EXCHANGE_SHIPPED')}
-                        disabled={statusLoading}
-                    >
-                        Mark Exchange Shipped
-                    </Button>
-                )}
-                {ret.exchangeOrderId && nextStatuses.includes('REPLACEMENT_SHIPPED') && (
-                    <Button
-                        variant="success"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('REPLACEMENT_SHIPPED')}
-                        disabled={statusLoading}
-                    >
-                        Mark Replacement Shipped
-                    </Button>
-                )}
-                {(ret.status === 'REFUND_INITIATED') && ret.type === 'RETURN' && (
-                    <Button
-                        variant="outline-success"
-                        className="mr-2 mb-1"
-                        onClick={() => {
-                            setRefundAmount(ret.refundAmount || '');
-                            // Pre-select the destination the customer chose at
-                            // return time (COD). Admin can still override.
-                            if (ret.refundMethod === 'UPI' || ret.refundMethod === 'BANK_TRANSFER') {
-                                setRefundMethod(ret.refundMethod);
-                            }
-                            setShowRefundModal(true);
-                        }}
-                        disabled={refundLoading}
-                    >
-                        Record Refund
-                    </Button>
-                )}
-                {nextStatuses.includes('COMPLETED') && (
-                    <Button
-                        variant="dark"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('COMPLETED')}
-                        disabled={statusLoading}
-                    >
-                        Mark Completed
-                    </Button>
-                )}
-                {nextStatuses.includes('CANCELLED') && (
-                    <Button
-                        variant="outline-danger"
-                        className="mr-2 mb-1"
-                        onClick={() => handleStatusUpdate('CANCELLED')}
-                        disabled={statusLoading}
-                    >
-                        Cancel
-                    </Button>
-                )}
-                <Button
-                    variant="outline-secondary"
-                    className="mb-1"
-                    onClick={() => setShowNoteModal(true)}
-                >
-                    <i className="fas fa-sticky-note" /> Add Note
-                </Button>
-            </div>
-        );
+    const handleAction = (actionKey) => {
+        if (actionKey === 'createExchangeOrder') dispatch(createExchangeOrder(returnId));
     };
+    const handleOpenModal = (modalKey) => {
+        if (modalKey === 'reject') return setShowRejectModal(true);
+        if (modalKey === 'note') return setShowNoteModal(true);
+        if (modalKey === 'refund') {
+            setRefundAmount(ret.refundAmount || '');
+            if (ret.refundMethod === 'UPI' || ret.refundMethod === 'BANK_TRANSFER') {
+                setRefundMethod(ret.refundMethod);
+            }
+            return setShowRefundModal(true);
+        }
+    };
+    const anyBusy = statusLoading || exLoading;
 
     return (
         <AdminPageLayout>
@@ -476,313 +285,196 @@ const ReturnDetailScreen = ({ match, history }) => {
                 <Message variant="warning">Return not found</Message>
             ) : (
                 <>
-                    {renderActionButtons()}
+                    <div className="mb-2">
+                        <ReturnStatusStepper status={ret.status} />
+                    </div>
 
-                    <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
-                        {/* Overview Tab */}
-                        <Tab eventKey="overview" title="Overview">
-                            <Row className="mb-3">
-                                <Col md={6}>
-                                    <Card>
-                                        <Card.Header>Return Info</Card.Header>
-                                        <Card.Body>
-                                            <p><strong>Return ID:</strong> {ret.returnId}</p>
-                                            <p><strong>Order ID:</strong>{' '}
-                                                <a href={`/admin/order/${ret.order}/edit`} target="_blank" rel="noopener noreferrer">
-                                                    {ret.orderId}
-                                                </a>
-                                            </p>
-                                            <p><strong>Customer:</strong> {ret.customerName || '-'}</p>
-                                            <p><strong>Email:</strong> {ret.customerEmail || '-'}</p>
-                                            <p><strong>Phone:</strong> {ret.customerPhone || '-'}</p>
-                                            <p><strong>Type:</strong> <Badge bg="primary">{ret.type}</Badge></p>
-                                            <p><strong>Status:</strong> <ReturnStatusBadge status={ret.status} /></p>
-                                            <p><strong>Reason:</strong> {ret.reason?.replace(/_/g, ' ')}</p>
-                                            {ret.reasonDetails && <p><strong>Details:</strong> {ret.reasonDetails}</p>}
-                                            <p><strong>Created:</strong> {ret.createdAt?.substring(0, 10)}</p>
-                                            <p><strong>Created By:</strong> {ret.createdByName || '-'}</p>
-                                            {ret.overrideReturnWindow && (
-                                                <Badge bg="warning">Return Window Override</Badge>
-                                            )}
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                                <Col md={6}>
-                                    <Card>
-                                        <Card.Header>Financials</Card.Header>
-                                        <Card.Body>
-                                            <p><strong>Refund Amount:</strong> ₹{ret.refundAmount || 0}</p>
-                                            <p><strong>Total Refund:</strong> ₹{ret.refundAmount || 0}</p>
-                                            <p><strong>Refund Method:</strong> {ret.refundMethod?.replace(/_/g, ' ') || '-'}</p>
-                                            <div className="border rounded p-2 my-2 bg-light">
-                                                <p className="mb-1 text-uppercase text-muted" style={{ fontSize: '0.75rem', letterSpacing: '0.03em' }}>
-                                                    Refund Destination
-                                                </p>
-                                                {renderRefundDestination()}
-                                            </div>
-                                            {ret.refundTransactionId && (
-                                                <p><strong>Transaction ID:</strong> {ret.refundTransactionId}</p>
-                                            )}
-                                            {ret.refundProcessedAt && (
-                                                <p><strong>Refund Processed:</strong> {ret.refundProcessedAt.substring(0, 10)}</p>
-                                            )}
-                                            {ret.priceDifference !== 0 && (
-                                                <p>
-                                                    <strong>Price Difference:</strong> ₹{Math.abs(ret.priceDifference)}{' '}
-                                                    {ret.priceDifference > 0 ? '(customer owes)' : '(refund due)'}
-                                                    {ret.priceDifference > 0 && (
-                                                        <Badge bg={ret.priceDifferenceCollected ? 'success' : 'warning'} className="ml-2">
-                                                            {ret.priceDifferenceCollected ? 'Collected' : 'Pending'}
-                                                        </Badge>
-                                                    )}
-                                                </p>
-                                            )}
-                                            {ret.creditNoteNumber && (
-                                                <p><strong>Credit Note:</strong> {ret.creditNoteNumber}</p>
-                                            )}
-                                            {ret.exchangeOrderNumber && (
-                                                <p><strong>Exchange Order:</strong> {ret.exchangeOrderNumber}</p>
-                                            )}
-                                            {!ret.creditNote && ret.status !== 'REJECTED' && ret.status !== 'CANCELLED' && (
-                                                <Button
-                                                    variant="outline-primary"
-                                                    size="sm"
-                                                    onClick={() => dispatch(generateCreditNote(returnId))}
-                                                    disabled={cnLoading}
-                                                >
-                                                    Generate Credit Note
-                                                </Button>
-                                            )}
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            </Row>
+                    <ReturnActionBar
+                        ret={ret}
+                        nextStatuses={nextStatuses}
+                        busy={anyBusy}
+                        fullRefundOverride={fullRefundOverride}
+                        onToggleFullRefundOverride={setFullRefundOverride}
+                        onStatusUpdate={handleStatusUpdate}
+                        onAction={handleAction}
+                        onOpenModal={handleOpenModal}
+                    />
 
-                            {/* Items Table */}
+                    <Row>
+                        {/* LEFT: items/QC + customer reason */}
+                        <Col lg={7}>
                             <Card className="mb-3">
-                                <Card.Header>Items</Card.Header>
+                                <Card.Header>Items {ret.status === 'QC_IN_PROGRESS' && '· QC Inspection'}</Card.Header>
                                 <Card.Body>
-                                    <Table bordered hover responsive>
-                                        <thead>
-                                            <tr>
-                                                <th>Product</th>
-                                                <th>Size</th>
-                                                <th>Qty</th>
-                                                <th>Price</th>
-                                                <th>QC Disposition</th>
-                                                <th>QC Notes</th>
-                                                {ret.type === 'EXCHANGE' && <th>Exchange</th>}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {(ret.items || []).map((item, i) => (
-                                                <tr key={i}>
-                                                    <td>{item.productName || item.name || '-'}</td>
-                                                    <td>{item.size || '-'}</td>
-                                                    <td>{item.returnQty}</td>
-                                                    <td>₹{item.price || 0}</td>
-                                                    <td>
-                                                        {item.qcDisposition ? (
-                                                            <Badge bg={QC_BADGE_VARIANT[item.qcDisposition] || 'warning'}>
-                                                                {item.qcDisposition}
-                                                            </Badge>
-                                                        ) : (
-                                                            '-'
-                                                        )}
-                                                    </td>
-                                                    <td>{item.qcNotes || '-'}</td>
-                                                    {ret.type === 'EXCHANGE' && (
-                                                        <td>
-                                                            {item.exchangeSize
-                                                                ? `Size: ${item.exchangeSize}`
-                                                                : '-'}
-                                                        </td>
-                                                    )}
+                                    {ret.status === 'QC_IN_PROGRESS' ? (
+                                        <QCDispositionForm items={ret.items || []} onSubmit={handleQCSubmit} />
+                                    ) : (
+                                        <Table bordered hover responsive size="sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th><th>Size</th><th>Qty</th><th>Price</th>
+                                                    <th>QC</th><th>QC Notes</th>{ret.type === 'EXCHANGE' && <th>Exchange</th>}
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </Table>
+                                            </thead>
+                                            <tbody>
+                                                {(ret.items || []).map((item, i) => (
+                                                    <tr key={i}>
+                                                        <td>{item.productName || item.name || '-'}</td>
+                                                        <td>{item.size || '-'}</td>
+                                                        <td>{item.returnQty}</td>
+                                                        <td>₹{item.price || 0}</td>
+                                                        <td>
+                                                            {item.qcDisposition ? (
+                                                                <Badge bg={QC_BADGE_VARIANT[item.qcDisposition] || 'warning'}>
+                                                                    {item.qcDisposition}
+                                                                </Badge>
+                                                            ) : '-'}
+                                                        </td>
+                                                        <td>{item.qcNotes || '-'}</td>
+                                                        {ret.type === 'EXCHANGE' && (
+                                                            <td>{item.exchangeSize ? `Size: ${item.exchangeSize}` : '-'}</td>
+                                                        )}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </Table>
+                                    )}
                                 </Card.Body>
                             </Card>
 
-                            {/* Evidence Photos (customer-submitted) */}
-                            {Array.isArray(ret.evidenceImages) && ret.evidenceImages.length > 0 && (
-                                <Card className="mb-3">
-                                    <Card.Header>Evidence Photos</Card.Header>
-                                    <Card.Body>
-                                        <div className="d-flex flex-wrap" style={{ gap: '8px' }}>
+                            <Card className="mb-3">
+                                <Card.Header>Customer Reason</Card.Header>
+                                <Card.Body>
+                                    <p className="mb-1"><strong>Reason:</strong> {ret.reason?.replace(/_/g, ' ') || '-'}</p>
+                                    {ret.reasonDetails && <p className="mb-1"><strong>Details:</strong> {ret.reasonDetails}</p>}
+                                    {Array.isArray(ret.evidenceImages) && ret.evidenceImages.length > 0 && (
+                                        <div className="d-flex flex-wrap mt-2" style={{ gap: '8px' }}>
                                             {ret.evidenceImages.map((src, i) => (
                                                 <a key={i} href={src} target="_blank" rel="noopener noreferrer">
-                                                    <img
-                                                        src={src}
-                                                        alt={`Evidence ${i + 1}`}
-                                                        style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 4, border: '1px solid #ddd' }}
-                                                    />
+                                                    <img src={src} alt={`Evidence ${i + 1}`}
+                                                        style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 4, border: '1px solid #ddd' }} />
                                                 </a>
                                             ))}
                                         </div>
-                                    </Card.Body>
-                                </Card>
-                            )}
+                                    )}
+                                </Card.Body>
+                            </Card>
+                        </Col>
 
-                            {/* Pickup Address */}
-                            {ret.pickupAddress && (
-                                <Card className="mb-3">
-                                    <Card.Header>Pickup Address</Card.Header>
-                                    <Card.Body>
-                                        <p>
-                                            {ret.pickupAddress.address}, {ret.pickupAddress.city},{' '}
-                                            {ret.pickupAddress.state} - {ret.pickupAddress.postalCode}
+                        {/* RIGHT: financials + shipping + customer */}
+                        <Col lg={5}>
+                            <Card className="mb-3">
+                                <Card.Header>Financials</Card.Header>
+                                <Card.Body>
+                                    <p className="mb-1"><strong>Refund Amount:</strong> ₹{ret.refundAmount || 0}</p>
+                                    <p className="mb-1"><strong>Refund Method:</strong> {ret.refundMethod?.replace(/_/g, ' ') || '-'}</p>
+                                    <div className="border rounded p-2 my-2 bg-light">
+                                        <p className="mb-1 text-uppercase text-muted" style={{ fontSize: '0.75rem', letterSpacing: '0.03em' }}>
+                                            Refund Destination
                                         </p>
-                                        <p>Phone: {ret.pickupAddress.phone}</p>
-                                    </Card.Body>
-                                </Card>
-                            )}
-                        </Tab>
+                                        {renderRefundDestination()}
+                                    </div>
+                                    {ret.refundTransactionId && <p className="mb-1"><strong>Transaction ID:</strong> {ret.refundTransactionId}</p>}
+                                    {ret.refundProcessedAt && <p className="mb-1"><strong>Refund Processed:</strong> {ret.refundProcessedAt.substring(0, 10)}</p>}
+                                    {ret.priceDifference !== 0 && (
+                                        <p className="mb-1">
+                                            <strong>Price Difference:</strong> ₹{Math.abs(ret.priceDifference)}{' '}
+                                            {ret.priceDifference > 0 ? '(customer owes)' : '(refund due)'}
+                                            {ret.priceDifference > 0 && (
+                                                <Badge bg={ret.priceDifferenceCollected ? 'success' : 'warning'} className="ml-2">
+                                                    {ret.priceDifferenceCollected ? 'Collected' : 'Pending'}
+                                                </Badge>
+                                            )}
+                                        </p>
+                                    )}
+                                    {ret.creditNoteNumber && <p className="mb-1"><strong>Credit Note:</strong> {ret.creditNoteNumber}</p>}
+                                    {ret.exchangeOrderNumber && <p className="mb-1"><strong>Exchange Order:</strong> {ret.exchangeOrderNumber}</p>}
+                                    {!ret.creditNote && ret.status !== 'REJECTED' && ret.status !== 'CANCELLED' && (
+                                        <Button variant="outline-primary" size="sm" className="mt-1"
+                                            onClick={() => dispatch(generateCreditNote(returnId))} disabled={cnLoading}>
+                                            Generate Credit Note
+                                        </Button>
+                                    )}
+                                </Card.Body>
+                            </Card>
 
-                        {/* Timeline Tab */}
-                        <Tab eventKey="timeline" title="Timeline">
-                            <ReturnTimeline timeline={ret.timeline || []} />
-                        </Tab>
-
-                        {/* QC Tab */}
-                        {['QC_IN_PROGRESS', 'QC_COMPLETED', 'REFUND_INITIATED', 'EXCHANGE_SHIPPED',
-                           'REPLACEMENT_SHIPPED', 'COMPLETED'].includes(ret.status) && (
-                            <Tab eventKey="qc" title="QC Inspection">
-                                {ret.status === 'QC_IN_PROGRESS' ? (
-                                    <QCDispositionForm
-                                        items={ret.items || []}
-                                        onSubmit={handleQCSubmit}
-                                    />
-                                ) : (
-                                    <Card>
-                                        <Card.Header>QC Results (Read-Only)</Card.Header>
-                                        <Card.Body>
-                                            <Table bordered size="sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Product</th>
-                                                        <th>Size</th>
-                                                        <th>Qty</th>
-                                                        <th>Accepted</th>
-                                                        <th>Disposition</th>
-                                                        <th>Notes</th>
-                                                        <th>Refund</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {(ret.items || []).map((item, i) => (
-                                                        <tr key={i}>
-                                                            <td>{item.productName || item.name || '-'}</td>
-                                                            <td>{item.size}</td>
-                                                            <td>{item.returnQty}</td>
-                                                            <td>{item.acceptedQty ?? item.returnQty}</td>
-                                                            <td>
-                                                                <Badge bg={QC_BADGE_VARIANT[item.qcDisposition] || 'warning'}>
-                                                                    {item.qcDisposition || 'PENDING'}
-                                                                </Badge>
-                                                            </td>
-                                                            <td>{item.qcNotes || '-'}</td>
-                                                            <td>
-                                                                {item.qcDisposition === 'NOT_RECEIVED' || item.qcDisposition === 'UNSELLABLE'
-                                                                    ? <span className="text-muted">No refund</span>
-                                                                    : `₹${item.refundAmount || 0}`}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </Table>
-                                        </Card.Body>
-                                    </Card>
-                                )}
-                            </Tab>
-                        )}
-
-                        {/* Shipping Tab */}
-                        <Tab eventKey="shipping" title="Shipping">
-                            <Card>
-                                <Card.Header>Reverse Pickup Details</Card.Header>
+                            <Card className="mb-3">
+                                <Card.Header>Shipping</Card.Header>
                                 <Card.Body>
                                     {ret.reverseShipping?.awbCode || ret.reverseShipping?.providerOrderId ? (
                                         <>
-                                            <p><strong>Provider:</strong> {ret.reverseShipping.provider || 'Shiprocket'}</p>
-                                            <p><strong>AWB:</strong> {ret.reverseShipping.awbCode || '-'}</p>
-                                            <p><strong>Courier:</strong> {ret.reverseShipping.courierName || '-'}</p>
-                                            <p><strong>Status:</strong> {ret.reverseShipping.status || '-'}</p>
-                                            <p><strong>Pickup Date:</strong> {ret.reverseShipping.pickupScheduledDate?.substring(0, 10) || '-'}</p>
-                                            {ret.reverseShipping.receivedAt && (
-                                                <p><strong>Received:</strong> {ret.reverseShipping.receivedAt.substring(0, 10)}</p>
-                                            )}
-                                            <p><strong>Shiprocket Order ID:</strong> {ret.reverseShipping.providerOrderId || '-'}</p>
+                                            <p className="mb-1"><strong>Provider:</strong> {ret.reverseShipping.provider || 'Shiprocket'}</p>
+                                            <p className="mb-1"><strong>AWB:</strong> {ret.reverseShipping.awbCode || '-'}</p>
+                                            <p className="mb-1"><strong>Courier:</strong> {ret.reverseShipping.courierName || '-'}</p>
+                                            <p className="mb-1"><strong>Status:</strong> {ret.reverseShipping.status || '-'}</p>
                                             {ret.reverseShipping.trackingUrl && (
-                                                <a
-                                                    href={ret.reverseShipping.trackingUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    Track Shipment
-                                                </a>
+                                                <a href={ret.reverseShipping.trackingUrl} target="_blank" rel="noopener noreferrer">Track Shipment</a>
                                             )}
                                             {ret.reverseShipping?.providerShipmentId && (
-                                                <div className="mt-2 d-flex gap-2" style={{ gap: '8px' }}>
-                                                    <Button
-                                                        variant="outline-warning"
-                                                        size="sm"
-                                                        disabled={initiateLoading}
-                                                        onClick={() => dispatch(initiateReturnPickup(returnId))}
-                                                    >
-                                                        {initiateLoading ? 'Requesting…' : '📦 Initiate Pickup on ShipRocket'}
+                                                <div className="mt-2 d-flex" style={{ gap: '8px' }}>
+                                                    <Button variant="outline-warning" size="sm" disabled={initiateLoading}
+                                                        onClick={() => dispatch(initiateReturnPickup(returnId))}>
+                                                        {initiateLoading ? 'Requesting…' : '📦 Initiate Pickup'}
                                                     </Button>
                                                     {!ret.reverseShipping?.labelUrl && (
-                                                        <Button
-                                                            variant="outline-primary"
-                                                            size="sm"
-                                                            disabled={labelLoading}
-                                                            onClick={() => dispatch(generateReturnLabel(returnId))}
-                                                        >
-                                                            {labelLoading ? 'Generating…' : 'Generate Return Label'}
+                                                        <Button variant="outline-primary" size="sm" disabled={labelLoading}
+                                                            onClick={() => dispatch(generateReturnLabel(returnId))}>
+                                                            {labelLoading ? 'Generating…' : 'Generate Label'}
                                                         </Button>
                                                     )}
                                                 </div>
                                             )}
                                             {ret.reverseShipping?.labelUrl && (
-                                                <p className="mt-2">
+                                                <p className="mt-2 mb-0">
                                                     <a href={ret.reverseShipping.labelUrl} target="_blank" rel="noopener noreferrer">
-                                                        <Button variant="outline-success" size="sm">Download Return Label</Button>
+                                                        <Button variant="outline-success" size="sm">Download Label</Button>
                                                     </a>
                                                 </p>
                                             )}
                                         </>
                                     ) : (
-                                        <p className="text-muted">No reverse shipment created yet.</p>
+                                        <p className="text-muted mb-0">No reverse shipment created yet.</p>
+                                    )}
+                                    {ret.exchangeOrderNumber && ret.exchangeOrderId && (
+                                        <div className="mt-3 pt-2 border-top">
+                                            <p className="mb-1"><strong>Exchange Order:</strong> {ret.exchangeOrderNumber}</p>
+                                            <Button variant="primary" size="sm"
+                                                onClick={() => window.open(`/admin/shipping/orders/${ret.exchangeOrderId}`, '_blank')}>
+                                                Ship This Order →
+                                            </Button>
+                                        </div>
                                     )}
                                 </Card.Body>
                             </Card>
-                            {ret.exchangeOrderNumber && ret.exchangeOrderId && (
-                                <Card className="mt-3">
-                                    <Card.Header>Exchange / Replacement Order</Card.Header>
-                                    <Card.Body>
-                                        <p><strong>Order Number:</strong> {ret.exchangeOrderNumber}</p>
-                                        <Button
-                                            variant="outline-primary"
-                                            size="sm"
-                                            className="mr-2"
-                                            onClick={() => window.open(`/admin/order/${ret.exchangeOrderId}/edit`, '_blank')}
-                                        >
-                                            View Exchange Order
-                                        </Button>
-                                        <Button
-                                            variant="primary"
-                                            size="sm"
-                                            onClick={() => window.open(`/admin/shipping/orders/${ret.exchangeOrderId}`, '_blank')}
-                                        >
-                                            Ship This Order →
-                                        </Button>
-                                    </Card.Body>
-                                </Card>
-                            )}
-                        </Tab>
-                    </Tabs>
+
+                            <Card className="mb-3">
+                                <Card.Header>Customer & Order</Card.Header>
+                                <Card.Body>
+                                    <p className="mb-1"><strong>Customer:</strong> {ret.customerName || '-'}</p>
+                                    <p className="mb-1"><strong>Email:</strong> {ret.customerEmail || '-'}</p>
+                                    <p className="mb-1"><strong>Phone:</strong> {ret.customerPhone || '-'}</p>
+                                    <p className="mb-1"><strong>Order:</strong>{' '}
+                                        <a href={`/admin/order/${ret.order}/edit`} target="_blank" rel="noopener noreferrer">{ret.orderId}</a>
+                                    </p>
+                                    <p className="mb-1"><strong>Created:</strong> {ret.createdAt?.substring(0, 10)} by {ret.createdByName || '-'}</p>
+                                    {ret.pickupAddress && (
+                                        <p className="mb-0 mt-2"><strong>Pickup:</strong> {ret.pickupAddress.address}, {ret.pickupAddress.city}, {ret.pickupAddress.state} - {ret.pickupAddress.postalCode} · {ret.pickupAddress.phone}</p>
+                                    )}
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    <Card className="mb-3">
+                        <Card.Header style={{ cursor: 'pointer' }} onClick={() => setShowTimeline((v) => !v)}>
+                            Timeline {showTimeline ? '▾' : '▸'}
+                        </Card.Header>
+                        <Collapse in={showTimeline}>
+                            <Card.Body><ReturnTimeline timeline={ret.timeline || []} /></Card.Body>
+                        </Collapse>
+                    </Card>
+
+                    {/* Reject / Refund / Note modals — KEEP existing blocks here, unchanged */}
 
                     {/* Reject Modal */}
                     <Modal show={showRejectModal} onHide={() => setShowRejectModal(false)}>
