@@ -46,3 +46,22 @@ export function validateRefundDestination({
   }
   return { ok: false, error: 'A refund destination (UPI or bank) is required for COD orders.' };
 }
+
+// Human-readable refund destination for customer emails. Masks the bank
+// account to the last 4 digits; shows IFSC in full. Falls back to
+// "your original payment method" for prepaid / no customer destination.
+export function formatRefundDestination({ refundMethod, refundUpiId, refundBankDetails } = {}) {
+  if (refundMethod === 'UPI' && refundUpiId) {
+    return { text: `UPI: ${refundUpiId}`, hasCustomerDestination: true };
+  }
+  if (refundMethod === 'BANK_TRANSFER' && refundBankDetails) {
+    const acc = String(refundBankDetails.accountNumber || '');
+    const masked = acc ? `••••${acc.slice(-4)}` : '';
+    const parts = [];
+    if (refundBankDetails.accountHolderName) parts.push(refundBankDetails.accountHolderName);
+    if (masked) parts.push(`Bank A/C ${masked}`);
+    if (refundBankDetails.ifscCode) parts.push(`IFSC ${refundBankDetails.ifscCode}`);
+    return { text: parts.join(' · '), hasCustomerDestination: true };
+  }
+  return { text: 'your original payment method', hasCustomerDestination: false };
+}

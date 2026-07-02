@@ -7,6 +7,7 @@ import {
   isValidAccountHolder,
   validateRefundDestination,
 } from './refundDestination.js';
+import { formatRefundDestination } from './refundDestination.js';
 
 test('isValidUpiId accepts a standard VPA', () => {
   assert.equal(isValidUpiId('rahul.k@okhdfcbank'), true);
@@ -59,4 +60,34 @@ test('validateRefundDestination: COD missing destination fails', () => {
 test('validateRefundDestination: COD bad UPI fails', () => {
   const r = validateRefundDestination({ paymentMethod: 'COD', refundMethod: 'UPI', refundUpiId: 'bad' });
   assert.equal(r.ok, false);
+});
+
+test('formatRefundDestination: COD UPI', () => {
+  const r = formatRefundDestination({ refundMethod: 'UPI', refundUpiId: 'rahul@oksbi' });
+  assert.equal(r.text, 'UPI: rahul@oksbi');
+  assert.equal(r.hasCustomerDestination, true);
+});
+test('formatRefundDestination: COD bank masks account to last 4, keeps IFSC', () => {
+  const r = formatRefundDestination({
+    refundMethod: 'BANK_TRANSFER',
+    refundBankDetails: { accountHolderName: 'Rahul K', accountNumber: '123456789012', ifscCode: 'HDFC0001234' },
+  });
+  assert.equal(r.text, 'Rahul K · Bank A/C ••••9012 · IFSC HDFC0001234');
+  assert.equal(r.hasCustomerDestination, true);
+});
+test('formatRefundDestination: bank without holder name omits the name segment', () => {
+  const r = formatRefundDestination({
+    refundMethod: 'BANK_TRANSFER',
+    refundBankDetails: { accountNumber: '99887766', ifscCode: 'SBIN0000456' },
+  });
+  assert.equal(r.text, 'Bank A/C ••••7766 · IFSC SBIN0000456');
+  assert.equal(r.hasCustomerDestination, true);
+});
+test('formatRefundDestination: prepaid / no destination falls back to original payment', () => {
+  const r = formatRefundDestination({ refundMethod: 'ORIGINAL_PAYMENT' });
+  assert.equal(r.text, 'your original payment method');
+  assert.equal(r.hasCustomerDestination, false);
+  const empty = formatRefundDestination({});
+  assert.equal(empty.text, 'your original payment method');
+  assert.equal(empty.hasCustomerDestination, false);
 });
