@@ -53,6 +53,20 @@
                         </td>
                     </tr>
 
+                    <!-- Refund To -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 16px 20px; text-align: center;">
+                                        <span style="color: #6b7280; font-size: 12px; display: block; margin-bottom: 4px;">Refund To</span>
+                                        <strong style="color: #111827; font-size: 15px;">{{refundDestinationText}}</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
                     <!-- Credit Note -->
                     {{#if creditNoteNumber}}
                     <tr>
@@ -75,7 +89,8 @@
                             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
                                 <tr>
                                     <td style="padding: 16px 20px;">
-                                        <p style="margin: 0; color: #1e40af; font-size: 13px; line-height: 1.6;">The refund has been credited to your original payment method. Please allow 2-3 business days for it to reflect in your account, depending on your bank.</p>
+                                        {{#if hasCustomerRefundDestination}}<p style="margin: 0; color: #1e40af; font-size: 13px; line-height: 1.6;">The refund has been sent to {{refundDestinationText}}. Please allow 2-3 business days for it to reflect, depending on your bank.</p>{{/if}}
+                                        {{#if usesOriginalPayment}}<p style="margin: 0; color: #1e40af; font-size: 13px; line-height: 1.6;">The refund has been credited to your original payment method. Please allow 2-3 business days for it to reflect in your account, depending on your bank.</p>{{/if}}
                                     </td>
                                 </tr>
                             </table>
