@@ -113,6 +113,11 @@ const buildEmailData = (returnRequest) => {
     supportPhone: process.env.SUPPORT_PHONE || '+919654264262',
     // Footer partial (_footer.html) renders "sent to {{customerEmail}}".
     customerEmail: returnRequest.customerEmail || '',
+    // Header/footer partials also reference these; mirror getCommonEmailData
+    // (emailService.js) so no partial token leaks to the customer.
+    websiteUrl: process.env.NEXTJS_URL || process.env.FRONTEND_URL || 'https://allschooluniform.com',
+    year: new Date().getFullYear(),
+    emailTitle: 'Return Update - All School Uniform',
     frontendUrl: process.env.NEXTJS_URL || process.env.FRONTEND_URL || '',
     refundDestinationText: refundDestination.text,
     // '1' (truthy) only when the customer gave a COD destination; omitted
