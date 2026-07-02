@@ -79,6 +79,20 @@
                         </td>
                     </tr>
 
+                    <!-- Refund To -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 16px 20px; text-align: center;">
+                                        <span style="color: #6b7280; font-size: 12px; display: block; margin-bottom: 4px;">Refund To</span>
+                                        <strong style="color: #111827; font-size: 15px;">{{refundDestinationText}}</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
                     <!-- Credit Note -->
                     {{#if creditNoteNumber}}
                     <tr>
@@ -102,7 +116,8 @@
                                 <tr>
                                     <td style="padding: 16px 20px;">
                                         <h3 style="margin: 0 0 8px; color: #92400e; font-size: 14px; font-weight: 600;">Refund Timeline</h3>
-                                        <p style="margin: 0; color: #78350f; font-size: 13px; line-height: 1.6;">The refund will be credited to your original payment method within 5-7 business days. Bank processing times may vary.</p>
+                                        {{#if hasCustomerRefundDestination}}<p style="margin: 0; color: #78350f; font-size: 13px; line-height: 1.6;">The refund will be sent to {{refundDestinationText}} within 5-7 business days. Processing times may vary.</p>{{/if}}
+                                        {{#if usesOriginalPayment}}<p style="margin: 0; color: #78350f; font-size: 13px; line-height: 1.6;">The refund will be credited to your original payment method within 5-7 business days. Bank processing times may vary.</p>{{/if}}
                                     </td>
                                 </tr>
                             </table>
