@@ -111,6 +111,8 @@ const buildEmailData = (returnRequest) => {
     supportEmail:
       process.env.SUPPORT_EMAIL || 'help@allschooluniform.com',
     supportPhone: process.env.SUPPORT_PHONE || '+919654264262',
+    // Footer partial (_footer.html) renders "sent to {{customerEmail}}".
+    customerEmail: returnRequest.customerEmail || '',
     frontendUrl: process.env.NEXTJS_URL || process.env.FRONTEND_URL || '',
     refundDestinationText: refundDestination.text,
     // '1' (truthy) only when the customer gave a COD destination; omitted

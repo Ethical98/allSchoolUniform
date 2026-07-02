@@ -353,7 +353,7 @@ export const processTemplate = async (templateName, data) => {
   });
 
   // Handle conditionals
-  const conditionals = ['trackingNumber', 'courierName', 'refundAmount', 'discount', 'discountPercent', 'last4', 'hasCustomerRefundDestination', 'usesOriginalPayment', 'creditNoteNumber', 'shippingRefundAmount'];
+  const conditionals = ['trackingNumber', 'courierName', 'refundAmount', 'discount', 'discountPercent', 'last4', 'hasCustomerRefundDestination', 'usesOriginalPayment', 'creditNoteNumber', 'shippingRefundAmount', 'awbCode', 'priceDifference', 'reason', 'reasonDetails', 'supportPhone'];
   conditionals.forEach(key => {
     if (data[key]) {
       htmlTemplate = htmlTemplate.replace(new RegExp(`{{#if ${key}}}`, 'g'), '');
