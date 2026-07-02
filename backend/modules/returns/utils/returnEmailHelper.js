@@ -4,6 +4,7 @@ import {
   formatPrice,
   formatDate,
 } from '../../../utils/emailService.js';
+import { formatRefundDestination } from './refundDestination.js';
 
 /**
  * Status-to-template mapping.
@@ -77,6 +78,12 @@ const buildEmailData = (returnRequest) => {
     )
     .join('');
 
+  const refundDestination = formatRefundDestination({
+    refundMethod: returnRequest.refundMethod,
+    refundUpiId: returnRequest.refundUpiId,
+    refundBankDetails: returnRequest.refundBankDetails,
+  });
+
   return {
     returnId: returnRequest.returnId,
     orderId: returnRequest.orderId,
@@ -105,6 +112,11 @@ const buildEmailData = (returnRequest) => {
       process.env.SUPPORT_EMAIL || 'help@allschooluniform.com',
     supportPhone: process.env.SUPPORT_PHONE || '+919654264262',
     frontendUrl: process.env.NEXTJS_URL || process.env.FRONTEND_URL || '',
+    refundDestinationText: refundDestination.text,
+    // '1' (truthy) only when the customer gave a COD destination; omitted
+    // otherwise so {{#if hasCustomerRefundDestination}} is false for prepaid.
+    hasCustomerRefundDestination: refundDestination.hasCustomerDestination ? '1' : '',
+    usesOriginalPayment: refundDestination.hasCustomerDestination ? '' : '1',
   };
 };
 
