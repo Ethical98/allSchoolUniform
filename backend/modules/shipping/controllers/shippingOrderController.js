@@ -5,6 +5,17 @@ import { shippingApi } from '../utils/shippingClient.js';
 import { mapOrderToProvider } from '../utils/shippingMapper.js';
 import { redis } from '../../../services/redisService.js';
 
+/**
+ * Pull the AWB (and any body-level error) out of a ShipRocket assign/awb response.
+ * ShipRocket returns HTTP 200 even on failure; the error lives in the body.
+ */
+export const extractAwb = (resp) => {
+  const d = resp?.response?.data || {};
+  const awbCode = d.awb_code || resp?.awb_code || null;
+  const error = d.awb_assign_error || resp?.awb_assign_error || resp?.message || null;
+  return { awbCode, courierName: d.courier_name || resp?.courier_name || null, error };
+};
+
 // @desc    Check courier serviceability and rates
 // @route   GET /api/shipping/serviceability
 // @access  Admin
@@ -104,20 +115,40 @@ export const createShippingOrder = asyncHandler(async (req, res) => {
         asuOrderId: order.orderId,
       });
 
-      const awbData = awbResponse.response?.data;
-      order.shipping.awbCode = awbData?.awb_code || awbResponse.awb_code;
-      order.shipping.courierName = awbData?.courier_name || awbResponse.courier_name || req.body.courierName || 'Assigned';
-      order.shipping.courierId = req.body.courierId;
-      order.shipping.status = 'AWB_ASSIGNED';
-      if (req.body.courierCharges) order.shipping.courierCharges = req.body.courierCharges;
-      if (req.body.estimatedDeliveryDate) order.shipping.estimatedDeliveryDate = new Date(req.body.estimatedDeliveryDate);
-      order.shipping.syncedAt = new Date();
+      const { awbCode, courierName, error } = extractAwb(awbResponse);
 
-      await order.save();
+      if (!awbCode) {
+        // ShipRocket accepted the call (HTTP 200) but returned no AWB — e.g. low
+        // wallet balance, KYC hold, non-serviceable. Do NOT claim AWB_ASSIGNED.
+        order.shipping.courierId = req.body.courierId;
+        order.shipping.status = 'AWB_FAILED';
+        order.shipping.syncedAt = new Date();
+        if (!order.shipping.errors) order.shipping.errors = [];
+        order.shipping.errors.push({
+          action: 'ASSIGN_AWB',
+          message: error || 'No AWB returned by provider',
+        });
+        await order.save();
 
-      response.awbCode = order.shipping.awbCode;
-      response.courierName = order.shipping.courierName;
-      response.message = 'Order created and courier assigned';
+        response.awbAssigned = false;
+        response.reason = error || 'No AWB returned by provider';
+        response.message = `Order created but courier assignment failed: ${response.reason}. Fix the cause (e.g. wallet balance) and retry.`;
+      } else {
+        order.shipping.awbCode = awbCode;
+        order.shipping.courierName = courierName || req.body.courierName || 'Assigned';
+        order.shipping.courierId = req.body.courierId;
+        order.shipping.status = 'AWB_ASSIGNED';
+        order.shipping.isShipped = true;
+        if (req.body.courierCharges) order.shipping.courierCharges = req.body.courierCharges;
+        if (req.body.estimatedDeliveryDate) order.shipping.estimatedDeliveryDate = new Date(req.body.estimatedDeliveryDate);
+        order.shipping.syncedAt = new Date();
+        await order.save();
+
+        response.awbAssigned = true;
+        response.awbCode = order.shipping.awbCode;
+        response.courierName = order.shipping.courierName;
+        response.message = 'Order created and courier assigned';
+      }
     } catch (awbError) {
       // Order was created but AWB assignment failed — don't throw, let admin retry
       response.message = 'Order created but courier assignment failed. You can assign courier manually.';
@@ -160,10 +191,31 @@ export const assignCourier = asyncHandler(async (req, res) => {
     asuOrderId: order.orderId,
   });
 
-  const awbData = data.response?.data;
-  order.shipping.awbCode = awbData?.awb_code || data.awb_code;
-  order.shipping.courierName = awbData?.courier_name || data.courier_name || reqCourierName || 'Assigned';
+  const { awbCode, courierName, error } = extractAwb(data);
+
+  if (!awbCode) {
+    order.shipping.courierId = courierId;
+    order.shipping.status = 'AWB_FAILED';
+    order.shipping.syncedAt = new Date();
+    if (!order.shipping.errors) order.shipping.errors = [];
+    order.shipping.errors.push({
+      action: 'ASSIGN_AWB',
+      message: error || 'No AWB returned by provider',
+    });
+    await order.save();
+
+    res.status(502).json({
+      message: `Courier assignment failed: ${error || 'No AWB returned by provider'}`,
+      awbAssigned: false,
+      reason: error || 'No AWB returned by provider',
+    });
+    return;
+  }
+
+  order.shipping.awbCode = awbCode;
+  order.shipping.courierName = courierName || reqCourierName || 'Assigned';
   order.shipping.courierId = courierId;
+  order.shipping.isShipped = true;
   if (courierCharges) order.shipping.courierCharges = courierCharges;
   if (estimatedDeliveryDate) order.shipping.estimatedDeliveryDate = new Date(estimatedDeliveryDate);
   order.shipping.status = 'AWB_ASSIGNED';
@@ -173,6 +225,7 @@ export const assignCourier = asyncHandler(async (req, res) => {
 
   res.json({
     message: 'Courier assigned successfully',
+    awbAssigned: true,
     awbCode: order.shipping.awbCode,
     courierName: order.shipping.courierName,
   });

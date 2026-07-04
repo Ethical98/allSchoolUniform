@@ -97,3 +97,23 @@ test('applyShipmentStatus pushes tracking history and syncedAt', () => {
   assert.equal(order.shipping.trackingHistory[0].statusCode, 6);
   assert.ok(order.shipping.syncedAt instanceof Date);
 });
+
+import { extractAwb } from '../controllers/shippingOrderController.js';
+
+test('extractAwb pulls awb from nested response.data', () => {
+  const r = extractAwb({ response: { data: { awb_code: '123', courier_name: 'Delhivery' } } });
+  assert.equal(r.awbCode, '123');
+  assert.equal(r.courierName, 'Delhivery');
+  assert.equal(r.error, null);
+});
+
+test('extractAwb detects ShipRocket 200-body error (low balance) with no awb', () => {
+  const r = extractAwb({ response: { data: {} }, awb_assign_error: 'Insufficient wallet balance' });
+  assert.equal(r.awbCode, null);
+  assert.equal(r.error, 'Insufficient wallet balance');
+});
+
+test('extractAwb reports missing awb even without an explicit error', () => {
+  const r = extractAwb({ response: { data: {} } });
+  assert.equal(r.awbCode, null);
+});
