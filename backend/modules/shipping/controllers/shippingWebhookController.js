@@ -2,9 +2,7 @@ import Order from '../../../models/OrderModel.js';
 import ShippingLog from '../models/ShippingLogModel.js';
 import ReturnRequest from '../../returns/models/ReturnRequestModel.js';
 import { validateTransition } from '../../returns/utils/returnStateMachine.js';
-import StockMovement from '../../stock/models/StockMovementModel.js';
-import Product from '../../../models/ProductModel.js';
-import handleStockAlerts from '../../stock/utils/stockAlertHelper.js';
+import { restoreStockOnRTO } from '../utils/reconcileShipping.js';
 import {
   sendOrderShippedEmail,
   sendOutForDeliveryEmail,
@@ -178,55 +176,3 @@ export const handleWebhook = async (req, res) => {
     res.status(200).json({ status: 'error', message: error.message });
   }
 };
-
-/**
- * Restore stock when RTO is delivered back (reuses cancel logic pattern).
- */
-async function restoreStockOnRTO(order) {
-  try {
-    const items = order.modified && order.modifiedItems?.length > 0
-      ? order.modifiedItems
-      : order.orderItems;
-
-    for (const item of items) {
-      const product = await Product.findById(item.product);
-      if (!product) continue;
-
-      const sizeVariant = product.size.find(
-        (s) => s.size.toLowerCase() === item.size.toLowerCase()
-      );
-      if (!sizeVariant) continue;
-
-      // Restore stock
-      sizeVariant.countInStock += item.qty;
-      await product.save();
-
-      // Record stock movement
-      await StockMovement.create({
-        product: product._id,
-        productName: product.name,
-        SKU: sizeVariant.SKU || `${product.name}-${sizeVariant.size}`,
-        size: sizeVariant.size,
-        type: 'RETURN',
-        quantity: item.qty,
-        previousStock: sizeVariant.countInStock - item.qty,
-        newStock: sizeVariant.countInStock,
-        reason: `RTO delivered - Order ${order.orderId}`,
-        reference: {
-          type: 'order',
-          id: order._id,
-          orderId: order.orderId,
-        },
-      });
-
-      // Check stock alerts
-      await handleStockAlerts(product, sizeVariant);
-    }
-  } catch (error) {
-    console.error('[Webhook] Stock restoration failed for RTO:', error.message);
-    order.shipping.errors.push({
-      action: 'RTO_STOCK_RESTORE',
-      message: error.message,
-    });
-  }
-}
