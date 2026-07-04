@@ -15,21 +15,10 @@ import {
   sendRTOAlertEmail,
   sendWeightDisputeEmail,
 } from '../utils/shippingEmails.js';
+import { applyShipmentStatus } from '../utils/shipmentStatus.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-// Status code priority for idempotency (higher = further in lifecycle)
-const STATUS_PRIORITY = {
-  6: 10,   // Shipped
-  18: 15,  // Pickup Scheduled
-  17: 20,  // Out for Delivery
-  7: 30,   // Delivered
-  9: 25,   // NDR / Undelivered
-  14: 35,  // RTO Initiated
-  15: 40,  // RTO Delivered
-  21: 0,   // Weight Discrepancy (can happen anytime)
-};
 
 // Map ShipRocket reverse shipment status codes to return status transitions
 const REVERSE_STATUS_MAP = {
@@ -118,16 +107,9 @@ export const handleWebhook = async (req, res) => {
       source: 'webhook',
     });
 
-    // Check if this is a reverse shipment webhook first
-    const webhookAwb = req.body?.awb || req.body?.awb_code || '';
-    const webhookStatusCode = Number(req.body?.current_status_id || req.body?.status_id || 0);
-
-    const handledAsReturn = await handleReverseWebhook(webhookAwb, webhookStatusCode);
-    if (handledAsReturn) {
-      return res.status(200).json({ received: true, type: 'reverse' });
-    }
-
-    // Find the order by AWB or provider order ID
+    // Resolve the forward order first (forward-wins routing): a forward AWB must
+    // never be swallowed as a return. Returns are handled only when NO forward
+    // order owns this AWB/order id.
     const awb = payload.awb || payload.awb_code;
     const srOrderId = payload.order_id;
 
@@ -140,6 +122,12 @@ export const handleWebhook = async (req, res) => {
     }
 
     if (!order) {
+      // No forward order owns this AWB — try reverse (returns) handling.
+      const webhookStatusCode = Number(payload.current_status_id || payload.status_id || 0);
+      const handledAsReturn = await handleReverseWebhook(awb || '', webhookStatusCode);
+      if (handledAsReturn) {
+        return res.status(200).json({ received: true, type: 'reverse' });
+      }
       console.error('[Webhook] Order not found for AWB:', awb, 'Order ID:', srOrderId);
       return res.status(200).json({ status: 'order_not_found' });
     }
@@ -147,116 +135,38 @@ export const handleWebhook = async (req, res) => {
     const statusCode = Number(payload.current_status_id || payload.status_code);
     const statusText = payload.current_status || payload.status;
 
-    // Idempotency check: skip if same or lower priority status
-    const currentPriority = STATUS_PRIORITY[order.shipping?.statusCode] || 0;
-    const newPriority = STATUS_PRIORITY[statusCode] || 0;
-    if (statusCode !== 21 && newPriority <= currentPriority && order.shipping?.statusCode === statusCode) {
+    const { changed, sideEffects } = applyShipmentStatus(order, {
+      code: statusCode,
+      text: statusText,
+      location: payload.current_location || payload.location || '',
+      remarks: payload.scans?.[0]?.activity || statusText,
+      edd: payload.etd || payload.edd,
+      chargedWeight: payload.charged_weight || payload.weight,
+      scanDate: payload.scans?.[0]?.date,
+    });
+
+    if (!changed) {
       return res.status(200).json({ status: 'already_processed' });
     }
 
-    // Update shipping status
-    order.shipping.status = statusText;
-    order.shipping.statusCode = statusCode;
-    order.shipping.syncedAt = new Date();
-
-    // Update EDD if provided
-    if (payload.etd || payload.edd) {
-      order.shipping.estimatedDeliveryDate = new Date(payload.etd || payload.edd);
-    }
-
-    // Add to tracking history
-    order.shipping.trackingHistory.push({
-      status: statusText,
-      statusCode,
-      location: payload.current_location || payload.location || '',
-      timestamp: new Date(payload.scans?.[0]?.date || Date.now()),
-      remarks: payload.scans?.[0]?.activity || statusText,
-    });
-
-    // Get user for email
-    const user = await import('../../../models/UserModel.js').then(m => m.default.findById(order.user));
-
-    // Handle specific statuses
-    switch (statusCode) {
-      case 6: // Shipped
-        order.tracking.isProcessing = true;
-        order.tracking.processedAt = order.tracking.processedAt || new Date();
-        order.orderStatus = 'Processing';
-        if (user) {
-          sendOrderShippedEmail(order, user, {
-            awb: order.shipping.awbCode,
-            courier: order.shipping.courierName,
-          }).catch((e) => console.error('[Webhook] Shipped email failed:', e.message));
+    // Fire side-effects (emails + RTO stock restore). Errors are swallowed so the
+    // webhook always returns 200.
+    const user = await import('../../../models/UserModel.js').then((m) => m.default.findById(order.user));
+    for (const fx of sideEffects) {
+      try {
+        if (fx.type === 'restoreStockOnRTO') {
+          await restoreStockOnRTO(order);
+        } else if (fx.type === 'email' && user) {
+          if (fx.kind === 'shipped') sendOrderShippedEmail(order, user, { awb: order.shipping.awbCode, courier: order.shipping.courierName }).catch((e) => console.error('[Webhook] Shipped email failed:', e.message));
+          else if (fx.kind === 'ofd') sendOutForDeliveryEmail(order, user, { awb: order.shipping.awbCode, courier: order.shipping.courierName }).catch((e) => console.error('[Webhook] OFD email failed:', e.message));
+          else if (fx.kind === 'delivered') sendOrderDeliveredEmail(order, user).catch((e) => console.error('[Webhook] Delivered email failed:', e.message));
         }
-        break;
-
-      case 17: // Out for Delivery
-        order.tracking.isOutForDelivery = true;
-        order.tracking.outForDeliveryAt = new Date();
-        order.orderStatus = 'Out For Delivery';
-        if (user) {
-          sendOutForDeliveryEmail(order, user, {
-            awb: order.shipping.awbCode,
-            courier: order.shipping.courierName,
-          }).catch((e) => console.error('[Webhook] OFD email failed:', e.message));
-        }
-        break;
-
-      case 7: // Delivered
-        order.tracking.isDelivered = true;
-        order.tracking.deliveredAt = new Date();
-        order.orderStatus = 'Delivered';
-        // Clear NDR if was in NDR
-        if (order.shipping.ndr?.isNDR) {
-          order.shipping.ndr.isNDR = false;
-        }
-        if (user) {
-          sendOrderDeliveredEmail(order, user).catch((e) =>
-            console.error('[Webhook] Delivered email failed:', e.message)
-          );
-        }
-        break;
-
-      case 9: // NDR / Undelivered
-        if (!order.shipping.ndr) {
-          order.shipping.ndr = { isNDR: false, ndrCount: 0, ndrActions: [] };
-        }
-        order.shipping.ndr.isNDR = true;
-        order.shipping.ndr.ndrCount = (order.shipping.ndr.ndrCount || 0) + 1;
-        order.shipping.ndr.lastNdrAt = new Date();
-        order.shipping.ndr.lastNdrReason = payload.scans?.[0]?.activity || 'Undelivered';
-        sendNDRAlertEmail(order, order.shipping.ndr.lastNdrReason).catch((e) =>
-          console.error('[Webhook] NDR email failed:', e.message)
-        );
-        break;
-
-      case 14: // RTO Initiated
-        order.shipping.isRTO = true;
-        order.shipping.rtoInitiatedAt = new Date();
-        sendRTOAlertEmail(order).catch((e) =>
-          console.error('[Webhook] RTO email failed:', e.message)
-        );
-        break;
-
-      case 15: // RTO Delivered — restore stock
-        order.shipping.rtoDeliveredAt = new Date();
-        await restoreStockOnRTO(order);
-        break;
-
-      case 18: // Pickup Scheduled
-        order.shipping.pickupScheduledDate = new Date();
-        break;
-
-      case 21: // Weight Discrepancy
-        const reportedWeight = payload.charged_weight || payload.weight;
-        order.shipping.errors.push({
-          action: 'WEIGHT_DISCREPANCY',
-          message: `Provider reported weight: ${reportedWeight}kg vs entered: ${order.shipping.weight}kg`,
-        });
-        sendWeightDisputeEmail(order, reportedWeight).catch((e) =>
-          console.error('[Webhook] Weight dispute email failed:', e.message)
-        );
-        break;
+        if (fx.type === 'email' && fx.kind === 'ndr') sendNDRAlertEmail(order, fx.reason).catch((e) => console.error('[Webhook] NDR email failed:', e.message));
+        else if (fx.type === 'email' && fx.kind === 'rto') sendRTOAlertEmail(order).catch((e) => console.error('[Webhook] RTO email failed:', e.message));
+        else if (fx.type === 'email' && fx.kind === 'weight') sendWeightDisputeEmail(order, fx.chargedWeight).catch((e) => console.error('[Webhook] Weight dispute email failed:', e.message));
+      } catch (e) {
+        console.error('[Webhook] Side-effect failed:', e.message);
+      }
     }
 
     await order.save();
