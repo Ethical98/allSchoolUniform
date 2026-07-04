@@ -1,6 +1,8 @@
 import asyncHandler from 'express-async-handler';
 import Order from '../../../models/OrderModel.js';
 import { shippingApi } from '../utils/shippingClient.js';
+import { applyShipmentStatus } from '../utils/shipmentStatus.js';
+import { restoreStockOnRTO } from '../utils/reconcileShipping.js';
 
 // @desc    Get live tracking for an order
 // @route   GET /api/shipping/orders/:orderId/track
@@ -13,44 +15,52 @@ export const trackOrder = asyncHandler(async (req, res) => {
     throw new Error('Order not found');
   }
 
-  if (!order.shipping?.awbCode) {
+  const awbCode = order.shipping?.awbCode;
+  const shipmentId = order.shipping?.providerShipmentId;
+
+  if (!awbCode && !shipmentId) {
     res.status(400);
-    throw new Error('No AWB code assigned to this order');
+    throw new Error('Order has no AWB or shipment id to track');
   }
 
-  const data = await shippingApi('get', `/courier/track/awb/${order.shipping.awbCode}`, {
+  // Prefer AWB tracking; fall back to shipment-id tracking for orders whose AWB
+  // never landed (e.g. AWB_FAILED / assign that returned no AWB).
+  const endpoint = awbCode
+    ? `/courier/track/awb/${awbCode}`
+    : `/courier/track/shipment/${shipmentId}`;
+
+  const data = await shippingApi('get', endpoint, {
     action: 'TRACK',
     orderId: order._id,
     asuOrderId: order.orderId,
   });
 
-  // Update tracking history on the order
   const trackingData = data.tracking_data;
   if (trackingData) {
     const shipmentTrack = trackingData.shipment_track || [];
-    const trackActivities = trackingData.shipment_track_activities || [];
+    const latest = shipmentTrack[0] || {};
 
-    // Update tracking history from activities
-    if (trackActivities.length > 0) {
-      order.shipping.trackingHistory = trackActivities.map((activity) => ({
-        status: activity['sr-status'] || activity.activity,
-        statusCode: activity['sr-status-code'],
-        location: activity.location,
-        timestamp: new Date(activity.date),
-        remarks: activity.activity,
-      }));
+    // Backfill a discovered AWB (shipment-id tracking often returns it).
+    if (!order.shipping.awbCode && latest.awb_code) {
+      order.shipping.awbCode = latest.awb_code;
     }
 
-    // Update current status from track
-    if (shipmentTrack.length > 0) {
-      const latest = shipmentTrack[0];
-      order.shipping.status = latest.current_status;
-      order.shipping.estimatedDeliveryDate = latest.edd
-        ? new Date(latest.edd)
-        : order.shipping.estimatedDeliveryDate;
+    const { changed, sideEffects } = applyShipmentStatus(order, {
+      text: latest.current_status,
+      edd: latest.edd,
+      location: latest.destination || '',
+    });
+
+    // Manual track does not send customer emails (avoid double-send vs webhook);
+    // it only heals dashboard state. RTO stock restore still runs.
+    if (changed) {
+      for (const fx of sideEffects) {
+        if (fx.type === 'restoreStockOnRTO') {
+          await restoreStockOnRTO(order);
+        }
+      }
     }
 
-    order.shipping.syncedAt = new Date();
     await order.save();
   }
 
