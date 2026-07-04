@@ -25,3 +25,72 @@ test('STATUS_PRIORITY ranks Delivered above Out For Delivery', () => {
   assert.ok(STATUS_PRIORITY[7] > STATUS_PRIORITY[17]);
   assert.ok(STATUS_PRIORITY[15] > STATUS_PRIORITY[7]); // RTO delivered is terminal-most
 });
+
+import { applyShipmentStatus } from './shipmentStatus.js';
+
+// Minimal fake order shaped like the Mongoose doc fields the engine touches.
+const makeOrder = (overrides = {}) => ({
+  orderStatus: 'Processing',
+  tracking: { isProcessing: false, isOutForDelivery: false, isDelivered: false },
+  shipping: {
+    status: 'AWB_ASSIGNED',
+    statusCode: undefined,
+    ndr: { isNDR: false, ndrCount: 0, ndrActions: [] },
+    trackingHistory: [],
+    errors: [],
+    ...overrides.shipping,
+  },
+  ...overrides,
+});
+
+test('applyShipmentStatus marks delivered from numeric code 7', () => {
+  const order = makeOrder();
+  const res = applyShipmentStatus(order, { code: 7, text: 'Delivered' });
+  assert.equal(res.changed, true);
+  assert.equal(order.tracking.isDelivered, true);
+  assert.equal(order.orderStatus, 'Delivered');
+  assert.equal(order.shipping.statusCode, 7);
+  assert.ok(res.sideEffects.some((s) => s.type === 'email' && s.kind === 'delivered'));
+});
+
+test('applyShipmentStatus marks delivered from TEXT only (track path)', () => {
+  const order = makeOrder();
+  const res = applyShipmentStatus(order, { text: 'Delivered' }); // no code
+  assert.equal(res.changed, true);
+  assert.equal(order.tracking.isDelivered, true);
+  assert.equal(order.orderStatus, 'Delivered');
+  assert.equal(order.shipping.statusCode, 7);
+});
+
+test('applyShipmentStatus is monotonic — OFD after Delivered is a no-op', () => {
+  const order = makeOrder({ shipping: { statusCode: 7, status: 'Delivered' } });
+  order.tracking.isDelivered = true;
+  order.orderStatus = 'Delivered';
+  const res = applyShipmentStatus(order, { code: 17, text: 'Out for Delivery' });
+  assert.equal(res.changed, false);
+  assert.equal(order.orderStatus, 'Delivered');
+});
+
+test('applyShipmentStatus RTO delivered (15) returns one stock-restore side-effect', () => {
+  const order = makeOrder({ shipping: { statusCode: 14, status: 'RTO Initiated' } });
+  const res = applyShipmentStatus(order, { code: 15, text: 'RTO Delivered' });
+  assert.equal(res.changed, true);
+  const restores = res.sideEffects.filter((s) => s.type === 'restoreStockOnRTO');
+  assert.equal(restores.length, 1);
+});
+
+test('applyShipmentStatus with unmappable status records string, no transition', () => {
+  const order = makeOrder();
+  const res = applyShipmentStatus(order, { text: 'Reached nearest hub' });
+  assert.equal(res.changed, false);
+  assert.equal(order.shipping.status, 'Reached nearest hub');
+  assert.equal(order.tracking.isDelivered, false);
+});
+
+test('applyShipmentStatus pushes tracking history and syncedAt', () => {
+  const order = makeOrder();
+  applyShipmentStatus(order, { code: 6, text: 'Shipped', location: 'Delhi' });
+  assert.equal(order.shipping.trackingHistory.length, 1);
+  assert.equal(order.shipping.trackingHistory[0].statusCode, 6);
+  assert.ok(order.shipping.syncedAt instanceof Date);
+});
