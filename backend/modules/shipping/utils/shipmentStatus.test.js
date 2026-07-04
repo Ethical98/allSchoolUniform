@@ -29,19 +29,22 @@ test('STATUS_PRIORITY ranks Delivered above Out For Delivery', () => {
 import { applyShipmentStatus } from './shipmentStatus.js';
 
 // Minimal fake order shaped like the Mongoose doc fields the engine touches.
-const makeOrder = (overrides = {}) => ({
-  orderStatus: 'Processing',
-  tracking: { isProcessing: false, isOutForDelivery: false, isDelivered: false },
-  shipping: {
-    status: 'AWB_ASSIGNED',
-    statusCode: undefined,
-    ndr: { isNDR: false, ndrCount: 0, ndrActions: [] },
-    trackingHistory: [],
-    errors: [],
-    ...overrides.shipping,
-  },
-  ...overrides,
-});
+const makeOrder = (overrides = {}) => {
+  const { shipping: shippingOverride, ...rest } = overrides;
+  return {
+    orderStatus: 'Processing',
+    tracking: { isProcessing: false, isOutForDelivery: false, isDelivered: false },
+    shipping: {
+      status: 'AWB_ASSIGNED',
+      statusCode: undefined,
+      ndr: { isNDR: false, ndrCount: 0, ndrActions: [] },
+      trackingHistory: [],
+      errors: [],
+      ...shippingOverride,
+    },
+    ...rest,
+  };
+};
 
 test('applyShipmentStatus marks delivered from numeric code 7', () => {
   const order = makeOrder();

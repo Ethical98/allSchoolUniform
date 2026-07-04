@@ -79,7 +79,6 @@ export const applyShipmentStatus = (order, meta = {}) => {
   order.shipping.syncedAt = new Date();
   if (edd) order.shipping.estimatedDeliveryDate = new Date(edd);
 
-  if (!Array.isArray(order.shipping.trackingHistory)) order.shipping.trackingHistory = [];
   order.shipping.trackingHistory.push({
     status: order.shipping.status,
     statusCode: resolvedCode,
@@ -129,7 +128,6 @@ export const applyShipmentStatus = (order, meta = {}) => {
       order.shipping.pickupScheduledDate = new Date();
       break;
     case 21: // Weight Discrepancy
-      if (!Array.isArray(order.shipping.errors)) order.shipping.errors = [];
       order.shipping.errors.push({
         action: 'WEIGHT_DISCREPANCY',
         message: `Provider reported weight: ${chargedWeight}kg vs entered: ${order.shipping.weight}kg`,
