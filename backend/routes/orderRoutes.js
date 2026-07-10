@@ -21,7 +21,7 @@ import {
 } from '../controllers/orderController.js';
 import { getDashboardData } from '../controllers/dashboardController.js';
 import { isAdmin, protect } from '../Middleware/authMiddleware.js';
-router.route('/report').get(orderReport);
+router.route('/report').get(protect, isAdmin, orderReport);
 router.route('/dashboard').get(protect, isAdmin, getDashboardData);
 router.route('/').post(protect, addOrderItems).get(protect, isAdmin, getOrders);
 router.route('/myorders').get(protect, getMyOrders);

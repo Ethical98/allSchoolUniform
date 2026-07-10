@@ -9,5 +9,5 @@ import { isAdmin, protect } from '../Middleware/authMiddleware.js';
 const router = express.Router();
 
 router.route('/').get(getClasses).post(protect, isAdmin, createClass);
-router.route('/:id').delete(deleteClass).put(protect, isAdmin, updateClass);
+router.route('/:id').delete(protect, isAdmin, deleteClass).put(protect, isAdmin, updateClass);
 export default router;
