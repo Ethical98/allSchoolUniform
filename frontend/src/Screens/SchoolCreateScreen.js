@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from 'react-redux';
 // Import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
-import jsonwebtoken from 'jsonwebtoken';
 import { logout } from '../actions/userActions';
 import { SCHOOL_CREATE_RESET, SCHOOL_IMAGE_UPLOAD_RESET, SCHOOL_NAME_LIST_RESET } from '../constants/schoolConstants';
 import { createSchool } from '../actions/schoolActions';
@@ -50,19 +49,8 @@ const SchoolCreateScreen = ({ history }) => {
     }, [history, userInfo]);
 
     useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
-
-    useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, userInfo]);

@@ -1,0 +1,100 @@
+{{> header}}
+
+                    <!-- Exchange Shipped Icon & Message -->
+                    <tr>
+                        <td style="padding: 40px 20px 30px; text-align: center;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 20px;">
+                                <tr>
+                                    <td style="width: 70px; height: 70px; background-color: #2563eb; border-radius: 50%; text-align: center; vertical-align: middle;">
+                                        <img src="https://img.icons8.com/ios-filled/36/ffffff/in-transit.png" alt="Shipped" style="width: 36px; height: 36px;">
+                                    </td>
+                                </tr>
+                            </table>
+                            <h2 style="margin: 0 0 10px; color: #111827; font-size: 22px; font-weight: 600;">Exchange Order Shipped</h2>
+                            <p style="margin: 0; color: #6b7280; font-size: 15px; line-height: 1.5;">Hi {{customerName}}, your replacement items have been shipped and are on their way!</p>
+                        </td>
+                    </tr>
+
+                    <!-- Exchange Details -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Return ID</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{returnId}}</strong>
+                                                </td>
+                                                <td align="right" style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Original Order</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{orderId}}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" style="border-top: 1px solid #bfdbfe; padding-top: 12px;">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Exchange Order Number</span>
+                                                    <strong style="color: #2563eb; font-size: 15px;">{{exchangeOrderNumber}}</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Tracking Info -->
+                    {{#if awbCode}}
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <h3 style="margin: 0 0 15px; color: #111827; font-size: 15px; font-weight: 600;">Tracking Information</h3>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Courier Partner</td>
+                                                <td align="right" style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">{{courierName}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">AWB / Tracking Code</td>
+                                                <td align="right" style="padding: 8px 0; color: #2563eb; font-size: 14px; font-weight: 600; border-top: 1px solid #e5e7eb;">{{awbCode}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {{/if}}
+
+                    <!-- Price Difference -->
+                    {{#if priceDifference}}
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 16px 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="color: #92400e; font-size: 14px; font-weight: 600;">Price Difference</td>
+                                                <td align="right" style="color: #92400e; font-size: 16px; font-weight: 700;">{{priceDifference}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {{/if}}
+
+                    <!-- CTA -->
+                    <tr>
+                        <td style="padding: 0 20px 40px;" align="center" class="email-padding">
+                            <a href="{{frontendUrl}}" class="cta-button" style="display: inline-block; width: 100%; max-width: 280px; padding: 14px 24px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; text-align: center; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25); box-sizing: border-box;">Track Exchange Order</a>
+                        </td>
+                    </tr>
+
+{{> footer}}

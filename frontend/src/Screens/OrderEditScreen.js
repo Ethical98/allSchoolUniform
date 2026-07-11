@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import jsonwebtoken from 'jsonwebtoken';
-import { Button, Form, Col, Row, Container, FloatingLabel, Image, ListGroup, Card, InputGroup } from 'react-bootstrap';
+import {
+    Button,
+    Form,
+    Col,
+    Row,
+    Container,
+    FloatingLabel,
+    Image,
+    ListGroup,
+    Card,
+    InputGroup,
+    Tabs,
+    Tab,
+    Badge
+} from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import {
@@ -26,7 +39,6 @@ import {
     ORDER_UPDATE_INVOICE_NUMBER_RESET,
     ORDER_UPDATE_RESET
 } from '../constants/orderConstants';
-import { logout } from '../actions/userActions';
 import Loader from '../components/Loader';
 import MaterialTable from 'material-table';
 import { LinkContainer } from 'react-router-bootstrap';
@@ -38,6 +50,8 @@ import Invoice from '../components/Invoice/Invoice';
 import { usePDF } from '@react-pdf/renderer';
 import Meta from '../components/Meta';
 import AdminPageLayout from '../components/AdminPageLayout';
+import OrderCallComments from '../components/OrderCallComments';
+import ShippingPanel from '../components/shipping/ShippingPanel';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 
 const OrderEditScreen = ({ history, match, location }) => {
@@ -110,6 +124,7 @@ const OrderEditScreen = ({ history, match, location }) => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showNewProductModal, setShowNewProductModal] = useState(false);
     const [modify, setModify] = useState(false);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('');
     const [school, setSchool] = useState('');
     const [countInStockIndex, setCountInStockIndex] = useState(0);
@@ -147,6 +162,7 @@ const OrderEditScreen = ({ history, match, location }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [options, setOptions] = useState([]);
     const [discountPrice, setDiscountPrice] = useState(0);
+    const [activeTab, setActiveTab] = useState('details');
 
     const orderItemColumns = [
         {
@@ -263,18 +279,8 @@ const OrderEditScreen = ({ history, match, location }) => {
     }, [history, userInfo]);
 
     useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
-
-    useEffect(() => {
         if (success) {
+            setHasUnsavedChanges(false);
             dispatch({ type: ORDER_UPDATE_RESET });
             dispatch({ type: ORDER_DETAILS_RESET });
         } else {
@@ -300,10 +306,10 @@ const OrderEditScreen = ({ history, match, location }) => {
                 dispatch(listProducts());
                 dispatch(listSchools());
             } else {
-                setName(order.user.name);
+                setName(order.name || order.user.name);
                 setEmail(order.user.email);
                 setOrderItems(order.orderItems);
-                setPhone(order.user.phone);
+                setPhone(order.phone || order.user.phone);
                 setAddress(order.shippingAddress.address);
                 setCity(order.shippingAddress.city);
                 setCountry(order.shippingAddress.country);
@@ -345,7 +351,10 @@ const OrderEditScreen = ({ history, match, location }) => {
                     setDiscountPrice(
                         Number(
                             order.modifiedItems
-                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                                .reduce(
+                                    (acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price),
+                                    0
+                                )
                                 .toFixed(2)
                         )
                     );
@@ -356,7 +365,10 @@ const OrderEditScreen = ({ history, match, location }) => {
                     setDiscountPrice(
                         Number(
                             order.orderItems
-                                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                                .reduce(
+                                    (acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price),
+                                    0
+                                )
                                 .toFixed(2)
                         )
                     );
@@ -384,7 +396,7 @@ const OrderEditScreen = ({ history, match, location }) => {
 
     useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, userInfo]);
@@ -408,14 +420,17 @@ const OrderEditScreen = ({ history, match, location }) => {
         const price = Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2));
         const discount = Number(
             modifiedOrderItems
-                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                 .toFixed(2)
         );
         setItemsPrice(price);
 
         setDiscountPrice(discount);
-        if (price > Number(599)) {
+        const netPrice = price - discount;
+        if (netPrice >= 599) {
             setShippingPrice(0);
+        } else {
+            setShippingPrice(100);
         }
     }, [modifiedOrderItems]);
 
@@ -423,8 +438,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         if (order) {
             setTotalPrice(Number(itemsPrice - discountPrice + shippingPrice));
         }
-        // eslint-disable-next-line
-    }, [order, itemsPrice, discountPrice]);
+    }, [order, itemsPrice, discountPrice, shippingPrice]);
 
     const newSizeHandler = (newSizeValue, pId, sizes, name, image) => {
         setNewSize(newSizeValue);
@@ -485,6 +499,7 @@ const OrderEditScreen = ({ history, match, location }) => {
             modifiedOrderItems[index].price = productSizes[editIndex].price;
             modifiedOrderItems[index].countInStock = productSizes[editIndex].countInStock;
             modifiedOrderItems[index].tax = productSizes[editIndex].tax;
+            modifiedOrderItems[index].disc = productSizes[editIndex].discount || 0;
             modifiedOrderItems[index].size = size;
             modifiedOrderItems[index].qty = qty;
 
@@ -494,17 +509,21 @@ const OrderEditScreen = ({ history, match, location }) => {
         const price = Number(modifiedOrderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2));
         const discount = Number(
             modifiedOrderItems
-                .reduce((acc, item) => acc + item.qty * ((Number(item.disc) / 100) * item.price), 0)
+                .reduce((acc, item) => acc + item.qty * ((Number(item.disc || 0) / 100) * item.price), 0)
                 .toFixed(2)
         );
 
         setItemsPrice(price);
         setDiscountPrice(discount);
-        if (price > 599) {
+        const netPrice = price - discount;
+        if (netPrice >= 599) {
             setShippingPrice(0);
+        } else {
+            setShippingPrice(100);
         }
         setCountInStock(1);
         setShowEditModal(false);
+        setHasUnsavedChanges(true);
     };
 
     const showEditModalHandle = (id, oldSize, currIndex, qtyValue) => {
@@ -540,6 +559,7 @@ const OrderEditScreen = ({ history, match, location }) => {
         setNewItemsToAdd([]);
         setNewSize('');
         setNewQty('');
+        setHasUnsavedChanges(true);
     };
 
     const showTrackingHandle = () => {
@@ -778,6 +798,11 @@ const OrderEditScreen = ({ history, match, location }) => {
             <Link to="/admin/orderlist" className="btn btn-outline-dark my-3">
                 Go Back
             </Link>
+            {order?.tracking?.isDelivered && !order?.tracking?.isCanceled && (
+                <Link to={`/admin/returns/create/${order._id}`} className="btn btn-outline-primary my-3 ms-2">
+                    Create Return / Exchange
+                </Link>
+            )}
             <Container>
                 <h1>EDIT ORDER</h1>
                 <h5>ORDER ID:{orderNumber}</h5>
@@ -788,364 +813,425 @@ const OrderEditScreen = ({ history, match, location }) => {
                 ) : error ? (
                     <Message variant="danger">{error}</Message>
                 ) : (
-                    <Form onSubmit={submitHandler}>
-                        <Row>
-                            <Col md={4} className="mb-3">
-                                <Button variant="outline-warning" className="col-12 mb-3" onClick={showTrackingHandle}>
-                                    EDIT TRACKING DETAILS
-                                </Button>
-                                <FloatingLabel className="mb-3" controlId="email" label="Email">
-                                    <Form.Control
-                                        className="mb-3"
-                                        required
-                                        readOnly
-                                        type="email"
-                                        placeholder="Email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                    ></Form.Control>
-                                </FloatingLabel>
-
-                                <FloatingLabel className="mb-3" label="Name" controlId="name">
-                                    <Form.Control
-                                        className="mb-3"
-                                        required
-                                        readOnly
-                                        type="name"
-                                        placeholder="Enter Name"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                    ></Form.Control>
-                                </FloatingLabel>
-                                <FloatingLabel className="mb-3" controlId="phone" label="Mobile">
-                                    <Form.Control
-                                        className="mb-3"
-                                        required
-                                        readOnly
-                                        type="phone"
-                                        placeholder="Enter Mobile "
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                    ></Form.Control>
-                                </FloatingLabel>
-                                <LinkContainer to={`/admin/user/${order.user._id}/edit`}>
-                                    <Button variant="outline-dark" className="col-12 mb-3">
-                                        EDIT USER DETAILS
-                                    </Button>
-                                </LinkContainer>
-                                <h6>Shipping Address</h6>
-                                <FloatingLabel className="mb-3" label="Address" controlId="address">
-                                    <Form.Control
-                                        required
-                                        type="text"
-                                        placeholder="Enter Address"
-                                        value={address}
-                                        onChange={(e) => setAddress(e.target.value)}
-                                    ></Form.Control>
-                                </FloatingLabel>
-                                <FloatingLabel className="mb-3" label="City" controlId="city">
-                                    <Form.Control
-                                        required
-                                        type="text"
-                                        placeholder="City"
-                                        value={city}
-                                        onChange={(e) => setCity(e.target.value)}
-                                    ></Form.Control>
-                                </FloatingLabel>
-                                <FloatingLabel className="mb-3" label="State" controlId="state">
-                                    <Form.Control
-                                        required
-                                        type="text"
-                                        placeholder="State"
-                                        value={state}
-                                        onChange={(e) => setState(e.target.value)}
-                                    ></Form.Control>
-                                </FloatingLabel>
-                                <FloatingLabel className="mb-3" label="Postal Code" controlId="postalCode">
-                                    <Form.Control
-                                        required
-                                        type="text"
-                                        placeholder="Postal Code"
-                                        value={postalCode}
-                                        onChange={(e) => setPostalCode(e.target.value)}
-                                    ></Form.Control>
-                                </FloatingLabel>
-
-                                <FloatingLabel className="mb-3" label="Country" controlId="country">
-                                    <Form.Control
-                                        required
-                                        type="text"
-                                        placeholder="Country"
-                                        value={country}
-                                        onChange={(e) => setCountry(e.target.value)}
-                                    ></Form.Control>
-                                </FloatingLabel>
-                                <FloatingLabel className="mb-3" label="Payment Method" controlId="paymentMethod">
-                                    <Form.Control
-                                        required
-                                        type="text"
-                                        readOnly
-                                        placeholder="Payment Method"
-                                        value={paymentMethod}
-                                        onChange={(e) => setPaymentMethod(e.target.value)}
-                                    ></Form.Control>
-                                </FloatingLabel>
+                    <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
+                        <Tab eventKey="details" title="Order Details">
+                            <Form onSubmit={submitHandler}>
                                 <Row>
-                                    <Col>
-                                        <InputGroup>
-                                            <InputGroup.Text>Paid</InputGroup.Text>
-                                            <InputGroup.Text>
-                                                {order.isPaid ? (
-                                                    <i className="fas fa-check" style={{ color: 'green' }}></i>
-                                                ) : (
-                                                    <i className="fas fa-times" style={{ color: 'red' }}></i>
-                                                )}
-                                            </InputGroup.Text>
-                                        </InputGroup>
-                                    </Col>
-                                    <Col>
-                                        <InputGroup>
-                                            <InputGroup.Text>Delivered</InputGroup.Text>
-                                            <InputGroup.Text>
-                                                {order.tracking.isDeliverd ? (
-                                                    <i className="fas fa-check" style={{ color: 'green' }}></i>
-                                                ) : (
-                                                    <i className="fas fa-times" style={{ color: 'red' }}></i>
-                                                )}
-                                            </InputGroup.Text>
-                                        </InputGroup>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col md={8}>
-                                <Row className="mb-3">
-                                    <Col>
-                                        {!modify && (
-                                            <Button
-                                                className="float-end"
-                                                variant="outline-info"
-                                                onClick={() => {
-                                                    setModifiedOrderItems([...order.orderItems.map((a) => ({ ...a }))]);
-                                                    setModify(true);
-                                                }}
-                                                disabled={order.invoiceNumber}
-                                            >
-                                                MODIFY ITEMS
+                                    <Col md={4} className="mb-3">
+                                        <Button
+                                            variant="outline-warning"
+                                            className="col-12 mb-3"
+                                            onClick={showTrackingHandle}
+                                        >
+                                            EDIT TRACKING DETAILS
+                                        </Button>
+                                        <FloatingLabel className="mb-3" controlId="email" label="Email">
+                                            <Form.Control
+                                                className="mb-3"
+                                                required
+                                                readOnly
+                                                type="email"
+                                                placeholder="Email"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                            ></Form.Control>
+                                        </FloatingLabel>
+
+                                        <FloatingLabel className="mb-3" label="Name" controlId="name">
+                                            <Form.Control
+                                                className="mb-3"
+                                                required
+                                                readOnly
+                                                type="name"
+                                                placeholder="Enter Name"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                            ></Form.Control>
+                                        </FloatingLabel>
+                                        <FloatingLabel className="mb-3" controlId="phone" label="Mobile">
+                                            <Form.Control
+                                                className="mb-3"
+                                                required
+                                                readOnly
+                                                type="phone"
+                                                placeholder="Enter Mobile "
+                                                value={phone}
+                                                onChange={(e) => setPhone(e.target.value)}
+                                            ></Form.Control>
+                                        </FloatingLabel>
+                                        <LinkContainer to={`/admin/user/${order.user._id}/edit`}>
+                                            <Button variant="outline-dark" className="col-12 mb-3">
+                                                EDIT USER DETAILS
                                             </Button>
-                                        )}
-                                        {order.invoiceNumber && <span>Modification not available</span>}
-                                    </Col>
-                                </Row>
-                                <Form.Group controlId="orderItems" className="mb-3">
-                                    {order.orderItems.length > 0 && (
-                                        <MaterialTable
-                                            title="Order Items"
-                                            columns={orderItemColumns}
-                                            data={
-                                                orderItems &&
-                                                orderItems.sort((a, b) =>
-                                                    a.name > b.name ? 1 : b.name > a.name ? -1 : 0
-                                                )
-                                            }
-                                            options={{
-                                                rowStyle: {
-                                                    color: 'black'
-                                                },
-                                                cellStyle: {
-                                                    textAlign: 'center'
-                                                },
-                                                headerStyle: {
-                                                    textAlign: 'center'
-                                                },
+                                        </LinkContainer>
+                                        <h6>Shipping Address</h6>
+                                        <FloatingLabel className="mb-3" label="Address" controlId="address">
+                                            <Form.Control
+                                                required
+                                                type="text"
+                                                placeholder="Enter Address"
+                                                value={address}
+                                                onChange={(e) => setAddress(e.target.value)}
+                                            ></Form.Control>
+                                        </FloatingLabel>
+                                        <FloatingLabel className="mb-3" label="City" controlId="city">
+                                            <Form.Control
+                                                required
+                                                type="text"
+                                                placeholder="City"
+                                                value={city}
+                                                onChange={(e) => setCity(e.target.value)}
+                                            ></Form.Control>
+                                        </FloatingLabel>
+                                        <FloatingLabel className="mb-3" label="State" controlId="state">
+                                            <Form.Control
+                                                required
+                                                type="text"
+                                                placeholder="State"
+                                                value={state}
+                                                onChange={(e) => setState(e.target.value)}
+                                            ></Form.Control>
+                                        </FloatingLabel>
+                                        <FloatingLabel className="mb-3" label="Postal Code" controlId="postalCode">
+                                            <Form.Control
+                                                required
+                                                type="text"
+                                                placeholder="Postal Code"
+                                                value={postalCode}
+                                                onChange={(e) => setPostalCode(e.target.value)}
+                                            ></Form.Control>
+                                        </FloatingLabel>
 
-                                                paging: false
-                                            }}
-                                        />
-                                    )}
-                                </Form.Group>
-
-                                <Form.Group controlId="mofifiedOrderItems" className="mb-3">
-                                    {modify && modifiedOrderItems.length > 0 && !order.invoiceNumber && (
+                                        <FloatingLabel className="mb-3" label="Country" controlId="country">
+                                            <Form.Control
+                                                required
+                                                type="text"
+                                                placeholder="Country"
+                                                value={country}
+                                                onChange={(e) => setCountry(e.target.value)}
+                                            ></Form.Control>
+                                        </FloatingLabel>
+                                        <FloatingLabel
+                                            className="mb-3"
+                                            label="Payment Method"
+                                            controlId="paymentMethod"
+                                        >
+                                            <Form.Control
+                                                required
+                                                type="text"
+                                                readOnly
+                                                placeholder="Payment Method"
+                                                value={paymentMethod}
+                                                onChange={(e) => setPaymentMethod(e.target.value)}
+                                            ></Form.Control>
+                                        </FloatingLabel>
                                         <Row>
                                             <Col>
-                                                <Button
-                                                    variant="outline-info"
-                                                    className="my-3 float-end "
-                                                    onClick={showNewProductModalHandle}
-                                                >
-                                                    <i className="fas fa-plus" /> ADD PRODUCT
-                                                </Button>
+                                                <InputGroup>
+                                                    <InputGroup.Text>Paid</InputGroup.Text>
+                                                    <InputGroup.Text>
+                                                        {order.isPaid ? (
+                                                            <i className="fas fa-check" style={{ color: 'green' }}></i>
+                                                        ) : (
+                                                            <i className="fas fa-times" style={{ color: 'red' }}></i>
+                                                        )}
+                                                    </InputGroup.Text>
+                                                </InputGroup>
+                                            </Col>
+                                            <Col>
+                                                <InputGroup>
+                                                    <InputGroup.Text>Delivered</InputGroup.Text>
+                                                    <InputGroup.Text>
+                                                        {order.tracking.isDeliverd ? (
+                                                            <i className="fas fa-check" style={{ color: 'green' }}></i>
+                                                        ) : (
+                                                            <i className="fas fa-times" style={{ color: 'red' }}></i>
+                                                        )}
+                                                    </InputGroup.Text>
+                                                </InputGroup>
                                             </Col>
                                         </Row>
-                                    )}
-                                    {modify && modifiedOrderItems.length > 0 && (
-                                        <MaterialTable
-                                            title="Modified Order Items"
-                                            columns={orderItemColumns}
-                                            data={modifiedOrderItems}
-                                            options={{
-                                                rowStyle: {
-                                                    color: 'black'
-                                                },
-                                                actionsColumnIndex: -1,
-                                                paging: false
-                                            }}
-                                            editable={{
-                                                isDeleteHidden: () => order.invoiceNumber,
-                                                onRowDelete: (oldData) =>
-                                                    new Promise((resolve, reject) => {
-                                                        setTimeout(() => {
-                                                            const dataDelete = [...modifiedOrderItems];
-                                                            const oldDataIndex = oldData.tableData.id;
-                                                            dataDelete.splice(oldDataIndex, 1);
-                                                            setModifiedOrderItems([...dataDelete]);
-
-                                                            resolve();
-                                                        }, 1000);
-                                                    })
-                                            }}
-                                            actions={[
-                                                {
-                                                    icon: 'edit',
-                                                    tooltip: 'Edit',
-                                                    onClick: (event, rowData) => {
-                                                        showEditModalHandle(
-                                                            rowData.product,
-                                                            rowData.size,
-                                                            rowData.tableData.id,
-                                                            rowData.qty
-                                                        );
-                                                    },
-                                                    hidden: order.invoiceNumber
-                                                }
-                                            ]}
-                                        />
-                                    )}
-                                </Form.Group>
-                                <Form.Group controlId="totalPrice">
-                                    <Col md={4} className="float-end mb-3">
-                                        <Card>
-                                            <ListGroup variant="flush">
-                                                <ListGroup.Item>
-                                                    <h2>ORDER SUMMARY</h2>
-                                                </ListGroup.Item>
-                                                <ListGroup.Item>
-                                                    <Row>
-                                                        <Col>Items</Col>
-                                                        <Col>₹{itemsPrice}</Col>
-                                                    </Row>
-                                                </ListGroup.Item>
-                                                <ListGroup.Item>
-                                                    <Row>
-                                                        <Col>Discount</Col>
-                                                        <Col>- ₹ {discountPrice}</Col>
-                                                    </Row>
-                                                </ListGroup.Item>
-                                                <ListGroup.Item>
-                                                    <Row>
-                                                        <Col>Shipping</Col>
-                                                        <Col>{shippingPrice}</Col>
-                                                    </Row>
-                                                </ListGroup.Item>
-                                                <ListGroup.Item>
-                                                    <Row>
-                                                        <Col>Total</Col>
-                                                        <Col>₹ {totalPrice}</Col>
-                                                    </Row>
-                                                </ListGroup.Item>
-                                                <ListGroup.Item>
-                                                    {!order.invoiceNumber ? (
-                                                        <Form.Group controlId="billType" className="mb-3">
-                                                            <label>Invoice Type</label>
-                                                            <Form.Check
-                                                                className="mb-3"
-                                                                type="checkbox"
-                                                                label="CGST"
-                                                                checked={billType === 'CGST'}
-                                                                onChange={(e) => {
-                                                                    setBillType('CGST');
-                                                                    dispatch(updateOrderBillType(order, 'CGST'));
-                                                                }}
-                                                            ></Form.Check>
-                                                            <Form.Check
-                                                                className="mb-3"
-                                                                type="checkbox"
-                                                                label="IGST"
-                                                                checked={billType === 'IGST'}
-                                                                onChange={(e) => {
-                                                                    setBillType('IGST');
-                                                                    dispatch(updateOrderBillType(order, 'IGST'));
-                                                                }}
-                                                            ></Form.Check>
-                                                        </Form.Group>
-                                                    ) : (
-                                                        <>
-                                                            <Row>
-                                                                <Col>
-                                                                    <label>Bill Type:</label>
-                                                                </Col>
-                                                                <Col>{billType}</Col>
-                                                            </Row>
-                                                            <Row>
-                                                                <Col>
-                                                                    <label>Invoice No.</label>
-                                                                </Col>
-                                                                <Col>{order.invoiceNumber}</Col>
-                                                            </Row>
-                                                        </>
-                                                    )}
-                                                </ListGroup.Item>
-                                            </ListGroup>
-                                            {!order.invoiceNumber && (
-                                                <Button
-                                                    variant="dark"
-                                                    onClick={() => {
-                                                        dispatch(incrementAndUpdateInvoiceNumber(order));
-                                                        if (modify) {
-                                                            dispatch(
-                                                                editOrder({
-                                                                    orderId,
-                                                                    shippingAddress: {
-                                                                        postalCode,
-                                                                        address,
-                                                                        city,
-                                                                        state,
-                                                                        country
-                                                                    },
-                                                                    modifiedOrderItems,
-                                                                    itemsPrice,
-                                                                    totalPrice
-                                                                })
-                                                            );
-                                                        }
-                                                    }}
-                                                >
-                                                    Generate Invoice
-                                                </Button>
-                                            )}
-                                            {order && order.invoiceNumber && (
-                                                <a href={instance.url} download={`${orderNumber}.pdf`}>
-                                                    <Button variant="dark" className="col-12">
-                                                        Download Invoice
-                                                    </Button>
-                                                </a>
-                                            )}
-                                        </Card>
                                     </Col>
-                                </Form.Group>
-                            </Col>
-                        </Row>
+                                    <Col md={8}>
+                                        <Row className="mb-3">
+                                            <Col>
+                                                {!modify && (
+                                                    <Button
+                                                        className="float-end"
+                                                        variant="outline-info"
+                                                        onClick={() => {
+                                                            setModifiedOrderItems([
+                                                                ...order.orderItems.map((a) => ({ ...a }))
+                                                            ]);
+                                                            setModify(true);
+                                                        }}
+                                                        disabled={order.invoiceNumber}
+                                                    >
+                                                        MODIFY ITEMS
+                                                    </Button>
+                                                )}
+                                                {order.invoiceNumber && <span>Modification not available</span>}
+                                            </Col>
+                                        </Row>
+                                        <Form.Group controlId="orderItems" className="mb-3">
+                                            {order.orderItems.length > 0 && (
+                                                <MaterialTable
+                                                    title="Order Items"
+                                                    columns={orderItemColumns}
+                                                    data={
+                                                        orderItems &&
+                                                        orderItems.sort((a, b) =>
+                                                            a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+                                                        )
+                                                    }
+                                                    options={{
+                                                        rowStyle: {
+                                                            color: 'black'
+                                                        },
+                                                        cellStyle: {
+                                                            textAlign: 'center'
+                                                        },
+                                                        headerStyle: {
+                                                            textAlign: 'center'
+                                                        },
 
-                        {!order.invoiceNumber && (
-                            <Row className="justify-content-md-center">
-                                <Col md={5} className="text-center">
-                                    <Button variant="dark" type="submit" className="col-12">
-                                        UPDATE
-                                    </Button>
-                                </Col>
-                            </Row>
-                        )}
-                    </Form>
+                                                        paging: false
+                                                    }}
+                                                />
+                                            )}
+                                        </Form.Group>
+
+                                        <Form.Group controlId="mofifiedOrderItems" className="mb-3">
+                                            {modify && modifiedOrderItems.length > 0 && !order.invoiceNumber && (
+                                                <Row>
+                                                    <Col>
+                                                        <Button
+                                                            variant="outline-info"
+                                                            className="my-3 float-end "
+                                                            onClick={showNewProductModalHandle}
+                                                        >
+                                                            <i className="fas fa-plus" /> ADD PRODUCT
+                                                        </Button>
+                                                    </Col>
+                                                </Row>
+                                            )}
+                                            {modify && modifiedOrderItems.length > 0 && (
+                                                <MaterialTable
+                                                    title="Modified Order Items"
+                                                    columns={orderItemColumns}
+                                                    data={modifiedOrderItems}
+                                                    options={{
+                                                        rowStyle: {
+                                                            color: 'black'
+                                                        },
+                                                        actionsColumnIndex: -1,
+                                                        paging: false
+                                                    }}
+                                                    editable={{
+                                                        isDeleteHidden: () => order.invoiceNumber,
+                                                        onRowDelete: (oldData) =>
+                                                            new Promise((resolve, reject) => {
+                                                                setTimeout(() => {
+                                                                    const dataDelete = [...modifiedOrderItems];
+                                                                    const oldDataIndex = oldData.tableData.id;
+                                                                    dataDelete.splice(oldDataIndex, 1);
+                                                                    setModifiedOrderItems([...dataDelete]);
+                                                                    setHasUnsavedChanges(true);
+                                                                    resolve();
+                                                                }, 1000);
+                                                            })
+                                                    }}
+                                                    actions={[
+                                                        {
+                                                            icon: 'edit',
+                                                            tooltip: 'Edit',
+                                                            onClick: (event, rowData) => {
+                                                                showEditModalHandle(
+                                                                    rowData.product,
+                                                                    rowData.size,
+                                                                    rowData.tableData.id,
+                                                                    rowData.qty
+                                                                );
+                                                            },
+                                                            hidden: order.invoiceNumber
+                                                        }
+                                                    ]}
+                                                />
+                                            )}
+                                        </Form.Group>
+                                        <Form.Group controlId="totalPrice">
+                                            <Col md={4} className="float-end mb-3">
+                                                <Card>
+                                                    <ListGroup variant="flush">
+                                                        <ListGroup.Item>
+                                                            <h2>ORDER SUMMARY</h2>
+                                                        </ListGroup.Item>
+                                                        <ListGroup.Item>
+                                                            <Row>
+                                                                <Col>Items</Col>
+                                                                <Col>₹{itemsPrice}</Col>
+                                                            </Row>
+                                                        </ListGroup.Item>
+                                                        <ListGroup.Item>
+                                                            <Row>
+                                                                <Col>Discount</Col>
+                                                                <Col>- ₹ {discountPrice}</Col>
+                                                            </Row>
+                                                        </ListGroup.Item>
+                                                        <ListGroup.Item>
+                                                            <Row>
+                                                                <Col>Shipping</Col>
+                                                                <Col>{shippingPrice}</Col>
+                                                            </Row>
+                                                        </ListGroup.Item>
+                                                        <ListGroup.Item>
+                                                            <Row>
+                                                                <Col>Total</Col>
+                                                                <Col>₹ {totalPrice}</Col>
+                                                            </Row>
+                                                        </ListGroup.Item>
+                                                        <ListGroup.Item>
+                                                            {!order.invoiceNumber ? (
+                                                                <Form.Group controlId="billType" className="mb-3">
+                                                                    <label>Invoice Type</label>
+                                                                    <Form.Check
+                                                                        className="mb-3"
+                                                                        type="checkbox"
+                                                                        label="CGST"
+                                                                        checked={billType === 'CGST'}
+                                                                        onChange={(e) => {
+                                                                            setBillType('CGST');
+                                                                            dispatch(
+                                                                                updateOrderBillType(order, 'CGST')
+                                                                            );
+                                                                        }}
+                                                                    ></Form.Check>
+                                                                    <Form.Check
+                                                                        className="mb-3"
+                                                                        type="checkbox"
+                                                                        label="IGST"
+                                                                        checked={billType === 'IGST'}
+                                                                        onChange={(e) => {
+                                                                            setBillType('IGST');
+                                                                            dispatch(
+                                                                                updateOrderBillType(order, 'IGST')
+                                                                            );
+                                                                        }}
+                                                                    ></Form.Check>
+                                                                </Form.Group>
+                                                            ) : (
+                                                                <>
+                                                                    <Row>
+                                                                        <Col>
+                                                                            <label>Bill Type:</label>
+                                                                        </Col>
+                                                                        <Col>{billType}</Col>
+                                                                    </Row>
+                                                                    <Row>
+                                                                        <Col>
+                                                                            <label>Invoice No.</label>
+                                                                        </Col>
+                                                                        <Col>{order.invoiceNumber}</Col>
+                                                                    </Row>
+                                                                </>
+                                                            )}
+                                                        </ListGroup.Item>
+                                                    </ListGroup>
+                                                    <Card.Body className="p-2 d-flex flex-column gap-2">
+                                                        {!order.invoiceNumber && modify && hasUnsavedChanges && (
+                                                            <Button variant="dark" type="submit" className="col-12">
+                                                                UPDATE
+                                                            </Button>
+                                                        )}
+                                                        {!order.invoiceNumber && (
+                                                            <Button
+                                                                variant="dark"
+                                                                className="col-12"
+                                                                disabled={hasUnsavedChanges}
+                                                                onClick={() => {
+                                                                    dispatch(incrementAndUpdateInvoiceNumber(order));
+                                                                    if (modify) {
+                                                                        dispatch(
+                                                                            editOrder({
+                                                                                orderId,
+                                                                                shippingAddress: {
+                                                                                    postalCode,
+                                                                                    address,
+                                                                                    city,
+                                                                                    state,
+                                                                                    country
+                                                                                },
+                                                                                modifiedOrderItems,
+                                                                                itemsPrice,
+                                                                                totalPrice
+                                                                            })
+                                                                        );
+                                                                    }
+                                                                }}
+                                                            >
+                                                                Generate Invoice
+                                                            </Button>
+                                                        )}
+                                                        {hasUnsavedChanges && (
+                                                            <small className="text-danger text-center">
+                                                                Save changes before generating invoice
+                                                            </small>
+                                                        )}
+                                                        {order && order.invoiceNumber && (
+                                                            <a href={instance.url} download={`${orderNumber}.pdf`}>
+                                                                <Button variant="dark" className="col-12">
+                                                                    Download Invoice
+                                                                </Button>
+                                                            </a>
+                                                        )}
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                        </Form.Group>
+                                        <OrderCallComments
+                                            orderId={orderId}
+                                            comments={order.callComments || []}
+                                            userInfo={userInfo}
+                                        />
+                                    </Col>
+                                </Row>
+
+                                {!order.invoiceNumber && !hasUnsavedChanges && (
+                                    <Row className="justify-content-md-center">
+                                        <Col md={5} className="text-center">
+                                            <Button variant="dark" type="submit" className="col-12">
+                                                UPDATE
+                                            </Button>
+                                        </Col>
+                                    </Row>
+                                )}
+                            </Form>
+                        </Tab>
+                        <Tab
+                            eventKey="shipping"
+                            title={
+                                <>
+                                    Shipping{' '}
+                                    {order.shipping?.status && (
+                                        <Badge
+                                            bg={
+                                                order.shipping?.status === 'DELIVERED'
+                                                    ? 'success'
+                                                    : order.shipping?.status === 'CANCELLED'
+                                                    ? 'danger'
+                                                    : 'primary'
+                                            }
+                                            className="ms-1"
+                                        >
+                                            {order.shipping.status}
+                                        </Badge>
+                                    )}
+                                </>
+                            }
+                        >
+                            <ShippingPanel order={order} onRefresh={() => dispatch(getOrderDetails(orderId))} />
+                        </Tab>
+                    </Tabs>
                 )}
             </Container>
         </AdminPageLayout>

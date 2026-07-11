@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import firebase from '../utils/firebase';
 import {
     USER_LOGIN_FAIL,
@@ -61,7 +61,7 @@ export const login = (email, password) => async (dispatch) => {
             }
         };
 
-        const { data } = await axios.post('/api/users/login', { email, password }, config);
+        const { data } = await api.post('/api/users/login', { email, password }, config);
 
         dispatch({
             type: USER_LOGIN_SUCCESS,
@@ -89,7 +89,7 @@ export const loginByPhone = (phone, password) => async (dispatch) => {
             }
         };
 
-        const { data } = await axios.post('/api/users/loginByPhone', { phone, password }, config);
+        const { data } = await api.post('/api/users/loginByPhone', { phone, password }, config);
 
         dispatch({
             type: USER_LOGIN_SUCCESS,
@@ -132,7 +132,7 @@ export const register = (name, email, phone, password) => async (dispatch) => {
             }
         };
 
-        const { data } = await axios.post('/api/users/', { name, email, phone, password }, config);
+        const { data } = await api.post('/api/users/', { name, email, phone, password }, config);
         data._id && (await firebase.auth().createUserWithEmailAndPassword(email, password));
 
         dispatch({
@@ -166,7 +166,7 @@ export const getOtpWithEmail = (email) => async (dispatch) => {
             }
         };
 
-        const { data } = await axios.post('/api/users/getUserPhone', { email }, config);
+        const { data } = await api.post('/api/users/getUserPhone', { email }, config);
 
         if (data) {
             const phoneNumber = '+91' + data.phone;
@@ -204,7 +204,7 @@ export const getUserDetails = (id) => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.get(`/api/users/${id}`, config);
+        const { data } = await api.get(`/api/users/${id}`, config);
         dispatch({
             type: USER_DETAILS_SUCCESS,
             payload: data
@@ -234,7 +234,7 @@ export const updateUserProfile = (user) => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.put(`/api/users/profile`, user, config);
+        const { data } = await api.put(`/api/users/profile`, user, config);
         dispatch({
             type: USER_UPDATE_PROFILE_SUCCESS,
             payload: data
@@ -259,7 +259,7 @@ export const loginByOTP = (phone) => async (dispatch) => {
             }
         };
 
-        const { data } = await axios.post('/api/users/loginByOtp', { phone }, config);
+        const { data } = await api.post('/api/users/loginByOtp', { phone }, config);
 
         dispatch({
             type: USER_LOGIN_SUCCESS,
@@ -372,7 +372,7 @@ export const forgotPassword = (email) => async (dispatch) => {
             }
         };
 
-        await axios.post('/api/users/forgotPassword', { email }, config);
+        await api.post('/api/users/forgotPassword', { email }, config);
 
         await firebase.auth().sendPasswordResetEmail(email);
         localStorage.setItem('RE', encryptData(JSON.stringify(email), salt));
@@ -397,7 +397,7 @@ export const resetPassword = (password, email) => async (dispatch) => {
             }
         };
 
-        const { data } = await axios.post(`/api/users/resetPassword`, { password, email }, config);
+        const { data } = await api.post(`/api/users/resetPassword`, { password, email }, config);
         dispatch({
             type: USER_UPDATE_PROFILE_SUCCESS,
             payload: data
@@ -440,7 +440,7 @@ export const listUsers =
                 }
             };
 
-            const { data } = await axios.get(`/api/users?pageNumber=${pageNumber}&&keyword=${keyword}`, config);
+            const { data } = await api.get(`/api/users?pageNumber=${pageNumber}&&keyword=${keyword}`, config);
 
             dispatch({
                 type: USER_LIST_SUCCESS,
@@ -470,7 +470,7 @@ export const deleteUser = (id) => async (dispatch, getState) => {
             }
         };
 
-        await axios.delete(`/api/users/${id}`, config);
+        await api.delete(`/api/users/${id}`, config);
 
         dispatch({
             type: USER_DELETE_SUCCESS
@@ -500,7 +500,7 @@ export const updateUser = (user) => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.put(`/api/users/${user._id}`, user, config);
+        const { data } = await api.put(`/api/users/${user._id}`, user, config);
 
         dispatch({
             type: USER_UPDATE_SUCCESS

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>We're Back — Orders Are Open Again!</title>
+    <style type="text/css">
+        /* Reset styles */
+        body,
+        table,
+        td,
+        p,
+        a,
+        li,
+        blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        /* Mobile Responsive Styles */
+        @media only screen and (max-width: 620px) {
+            .email-container {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .email-padding {
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+
+            .cta-button {
+                width: 100% !important;
+                max-width: 100% !important;
+                display: block !important;
+                padding: 14px 20px !important;
+                box-sizing: border-box !important;
+            }
+
+            h1 {
+                font-size: 22px !important;
+            }
+
+            h2 {
+                font-size: 20px !important;
+            }
+
+            .footer-links a {
+                display: block !important;
+                margin: 5px 0 !important;
+            }
+
+            .footer-links span {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body
+    style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; line-height: 1.6;">
+    <!-- Email Container -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+        style="background-color: #f5f5f5; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <!-- Main Content -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600"
+                    class="email-container"
+                    style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+
+                    <!-- Header with Logo -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;"
+                            class="email-padding">
+                            <img src="https://allschooluniform.com/logo.png" alt="All School Uniform"
+                                style="height: 50px; background-color: #ffffff; border-radius: 4px; padding: 8px; margin-bottom: 12px;">
+                            <h1
+                                style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600; letter-spacing: -0.5px;">
+                                All School Uniform</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Success Icon & Headline -->
+                    <tr>
+                        <td style="padding: 40px 20px 20px; text-align: center;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"
+                                style="margin: 0 auto 20px;">
+                                <tr>
+                                    <td
+                                        style="width: 70px; height: 70px; background-color: #10b981; border-radius: 50%; text-align: center; vertical-align: middle;">
+                                        <img src="https://img.icons8.com/ios-filled/36/ffffff/checkmark.png" alt="✓"
+                                            style="width: 36px; height: 36px;">
+                                    </td>
+                                </tr>
+                            </table>
+                            <h2 style="margin: 0 0 10px; color: #111827; font-size: 24px; font-weight: 700;">We're Back!</h2>
+                            <p style="margin: 0; color: #6b7280; font-size: 16px; line-height: 1.5;">Orders are open again — your wait is over.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Message Body -->
+                    <tr>
+                        <td style="padding: 10px 30px 20px;" class="email-padding">
+                            <p style="margin: 0 0 16px; color: #374151; font-size: 15px; line-height: 1.7;">
+                                Dear <strong>{{customerName}}</strong>,
+                            </p>
+                            <p style="margin: 0 0 16px; color: #374151; font-size: 15px; line-height: 1.7;">
+                                We know the wait was frustrating — and we sincerely apologize for it. Due to the back-to-school rush,
+                                we temporarily paused orders to restock our inventory and ensure every order gets fulfilled properly.
+                            </p>
+                            <p style="margin: 0 0 16px; color: #374151; font-size: 15px; line-height: 1.7;">
+                                <strong>The good news: orders are fully open now.</strong> Our inventory is restocked and we're
+                                ready to dispatch your order quickly.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Cart Saved Notice -->
+                    <tr>
+                        <td style="padding: 0 30px 24px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+                                style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td>
+                                        <p style="margin: 0 0 8px; color: #065f46; font-size: 15px; font-weight: 600;">
+                                            Your Cart Is Saved
+                                        </p>
+                                        <p style="margin: 0; color: #047857; font-size: 14px; line-height: 1.6;">
+                                            All your selected items are still in your cart — exactly as you left them.
+                                            Just open the site and check out instantly. No need to add items again.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- What's New -->
+                    <tr>
+                        <td style="padding: 0 30px 24px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+                                style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td>
+                                        <p style="margin: 0 0 14px; color: #111827; font-size: 15px; font-weight: 600;">What to expect now</p>
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding: 6px 0; vertical-align: top; width: 24px; color: #10b981; font-size: 16px; font-weight: 700;">✓</td>
+                                                <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.6;">Inventory fully restocked — most sizes now available</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; vertical-align: top; width: 24px; color: #10b981; font-size: 16px; font-weight: 700;">✓</td>
+                                                <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.6;">Orders dispatched within 1–2 business days</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; vertical-align: top; width: 24px; color: #10b981; font-size: 16px; font-weight: 700;">✓</td>
+                                                <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.6;">WhatsApp support is back — reach us anytime for queries</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; vertical-align: top; width: 24px; color: #10b981; font-size: 16px; font-weight: 700;">✓</td>
+                                                <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.6;">All payment methods accepted — online & Cash on Delivery</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Primary CTA -->
+                    <tr>
+                        <td style="padding: 0 30px 40px;" align="center" class="email-padding">
+                            <a href="{{websiteUrl}}" class="cta-button"
+                                style="display: inline-block; width: 100%; max-width: 280px; padding: 16px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25); box-sizing: border-box;">
+                                Shop Now
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Contact / Support -->
+                    <tr>
+                        <td style="padding: 30px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <h3 style="margin: 0 0 15px; color: #111827; font-size: 16px; font-weight: 600; text-align: center;">Need Help?</h3>
+                            <p style="margin: 0 0 20px; color: #6b7280; font-size: 14px; text-align: center;">
+                                Questions about your previous order or current stock? We're here.
+                            </p>
+
+                            <!-- Contact Options -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <!-- WhatsApp -->
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0"
+                                            style="display: inline-block; margin: 0 10px 10px;">
+                                            <tr>
+                                                <td style="vertical-align: middle; padding-right: 8px;">
+                                                    <img src="https://img.icons8.com/ios-filled/20/25D366/whatsapp--v1.png"
+                                                        alt="WhatsApp" style="width: 20px; height: 20px; display: block;">
+                                                </td>
+                                                <td style="vertical-align: middle;">
+                                                    <a href="https://wa.me/919654264262"
+                                                        style="color: #111827; text-decoration: none; font-size: 14px; font-weight: 600;">+91 96542 64262</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <!-- Email -->
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0"
+                                            style="display: inline-block; margin: 0 10px 10px;">
+                                            <tr>
+                                                <td style="vertical-align: middle; padding-right: 8px;">
+                                                    <img src="https://img.icons8.com/ios-filled/20/667eea/new-post.png"
+                                                        alt="Email" style="width: 20px; height: 20px; display: block;">
+                                                </td>
+                                                <td style="vertical-align: middle;">
+                                                    <a href="mailto:{{supportEmail}}"
+                                                        style="color: #111827; text-decoration: none; font-size: 14px; font-weight: 600;">{{supportEmail}}</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Warm Regards -->
+                    <tr>
+                        <td style="padding: 20px 30px 30px;" class="email-padding">
+                            <p style="margin: 0; color: #374151; font-size: 15px; line-height: 1.7;">
+                                Thank you for your patience and continued trust in us.<br><br>
+                                Warm regards,<br>
+                                <strong>Team All School Uniform</strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center; background-color: #1f2937;" class="email-padding">
+                            <!-- Social Media -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+                                style="margin-bottom: 20px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="https://www.facebook.com/allschoolsuniform/"
+                                            style="text-decoration: none; display: inline-block; margin: 0 8px;">
+                                            <img src="https://img.icons8.com/ios-filled/32/ffffff/facebook-new.png"
+                                                alt="Facebook" style="width: 32px; height: 32px; display: block;">
+                                        </a>
+                                        <a href="https://www.instagram.com/allschooluniform/"
+                                            style="text-decoration: none; display: inline-block; margin: 0 8px;">
+                                            <img src="https://img.icons8.com/ios-filled/32/ffffff/instagram-new.png"
+                                                alt="Instagram" style="width: 32px; height: 32px; display: block;">
+                                        </a>
+                                        <a href="https://x.com/allschooluni4m"
+                                            style="text-decoration: none; display: inline-block; margin: 0 8px;">
+                                            <img src="https://img.icons8.com/ios-filled/32/ffffff/twitterx.png" alt="X"
+                                                style="width: 32px; height: 32px; display: block;">
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Brand -->
+                            <p style="margin: 0 0 5px; color: #ffffff; font-size: 16px; font-weight: 600;">All School Uniform</p>
+                            <p style="margin: 0 0 20px; color: #9ca3af; font-size: 12px;">A unit of ACTIVE MINDZ</p>
+
+                            <!-- Policy Links -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+                                class="footer-links" style="margin-bottom: 20px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{websiteUrl}}/policies/shipping"
+                                            style="color: #9ca3af; text-decoration: none; font-size: 12px; margin: 0 8px; display: inline-block;">Shipping</a>
+                                        <span style="color: #4b5563;">|</span>
+                                        <a href="{{websiteUrl}}/policies/returns"
+                                            style="color: #9ca3af; text-decoration: none; font-size: 12px; margin: 0 8px; display: inline-block;">Returns</a>
+                                        <span style="color: #4b5563;">|</span>
+                                        <a href="{{websiteUrl}}/policies/privacy"
+                                            style="color: #9ca3af; text-decoration: none; font-size: 12px; margin: 0 8px; display: inline-block;">Privacy</a>
+                                        <span style="color: #4b5563;">|</span>
+                                        <a href="{{websiteUrl}}/policies/terms"
+                                            style="color: #9ca3af; text-decoration: none; font-size: 12px; margin: 0 8px; display: inline-block;">Terms</a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Copyright -->
+                            <p style="margin: 0 0 8px; color: #6b7280; font-size: 11px;">This email was sent to
+                                {{customerEmail}}</p>
+                            <p style="margin: 0; color: #6b7280; font-size: 11px;">© {{year}} All School Uniform. All
+                                rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

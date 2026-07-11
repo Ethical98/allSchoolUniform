@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import {
     CLASS_CREATE_FAIL,
     CLASS_CREATE_REQUEST,
@@ -18,7 +18,7 @@ export const listClasses = () => async dispatch => {
     try {
         dispatch({ type: CLASS_LIST_REQUEST });
 
-        const { data } = await axios.get(`/api/classes`);
+        const { data } = await api.get(`/api/classes`);
 
         dispatch({
             type: CLASS_LIST_SUCCESS,
@@ -49,7 +49,7 @@ export const updateClass = standard => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.put(`/api/classes/${standard._id}`, standard, config);
+        const { data } = await api.put(`/api/classes/${standard._id}`, standard, config);
         dispatch({
             type: CLASS_UPDATE_SUCCESS,
             payload: data
@@ -78,7 +78,7 @@ export const deleteClass = id => async (dispatch, getState) => {
             }
         };
 
-        await axios.delete(`/api/classes/${id}`, config);
+        await api.delete(`/api/classes/${id}`, config);
         dispatch({
             type: CLASS_DELETE_SUCCESS
         });
@@ -107,7 +107,7 @@ export const createClass = standard => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.post(`/api/classes/`, standard, config);
+        const { data } = await api.post(`/api/classes/`, standard, config);
         dispatch({
             type: CLASS_CREATE_SUCCESS,
             payload: data

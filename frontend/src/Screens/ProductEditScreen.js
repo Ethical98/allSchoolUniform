@@ -4,8 +4,7 @@ import { Button, Form, Col, Row, Container, FloatingLabel } from 'react-bootstra
 import { Link } from 'react-router-dom';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import jsonwebtoken from 'jsonwebtoken';
-import { listProductDetailsById, updateProduct } from '../actions/productActions';
+import { listProductDetailsById, updateProduct, updateFeaturedProduct } from '../actions/productActions';
 import { listTypes, listTypeSizes } from '../actions/typeActions';
 import { listClasses } from '../actions/classActions';
 import { listSchools } from '../actions/schoolActions';
@@ -46,6 +45,9 @@ const ProductEditScreen = ({ match, history, location }) => {
     const [message, setMessage] = useState('');
     const [isActive, setIsActive] = useState(false);
     const [outOfStock, setIsOutOfStock] = useState(false);
+    const [displayOrder, setDisplayOrder] = useState(0);
+    const [isFeatured, setIsFeatured] = useState(false);
+    const [featuredOrder, setFeaturedOrder] = useState(0);
 
     const [masterSize, setMasterSize] = useState([]);
 
@@ -58,8 +60,30 @@ const ProductEditScreen = ({ match, history, location }) => {
             readonly: true
         },
         {
-            title: 'InStock',
-            field: 'countInStock'
+            title: 'On Hand',
+            field: 'quantityOnHand',
+        },
+        {
+            title: 'Damaged',
+            field: 'damaged',
+        },
+        {
+            title: 'Safety Stock',
+            field: 'safetyStock',
+        },
+        {
+            title: 'Available',
+            field: 'countInStock',
+            editable: 'never',
+            render: (rowData) => {
+                const val = rowData.countInStock || 0;
+                const color = val <= 0 ? 'red' : val <= 10 ? 'orange' : 'inherit';
+                return <span style={{ color, fontWeight: 'bold' }}>{val}</span>;
+            },
+        },
+        {
+            title: 'Max Order Qty',
+            field: 'maxOrderQty',
         },
         {
             title: 'Price',
@@ -72,6 +96,10 @@ const ProductEditScreen = ({ match, history, location }) => {
         {
             title: 'Alert On Qty',
             field: 'alertOnQty'
+        },
+        {
+            title: 'Cost Price',
+            field: 'costPrice'
         },
         {
             title: 'Discount',
@@ -134,20 +162,10 @@ const ProductEditScreen = ({ match, history, location }) => {
         }
     }, [history, userInfo]);
 
-    useEffect(() => {
-        if (userInfo && userInfo.token) {
-            jsonwebtoken.verify(userInfo.token, process.env.REACT_APP_JWT_SECRET, (err, decoded) => {
-                if (err) {
-                    dispatch(logout());
-                    history.push('/login');
-                }
-            });
-        }
-    }, [dispatch, userInfo, history]);
 
     const removeIdHandler = (sizeArray) => {
         const newSizeArray = sizeArray.map(
-            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive, outOfStock }) => ({
+            ({ price, countInStock, openingQty, tax, discount, size, alertOnQty, isActive, outOfStock, costPrice, quantityOnHand, committed, damaged, safetyStock, maxOrderQty }) => ({
                 price,
                 countInStock,
                 openingQty,
@@ -156,7 +174,13 @@ const ProductEditScreen = ({ match, history, location }) => {
                 size,
                 alertOnQty,
                 isActive,
-                outOfStock
+                outOfStock,
+                costPrice,
+                quantityOnHand,
+                committed,
+                damaged,
+                safetyStock,
+                maxOrderQty,
             })
         );
         return newSizeArray;
@@ -164,7 +188,7 @@ const ProductEditScreen = ({ match, history, location }) => {
 
     useEffect(() => {
         if (userInfo && !userInfo.isAdmin) {
-            dispatch(logout());
+            // logout handled by 401 interceptor
             history.push('/login');
         }
     }, [dispatch, history, userInfo]);
@@ -198,6 +222,9 @@ const ProductEditScreen = ({ match, history, location }) => {
                 setSKU(product.SKU);
                 setSEOKeywords(product.SEOKeywords);
                 setIsOutOfStock(product.outOfStock);
+                setDisplayOrder(product.displayOrder || 0);
+                setIsFeatured(product.isFeatured || false);
+                setFeaturedOrder(product.featuredOrder || 0);
                 // If (masterSchools) {
                 //   SetMasterSchool([
                 //     ...masterSchools.filter((x) => x.isActive === true),
@@ -288,7 +315,15 @@ const ProductEditScreen = ({ match, history, location }) => {
                 standard,
                 isActive,
                 SEOKeywords,
-                outOfStock
+                outOfStock,
+                displayOrder: Number(displayOrder)
+            })
+        );
+        // Update featured status separately
+        dispatch(
+            updateFeaturedProduct(productId, {
+                isFeatured,
+                featuredOrder: Number(featuredOrder)
             })
         );
     };
@@ -296,25 +331,19 @@ const ProductEditScreen = ({ match, history, location }) => {
     useEffect(() => {
         if (masterSize && size) {
             masterSize.forEach((x) => {
-                x.price = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].price
-                    : 0;
-                x.countInStock = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].countInStock
-                    : 0;
-                x.alertOnQty = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].alertOnQty
-                    : 0;
-                x.discount = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].discount
-                    : 0;
-                x.openingQty = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].openingQty
-                    : 0;
-                x.tax = size.some((y) => y.size === x.size) ? size[size.findIndex((y) => y.size === x.size)].tax : 0;
-                x.outOfStock = size.some((y) => y.size === x.size)
-                    ? size[size.findIndex((y) => y.size === x.size)].outOfStock
-                    : false;
+                const match = size.find((y) => y.size === x.size);
+                x.price = match ? match.price : 0;
+                x.countInStock = match ? match.countInStock : 0;
+                x.alertOnQty = match ? match.alertOnQty : 0;
+                x.discount = match ? match.discount : 0;
+                x.openingQty = match ? match.openingQty : 0;
+                x.tax = match ? match.tax : 0;
+                x.outOfStock = match ? match.outOfStock : false;
+                x.quantityOnHand = match ? match.quantityOnHand : 0;
+                x.committed = match ? match.committed : 0;
+                x.damaged = match ? match.damaged : 0;
+                x.safetyStock = match ? match.safetyStock : 0;
+                x.maxOrderQty = match ? match.maxOrderQty : undefined;
             });
         }
     }, [masterSize, size]);
@@ -338,8 +367,6 @@ const ProductEditScreen = ({ match, history, location }) => {
     const nameValidationHandler = (value) => {
         setName(value.replace(/[^\w\s]/gi, ''));
     };
-
-    console.log(size);
 
     return (
         <AdminPageLayout>
@@ -499,6 +526,39 @@ const ProductEditScreen = ({ match, history, location }) => {
                                         onChange={(e) => setIsActive(e.target.checked)}
                                     ></Form.Check>
                                 </Form.Group>
+                                <FloatingLabel controlId="displayOrder" label="Display Order" className="mb-3">
+                                    <Form.Control
+                                        type="number"
+                                        placeholder="Display Order (higher = appears first)"
+                                        value={displayOrder}
+                                        onChange={(e) => setDisplayOrder(e.target.value)}
+                                    ></Form.Control>
+                                    <Form.Text className="text-muted">
+                                        Higher values appear first. Use sparse numbering (100, 200, 300...).
+                                    </Form.Text>
+                                </FloatingLabel>
+                                <Form.Group controlId="isFeatured" className="mb-3">
+                                    <Form.Check
+                                        className="mb-3"
+                                        type="checkbox"
+                                        label="Featured Product"
+                                        checked={isFeatured}
+                                        onChange={(e) => setIsFeatured(e.target.checked)}
+                                    ></Form.Check>
+                                </Form.Group>
+                                {isFeatured && (
+                                    <FloatingLabel controlId="featuredOrder" label="Featured Order" className="mb-3">
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Featured Order (lower = appears first)"
+                                            value={featuredOrder}
+                                            onChange={(e) => setFeaturedOrder(e.target.value)}
+                                        ></Form.Control>
+                                        <Form.Text className="text-muted">
+                                            Lower values appear first in featured section.
+                                        </Form.Text>
+                                    </FloatingLabel>
+                                )}
                             </Col>
 
                             <Col md={9}>

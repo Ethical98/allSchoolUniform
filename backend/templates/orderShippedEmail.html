@@ -1,0 +1,85 @@
+{{> header}}
+
+                    <!-- Order Shipped Icon & Message -->
+                    <tr>
+                        <td style="padding: 40px 20px 30px; text-align: center;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 20px;">
+                                <tr>
+                                    <td style="width: 70px; height: 70px; background-color: #3b82f6; border-radius: 50%; text-align: center; vertical-align: middle;">
+                                        <img src="https://img.icons8.com/ios-filled/36/ffffff/in-transit.png" alt="Shipped" style="width: 36px; height: 36px;">
+                                    </td>
+                                </tr>
+                            </table>
+                            <h2 style="margin: 0 0 10px; color: #111827; font-size: 22px; font-weight: 600;">Your Order is On Its Way! 📦</h2>
+                            <p style="margin: 0; color: #6b7280; font-size: 15px; line-height: 1.5;">Great news! Your order has been shipped and is on its way to you.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Order Info -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Order Number</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{orderNumber}}</strong>
+                                                </td>
+                                                <td align="right" style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Shipped Date</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{shippedDate}}</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Estimated Delivery -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 16px 20px; text-align: center;">
+                                        <span style="color: #166534; font-size: 14px;">🚚 Estimated Delivery:</span>
+                                        <strong style="color: #166534; font-size: 15px; margin-left: 8px;">{{estimatedDelivery}}</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Order Items Summary -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <h3 style="margin: 0 0 15px; color: #111827; font-size: 15px; font-weight: 600;">Items in this shipment</h3>
+                            {{itemsHTML}}
+                        </td>
+                    </tr>
+
+                    <!-- Delivery Address -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <h3 style="margin: 0 0 15px; color: #111827; font-size: 15px; font-weight: 600;">Delivery Address</h3>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                                <strong style="color: #111827; display: block; margin-bottom: 5px;">{{shippingName}}</strong>
+                                {{shippingAddress}}<br>
+                                {{shippingCity}}, {{shippingState}} {{shippingPostalCode}}<br>
+                                {{shippingCountry}}<br>
+                                <span style="display: block; margin-top: 8px;">Phone: {{shippingPhone}}</span>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Track Order CTA -->
+                    <tr>
+                        <td style="padding: 0 20px 40px;" align="center" class="email-padding">
+                            <a href="{{trackOrderUrl}}" class="cta-button" style="display: inline-block; width: 100%; max-width: 280px; padding: 14px 24px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; text-align: center; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25); box-sizing: border-box;">View Order Details</a>
+                        </td>
+                    </tr>
+
+{{> footer}}

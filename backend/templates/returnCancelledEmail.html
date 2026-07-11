@@ -1,0 +1,86 @@
+{{> header}}
+
+                    <!-- Return Cancelled Icon & Message -->
+                    <tr>
+                        <td style="padding: 40px 20px 30px; text-align: center;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 20px;">
+                                <tr>
+                                    <td style="width: 70px; height: 70px; background-color: #6b7280; border-radius: 50%; text-align: center; vertical-align: middle;">
+                                        <img src="https://img.icons8.com/ios-filled/36/ffffff/cancel.png" alt="Cancelled" style="width: 36px; height: 36px;">
+                                    </td>
+                                </tr>
+                            </table>
+                            <h2 style="margin: 0 0 10px; color: #111827; font-size: 22px; font-weight: 600;">Return Cancelled</h2>
+                            <p style="margin: 0; color: #6b7280; font-size: 15px; line-height: 1.5;">Hi {{customerName}}, your {{type}} request has been cancelled.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Return Details -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Return ID</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{returnId}}</strong>
+                                                </td>
+                                                <td align="right" style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Order Number</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{orderId}}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border-top: 1px solid #e5e7eb; padding-top: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Request Type</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{type}}</strong>
+                                                </td>
+                                                <td align="right" style="border-top: 1px solid #e5e7eb; padding-top: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Status</span>
+                                                    <strong style="color: #6b7280; font-size: 15px;">Cancelled</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Contact Support -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px; text-align: center;">
+                                        <h3 style="margin: 0 0 8px; color: #111827; font-size: 15px; font-weight: 600;">Didn't expect this?</h3>
+                                        <p style="margin: 0 0 12px; color: #6b7280; font-size: 13px; line-height: 1.6;">If this cancellation was not requested by you, please reach out to our support team and we'll help sort it out.</p>
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto;">
+                                            <tr>
+                                                <td style="padding: 4px 0;">
+                                                    <a href="mailto:{{supportEmail}}" style="color: #2563eb; text-decoration: none; font-size: 14px; font-weight: 600;">{{supportEmail}}</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 4px 0;">
+                                                    <span style="color: #6b7280; font-size: 14px;">Phone: </span>
+                                                    <a href="tel:{{supportPhone}}" style="color: #2563eb; text-decoration: none; font-size: 14px; font-weight: 600;">{{supportPhone}}</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- CTA -->
+                    <tr>
+                        <td style="padding: 0 20px 40px;" align="center" class="email-padding">
+                            <a href="{{frontendUrl}}" class="cta-button" style="display: inline-block; width: 100%; max-width: 280px; padding: 14px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; text-align: center; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25); box-sizing: border-box;">Visit Store</a>
+                        </td>
+                    </tr>
+
+{{> footer}}

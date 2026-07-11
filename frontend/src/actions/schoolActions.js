@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import {
     SCHOOL_CREATE_FAIL,
     SCHOOL_CREATE_REQUEST,
@@ -42,7 +42,7 @@ export const listSchools =
                     }
                 };
 
-                const { data } = await axios.get(`/api/schools?pageNumber=${pageNumber}`, config);
+                const { data } = await api.get(`/api/schools?pageNumber=${pageNumber}`, config);
 
                 dispatch({
                     type: SCHOOL_LIST_SUCCESS,
@@ -60,7 +60,7 @@ export const listSchoolNames = keyword => async dispatch => {
     try {
         dispatch({ type: SCHOOL_NAME_LIST_REQUEST });
 
-        const { data } = await axios.get(`/api/schools/name/${keyword}`);
+        const { data } = await api.get(`/api/schools/name/${keyword}`);
 
         dispatch({
             type: SCHOOL_NAME_LIST_SUCCESS,
@@ -88,7 +88,7 @@ export const listSchoolDetails = id => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.get(`/api/schools/${id}`, config);
+        const { data } = await api.get(`/api/schools/${id}`, config);
 
         dispatch({
             type: SCHOOL_DETAILS_SUCCESS,
@@ -119,7 +119,7 @@ export const updateSchool = school => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.put(`/api/schools/${school._id}`, school, config);
+        const { data } = await api.put(`/api/schools/${school._id}`, school, config);
         dispatch({
             type: SCHOOL_UPDATE_SUCCESS,
             payload: data
@@ -148,7 +148,7 @@ export const deleteSchool = id => async (dispatch, getState) => {
             }
         };
 
-        await axios.delete(`/api/schools/${id}`, config);
+        await api.delete(`/api/schools/${id}`, config);
         dispatch({
             type: SCHOOL_DELETE_SUCCESS
         });
@@ -177,7 +177,7 @@ export const createSchool = school => async (dispatch, getState) => {
             }
         };
 
-        const { data } = await axios.post(`/api/schools/`, school, config);
+        const { data } = await api.post(`/api/schools/`, school, config);
         dispatch({
             type: SCHOOL_CREATE_SUCCESS,
             payload: data
@@ -202,7 +202,7 @@ export const listSchoolImages =
                 dispatch({ type: SCHOOL_IMAGE_LIST_REQUEST });
                 const {
                     data: { images: schoolImages, pages: schoolImagePages }
-                } = await axios.get(`/api/schools/images?page=${pageNumber}`, config);
+                } = await api.get(`/api/schools/images?page=${pageNumber}`, config);
 
                 dispatch({
                     type: SCHOOL_IMAGE_LIST_SUCCESS,
@@ -237,7 +237,7 @@ export const uploadSchoolImage = file => async dispatch => {
 
         dispatch({ type: SCHOOL_IMAGE_UPLOAD_REQUEST });
 
-        const { data } = await axios.post(baseUrl, formData, config);
+        const { data } = await api.post(baseUrl, formData, config);
 
         dispatch({
             type: SCHOOL_IMAGE_UPLOAD_SUCCESS,

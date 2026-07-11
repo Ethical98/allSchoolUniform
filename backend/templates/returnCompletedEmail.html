@@ -1,0 +1,108 @@
+{{> header}}
+
+                    <!-- Refund Processed Icon & Message -->
+                    <tr>
+                        <td style="padding: 40px 20px 30px; text-align: center;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 20px;">
+                                <tr>
+                                    <td style="width: 70px; height: 70px; background-color: #10b981; border-radius: 50%; text-align: center; vertical-align: middle;">
+                                        <img src="https://img.icons8.com/ios-filled/36/ffffff/checkmark.png" alt="Complete" style="width: 36px; height: 36px;">
+                                    </td>
+                                </tr>
+                            </table>
+                            <h2 style="margin: 0 0 10px; color: #111827; font-size: 22px; font-weight: 600;">Refund Processed</h2>
+                            <p style="margin: 0; color: #6b7280; font-size: 15px; line-height: 1.5;">Hi {{customerName}}, your refund has been successfully processed!</p>
+                        </td>
+                    </tr>
+
+                    <!-- Return Details -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Return ID</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{returnId}}</strong>
+                                                </td>
+                                                <td align="right" style="padding-bottom: 12px;" class="stack-column-center">
+                                                    <span style="display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px;">Order Number</span>
+                                                    <strong style="color: #111827; font-size: 15px;">{{orderId}}</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Refund Amount -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 24px; text-align: center;">
+                                        <span style="display: block; color: #065f46; font-size: 14px; margin-bottom: 8px;">Total Refund Amount</span>
+                                        <strong style="color: #047857; font-size: 28px; font-weight: 700;">{{totalRefund}}</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Refund To (COD only; prepaid shows it in the note below) -->
+                    {{#if hasCustomerRefundDestination}}<tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 16px 20px; text-align: center;">
+                                        <span style="color: #6b7280; font-size: 12px; display: block; margin-bottom: 4px;">Refund To</span>
+                                        <strong style="color: #111827; font-size: 15px;">{{refundDestinationText}}</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>{{/if}}
+
+                    <!-- Credit Note -->
+                    {{#if creditNoteNumber}}
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 16px 20px; text-align: center;">
+                                        <span style="color: #6b7280; font-size: 12px; display: block; margin-bottom: 4px;">Credit Note Reference</span>
+                                        <strong style="color: #111827; font-size: 15px;">{{creditNoteNumber}}</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {{/if}}
+
+                    <!-- Info Note -->
+                    <tr>
+                        <td style="padding: 0 20px 30px;" class="email-padding">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 16px 20px;">
+                                        {{#if hasCustomerRefundDestination}}<p style="margin: 0; color: #1e40af; font-size: 13px; line-height: 1.6;">The refund has been sent to {{refundDestinationText}}. Please allow 2-3 business days for it to reflect, depending on your bank.</p>{{/if}}
+                                        {{#if usesOriginalPayment}}<p style="margin: 0; color: #1e40af; font-size: 13px; line-height: 1.6;">The refund has been credited to your original payment method. Please allow 2-3 business days for it to reflect in your account, depending on your bank.</p>{{/if}}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- CTA -->
+                    <tr>
+                        <td style="padding: 0 20px 40px;" align="center" class="email-padding">
+                            <p style="margin: 0 0 15px; color: #6b7280; font-size: 14px;">We'd love to have you back!</p>
+                            <a href="{{frontendUrl}}" class="cta-button" style="display: inline-block; width: 100%; max-width: 280px; padding: 14px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; text-align: center; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25); box-sizing: border-box;">Continue Shopping</a>
+                        </td>
+                    </tr>
+
+{{> footer}}

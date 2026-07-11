@@ -1,13 +1,84 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { Card, Badge, ListGroup, Image, Button, Offcanvas, Form, Row, Col } from 'react-bootstrap';
 import { groupBy, sumBy } from 'lodash';
+
+// Size ordering for sorting
+const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'];
+
+const getSizeSortKey = (size) => {
+    const upperSize = (size || '').toUpperCase().trim();
+    const idx = SIZE_ORDER.indexOf(upperSize);
+    if (idx !== -1) return idx;
+    // Numeric sizes (e.g., "28", "30", "32")
+    const num = parseFloat(upperSize);
+    if (!isNaN(num)) return 100 + num;
+    // Fallback: alphabetical
+    return 200;
+};
+
+// Helper to group flat items into product-level groups with nested sizes
+const groupItemsByProduct = (flatItems) => {
+    // First group by product name
+    const byProduct = groupBy(flatItems, 'name');
+
+    return Object.entries(byProduct)
+        .map(([productName, items]) => {
+            // Group this product's items by size
+            const bySize = groupBy(items, 'size');
+            const sizes = Object.entries(bySize)
+                .map(([size, sizeItems]) => ({
+                    size,
+                    totalQty: sumBy(sizeItems, 'qty'),
+                    orderDetails: sizeItems.map((i) => ({
+                        orderId: i.orderId,
+                        qty: i.qty,
+                        status: i.orderStatus,
+                        isModified: i.isModified
+                    }))
+                }))
+                .sort((a, b) => getSizeSortKey(a.size) - getSizeSortKey(b.size));
+
+            const totalOrders = new Set(items.map((i) => i.orderId)).size;
+
+            return {
+                id: productName,
+                productName,
+                image: items[0].image,
+                totalQty: sumBy(items, 'qty'),
+                totalOrders,
+                hasModified: items.some((i) => i.isModified),
+                sizes
+            };
+        })
+        .sort((a, b) => b.totalQty - a.totalQty);
+};
+
+// Indeterminate checkbox component
+const IndeterminateCheckbox = ({ checked, indeterminate, onChange, className, style }) => {
+    const ref = useRef(null);
+    useEffect(() => {
+        if (ref.current) {
+            ref.current.indeterminate = indeterminate;
+        }
+    }, [indeterminate]);
+    return (
+        <Form.Check
+            ref={ref}
+            type="checkbox"
+            checked={checked}
+            onChange={onChange}
+            className={className}
+            style={style}
+        />
+    );
+};
 
 const OrderListSummary = ({ orders = [] }) => {
     const [showPicking, setShowPicking] = useState(false);
     const [showShipping, setShowShipping] = useState(false);
     const [expandedPickItem, setExpandedPickItem] = useState(null);
     const [expandedShipItem, setExpandedShipItem] = useState(null);
-    const [pickedItems, setPickedItems] = useState({});
+    const [pickedSizes, setPickedSizes] = useState({}); // keyed by "productName|size"
 
     const handleClosePicking = () => setShowPicking(false);
     const handleShowPicking = () => setShowPicking(true);
@@ -26,17 +97,14 @@ const OrderListSummary = ({ orders = [] }) => {
                 canceledOrders: 0,
                 modifiedOrders: 0,
                 itemsToPick: [],
-                itemsToShip: []
+                itemsToShip: [],
+                totalSizesToPick: 0
             };
         }
 
-        // Orders that need to be shipped (not delivered and not cancelled)
         const ordersToShip = orders.filter((order) => !order.tracking.isDelivered && !order.tracking.isCanceled);
-
-        // Count modified orders
         const modifiedOrders = orders.filter((order) => order.modified === true).length;
 
-        // Separate orders for picking (Received status only) and shipping (Confirmed, Processing, Out for Delivery)
         const ordersForPicking = ordersToShip.filter(
             (order) => !order.tracking.isConfirmed && !order.tracking.isProcessing && !order.tracking.isOutForDelivery
         );
@@ -45,7 +113,7 @@ const OrderListSummary = ({ orders = [] }) => {
             (order) => order.tracking.isConfirmed || order.tracking.isProcessing || order.tracking.isOutForDelivery
         );
 
-        // Collect items for picking (Received status)
+        // Collect flat items for picking
         const allItemsToPick = [];
         ordersForPicking.forEach((order) => {
             const itemsToProcess = order.modified && order.modifiedItems ? order.modifiedItems : order.orderItems;
@@ -62,7 +130,7 @@ const OrderListSummary = ({ orders = [] }) => {
             });
         });
 
-        // Collect items for shipping (other statuses)
+        // Collect flat items for shipping
         const allItemsToShip = [];
         ordersForShipping.forEach((order) => {
             const itemsToProcess = order.modified && order.modifiedItems ? order.modifiedItems : order.orderItems;
@@ -83,7 +151,6 @@ const OrderListSummary = ({ orders = [] }) => {
             });
         });
 
-        // Calculate total units to ship
         const totalUnitsToShip = ordersToShip.reduce(
             (sum, order) =>
                 sum +
@@ -94,66 +161,72 @@ const OrderListSummary = ({ orders = [] }) => {
             0
         );
 
-        // Group items by product name and size for picking
-        const groupedPickItems = groupBy(allItemsToPick, (item) => `${item.name}|${item.size}`);
-        const itemsToPick = Object.entries(groupedPickItems).map(([key, items]) => ({
-            id: key,
-            productName: items[0].name,
-            size: items[0].size,
-            totalQty: sumBy(items, 'qty'),
-            image: items[0].image,
-            orderDetails: items.map((i) => ({
-                orderId: i.orderId,
-                qty: i.qty,
-                status: i.orderStatus,
-                isModified: i.isModified
-            }))
-        }));
+        // Group by product with nested sizes
+        const itemsToPick = groupItemsByProduct(allItemsToPick);
+        const itemsToShip = groupItemsByProduct(allItemsToShip);
 
-        // Group items by product name and size for shipping
-        const groupedShipItems = groupBy(allItemsToShip, (item) => `${item.name}|${item.size}`);
-        const itemsToShip = Object.entries(groupedShipItems).map(([key, items]) => ({
-            id: key,
-            productName: items[0].name,
-            size: items[0].size,
-            totalQty: sumBy(items, 'qty'),
-            image: items[0].image,
-            orderDetails: items.map((i) => ({
-                orderId: i.orderId,
-                qty: i.qty,
-                status: i.orderStatus,
-                isModified: i.isModified
-            }))
-        }));
+        // Count total size entries for progress tracking
+        const totalSizesToPick = itemsToPick.reduce((sum, p) => sum + p.sizes.length, 0);
 
         return {
             totalOrders: orders.length,
             totalRevenue: orders.reduce((sum, order) => sum + order.totalPrice, 0),
-            totalUnitsToShip: totalUnitsToShip,
+            totalUnitsToShip,
             pendingShipment: ordersToShip.length,
             deliveredOrders: orders.filter((order) => order.tracking.isDelivered).length,
             canceledOrders: orders.filter((order) => order.tracking.isCanceled).length,
-            modifiedOrders: modifiedOrders,
-            itemsToPick: itemsToPick.sort((a, b) => b.totalQty - a.totalQty),
-            itemsToShip: itemsToShip.sort((a, b) => b.totalQty - a.totalQty)
+            modifiedOrders,
+            itemsToPick,
+            itemsToShip,
+            totalSizesToPick
         };
     }, [orders]);
 
-    // Handle checkbox change
-    const handleCheckboxChange = (itemId) => {
-        setPickedItems((prev) => ({
+    // Handle individual size checkbox
+    const handleSizeCheck = useCallback((productName, size) => {
+        const key = `${productName}|${size}`;
+        setPickedSizes((prev) => ({
             ...prev,
-            [itemId]: !prev[itemId]
+            [key]: !prev[key]
         }));
-    };
+    }, []);
 
-    // Separate picked and unpicked items
-    const unpickedItems = orderSummary.itemsToPick.filter((item) => !pickedItems[item.id]);
-    const pickedItemsList = orderSummary.itemsToPick.filter((item) => pickedItems[item.id]);
+    // Handle product-level checkbox (toggle all sizes)
+    const handleProductCheck = useCallback((product) => {
+        const allPicked = product.sizes.every((s) => pickedSizes[`${product.productName}|${s.size}`]);
+        setPickedSizes((prev) => {
+            const next = { ...prev };
+            product.sizes.forEach((s) => {
+                next[`${product.productName}|${s.size}`] = !allPicked;
+            });
+            return next;
+        });
+    }, [pickedSizes]);
+
+    // Check if a product is fully picked, partially picked
+    const getProductPickState = useCallback(
+        (product) => {
+            const pickedCount = product.sizes.filter((s) => pickedSizes[`${product.productName}|${s.size}`]).length;
+            if (pickedCount === 0) return 'none';
+            if (pickedCount === product.sizes.length) return 'all';
+            return 'partial';
+        },
+        [pickedSizes]
+    );
+
+    // Separate products into unpicked (any size unpicked) and fully picked
+    const unpickedProducts = orderSummary.itemsToPick.filter((p) => getProductPickState(p) !== 'all');
+    const pickedProducts = orderSummary.itemsToPick.filter((p) => getProductPickState(p) === 'all');
+
+    // Count picked sizes for progress
+    const pickedSizeCount = orderSummary.itemsToPick.reduce(
+        (sum, p) => sum + p.sizes.filter((s) => pickedSizes[`${p.productName}|${s.size}`]).length,
+        0
+    );
 
     return (
         <>
-            {/* Summary Cards - Outside */}
+            {/* Summary Cards */}
             <Row className="g-3 mb-4">
                 <Col md={3}>
                     <Card className="border-0 shadow-sm h-100">
@@ -278,7 +351,7 @@ const OrderListSummary = ({ orders = [] }) => {
                         <div className="d-inline-block">
                             <div className="fw-bold">Warehouse Picking</div>
                             <small className="text-muted">
-                                {unpickedItems.length} to pick • {pickedItemsList.length} picked
+                                {unpickedProducts.length} to pick • {pickedProducts.length} picked
                             </small>
                         </div>
                     </Button>
@@ -294,7 +367,7 @@ const OrderListSummary = ({ orders = [] }) => {
                         <i className="fas fa-shipping-fast me-2 fs-4"></i>
                         <div className="d-inline-block">
                             <div className="fw-bold">Ready to Ship</div>
-                            <small className="text-muted">{orderSummary.itemsToShip.length} items ready</small>
+                            <small className="text-muted">{orderSummary.itemsToShip.length} products ready</small>
                         </div>
                     </Button>
                 </Col>
@@ -311,155 +384,233 @@ const OrderListSummary = ({ orders = [] }) => {
                         <div className="d-flex justify-content-between mb-2">
                             <span className="text-muted small">Picking Progress</span>
                             <span className="fw-semibold">
-                                {pickedItemsList.length} / {orderSummary.itemsToPick.length}
+                                {pickedSizeCount} / {orderSummary.totalSizesToPick} sizes
                             </span>
                         </div>
                         <div className="progress" style={{ height: '8px' }}>
                             <div
                                 className="progress-bar bg-dark"
                                 style={{
-                                    width: `${(pickedItemsList.length / orderSummary.itemsToPick.length) * 100 || 0}%`
+                                    width: `${(pickedSizeCount / orderSummary.totalSizesToPick) * 100 || 0}%`
                                 }}
                             ></div>
                         </div>
-                        <small className="text-muted mt-2 d-block " style={{ height: 'unset' }}>
+                        <small className="text-muted mt-2 d-block" style={{ height: 'unset' }}>
                             <i className="fas fa-info-circle me-1"></i>
-                            Received orders only
+                            Received orders only • {orderSummary.itemsToPick.length} products, {orderSummary.totalSizesToPick} sizes
                         </small>
                     </div>
 
                     {/* Content Container */}
                     <div style={{ height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-                        {/* Unpicked Items */}
-                        {unpickedItems.length > 0 && (
+                        {/* Unpicked Products */}
+                        {unpickedProducts.length > 0 && (
                             <>
                                 <div className="p-3 border-bottom bg-white sticky-top">
                                     <h6 className="fw-semibold mb-0 small text-uppercase">
-                                        TO PICK ({unpickedItems.length})
+                                        TO PICK ({unpickedProducts.length} products)
                                     </h6>
                                 </div>
                                 <ListGroup variant="flush">
-                                    {unpickedItems.map((item, index) => (
-                                        <ListGroup.Item key={item.id} className="border-0 border-bottom px-3 py-3">
-                                            <div className="d-flex align-items-start gap-3">
-                                                <Form.Check
-                                                    type="checkbox"
-                                                    checked={!!pickedItems[item.id]}
-                                                    onChange={() => handleCheckboxChange(item.id)}
-                                                    className="mt-1"
-                                                    style={{ transform: 'scale(1.2)' }}
-                                                />
-                                                <Image
-                                                    src={item.image}
-                                                    alt={item.productName}
-                                                    rounded
-                                                    loading="lazy"
-                                                    style={{
-                                                        width: '50px',
-                                                        height: '50px',
-                                                        objectFit: 'cover',
-                                                        border: '1px solid #dee2e6'
-                                                    }}
-                                                />
-                                                <div
-                                                    className="flex-grow-1"
-                                                    style={{ minWidth: 0, cursor: 'pointer' }}
-                                                    onClick={() =>
-                                                        setExpandedPickItem(expandedPickItem === index ? null : index)
-                                                    }
-                                                >
-                                                    <div className="fw-semibold text-truncate small mb-1">
-                                                        {item.productName}
+                                    {unpickedProducts.map((product, index) => {
+                                        const pickState = getProductPickState(product);
+                                        const isExpanded = expandedPickItem === index;
+                                        return (
+                                            <ListGroup.Item
+                                                key={product.id}
+                                                className="border-0 border-bottom px-3 py-0"
+                                            >
+                                                {/* Product Header */}
+                                                <div className="d-flex align-items-start gap-3 py-3">
+                                                    <IndeterminateCheckbox
+                                                        checked={pickState === 'all'}
+                                                        indeterminate={pickState === 'partial'}
+                                                        onChange={() => handleProductCheck(product)}
+                                                        className="mt-1"
+                                                        style={{ transform: 'scale(1.2)' }}
+                                                    />
+                                                    <Image
+                                                        src={product.image}
+                                                        alt={product.productName}
+                                                        rounded
+                                                        loading="lazy"
+                                                        style={{
+                                                            width: '50px',
+                                                            height: '50px',
+                                                            objectFit: 'cover',
+                                                            border: '1px solid #dee2e6'
+                                                        }}
+                                                    />
+                                                    <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                                        <div className="fw-semibold text-truncate small mb-1">
+                                                            {product.productName}
+                                                        </div>
+                                                        <div className="d-flex align-items-center gap-2 flex-wrap">
+                                                            <small className="text-muted">
+                                                                {product.sizes.length} sizes • {product.totalOrders} orders
+                                                            </small>
+                                                            {product.hasModified && (
+                                                                <Badge bg="dark" className="small">
+                                                                    Modified
+                                                                </Badge>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div className="d-flex align-items-center gap-2 flex-wrap">
-                                                        <Badge bg="light" text="dark" className="small">
-                                                            Size {item.size}
-                                                        </Badge>
-                                                        <small className="text-muted">
-                                                            {item.orderDetails.length} orders
-                                                        </small>
-                                                        {item.orderDetails.some((o) => o.isModified) && (
-                                                            <Badge bg="dark" className="small">
-                                                                Modified
-                                                            </Badge>
-                                                        )}
+                                                    <div className="text-end">
+                                                        <div className="fw-bold fs-5">{product.totalQty}</div>
+                                                        <small className="text-muted">units</small>
                                                     </div>
                                                 </div>
-                                                <div className="text-end">
-                                                    <div className="fw-bold fs-5">{item.totalQty}</div>
-                                                    <small className="text-muted">units</small>
-                                                </div>
-                                            </div>
 
-                                            {/* Expanded Details */}
-                                            {expandedPickItem === index && (
-                                                <div className="mt-3 pt-3 border-top">
-                                                    <div className="small fw-semibold text-muted mb-2">
-                                                        ORDER BREAKDOWN
-                                                    </div>
-                                                    <div className="d-flex flex-column gap-2">
-                                                        {item.orderDetails.map((order, idx) => (
+                                                {/* Sizes Table */}
+                                                <div
+                                                    className="mb-3 ms-4 ps-3"
+                                                    style={{
+                                                        borderLeft: '2px solid #e9ecef'
+                                                    }}
+                                                >
+                                                    {product.sizes.map((sizeEntry) => {
+                                                        const sizeKey = `${product.productName}|${sizeEntry.size}`;
+                                                        const isSizePicked = !!pickedSizes[sizeKey];
+                                                        return (
                                                             <div
-                                                                key={idx}
-                                                                className="p-2 bg-light rounded d-flex justify-content-between align-items-center"
+                                                                key={sizeEntry.size}
+                                                                className="d-flex align-items-center gap-2 py-2"
                                                                 style={{
-                                                                    border: order.isModified
-                                                                        ? '1px solid #6c757d'
-                                                                        : '1px solid transparent'
+                                                                    borderBottom: '1px solid #f8f9fa',
+                                                                    opacity: isSizePicked ? 0.5 : 1
                                                                 }}
                                                             >
-                                                                <div>
-                                                                    <div className="small fw-semibold mb-1">
-                                                                        {order.orderId}
+                                                                <Form.Check
+                                                                    type="checkbox"
+                                                                    checked={isSizePicked}
+                                                                    onChange={() =>
+                                                                        handleSizeCheck(
+                                                                            product.productName,
+                                                                            sizeEntry.size
+                                                                        )
+                                                                    }
+                                                                    style={{ transform: 'scale(1.0)' }}
+                                                                />
+                                                                <Badge
+                                                                    bg={isSizePicked ? 'secondary' : 'dark'}
+                                                                    style={{
+                                                                        minWidth: '42px',
+                                                                        textDecoration: isSizePicked
+                                                                            ? 'line-through'
+                                                                            : 'none'
+                                                                    }}
+                                                                >
+                                                                    {sizeEntry.size}
+                                                                </Badge>
+                                                                <span
+                                                                    className={`fw-semibold small ${isSizePicked ? 'text-muted' : ''}`}
+                                                                    style={{
+                                                                        textDecoration: isSizePicked
+                                                                            ? 'line-through'
+                                                                            : 'none'
+                                                                    }}
+                                                                >
+                                                                    × {sizeEntry.totalQty}
+                                                                </span>
+                                                                <small className="text-muted ms-auto">
+                                                                    {sizeEntry.orderDetails.length} orders
+                                                                </small>
+                                                            </div>
+                                                        );
+                                                    })}
+
+                                                    {/* Order Breakdown Toggle */}
+                                                    <div
+                                                        className="py-2 small text-muted d-flex align-items-center gap-1"
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() =>
+                                                            setExpandedPickItem(isExpanded ? null : index)
+                                                        }
+                                                    >
+                                                        <i
+                                                            className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} me-1`}
+                                                        ></i>
+                                                        Order Breakdown
+                                                    </div>
+
+                                                    {/* Expanded Order Details */}
+                                                    {isExpanded && (
+                                                        <div className="pb-2">
+                                                            {product.sizes.map((sizeEntry) => (
+                                                                <div key={sizeEntry.size} className="mb-2">
+                                                                    <div className="small fw-semibold text-muted mb-1">
+                                                                        Size {sizeEntry.size}
                                                                     </div>
-                                                                    <div className="d-flex gap-1 flex-wrap">
-                                                                        <Badge bg="light" text="dark" className="small">
-                                                                            {order.status}
-                                                                        </Badge>
-                                                                        {order.isModified && (
-                                                                            <Badge bg="dark" className="small">
-                                                                                Modified
-                                                                            </Badge>
-                                                                        )}
+                                                                    <div className="d-flex flex-column gap-1">
+                                                                        {sizeEntry.orderDetails.map((order, idx) => (
+                                                                            <div
+                                                                                key={idx}
+                                                                                className="p-2 bg-light rounded d-flex justify-content-between align-items-center"
+                                                                                style={{
+                                                                                    border: order.isModified
+                                                                                        ? '1px solid #6c757d'
+                                                                                        : '1px solid transparent',
+                                                                                    fontSize: '0.8rem'
+                                                                                }}
+                                                                            >
+                                                                                <div>
+                                                                                    <span className="fw-semibold">
+                                                                                        {order.orderId}
+                                                                                    </span>
+                                                                                    {order.isModified && (
+                                                                                        <Badge
+                                                                                            bg="dark"
+                                                                                            className="small ms-2"
+                                                                                        >
+                                                                                            Modified
+                                                                                        </Badge>
+                                                                                    )}
+                                                                                </div>
+                                                                                <span className="fw-bold">
+                                                                                    × {order.qty}
+                                                                                </span>
+                                                                            </div>
+                                                                        ))}
                                                                     </div>
                                                                 </div>
-                                                                <div className="fw-bold">× {order.qty}</div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </ListGroup.Item>
-                                    ))}
+                                            </ListGroup.Item>
+                                        );
+                                    })}
                                 </ListGroup>
                             </>
                         )}
 
-                        {/* Picked Items */}
-                        {pickedItemsList.length > 0 && (
+                        {/* Fully Picked Products */}
+                        {pickedProducts.length > 0 && (
                             <>
                                 <div className="p-3 border-bottom bg-light sticky-top">
                                     <h6 className="fw-semibold mb-0 small text-uppercase text-muted">
-                                        PICKED ({pickedItemsList.length})
+                                        PICKED ({pickedProducts.length} products)
                                     </h6>
                                 </div>
                                 <ListGroup variant="flush">
-                                    {pickedItemsList.map((item) => (
+                                    {pickedProducts.map((product) => (
                                         <ListGroup.Item
-                                            key={item.id}
-                                            className="border-0 border-bottom px-3 py-3 bg-light"
+                                            key={product.id}
+                                            className="border-0 border-bottom px-3 py-0 bg-light"
                                         >
-                                            <div className="d-flex align-items-start gap-3">
-                                                <Form.Check
-                                                    type="checkbox"
+                                            {/* Product Header */}
+                                            <div className="d-flex align-items-start gap-3 py-3">
+                                                <IndeterminateCheckbox
                                                     checked={true}
-                                                    onChange={() => handleCheckboxChange(item.id)}
+                                                    indeterminate={false}
+                                                    onChange={() => handleProductCheck(product)}
                                                     className="mt-1"
                                                     style={{ transform: 'scale(1.2)' }}
                                                 />
                                                 <Image
-                                                    src={item.image}
-                                                    alt={item.productName}
+                                                    src={product.image}
+                                                    alt={product.productName}
                                                     rounded
                                                     loading="lazy"
                                                     style={{
@@ -467,7 +618,7 @@ const OrderListSummary = ({ orders = [] }) => {
                                                         height: '50px',
                                                         objectFit: 'cover',
                                                         border: '1px solid #dee2e6',
-                                                        opacity: 0.6
+                                                        opacity: 0.5
                                                     }}
                                                 />
                                                 <div className="flex-grow-1" style={{ minWidth: 0 }}>
@@ -478,19 +629,24 @@ const OrderListSummary = ({ orders = [] }) => {
                                                             textDecorationThickness: '2px'
                                                         }}
                                                     >
-                                                        {item.productName}
+                                                        {product.productName}
                                                     </div>
                                                     <div className="d-flex align-items-center gap-2 flex-wrap">
-                                                        <Badge bg="secondary" className="small opacity-75">
-                                                            Size {item.size}
-                                                        </Badge>
-                                                        <small className="text-muted">
-                                                            {item.orderDetails.length} orders
-                                                        </small>
+                                                        {product.sizes.map((s) => (
+                                                            <Badge
+                                                                key={s.size}
+                                                                bg="secondary"
+                                                                className="small opacity-50"
+                                                            >
+                                                                {s.size} × {s.totalQty}
+                                                            </Badge>
+                                                        ))}
                                                     </div>
                                                 </div>
                                                 <div className="text-end">
-                                                    <div className="fw-bold fs-5 text-muted">{item.totalQty}</div>
+                                                    <div className="fw-bold fs-5 text-muted">
+                                                        {product.totalQty}
+                                                    </div>
                                                     <small className="text-muted">units</small>
                                                 </div>
                                             </div>
@@ -532,18 +688,24 @@ const OrderListSummary = ({ orders = [] }) => {
                     <div style={{ height: 'calc(100vh - 180px)', overflowY: 'auto' }}>
                         {orderSummary.itemsToShip.length > 0 ? (
                             <ListGroup variant="flush">
-                                {orderSummary.itemsToShip.map((item, index) => (
-                                    <ListGroup.Item key={item.id} className="border-0 border-bottom px-3 py-3">
-                                        <div
-                                            onClick={() =>
-                                                setExpandedShipItem(expandedShipItem === index ? null : index)
-                                            }
-                                            style={{ cursor: 'pointer' }}
+                                {orderSummary.itemsToShip.map((product, index) => {
+                                    const isExpanded = expandedShipItem === index;
+                                    return (
+                                        <ListGroup.Item
+                                            key={product.id}
+                                            className="border-0 border-bottom px-3 py-0"
                                         >
-                                            <div className="d-flex align-items-start gap-3">
+                                            {/* Product Header */}
+                                            <div
+                                                className="d-flex align-items-start gap-3 py-3"
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() =>
+                                                    setExpandedShipItem(isExpanded ? null : index)
+                                                }
+                                            >
                                                 <Image
-                                                    src={item.image}
-                                                    alt={item.productName}
+                                                    src={product.image}
+                                                    alt={product.productName}
                                                     rounded
                                                     loading="lazy"
                                                     style={{
@@ -555,16 +717,13 @@ const OrderListSummary = ({ orders = [] }) => {
                                                 />
                                                 <div className="flex-grow-1" style={{ minWidth: 0 }}>
                                                     <div className="fw-semibold text-truncate small mb-1">
-                                                        {item.productName}
+                                                        {product.productName}
                                                     </div>
                                                     <div className="d-flex align-items-center gap-2 flex-wrap">
-                                                        <Badge bg="light" text="dark" className="small">
-                                                            Size {item.size}
-                                                        </Badge>
                                                         <small className="text-muted">
-                                                            {item.orderDetails.length} orders
+                                                            {product.sizes.length} sizes • {product.totalOrders} orders
                                                         </small>
-                                                        {item.orderDetails.some((o) => o.isModified) && (
+                                                        {product.hasModified && (
                                                             <Badge bg="dark" className="small">
                                                                 Modified
                                                             </Badge>
@@ -572,66 +731,142 @@ const OrderListSummary = ({ orders = [] }) => {
                                                     </div>
                                                 </div>
                                                 <div className="text-end">
-                                                    <div className="fw-bold fs-5">{item.totalQty}</div>
+                                                    <div className="fw-bold fs-5">{product.totalQty}</div>
                                                     <small className="text-muted">units</small>
                                                 </div>
                                             </div>
 
-                                            {/* Expanded Details */}
-                                            {expandedShipItem === index && (
-                                                <div className="mt-3 pt-3 border-top">
-                                                    <div className="small fw-semibold text-muted mb-2">
-                                                        ORDER BREAKDOWN
+                                            {/* Sizes Table */}
+                                            <div
+                                                className="mb-3 ms-4 ps-3"
+                                                style={{ borderLeft: '2px solid #e9ecef' }}
+                                            >
+                                                {product.sizes.map((sizeEntry) => (
+                                                    <div
+                                                        key={sizeEntry.size}
+                                                        className="d-flex align-items-center gap-2 py-2"
+                                                        style={{ borderBottom: '1px solid #f8f9fa' }}
+                                                    >
+                                                        <Badge bg="dark" style={{ minWidth: '42px' }}>
+                                                            {sizeEntry.size}
+                                                        </Badge>
+                                                        <span className="fw-semibold small">
+                                                            × {sizeEntry.totalQty}
+                                                        </span>
+                                                        <small className="text-muted ms-auto">
+                                                            {sizeEntry.orderDetails.length} orders
+                                                        </small>
+                                                        <div className="d-flex gap-1">
+                                                            {/* Show unique statuses for this size */}
+                                                            {[
+                                                                ...new Set(
+                                                                    sizeEntry.orderDetails.map((o) => o.status)
+                                                                )
+                                                            ].map((status) => (
+                                                                <Badge
+                                                                    key={status}
+                                                                    bg={
+                                                                        status === 'Confirmed'
+                                                                            ? 'info'
+                                                                            : status === 'Processing'
+                                                                            ? 'primary'
+                                                                            : 'warning'
+                                                                    }
+                                                                    text={
+                                                                        status === 'Out For Delivery'
+                                                                            ? 'dark'
+                                                                            : 'white'
+                                                                    }
+                                                                    className="small"
+                                                                >
+                                                                    {status}
+                                                                </Badge>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                    <div className="d-flex flex-column gap-2">
-                                                        {item.orderDetails.map((order, idx) => (
-                                                            <div
-                                                                key={idx}
-                                                                className="p-2 bg-light rounded d-flex justify-content-between align-items-center"
-                                                                style={{
-                                                                    border: order.isModified
-                                                                        ? '1px solid #6c757d'
-                                                                        : '1px solid transparent'
-                                                                }}
-                                                            >
-                                                                <div>
-                                                                    <div className="small fw-semibold mb-1">
-                                                                        {order.orderId}
-                                                                    </div>
-                                                                    <div className="d-flex gap-1 flex-wrap">
-                                                                        <Badge
-                                                                            bg={
-                                                                                order.status === 'Confirmed'
-                                                                                    ? 'info'
-                                                                                    : order.status === 'Processing'
-                                                                                    ? 'primary'
-                                                                                    : 'warning'
-                                                                            }
-                                                                            text={
-                                                                                order.status === 'Out For Delivery'
-                                                                                    ? 'dark'
-                                                                                    : 'white'
-                                                                            }
-                                                                            className="small"
-                                                                        >
-                                                                            {order.status}
-                                                                        </Badge>
-                                                                        {order.isModified && (
-                                                                            <Badge bg="dark" className="small">
-                                                                                Modified
-                                                                            </Badge>
-                                                                        )}
-                                                                    </div>
+                                                ))}
+
+                                                {/* Order Breakdown Toggle */}
+                                                <div
+                                                    className="py-2 small text-muted d-flex align-items-center gap-1"
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setExpandedShipItem(isExpanded ? null : index);
+                                                    }}
+                                                >
+                                                    <i
+                                                        className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} me-1`}
+                                                    ></i>
+                                                    Order Breakdown
+                                                </div>
+
+                                                {/* Expanded Order Details */}
+                                                {isExpanded && (
+                                                    <div className="pb-2">
+                                                        {product.sizes.map((sizeEntry) => (
+                                                            <div key={sizeEntry.size} className="mb-2">
+                                                                <div className="small fw-semibold text-muted mb-1">
+                                                                    Size {sizeEntry.size}
                                                                 </div>
-                                                                <div className="fw-bold">× {order.qty}</div>
+                                                                <div className="d-flex flex-column gap-1">
+                                                                    {sizeEntry.orderDetails.map((order, idx) => (
+                                                                        <div
+                                                                            key={idx}
+                                                                            className="p-2 bg-light rounded d-flex justify-content-between align-items-center"
+                                                                            style={{
+                                                                                border: order.isModified
+                                                                                    ? '1px solid #6c757d'
+                                                                                    : '1px solid transparent',
+                                                                                fontSize: '0.8rem'
+                                                                            }}
+                                                                        >
+                                                                            <div>
+                                                                                <span className="fw-semibold">
+                                                                                    {order.orderId}
+                                                                                </span>
+                                                                                <Badge
+                                                                                    bg={
+                                                                                        order.status === 'Confirmed'
+                                                                                            ? 'info'
+                                                                                            : order.status ===
+                                                                                              'Processing'
+                                                                                            ? 'primary'
+                                                                                            : 'warning'
+                                                                                    }
+                                                                                    text={
+                                                                                        order.status ===
+                                                                                        'Out For Delivery'
+                                                                                            ? 'dark'
+                                                                                            : 'white'
+                                                                                    }
+                                                                                    className="small ms-2"
+                                                                                >
+                                                                                    {order.status}
+                                                                                </Badge>
+                                                                                {order.isModified && (
+                                                                                    <Badge
+                                                                                        bg="dark"
+                                                                                        className="small ms-1"
+                                                                                    >
+                                                                                        Modified
+                                                                                    </Badge>
+                                                                                )}
+                                                                            </div>
+                                                                            <span className="fw-bold">
+                                                                                × {order.qty}
+                                                                            </span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
                                                             </div>
                                                         ))}
                                                     </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </ListGroup.Item>
-                                ))}
+                                                )}
+                                            </div>
+                                        </ListGroup.Item>
+                                    );
+                                })}
                             </ListGroup>
                         ) : (
                             <div className="text-center py-5 text-muted">

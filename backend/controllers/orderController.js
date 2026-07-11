@@ -1,132 +1,63 @@
 import asyncHandler from 'express-async-handler';
 import Order, { InvoiceNumber } from '../models/OrderModel.js';
 import User from '../models/UserModel.js';
-import nodemailer from 'nodemailer';
-import { google } from 'googleapis';
+import Product from '../models/ProductModel.js';
 import dotenv from 'dotenv';
 import _ from 'lodash';
+import { normalizeUrl } from '../utils/normalizeUrl.js';
+import { escapeRegex } from '../utils/stringUtils.js';
+import {
+  sendOrderConfirmationEmail,
+  sendOrderShippedEmail,
+  sendOutForDeliveryEmail,
+  sendOrderDeliveredEmail,
+  sendOrderCancelledEmail,
+} from '../utils/emailService.js';
+import StockMovement from '../modules/stock/models/StockMovementModel.js';
+import handleStockAlerts from '../modules/stock/utils/stockAlertHelper.js';
+import { updateInventoryBucket } from '../modules/stock/utils/inventoryCalc.js';
+import { validateAndBuildOrder, FREE_SHIPPING_THRESHOLD, SHIPPING_CHARGE } from '../utils/validateOrderStock.js';
 dotenv.config();
 
 // @desc Create new order
-// @route GET /api/orders
+// @route POST /api/orders
 // @access Private
 const addOrderItems = asyncHandler(async (req, res) => {
-  const {
-    orderItems,
+  const { orderItems, shippingAddress, paymentMethod } = req.body;
+
+  let validated;
+  try {
+    validated = await validateAndBuildOrder(orderItems);
+  } catch (error) {
+    res.status(400);
+    throw error;
+  }
+
+  // Create the order with server-calculated prices
+  const order = new Order({
+    orderItems: validated.validatedOrderItems,
+    user: req.user._id,
+    name: req.user.name,
+    phone: req.user.phone,
     shippingAddress,
     paymentMethod,
-    itemsPrice,
-    taxPrice,
-    shippingPrice,
-    totalPrice,
-  } = req.body;
+    itemsPrice: validated.itemsPrice,
+    taxPrice: validated.taxPrice,
+    shippingPrice: validated.shippingPrice,
+    totalPrice: validated.totalPrice,
+    orderStatus: `Received: ${Date.now()}`,
+  });
 
-  if (orderItems && orderItems.length === 0) {
-    res.status(400);
-    throw new Error('No order items');
-  } else {
-    const order = new Order({
-      orderItems,
-      user: req.user._id,
-      name: req.user.name,
-      phone: req.user.phone,
-      shippingAddress,
-      paymentMethod,
-      itemsPrice,
-      taxPrice,
-      shippingPrice,
-      totalPrice,
-      orderStatus: `Received: ${Date.now()}`,
-    });
+  const createdOrder = await order.save();
 
-    // console.log(orderItems);
-    // const imageArray = [];
-    // for (var i = 0; i < orderItems.length; i++) {
-    //   imageArray.push({
-    //     filename: orderItems[i].name,
-    //     path: 'frontend/public' + orderItems[i].image,
-    //     cid: orderItems[i].name,
-    //   });
-    //   // result[i].filename = orderItems[i].name;
-    //   // result[i].path = orderItems[i].image;
-    //   // result[i].cid = orderItems[i].image;
-    // }
-    // console.log(imageArray);
-    const createdOrder = await order.save();
-    res.status(201).json(createdOrder);
+  // Send order confirmation email asynchronously (don't block response)
+  sendOrderConfirmationEmail(createdOrder, req.user).catch(error => {
+    console.error('Email sending failed (non-blocking):', error.message);
+  });
 
-    // const oAuth2Client = new google.auth.OAuth2(
-    //   OAUTH2_CLIENT_ID,
-    //    OAUTH2_CLIENT_SECRET,
-    //    OAUTH2_REDIRECT_URI
-    // );
-    // oAuth2Client.setCredentials({  refresh_token:  OAUTH2_REFRESH_TOKEN });
-
-    // try {
-    //   const accessToken = await oAuth2Client.getAccessToken();
-    //   const transport = nodemailer.createTransport({
-    //     service: 'gmail',
-    //     auth: {
-    //       type: 'Oauth2',
-    //       user: 'noreply@gouniform.com',
-    //       clientId:  OAUTH2_CLIENT_ID,
-    //       clientSecret:  OAUTH2_CLIENT_SECRET,
-    //       refreshToken:  OAUTH2_REFRESH_TOKEN,
-    //       accessToken: accessToken,
-    //     },
-    //   });
-
-    //   const mailOptions = {
-    //     from: 'ALLSCHOOLUNIFORM',
-    //     replyTo: 'akash@gounifrom.com',
-    //     to: 'devanshgupta54@gmail.com',
-    //     subject: 'ORDER',
-    //     text: 'HELOOOOOOO',
-    //     html:
-    //       '<h1>' +
-    //       createdOrder.orderId +
-    //       '</h1><table style="border:2px solid green;border-collapse:collapse"><tr><th style="border:2px solid green;border-collapse:collapse">S.NO</th><th>IMAGE</th><th>NAME</th><th>SIZE</th><th>PRICE</th></tr>' +
-    //       orderItems
-    //         .map(
-    //           (x, index) =>
-    //             '<tr style="border:2px solid green;border-collapse:collapse"><td style="border:2px solid green">' +
-    //             (index + 1) +
-    //             '</td><td style="border:2px solid green;border-collapse:collapse;width:20vw">' +
-    //             `<img style="width:10vw" src="cid:${x.name}"/>` +
-    //             '</td><td style="border:2px solid green;border-collapse:collapse">' +
-    //             x.name +
-    //             '</td><td style="border:2px solid green;border-collapse:collapse">' +
-    //             x.size +
-    //             '</td><td style="border:2px solid green;border-collapse:collapse" >' +
-    //             x.qty +
-    //             '*' +
-    //             x.price +
-    //             '=' +
-    //             x.qty * x.price +
-    //             '</td></tr>'
-    //         )
-    //         .join('') +
-    //       '</table>',
-    //     attachments: imageArray,
-    //   };
-
-    //   // const mailOptions2 = {
-    //   //   from: 'ALLSCHOOLUNIFORM noreply@allschooluniform.com',
-    //   //   replyTo: 'akash@gounifrom.com',
-    //   //   to: 'devanshgupta54@gmail.com',
-    //   //   subject: 'ORDER',
-    //   //   text: 'HELOOOOOOO',
-    //   //   html: '<table><thead><tr><th>HELLO</th><th>NAME</th><th>PRICE</th><th>CHANGES</th></tr></thead></table>',
-    //   // };
-    //   const result = await transport.sendMail(mailOptions);
-    //   // const result2 = await transport.sendMail(mailOptions2);
-    //   console.log(result);
-    //   // console.log(result2);
-    // } catch (error) {
-    //   console.log(error);
-    // }
-  }
+  res.status(201).json(createdOrder);
 });
+
 
 // @desc Get order by ID
 // @route GET /api/orders/:id
@@ -173,7 +104,7 @@ const updateOrderToPaidPayUMoney = asyncHandler(async (req, res) => {
 // @desc Update order to Paid
 // @route GET /api/orders/:id/pay
 // @access Private
-const updateOrderTopaid = asyncHandler(async (req, res) => {
+const updateOrderToPaid = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
   const { paymentResult } = req.body;
 
@@ -192,6 +123,11 @@ const updateOrderTopaid = asyncHandler(async (req, res) => {
 
     const updatedOrder = await order.save();
 
+    // // Send order confirmation email after successful payment
+    sendOrderConfirmationEmail(updatedOrder, user).catch(error => {
+      console.error('Email sending failed after payment (non-blocking):', error.message);
+    });
+
     res.json(updatedOrder);
   } else {
     res.status(404);
@@ -206,71 +142,7 @@ const getMyOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({ user: req.user._id }).sort({
     createdAt: -1,
   });
-  if (orders.length > 0) {
-    res.json(orders);
-  } else {
-    res.status(404);
-    throw new Error('No orders Found');
-  }
-});
-
-const sendMail = asyncHandler(async (req, res) => {
-  const oAuth2Client = new google.auth.OAuth2(
-    OAUTH2_CLIENT_ID,
-    OAUTH2_CLIENT_SECRET,
-    OAUTH2_REDIRECT_URI
-  );
-  oAuth2Client.setCredentials({ refresh_token: OAUTH2_REFRESH_TOKEN });
-
-  try {
-    const accessToken = await oAuth2Client.getAccessToken();
-    const transport = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        type: 'Oauth2',
-        user: 'noreply@gouniform.com',
-        clientId: OAUTH2_CLIENT_ID,
-        clientSecret: OAUTH2_CLIENT_SECRET,
-        refreshToken: OAUTH2_REFRESH_TOKEN,
-        accessToken: accessToken,
-      },
-    });
-
-    const mailOptions = {
-      from: 'ALLSCHOOLUNIFORM noreply@allschooluniform.com',
-      replyTo: 'akash@gounifrom.com',
-      to: 'devanshgupta54@gmail.com',
-      subject: 'ORDER',
-      text: 'HELOOOOOOO',
-      html: '<table style="border:2px solid green"><thead><tr><th>HELLO</th><th>NAME</th><th>PRICE</th><th>CHANGES</th></tr></thead></table>',
-    };
-
-    const mailOptions2 = {
-      from: 'ALLSCHOOLUNIFORM noreply@allschooluniform.com',
-      replyTo: 'akash@gounifrom.com',
-      to: 'devanshgupta54@gmail.com',
-      subject: 'ORDER',
-      text: 'HELOOOOOOO',
-      html: '<table><thead><tr><th>HELLO</th><th>NAME</th><th>PRICE</th><th>CHANGES</th></tr></thead></table>',
-    };
-    const result = await transport.sendMail(mailOptions);
-    const result2 = await transport.sendMail(mailOptions2);
-
-    // const res = await gmail.users.messages.send({
-    //   userId: 'devansh.gupta73@yahoo.in',
-    //   requestBody: {
-    //     raw: 'hello',
-    //     access_token: accessToken,
-    //     refresh_token: REFRESH_TOKEN,
-
-    //     clientId: CLIENT_ID,
-    //     clientSecret: CLIENT_SECRET,
-    //   },
-    // });
-    // console.log(res.data);
-  } catch (error) {
-    console.log(error);
-  }
+  res.json(orders);
 });
 
 // @desc Get all orders
@@ -283,36 +155,37 @@ const getOrders = asyncHandler(async (req, res) => {
 
   const orderStatusSearch = status
     ? {
-        orderStatus: {
-          $regex: status,
-          $options: 'i',
-        },
-      }
+      orderStatus: {
+        $regex: escapeRegex(status),
+        $options: 'i',
+      },
+    }
     : {};
 
+  const escapedKeyword = keyword ? escapeRegex(keyword) : '';
   const searchKeyword = keyword
     ? {
-        name: {
-          $regex: keyword,
-          $options: 'i',
-        },
-      }
+      name: {
+        $regex: escapedKeyword,
+        $options: 'i',
+      },
+    }
     : {};
   const searchKeywordTwo = keyword
     ? {
-        orderId: {
-          $regex: keyword,
-          $options: 'i',
-        },
-      }
+      orderId: {
+        $regex: escapedKeyword,
+        $options: 'i',
+      },
+    }
     : {};
   const searchKeywordThree = keyword
     ? {
-        phone: {
-          $regex: keyword,
-          $options: 'i',
-        },
-      }
+      phone: {
+        $regex: escapedKeyword,
+        $options: 'i',
+      },
+    }
     : {};
 
   const page = Number(req.query.pageNumber) || 1;
@@ -347,20 +220,14 @@ const getOrders = asyncHandler(async (req, res) => {
     ],
   });
 
-  if (orders.length > 0) {
-    res.json({ orders, page, pages: Math.ceil(count / pageSize) });
-  } else {
-    res.status(404);
-    throw new Error('No orders Found');
-  }
+  res.json({ orders, page, pages: Math.ceil(count / pageSize) });
 });
 
 // @desc Edit order
 // @route PUT /api/orders/:id
 // @access Private/Admin
 const editOrderById = asyncHandler(async (req, res) => {
-  const { modifiedOrderItems, shippingAddress, itemsPrice, totalPrice } =
-    req.body;
+  const { modifiedOrderItems, shippingAddress } = req.body;
 
   const order = await Order.findById(req.params.id);
   if (order) {
@@ -368,14 +235,26 @@ const editOrderById = asyncHandler(async (req, res) => {
     order.name = user.name;
     order.shippingAddress = shippingAddress || order.shippingAddress;
 
-    order.totalPrice = totalPrice || order.totalPrice;
-
     if (modifiedOrderItems && modifiedOrderItems.length === 0) {
       order.modified = false;
     } else {
       order.modified = true;
       order.modifiedItems = [...modifiedOrderItems];
+
+      // Recalculate prices server-side from modified items
+      const calculatedItemsPrice = modifiedOrderItems.reduce((acc, item) => {
+        const discountedPrice = item.price * (1 - (item.disc || 0) / 100);
+        return acc + discountedPrice * item.qty;
+      }, 0);
+
+      const calculatedShippingPrice =
+        calculatedItemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE;
+      const calculatedTotalPrice = calculatedItemsPrice + calculatedShippingPrice;
+
+      order.shippingPrice = Math.round(calculatedShippingPrice * 100) / 100;
+      order.totalPrice = Math.round(calculatedTotalPrice * 100) / 100;
     }
+
     const updatedOrder = await order.save();
     res.status(200);
     res.json(updatedOrder);
@@ -415,9 +294,16 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 
       const updatedOrder = await order.save();
 
+
+
+      // Send delivery confirmation email
+      sendOrderDeliveredEmail(updatedOrder, user).catch(error => {
+        console.error('Failed to send delivery email:', error.message);
+      });
+
       res.json(updatedOrder);
     } else {
-      res.status(500);
+      res.status(400);
       throw new Error('Cannot Update Delivered Before It is out for Delivery');
     }
   } else {
@@ -442,9 +328,16 @@ const updateOrderToOutForDelivery = asyncHandler(async (req, res) => {
 
       const updatedOrder = await order.save();
 
+
+
+      // Send out for delivery email
+      sendOutForDeliveryEmail(updatedOrder, user).catch(error => {
+        console.error('Failed to send out for delivery email:', error.message);
+      });
+
       res.json(updatedOrder);
     } else {
-      res.status(500);
+      res.status(400);
       throw new Error(
         'Cannot Update To Out For Delivery Before It is under Processing '
       );
@@ -471,9 +364,16 @@ const updateOrderToProcessing = asyncHandler(async (req, res) => {
 
       const updatedOrder = await order.save();
 
+
+
+      // Send shipped email (mapped to Processing status)
+      sendOrderShippedEmail(updatedOrder, user).catch(error => {
+        console.error('Failed to send shipped email:', error.message);
+      });
+
       res.json(updatedOrder);
     } else {
-      res.status(500);
+      res.status(400);
       throw new Error('Cannot Update To Processing Before It is Confirmed ');
     }
   } else {
@@ -497,6 +397,40 @@ const updateOrderToConfirmed = asyncHandler(async (req, res) => {
 
     const updatedOrder = await order.save();
 
+    // Deduct stock atomically for each order item
+    for (const item of order.orderItems) {
+      const result = await updateInventoryBucket({
+        productId: item.product,
+        size: item.size,
+        increments: { quantityOnHand: -item.qty },
+      });
+      if (!result) continue;
+
+      const { product, variant: sizeVariant } = result;
+      const newStock = sizeVariant.countInStock;
+      const previousStock = newStock + item.qty;
+
+      await StockMovement.create({
+        product: product._id,
+        productName: product.name,
+        SKU: product.SKU,
+        size: item.size,
+        type: 'SALE',
+        quantityChange: -item.qty,
+        previousStock,
+        newStock,
+        order: order._id,
+        orderId: order._id.toString(),
+        reason: `Order confirmed`,
+        performedBy: req.user._id,
+        performedByName: req.user.name,
+        bucketChanged: 'quantityOnHand',
+        onHandAfter: sizeVariant.quantityOnHand,
+      });
+
+      await handleStockAlerts(product, item.size, newStock);
+    }
+
     res.json(updatedOrder);
   } else {
     res.status(404);
@@ -511,6 +445,29 @@ const updateOrderToCanceled = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
   if (order) {
+    // Cancel on shipping provider if order was shipped
+    if (order.shipping?.isShipped && order.shipping?.status !== 'CANCELLED') {
+      try {
+        const { shippingApi } = await import('../modules/shipping/utils/shippingClient.js');
+        await shippingApi('post', '/orders/cancel', {
+          data: { ids: [order.shipping.providerOrderId] },
+          action: 'CANCEL_ORDER',
+          orderId: order._id,
+          asuOrderId: order.orderId,
+        });
+        order.shipping.status = 'CANCELLED';
+        order.shipping.syncedAt = new Date();
+      } catch (error) {
+        // Log error but don't block cancellation
+        console.error('[Cancel] Shipping provider cancel failed:', error.message);
+        if (!order.shipping.errors) order.shipping.errors = [];
+        order.shipping.errors.push({
+          action: 'CANCEL_ORDER',
+          message: error.message,
+        });
+      }
+    }
+
     const user = await User.findById(order.user);
     order.name = user.name;
     order.tracking.isCanceled = true;
@@ -518,6 +475,47 @@ const updateOrderToCanceled = asyncHandler(async (req, res) => {
     order.orderStatus = `Canceled: ${Date.now()}`;
 
     const updatedOrder = await order.save();
+
+    // Restore stock atomically if the order was previously confirmed
+    if (order.tracking.isConfirmed) {
+      for (const item of order.orderItems) {
+        const result = await updateInventoryBucket({
+          productId: item.product,
+          size: item.size,
+          increments: { quantityOnHand: item.qty },
+        });
+        if (!result) continue;
+
+        const { product, variant: sizeVariant } = result;
+        const newStock = sizeVariant.countInStock;
+        const previousStock = newStock - item.qty;
+
+        await StockMovement.create({
+          product: product._id,
+          productName: product.name,
+          SKU: product.SKU,
+          size: item.size,
+          type: 'SALE_CANCEL',
+          quantityChange: item.qty,
+          previousStock,
+          newStock,
+          order: order._id,
+          orderId: order._id.toString(),
+          reason: `Order cancelled`,
+          performedBy: req.user._id,
+          performedByName: req.user.name,
+          bucketChanged: 'quantityOnHand',
+          onHandAfter: sizeVariant.quantityOnHand,
+        });
+
+        await handleStockAlerts(product, item.size, newStock);
+      }
+    }
+
+    // Send cancellation email
+    sendOrderCancelledEmail(updatedOrder, user).catch(error => {
+      console.error('Failed to send cancellation email:', error.message);
+    });
 
     res.json(updatedOrder);
   } else {
@@ -573,9 +571,11 @@ const incrementInvoiceNumber = asyncHandler(async (req, res) => {
 // @route GET /api/orders/report
 // @access Private/Admin
 const orderReport = asyncHandler(async (req, res) => {
+  const { startDate } = req.query;
+  const reportStartDate = startDate ? new Date(startDate) : new Date('2022-10-06');
   const orders = await Order.find({
     createdAt: {
-      $gte: new Date('2022-10-06').toISOString(),
+      $gte: reportStartDate.toISOString(),
       $lt: new Date().toISOString(),
     },
     modified: true,
@@ -585,12 +585,12 @@ const orderReport = asyncHandler(async (req, res) => {
 
   orders.forEach(
     (orderObj) =>
-      (orderObj.pendingItems = orderObj.orderItems.filter(
-        (originalItem) =>
-          !orderObj.modifiedItems.some(
-            (item) => item.name === originalItem.name
-          )
-      ))
+    (orderObj.pendingItems = orderObj.orderItems.filter(
+      (originalItem) =>
+        !orderObj.modifiedItems.some(
+          (item) => item.name === originalItem.name
+        )
+    ))
   );
 
   const pendingOrders = orders.filter((order) => order.pendingItems.length > 0);
@@ -598,13 +598,71 @@ const orderReport = asyncHandler(async (req, res) => {
   res.status(200).json(pendingOrders);
 });
 
+// @desc Add comment to order
+// @route POST /api/orders/:id/comments
+// @access Private/Admin
+const addOrderComment = asyncHandler(async (req, res) => {
+  const { text, commentType } = req.body;
+
+  if (!text || !text.trim()) {
+    res.status(400);
+    throw new Error('Comment text is required');
+  }
+
+  const validTypes = ['Call', 'Note', 'Follow-up'];
+  const type = validTypes.includes(commentType) ? commentType : 'Call';
+
+  const order = await Order.findByIdAndUpdate(
+    req.params.id,
+    {
+      $push: {
+        callComments: {
+          admin: req.user._id,
+          adminName: req.user.name,
+          commentType: type,
+          text: text.trim(),
+        },
+      },
+    },
+    { new: true }
+  );
+
+  if (order) {
+    res.status(201).json(order.callComments);
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
+// @desc Delete comment from order
+// @route DELETE /api/orders/:id/comments/:commentId
+// @access Private/Admin
+const deleteOrderComment = asyncHandler(async (req, res) => {
+  const order = await Order.findByIdAndUpdate(
+    req.params.id,
+    {
+      $pull: {
+        callComments: { _id: req.params.commentId },
+      },
+    },
+    { new: true }
+  );
+
+  if (order) {
+    res.json(order.callComments);
+  } else {
+    res.status(404);
+    throw new Error('Order Not Found');
+  }
+});
+
 export {
   getOrders,
   addOrderItems,
   getOrderById,
-  updateOrderTopaid,
+  updateOrderToPaid,
   getMyOrders,
-  sendMail,
   editOrderById,
   getOrderByOrderId,
   updateOrderToConfirmed,
@@ -615,4 +673,6 @@ export {
   updateOrderBillType,
   incrementInvoiceNumber,
   orderReport,
+  addOrderComment,
+  deleteOrderComment,
 };

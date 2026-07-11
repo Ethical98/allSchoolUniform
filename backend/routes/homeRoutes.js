@@ -7,6 +7,7 @@ import {
   getAnnouncement,
   getCarouselImages,
   getHeaderBackground,
+  getHomePageConfig,
   getStatistics,
   updateAnnouncement,
   updateCarouselImages,
@@ -16,6 +17,9 @@ import {
 import { isAdmin, protect } from '../Middleware/authMiddleware.js';
 
 const router = express.Router();
+
+// Consolidated homepage config endpoint (single API call for all homepage data)
+router.route('/config').get(getHomePageConfig);
 
 router
   .route('/carousel')
