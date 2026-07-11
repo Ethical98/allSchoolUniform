@@ -12,6 +12,11 @@ import { createReturn, getReturnsByOrder } from '../actions/returnActions';
 import { RETURN_CREATE_RESET } from '../constants/returnConstants';
 import { logout } from '../actions/userActions';
 
+// Mirrors backend modules/returns/utils/refundDestination.js validation.
+const UPI_RE = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
+const IFSC_RE = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+const ACCOUNT_RE = /^\d{9,18}$/;
+
 const RETURN_REASONS = [
     'DEFECTIVE',
     'WRONG_ITEM',
@@ -35,6 +40,14 @@ const ReturnCreateScreen = ({ match, history }) => {
     const [reason, setReason] = useState('');
     const [reasonDetails, setReasonDetails] = useState('');
     const [overrideWindow, setOverrideWindow] = useState(false);
+    // COD refund destination (only used when order.paymentMethod === 'COD')
+    const [refundMethod, setRefundMethod] = useState('');
+    const [refundUpiId, setRefundUpiId] = useState('');
+    const [refundBankDetails, setRefundBankDetails] = useState({
+        accountHolderName: '',
+        accountNumber: '',
+        ifscCode: '',
+    });
     const [pickupAddress, setPickupAddress] = useState({
         address: '',
         city: '',
@@ -199,6 +212,43 @@ const ReturnCreateScreen = ({ match, history }) => {
             return;
         }
 
+        // COD returns need a refund destination (no original payment to reverse).
+        const isCod = order?.paymentMethod === 'COD';
+        let refundPayload = {};
+        if (isCod) {
+            if (refundMethod === 'UPI') {
+                const upi = refundUpiId.trim();
+                if (!UPI_RE.test(upi)) {
+                    alert('A valid UPI ID is required for the refund (e.g. name@bank).');
+                    return;
+                }
+                refundPayload = { refundMethod: 'UPI', refundUpiId: upi };
+            } else if (refundMethod === 'BANK_TRANSFER') {
+                const name = refundBankDetails.accountHolderName.trim();
+                const acc = refundBankDetails.accountNumber.trim();
+                const ifsc = refundBankDetails.ifscCode.trim().toUpperCase();
+                if (name.length < 2) {
+                    alert('Account holder name is required.');
+                    return;
+                }
+                if (!ACCOUNT_RE.test(acc)) {
+                    alert('A valid account number (9–18 digits) is required.');
+                    return;
+                }
+                if (!IFSC_RE.test(ifsc)) {
+                    alert('A valid IFSC code is required.');
+                    return;
+                }
+                refundPayload = {
+                    refundMethod: 'BANK_TRANSFER',
+                    refundBankDetails: { accountHolderName: name, accountNumber: acc, ifscCode: ifsc },
+                };
+            } else {
+                alert('Select a refund destination (UPI or bank) for this COD return.');
+                return;
+            }
+        }
+
         const items = selectedItems.map((item) => ({
             product: item.product,
             size: item.size,
@@ -222,6 +272,7 @@ const ReturnCreateScreen = ({ match, history }) => {
                 items,
                 pickupAddress,
                 overrideReturnWindow: overrideWindow,
+                ...refundPayload,
             })
         );
     };
@@ -423,7 +474,7 @@ const ReturnCreateScreen = ({ match, history }) => {
                             <Card.Header>Return Type</Card.Header>
                             <Card.Body>
                                 <Form.Group>
-                                    {['RETURN', 'EXCHANGE', 'REPLACEMENT'].map((t) => (
+                                    {['RETURN'].map((t) => (
                                         <Form.Check
                                             key={t}
                                             type="radio"
@@ -700,6 +751,87 @@ const ReturnCreateScreen = ({ match, history }) => {
                                         <strong>Estimated Refund: ₹{calculateRefund()}</strong>
                                     </ListGroup.Item>
                                 </ListGroup>
+
+                                {order?.paymentMethod === 'COD' && (
+                                    <Card className="mb-3">
+                                        <Card.Header>Refund Destination (COD)</Card.Header>
+                                        <Card.Body>
+                                            <Alert variant="info" className="py-2">
+                                                This was a COD order, so there is no original payment to reverse.
+                                                Enter the customer's UPI or bank details to send the refund.
+                                            </Alert>
+                                            <Form.Group>
+                                                <Form.Check
+                                                    type="radio"
+                                                    label="UPI"
+                                                    name="refundMethod"
+                                                    value="UPI"
+                                                    checked={refundMethod === 'UPI'}
+                                                    onChange={(e) => setRefundMethod(e.target.value)}
+                                                    className="mb-2"
+                                                    inline
+                                                />
+                                                <Form.Check
+                                                    type="radio"
+                                                    label="Bank Transfer"
+                                                    name="refundMethod"
+                                                    value="BANK_TRANSFER"
+                                                    checked={refundMethod === 'BANK_TRANSFER'}
+                                                    onChange={(e) => setRefundMethod(e.target.value)}
+                                                    className="mb-2"
+                                                    inline
+                                                />
+                                            </Form.Group>
+
+                                            {refundMethod === 'UPI' && (
+                                                <Form.Group>
+                                                    <Form.Label>UPI ID</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="name@bank"
+                                                        value={refundUpiId}
+                                                        onChange={(e) => setRefundUpiId(e.target.value)}
+                                                    />
+                                                </Form.Group>
+                                            )}
+
+                                            {refundMethod === 'BANK_TRANSFER' && (
+                                                <>
+                                                    <Form.Group>
+                                                        <Form.Label>Account Holder Name</Form.Label>
+                                                        <Form.Control
+                                                            type="text"
+                                                            value={refundBankDetails.accountHolderName}
+                                                            onChange={(e) => setRefundBankDetails((prev) => ({
+                                                                ...prev, accountHolderName: e.target.value,
+                                                            }))}
+                                                        />
+                                                    </Form.Group>
+                                                    <Form.Group className="mt-2">
+                                                        <Form.Label>Account Number</Form.Label>
+                                                        <Form.Control
+                                                            type="text"
+                                                            value={refundBankDetails.accountNumber}
+                                                            onChange={(e) => setRefundBankDetails((prev) => ({
+                                                                ...prev, accountNumber: e.target.value,
+                                                            }))}
+                                                        />
+                                                    </Form.Group>
+                                                    <Form.Group className="mt-2">
+                                                        <Form.Label>IFSC Code</Form.Label>
+                                                        <Form.Control
+                                                            type="text"
+                                                            value={refundBankDetails.ifscCode}
+                                                            onChange={(e) => setRefundBankDetails((prev) => ({
+                                                                ...prev, ifscCode: e.target.value.toUpperCase(),
+                                                            }))}
+                                                        />
+                                                    </Form.Group>
+                                                </>
+                                            )}
+                                        </Card.Body>
+                                    </Card>
+                                )}
 
                                 <Button variant="secondary" className="mr-2" onClick={prevStep}>
                                     Back
